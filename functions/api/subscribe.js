@@ -31,8 +31,8 @@ export async function onRequestPost(context) {
     }
 
     // Airtable configuration from environment variables
-    const AIRTABLE_ACCESS_TOKEN = env.AIRTABLE_ACCESS_TOKEN || context.env.AIRTABLE_ACCESS_TOKEN;
-    const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID || context.env.AIRTABLE_BASE_ID;
+    const AIRTABLE_ACCESS_TOKEN = env.AIRTABLE_ACCESS_TOKEN;
+    const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID;
     const AIRTABLE_TABLE_NAME = 'Incoming Interest';
     
     // Validate environment variables
