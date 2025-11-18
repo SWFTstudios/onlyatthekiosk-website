@@ -69,10 +69,10 @@ export async function onRequestPost(context) {
     const AIRTABLE_API_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}`;
 
     // Prepare data for Airtable
+    // Note: "Date Submitted" is auto-generated, so we don't set it manually
     const airtableData = {
       fields: {
-        'Email': email,
-        'Date': new Date().toISOString()
+        'Email Address': email
       }
     };
 
