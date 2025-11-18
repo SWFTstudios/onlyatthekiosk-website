@@ -99,6 +99,14 @@ export async function onRequestPost(context) {
     };
 
     // Make request to Airtable API
+    // Log token info (first 10 chars only for security)
+    console.log('Making Airtable request:', {
+      url: AIRTABLE_API_URL,
+      tokenPrefix: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.substring(0, 10) + '...' : 'missing',
+      tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0,
+      baseId: AIRTABLE_BASE_ID
+    });
+    
     const airtableResponse = await fetch(AIRTABLE_API_URL, {
       method: 'POST',
       headers: {
