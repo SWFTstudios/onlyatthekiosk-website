@@ -89,11 +89,40 @@ export async function onRequestPost(context) {
     if (!airtableResponse.ok) {
       const errorData = await airtableResponse.text();
       const errorStatus = airtableResponse.status;
+      
+      // Log detailed error for debugging
       console.error('Airtable API error:', {
         status: errorStatus,
         statusText: airtableResponse.statusText,
-        error: errorData
+        error: errorData,
+        url: AIRTABLE_API_URL,
+        hasToken: !!AIRTABLE_ACCESS_TOKEN,
+        tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0
       });
+      
+      // Check for authentication errors (401, 403)
+      if (errorStatus === 401 || errorStatus === 403) {
+        let authError = 'Authentication required. Please check your Airtable token.';
+        try {
+          const parsedError = JSON.parse(errorData);
+          if (parsedError.error && parsedError.error.message) {
+            authError = parsedError.error.message;
+          }
+        } catch (e) {
+          // Use default message
+        }
+        return new Response(
+          JSON.stringify({ 
+            error: authError,
+            status: errorStatus,
+            type: 'authentication'
+          }),
+          { 
+            status: 401,
+            headers: corsHeaders
+          }
+        );
+      }
       
       // Check if it's a duplicate entry (422 status)
       if (errorStatus === 422) {
@@ -106,15 +135,16 @@ export async function onRequestPost(context) {
         );
       }
 
-      // Return more specific error for debugging (remove in production if needed)
+      // Return more specific error for debugging
       let errorMessage = 'Failed to save email. Please try again.';
       try {
         const parsedError = JSON.parse(errorData);
         if (parsedError.error) {
-          errorMessage = parsedError.error.message || errorMessage;
+          errorMessage = parsedError.error.message || parsedError.error.type || errorMessage;
         }
       } catch (e) {
         // If we can't parse, use default message
+        errorMessage = errorData || errorMessage;
       }
 
       return new Response(
