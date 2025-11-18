@@ -2,6 +2,19 @@
 export async function onRequestPost(context) {
   const { request, env } = context;
   
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json'
+  };
+
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+  
   try {
     // Get email from request body
     const body = await request.json();
@@ -13,7 +26,7 @@ export async function onRequestPost(context) {
         JSON.stringify({ error: 'Email is required' }),
         { 
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: corsHeaders
         }
       );
     }
@@ -25,7 +38,7 @@ export async function onRequestPost(context) {
         JSON.stringify({ error: 'Invalid email format' }),
         { 
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: corsHeaders
         }
       );
     }
@@ -37,12 +50,18 @@ export async function onRequestPost(context) {
     
     // Validate environment variables
     if (!AIRTABLE_ACCESS_TOKEN || !AIRTABLE_BASE_ID) {
-      console.error('Missing Airtable configuration');
+      console.error('Missing Airtable configuration', {
+        hasToken: !!AIRTABLE_ACCESS_TOKEN,
+        hasBaseId: !!AIRTABLE_BASE_ID
+      });
       return new Response(
-        JSON.stringify({ error: 'Server configuration error. Please contact support.' }),
+        JSON.stringify({ 
+          error: 'Server configuration error. Please contact support.',
+          debug: 'Missing environment variables'
+        }),
         { 
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: corsHeaders
         }
       );
     }
@@ -69,24 +88,43 @@ export async function onRequestPost(context) {
 
     if (!airtableResponse.ok) {
       const errorData = await airtableResponse.text();
-      console.error('Airtable API error:', errorData);
+      const errorStatus = airtableResponse.status;
+      console.error('Airtable API error:', {
+        status: errorStatus,
+        statusText: airtableResponse.statusText,
+        error: errorData
+      });
       
       // Check if it's a duplicate entry (422 status)
-      if (airtableResponse.status === 422) {
+      if (errorStatus === 422) {
         return new Response(
           JSON.stringify({ error: 'This email is already registered' }),
           { 
             status: 409,
-            headers: { 'Content-Type': 'application/json' }
+            headers: corsHeaders
           }
         );
       }
 
+      // Return more specific error for debugging (remove in production if needed)
+      let errorMessage = 'Failed to save email. Please try again.';
+      try {
+        const parsedError = JSON.parse(errorData);
+        if (parsedError.error) {
+          errorMessage = parsedError.error.message || errorMessage;
+        }
+      } catch (e) {
+        // If we can't parse, use default message
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Failed to save email. Please try again.' }),
+        JSON.stringify({ 
+          error: errorMessage,
+          status: errorStatus
+        }),
         { 
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: corsHeaders
         }
       );
     }
@@ -101,17 +139,24 @@ export async function onRequestPost(context) {
       }),
       { 
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: corsHeaders
       }
     );
 
   } catch (error) {
-    console.error('Error processing subscription:', error);
+    console.error('Error processing subscription:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return new Response(
-      JSON.stringify({ error: 'Internal server error. Please try again later.' }),
+      JSON.stringify({ 
+        error: 'Internal server error. Please try again later.',
+        details: error.message
+      }),
       { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: corsHeaders
       }
     );
   }
