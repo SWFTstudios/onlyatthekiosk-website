@@ -1,0 +1,11 @@
+name = "kiosk-form-submission-handler"
+main = "kiosk-form-submission-handler.js"
+compatibility_date = "2025-11-17"
+
+[env.production]
+vars = { }
+
+# Environment variables should be set in Cloudflare Dashboard:
+# AIRTABLE_ACCESS_TOKEN (Secret)
+# AIRTABLE_BASE_ID (Plaintext)
+
