@@ -53,6 +53,10 @@
       width: 100%;
       height: 60vh;
       margin-bottom: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective-origin: center center;
     }
 
     /* Tablet Responsive */
@@ -71,14 +75,16 @@
       width: 100%;
       height: 100%;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
     }
 
     /* Individual Item Container */
     [carousel="wrap"] > div > div {
       width: var(--3d-carousel-item-width);
       position: absolute;
-      top: 50%;
-      left: 50%;
       transform-origin: center center;
     }
 
@@ -95,6 +101,8 @@
       width: 100%;
       height: 100%;
       transform-origin: center center;
+      top: 0;
+      left: 0;
     }
 
     /* Carousel Image */
@@ -394,10 +402,13 @@
         wrapEl.css("perspective", posTranslate);
         
         // Position each item in 3D space
+        // Items are centered at origin, then rotated and translated outward
         itemEl.each(function (index) {
-          $(this).css("transform", 
-            `rotateY(${rotateAmount * index}deg) translateZ(${posTranslate})`
-          );
+          $(this).css({
+            left: '50%',
+            top: '50%',
+            transform: `translate(-50%, -50%) rotateY(${rotateAmount * index}deg) translateZ(${posTranslate})`
+          });
         });
 
         // INTRO ANIMATION
