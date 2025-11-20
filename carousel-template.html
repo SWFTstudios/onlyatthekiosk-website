@@ -374,8 +374,11 @@
       }
 
       .carousel_arrow_link::before {
-        width: 10px;
-        height: 10px;
+        border-width: 6px 10px 6px 0;
+      }
+
+      .carousel_arrow_link.is-right::before {
+        border-width: 6px 0 6px 10px;
       }
     }
 
