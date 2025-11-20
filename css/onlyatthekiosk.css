@@ -447,7 +447,8 @@ h1 {
   flex-flow: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100svh;
+  min-height: 100svh;
   display: flex;
   position: relative;
 }
