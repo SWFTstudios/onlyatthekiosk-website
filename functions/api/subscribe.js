@@ -44,42 +44,21 @@ export async function onRequestPost(context) {
     }
 
     // Airtable configuration from environment variables
-    // Try multiple ways to access env vars (Cloudflare Pages Functions compatibility)
-    const AIRTABLE_ACCESS_TOKEN = env.AIRTABLE_ACCESS_TOKEN || context.env?.AIRTABLE_ACCESS_TOKEN;
-    const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID || context.env?.AIRTABLE_BASE_ID;
+    // In Cloudflare Pages Functions, env vars are available directly from the context
+    const AIRTABLE_ACCESS_TOKEN = env.AIRTABLE_ACCESS_TOKEN;
+    const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID;
     const AIRTABLE_TABLE_NAME = 'Incoming Interest';
     
-    // Log environment variable access for debugging
-    const envKeys = Object.keys(env || {});
-    console.log('Environment check:', {
-      hasToken: !!AIRTABLE_ACCESS_TOKEN,
-      hasBaseId: !!AIRTABLE_BASE_ID,
-      tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0,
-      baseIdLength: AIRTABLE_BASE_ID ? AIRTABLE_BASE_ID.length : 0,
-      availableEnvKeys: envKeys,
-      envObjectType: typeof env,
-      envExists: !!env
-    });
-    
-    // Validate environment variables with detailed logging
+    // Validate environment variables
     if (!AIRTABLE_ACCESS_TOKEN || !AIRTABLE_BASE_ID) {
       console.error('Missing Airtable configuration', {
         hasToken: !!AIRTABLE_ACCESS_TOKEN,
         hasBaseId: !!AIRTABLE_BASE_ID,
-        tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0,
-        baseIdLength: AIRTABLE_BASE_ID ? AIRTABLE_BASE_ID.length : 0,
-        availableEnvKeys: envKeys,
-        envObject: env ? 'exists' : 'missing'
+        availableEnvKeys: Object.keys(env || {})
       });
       return new Response(
         JSON.stringify({ 
-          error: 'Server configuration error. Environment variables not found.',
-          debug: {
-            hasToken: !!AIRTABLE_ACCESS_TOKEN,
-            hasBaseId: !!AIRTABLE_BASE_ID,
-            availableKeys: envKeys,
-            envType: typeof env
-          }
+          error: 'Server configuration error. Please contact support.'
         }),
         { 
           status: 500,
@@ -99,14 +78,6 @@ export async function onRequestPost(context) {
     };
 
     // Make request to Airtable API
-    // Log token info (first 10 chars only for security)
-    console.log('Making Airtable request:', {
-      url: AIRTABLE_API_URL,
-      tokenPrefix: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.substring(0, 10) + '...' : 'missing',
-      tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0,
-      baseId: AIRTABLE_BASE_ID
-    });
-    
     const airtableResponse = await fetch(AIRTABLE_API_URL, {
       method: 'POST',
       headers: {
@@ -120,14 +91,11 @@ export async function onRequestPost(context) {
       const errorData = await airtableResponse.text();
       const errorStatus = airtableResponse.status;
       
-      // Log detailed error for debugging
+      // Log error for debugging
       console.error('Airtable API error:', {
         status: errorStatus,
         statusText: airtableResponse.statusText,
-        error: errorData,
-        url: AIRTABLE_API_URL,
-        hasToken: !!AIRTABLE_ACCESS_TOKEN,
-        tokenLength: AIRTABLE_ACCESS_TOKEN ? AIRTABLE_ACCESS_TOKEN.length : 0
+        error: errorData
       });
       
       // Check for authentication errors (401, 403)

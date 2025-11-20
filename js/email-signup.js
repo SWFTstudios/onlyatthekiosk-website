@@ -59,16 +59,14 @@
     submitBtn.textContent = 'Signing Up...';
 
     try {
-      // Call Cloudflare Worker
-      // Update this URL to your Worker's URL after deployment
-      // Format: https://kiosk-form-submission-handler.YOUR_SUBDOMAIN.workers.dev
-      const workerUrl = 'https://kiosk-form-submission-handler.YOUR_SUBDOMAIN.workers.dev';
-      const response = await fetch(workerUrl, {
+      // Call Cloudflare Pages Function
+      // The function is automatically deployed at /api/subscribe when using Cloudflare Pages
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: email, formType: 'email-signup' }),
+        body: JSON.stringify({ email: email }),
       });
 
       const data = await response.json();
