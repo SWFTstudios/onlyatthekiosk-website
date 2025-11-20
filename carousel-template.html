@@ -395,12 +395,17 @@
       width: 12px;
       height: 12px;
       border-top: 2px solid #fff;
-      border-right: 2px solid #fff;
+      border-left: 2px solid #fff;
       transform: rotate(-45deg);
+      display: block;
     }
 
     .carousel_arrow_link.is-right::before {
-      transform: rotate(135deg);
+      border-top: none;
+      border-left: none;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg);
     }
 
     /* Disabled State */
