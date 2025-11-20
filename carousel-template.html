@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>3D Carousel Template - Only at The Kiosk</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  
+  <!-- Custom Styles -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
+      overscroll-behavior: none;
+    }
+
+    /* Fade-up elements start hidden */
+    [fade-up], [carousel="wrap"] { 
+      opacity: 0;
+    }
+
+    /* 3D Carousel Container */
+    [carousel="component"] {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    /* 3D Carousel Wrapper */
+    [carousel="wrap"] {
+      will-change: contents;
+      --3d-carousel-item-width: 40vw;
+      --3d-carousel-gap: 7vw;
+      --3d-carousel-rotate: 0deg;
+      --3d-carousel-rotate-x: 0deg;
+      --3d-carousel-z: 0px;
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      margin-bottom: 4rem;
+    }
+
+    /* Tablet Responsive */
+    @media screen and (max-width: 991px) {
+      [carousel="wrap"] {
+        --3d-carousel-item-width: 70vw;
+        --3d-carousel-gap: 6vw;
+        height: 50vh;
+      }
+    }
+
+    /* 3D Transform Container */
+    [carousel="wrap"] > div {
+      transform-style: preserve-3d;
+      transform: translate3d(0px, 0px, var(--3d-carousel-z)) rotateX(var(--3d-carousel-rotate-x)) rotateY(var(--3d-carousel-rotate));
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* Individual Item Container */
+    [carousel="wrap"] > div > div {
+      width: var(--3d-carousel-item-width);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center center;
+    }
+
+    /* Carousel List */
+    .carousel_list {
+      list-style: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Carousel Item */
+    .carousel_item {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+    }
+
+    /* Carousel Image */
+    .carousel_img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Carousel Ratio (for aspect ratio) */
+    .carousel_ratio {
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    }
+
+    /* Swiper Container for Titles */
+    .swiper {
+      width: 100%;
+      max-width: 600px;
+      height: 200px;
+      margin-bottom: 2rem;
+    }
+
+    .swiper-slide {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .swiper-slide h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    @media screen and (max-width: 991px) {
+      .swiper-slide h2 {
+        font-size: 2rem;
+      }
+    }
+
+    .swiper-slide .button {
+      padding: 12px 32px;
+      background-color: #fff;
+      color: #000;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .swiper-slide .button:hover {
+      background-color: #f0f0f0;
+      transform: scale(1.05);
+    }
+
+    /* Navigation Arrows */
+    .carousel_arrow_wrap {
+      display: flex;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .carousel_arrow_link {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .carousel_arrow_link:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
+    }
+
+    .carousel_arrow_link::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid #fff;
+      border-right: 2px solid #fff;
+      transform: rotate(-45deg);
+    }
+
+    .carousel_arrow_link.is-right::before {
+      transform: rotate(135deg);
+    }
+
+    /* Disabled State */
+    .swiper-button-disabled {
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D Carousel Component -->
+  <div carousel="component" class="carousel_component">
+    
+    <!-- 3D Image Carousel -->
+    <div carousel="wrap" class="carousel_wrap">
+      <div class="carousel_list">
+        <!-- Carousel Items - Add your images here -->
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1080" alt="Product 1" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1080" alt="Product 2" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080" alt="Product 3" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1080" alt="Product 4" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1080" alt="Product 5" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=1080" alt="Product 6" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=1080" alt="Product 7" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=1080" alt="Product 8" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1560472355-536de3962603?w=1080" alt="Product 9" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1558199141-0d5b1e0f3c4a?w=1080" alt="Product 10" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=1080" alt="Product 11" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1080" alt="Product 12" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=1080" alt="Product 13" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1080" alt="Product 14" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1080" alt="Product 15" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+        <div class="carousel_item">
+          <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1080" alt="Product 16" class="carousel_img">
+          <div class="carousel_ratio"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swiper Slider for Titles -->
+    <div fade-up="" class="swiper">
+      <div class="swiper-wrapper">
+        <!-- Slides - Add your titles here -->
+        <div class="swiper-slide">
+          <h2>NeoTech</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Innovate</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Catalyst</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Quantum</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Fusion</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Apex</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Evolve</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Synergy</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Lumina</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Pinnacle</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Odyssey</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Zenith</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Elysium</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Nexus</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Stellar</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+        <div class="swiper-slide">
+          <h2>Vortex</h2>
+          <a href="#" class="button">view case</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <div fade-up="" class="carousel_arrow_wrap">
+      <a carousel="prev" href="#" class="carousel_arrow_link"></a>
+      <a carousel="next" href="#" class="carousel_arrow_link is-right"></a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+  <!-- 3D Carousel Script -->
+  <script>
+    $(document).ready(function() {
+      $("[carousel='component']").each(function () {
+        let componentEl = $(this);
+        let wrapEl = componentEl.find("[carousel='wrap']");
+        let swiperEl = componentEl.find(".swiper");
+        let itemEl = wrapEl.find(".carousel_item");
+        let nextEl = componentEl.find("[carousel='next']");
+        let prevEl = componentEl.find("[carousel='prev']");
+        
+        // Calculate rotation angle per item (360° / number of items)
+        let rotateAmount = 360 / itemEl.length;
+        
+        // Calculate Z-distance for proper 3D perspective
+        let zTranslate = 2 * Math.tan((rotateAmount / 2) * (Math.PI / 180));
+        
+        // Calculate translate values
+        let negTranslate = `calc(var(--3d-carousel-item-width) / -${zTranslate} - var(--3d-carousel-gap))`;
+        let posTranslate = `calc(var(--3d-carousel-item-width) / ${zTranslate} + var(--3d-carousel-gap))`;
+
+        // Set perspective and Z-position
+        wrapEl.css("--3d-carousel-z", negTranslate);
+        wrapEl.css("perspective", posTranslate);
+        
+        // Position each item in 3D space
+        itemEl.each(function (index) {
+          $(this).css("transform", 
+            `rotateY(${rotateAmount * index}deg) translateZ(${posTranslate})`
+          );
+        });
+
+        // INTRO ANIMATION
+        let introTl = gsap.timeline({
+          onComplete: () => {
+            swiperCode();
+          }
+        });
+        
+        // Fade in
+        introTl.to(wrapEl, { opacity: 1, duration: 0.3 });
+        
+        // Rotate from off-screen to position
+        introTl.fromTo(
+          wrapEl, 
+          { 
+            "--3d-carousel-rotate": 100,
+            "--3d-carousel-rotate-x": -90
+          }, 
+          { 
+            "--3d-carousel-rotate": 0,
+            "--3d-carousel-rotate-x": -4,
+            duration: 4, 
+            ease: "power2.inOut" 
+          }, 
+          "<"
+        );
+        
+        // Fade in titles and arrows
+        introTl.to("[fade-up]", { opacity: 1 }, ">-0.3");
+
+        function swiperCode() {
+          // Create continuous rotation timeline
+          let tl = gsap.timeline({ paused: true });
+          tl.fromTo(
+            wrapEl, 
+            { "--3d-carousel-rotate": 0 }, 
+            { 
+              "--3d-carousel-rotate": -(360 - rotateAmount),
+              duration: 30, 
+              ease: "none" 
+            }
+          );
+
+          // Progress tracker for syncing
+          let progress = { value: 0 };
+
+          // Initialize Swiper
+          const swiper = new Swiper(swiperEl[0], {
+            effect: "creative",
+            creativeEffect: {
+              prev: {
+                translate: [0, "-100%", 0],
+                scale: 0.5,
+                opacity: 0
+              },
+              next: {
+                translate: [0, "100%", 0],
+                scale: 0.5,
+                opacity: 0
+              }
+            },
+            grabCursor: true,
+            keyboard: true,
+            speed: 500,
+            mousewheel: {
+              eventsTarget: "[carousel='component']"
+            },
+            navigation: {
+              nextEl: nextEl[0],
+              prevEl: prevEl[0]
+            }
+          });
+          
+          // Sync Swiper progress with 3D rotation
+          swiper.on("progress", function (e) {
+            gsap.to(progress, {
+              value: e.progress,
+              onUpdate: () => {
+                tl.progress(progress.value);
+              }
+            });
+          });
+
+          // Update arrow states
+          swiper.on("reachBeginning", function () {
+            prevEl.addClass("swiper-button-disabled");
+          });
+          swiper.on("reachEnd", function () {
+            nextEl.addClass("swiper-button-disabled");
+          });
+          swiper.on("fromEdge", function () {
+            prevEl.removeClass("swiper-button-disabled");
+            nextEl.removeClass("swiper-button-disabled");
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
