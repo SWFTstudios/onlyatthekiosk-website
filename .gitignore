@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Secrets and tokens (should never be committed)
+*_SECRET*
+*_TOKEN*
+*_KEY*
+*.pem
+*.key
+
+# Supabase
+.supabase/
+
+# Cloudflare
+.wrangler/
+wrangler.toml.local
+
+# Airtable (tokens in scripts should use placeholders)
+# Keep scripts but remove actual tokens before committing
+

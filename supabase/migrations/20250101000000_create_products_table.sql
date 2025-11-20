@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   -- Metadata
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  airtable_record_id TEXT UNIQUE, -- To track which Airtable record this came from
+  airtable_record_id TEXT, -- To track which Airtable record this came from
+  shopify_product_id TEXT UNIQUE, -- To track which Shopify product this came from
   
   -- Indexes for performance
   CONSTRAINT products_status_check CHECK (status IN ('active', 'draft', 'archived'))
@@ -53,6 +54,17 @@ CREATE INDEX IF NOT EXISTS idx_products_featured ON public.products(featured);
 CREATE INDEX IF NOT EXISTS idx_products_status ON public.products(status);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_display);
 CREATE INDEX IF NOT EXISTS idx_products_airtable_id ON public.products(airtable_record_id);
+CREATE INDEX IF NOT EXISTS idx_products_shopify_id ON public.products(shopify_product_id);
+
+-- Unique indexes (allow NULL for products from single source)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_airtable_id_unique 
+ON public.products(airtable_record_id) 
+WHERE airtable_record_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_shopify_id_unique 
+ON public.products(shopify_product_id) 
+WHERE shopify_product_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_products_shopify_id ON public.products(shopify_product_id);
 
 -- Enable Row Level Security (allow public read access)
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;

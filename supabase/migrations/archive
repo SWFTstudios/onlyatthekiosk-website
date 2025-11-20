@@ -1,0 +1,22 @@
+-- Add Shopify product ID column to products table
+-- Run this if you already have the products table and want to add Shopify sync
+
+-- Add shopify_product_id column
+ALTER TABLE public.products 
+ADD COLUMN IF NOT EXISTS shopify_product_id TEXT;
+
+-- Add unique constraint (products can have either airtable_record_id OR shopify_product_id)
+-- Note: Using unique index instead of constraint to allow NULL values
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_shopify_id_unique 
+ON public.products(shopify_product_id) 
+WHERE shopify_product_id IS NOT NULL;
+
+-- Add index for performance
+CREATE INDEX IF NOT EXISTS idx_products_shopify_id ON public.products(shopify_product_id);
+
+-- Verify the column was added
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_name = 'products' 
+  AND column_name = 'shopify_product_id';
+
