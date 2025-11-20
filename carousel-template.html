@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>3D Carousel Template - Only at The Kiosk</title>
-  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes" name="viewport">
   
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
@@ -22,6 +22,11 @@
       color: #fff;
       overflow-x: hidden;
       overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Improve touch scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
 
     /* Fade-up elements start hidden */
@@ -39,6 +44,22 @@
       justify-content: center;
       align-items: center;
       padding: 2rem;
+      /* Improve touch handling */
+      touch-action: pan-y pinch-zoom;
+    }
+
+    /* Mobile - Reduce padding */
+    @media screen and (max-width: 767px) {
+      [carousel="component"] {
+        padding: 1rem;
+        min-height: 100svh; /* Use svh for mobile viewport */
+      }
+    }
+
+    @media screen and (max-width: 479px) {
+      [carousel="component"] {
+        padding: 0.5rem;
+      }
     }
 
     /* 3D Carousel Wrapper */
@@ -65,6 +86,27 @@
         --3d-carousel-item-width: 70vw;
         --3d-carousel-gap: 6vw;
         height: 50vh;
+        margin-bottom: 2rem;
+      }
+    }
+
+    /* Mobile - Smaller carousel items */
+    @media screen and (max-width: 767px) {
+      [carousel="wrap"] {
+        --3d-carousel-item-width: 80vw;
+        --3d-carousel-gap: 5vw;
+        height: 45vh;
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    /* Small Mobile */
+    @media screen and (max-width: 479px) {
+      [carousel="wrap"] {
+        --3d-carousel-item-width: 85vw;
+        --3d-carousel-gap: 4vw;
+        height: 40vh;
+        margin-bottom: 1rem;
       }
     }
 
@@ -112,6 +154,17 @@
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      /* Prevent image drag on mobile */
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @media screen and (max-width: 479px) {
+      .carousel_img {
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      }
     }
 
     /* Carousel Ratio (for aspect ratio) */
@@ -125,6 +178,8 @@
       max-width: 600px;
       height: 200px;
       margin-bottom: 2rem;
+      /* Enable touch gestures */
+      touch-action: pan-y;
     }
 
     .swiper-slide {
@@ -134,6 +189,9 @@
       align-items: center;
       text-align: center;
       padding: 2rem;
+      /* Prevent text selection during swipe */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .swiper-slide h2 {
@@ -141,11 +199,55 @@
       font-weight: 700;
       margin-bottom: 1rem;
       color: #fff;
+      line-height: 1.2;
     }
 
+    /* Tablet */
     @media screen and (max-width: 991px) {
+      .swiper {
+        height: 180px;
+        margin-bottom: 1.5rem;
+      }
+      
+      .swiper-slide {
+        padding: 1.5rem;
+      }
+
       .swiper-slide h2 {
         font-size: 2rem;
+      }
+    }
+
+    /* Mobile */
+    @media screen and (max-width: 767px) {
+      .swiper {
+        height: 160px;
+        margin-bottom: 1rem;
+      }
+
+      .swiper-slide {
+        padding: 1rem;
+      }
+
+      .swiper-slide h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+      }
+    }
+
+    /* Small Mobile */
+    @media screen and (max-width: 479px) {
+      .swiper {
+        height: 140px;
+      }
+
+      .swiper-slide {
+        padding: 0.75rem;
+      }
+
+      .swiper-slide h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
       }
     }
 
@@ -158,11 +260,39 @@
       font-weight: 600;
       transition: all 0.3s ease;
       display: inline-block;
+      /* Touch-friendly button size */
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .swiper-slide .button:hover {
       background-color: #f0f0f0;
       transform: scale(1.05);
+    }
+
+    .swiper-slide .button:active {
+      transform: scale(0.98);
+    }
+
+    /* Mobile button adjustments */
+    @media screen and (max-width: 767px) {
+      .swiper-slide .button {
+        padding: 10px 24px;
+        font-size: 0.875rem;
+      }
+    }
+
+    @media screen and (max-width: 479px) {
+      .swiper-slide .button {
+        padding: 8px 20px;
+        font-size: 0.8rem;
+        border-radius: 30px;
+      }
     }
 
     /* Navigation Arrows */
@@ -185,12 +315,46 @@
       pointer-events: auto;
       transition: all 0.3s ease;
       position: relative;
+      /* Touch-friendly size */
+      min-width: 44px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .carousel_arrow_link:hover {
       background-color: rgba(255, 255, 255, 0.2);
       border-color: rgba(255, 255, 255, 0.5);
       transform: scale(1.1);
+    }
+
+    .carousel_arrow_link:active {
+      transform: scale(0.95);
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Mobile arrow adjustments */
+    @media screen and (max-width: 767px) {
+      .carousel_arrow_link {
+        width: 50px;
+        height: 50px;
+      }
+
+      .carousel_arrow_link::before {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    @media screen and (max-width: 479px) {
+      .carousel_arrow_link {
+        width: 44px;
+        height: 44px;
+      }
+
+      .carousel_arrow_wrap {
+        gap: 0.5rem;
+      }
     }
 
     .carousel_arrow_link::before {
@@ -242,6 +406,9 @@
       overflow-y: auto;
       position: relative;
       animation: slideInRight 0.3s ease-out;
+      /* Improve scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
     @keyframes slideInRight {
@@ -260,15 +427,39 @@
       }
     }
 
+    @media screen and (max-width: 767px) {
+      .products_drawer-wrapper {
+        width: 85vw;
+        max-width: none;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: 2rem;
+      }
+    }
+
     @media screen and (max-width: 479px) {
       .products_drawer-wrapper {
         width: 100vw;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        padding-bottom: 1.5rem;
+      }
+
+      .products_drawer-title {
+        margin-top: 2rem;
+        padding-bottom: 0.5rem;
+      }
+
+      .products_drawer-title h3 {
+        font-size: 1.25rem;
       }
     }
 
     .products_drawer-close-icon {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
       position: absolute;
       top: 1rem;
       right: 1rem;
@@ -279,14 +470,22 @@
       color: #000;
       cursor: pointer;
       z-index: 10;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
+      /* Touch-friendly */
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      padding: 0;
     }
 
     .products_drawer-close-icon:hover {
       opacity: 0.6;
+    }
+
+    .products_drawer-close-icon:active {
+      transform: scale(0.9);
     }
 
     .products_drawer-title {
@@ -325,6 +524,11 @@
     @media screen and (max-width: 767px) {
       .products_drawer-content {
         grid-template-columns: 1fr;
+        grid-row-gap: 1rem;
+      }
+
+      .products_drawer-text {
+        position: static;
       }
     }
 
@@ -343,6 +547,22 @@
       height: auto;
       max-height: 22rem;
       border-radius: 8px;
+      /* Prevent image drag on mobile */
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @media screen and (max-width: 767px) {
+      .products_drawer-main-image {
+        max-height: 18rem;
+      }
+    }
+
+    @media screen and (max-width: 479px) {
+      .products_drawer-main-image {
+        max-height: 15rem;
+      }
     }
 
     .products_drawer-more-collection {
@@ -368,6 +588,16 @@
       object-fit: cover;
       width: 100%;
       height: 100%;
+      /* Prevent image drag on mobile */
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: auto;
+    }
+
+    @media screen and (max-width: 479px) {
+      .products_drawer-more-item {
+        max-height: 80px;
+      }
     }
 
     .products_drawer-text {
@@ -417,11 +647,32 @@
       cursor: pointer;
       width: 100%;
       margin-top: 1rem;
+      /* Touch-friendly */
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .button-secondary:hover {
       background-color: #333;
       border-color: #333;
+    }
+
+    .button-secondary:active {
+      transform: scale(0.98);
+      background-color: #555;
+    }
+
+    /* Mobile button adjustments */
+    @media screen and (max-width: 767px) {
+      .button-secondary {
+        padding: 0.625rem 1.5rem;
+        font-size: 0.8rem;
+      }
     }
 
     .products_text-top {
@@ -466,10 +717,19 @@
       padding-bottom: 0;
       display: flex;
       cursor: pointer;
+      /* Touch-friendly */
+      min-height: 44px;
+      padding: 0.5rem 0;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .products_description-question:hover {
       opacity: 0.7;
+    }
+
+    .products_description-question:active {
+      opacity: 0.5;
     }
 
     .products_description-left {
@@ -890,7 +1150,7 @@
           // Progress tracker for syncing
           let progress = { value: 0 };
 
-          // Initialize Swiper
+          // Initialize Swiper with mobile-friendly touch gestures
           const swiper = new Swiper(swiperEl[0], {
             effect: "creative",
             creativeEffect: {
@@ -905,16 +1165,44 @@
                 opacity: 0
               }
             },
+            // Touch and swipe settings for mobile
             grabCursor: true,
-            keyboard: true,
-            speed: 500,
-            mousewheel: {
-              eventsTarget: "[carousel='component']"
+            touchRatio: 1,
+            touchAngle: 45,
+            simulateTouch: true,
+            allowTouchMove: true,
+            touchStartPreventDefault: false,
+            touchMoveStopPropagation: false,
+            // Swipe settings
+            slidesPerView: 1,
+            spaceBetween: 0,
+            // Keyboard support
+            keyboard: {
+              enabled: true,
+              onlyInViewport: true
             },
+            // Mousewheel support (desktop)
+            mousewheel: {
+              enabled: true,
+              eventsTarget: "[carousel='component']",
+              sensitivity: 1,
+              forceToAxis: true
+            },
+            speed: 500,
+            // Navigation arrows
             navigation: {
               nextEl: nextEl[0],
-              prevEl: prevEl[0]
-            }
+              prevEl: prevEl[0],
+              disabledClass: "swiper-button-disabled"
+            },
+            // Touch events
+            touchEventsTarget: 'container',
+            // Prevent clicks during swipe
+            preventClicks: true,
+            preventClicksPropagation: true,
+            // Resistance when reaching edges
+            resistance: true,
+            resistanceRatio: 0.85
           });
           
           // Sync Swiper progress with 3D rotation
