@@ -211,6 +211,343 @@
       pointer-events: none;
       opacity: 0.4;
     }
+
+    /* Product Drawer Styles */
+    .products_collection-drawer {
+      z-index: 1000;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .products_collection-drawer.open {
+      display: flex;
+    }
+
+    .products_drawer-close {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .products_drawer-wrapper {
+      border-left: 1px solid #666;
+      background-color: #fff;
+      color: #000;
+      width: 50vw;
+      max-width: 600px;
+      padding-bottom: 3rem;
+      padding-left: 1.5rem;
+      padding-right: 3rem;
+      overflow-y: auto;
+      position: relative;
+      animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    @media screen and (max-width: 991px) {
+      .products_drawer-wrapper {
+        width: 85vw;
+        max-width: none;
+      }
+    }
+
+    @media screen and (max-width: 479px) {
+      .products_drawer-wrapper {
+        width: 100vw;
+      }
+    }
+
+    .products_drawer-close-icon {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      line-height: 1;
+      color: #000;
+      cursor: pointer;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .products_drawer-close-icon:hover {
+      opacity: 0.6;
+    }
+
+    .products_drawer-title {
+      border-bottom: 1px solid #666;
+      justify-content: space-between;
+      margin-top: 3.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: baseline;
+    }
+
+    .products_drawer-title h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      color: #000;
+    }
+
+    .products_drawer-title h3:last-child {
+      font-weight: 400;
+      color: #666;
+    }
+
+    .products_drawer-content {
+      grid-column-gap: 1.5rem;
+      grid-row-gap: 1.5rem;
+      grid-template-rows: auto;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-columns: 1fr;
+      align-items: start;
+      height: auto;
+      display: grid;
+    }
+
+    @media screen and (max-width: 767px) {
+      .products_drawer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .products_drawer-images {
+      grid-column-gap: 1.5rem;
+      grid-row-gap: 1.5rem;
+      grid-template-rows: auto auto;
+      grid-template-columns: 1fr;
+      grid-auto-columns: 1fr;
+      display: grid;
+    }
+
+    .products_drawer-main-image {
+      object-fit: cover;
+      width: 100%;
+      height: auto;
+      max-height: 22rem;
+      border-radius: 8px;
+    }
+
+    .products_drawer-more-collection {
+      grid-column-gap: 1rem;
+      grid-row-gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      display: grid;
+    }
+
+    .products_drawer-more-item {
+      max-height: 100px;
+      overflow: hidden;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .products_drawer-more-item:hover {
+      opacity: 0.7;
+    }
+
+    .products_drawer-more-image {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    .products_drawer-text {
+      padding-top: 1.5rem;
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .products_quantity-wrapper {
+      margin-bottom: 1rem;
+    }
+
+    .margin-bottom.margin-xsmall {
+      margin-bottom: 0.5rem;
+    }
+
+    .uppercase {
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #000;
+      letter-spacing: 0.05em;
+    }
+
+    .products_quantity {
+      border: 1px solid #ccc;
+      background-color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      width: 80px;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .button-secondary {
+      border: 1px solid #000;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      padding: 0.75rem 2rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .button-secondary:hover {
+      background-color: #333;
+      border-color: #333;
+    }
+
+    .products_text-top {
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .products_out-of-stock,
+    .products_error {
+      background-color: #f5f5f5;
+      color: #d32f2f;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+
+    .products_text-bottom {
+      margin-top: 1.5rem;
+    }
+
+    .margin-bottom.margin-medium {
+      margin-bottom: 1rem;
+    }
+
+    .products_description-item {
+      border-bottom: 1px solid #ccc;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      position: relative;
+    }
+
+    .products_description-item:last-child {
+      border-bottom: none;
+    }
+
+    .products_description-question {
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .products_description-question:hover {
+      opacity: 0.7;
+    }
+
+    .products_description-left {
+      align-items: center;
+      display: flex;
+    }
+
+    .products_description-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .products_description-question p {
+      margin: 0;
+      font-weight: 500;
+      color: #000;
+    }
+
+    .product_description-plus {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: #000;
+      transition: transform 0.3s ease;
+      line-height: 1;
+    }
+
+    .products_description-item.active .product_description-plus {
+      transform: rotate(45deg);
+    }
+
+    .products_description-answer {
+      display: none;
+      padding-top: 0.75rem;
+      color: #666;
+    }
+
+    .products_description-item.active .products_description-answer {
+      display: block;
+    }
+
+    .products_description-answer .paragraph {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .drawer-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #fff;
+      z-index: 1001;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .drawer-loading p {
+      margin: 0;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 <body>
@@ -292,69 +629,70 @@
     <div fade-up="" class="swiper">
       <div class="swiper-wrapper">
         <!-- Slides - Add your titles here -->
-        <div class="swiper-slide">
+        <!-- Add data-product-handle attribute with your Shopify product handle -->
+        <div class="swiper-slide" data-product-handle="product-handle-1">
           <h2>NeoTech</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-2">
           <h2>Innovate</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-3">
           <h2>Catalyst</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-4">
           <h2>Quantum</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-5">
           <h2>Fusion</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-6">
           <h2>Apex</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-7">
           <h2>Evolve</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-8">
           <h2>Synergy</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-9">
           <h2>Lumina</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-10">
           <h2>Pinnacle</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-11">
           <h2>Odyssey</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-12">
           <h2>Zenith</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-13">
           <h2>Elysium</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-14">
           <h2>Nexus</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-15">
           <h2>Stellar</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
-        <div class="swiper-slide">
+        <div class="swiper-slide" data-product-handle="product-handle-16">
           <h2>Vortex</h2>
-          <a href="#" class="button">view case</a>
+          <a href="#" class="button view-details-btn">view details</a>
         </div>
       </div>
     </div>
@@ -363,6 +701,102 @@
     <div fade-up="" class="carousel_arrow_wrap">
       <a carousel="prev" href="#" class="carousel_arrow_link"></a>
       <a carousel="next" href="#" class="carousel_arrow_link is-right"></a>
+    </div>
+  </div>
+
+  <!-- Product Drawer -->
+  <div class="products_collection-drawer" id="product-drawer">
+    <div class="products_drawer-close" id="drawer-close-overlay"></div>
+    <div class="products_drawer-wrapper">
+      <button class="products_drawer-close-icon" id="drawer-close-btn" aria-label="Close drawer">×</button>
+      
+      <div class="products_drawer-title">
+        <h3 id="drawer-product-title"></h3>
+        <h3 id="drawer-product-price"></h3>
+      </div>
+      
+      <div class="products_drawer-content">
+        <!-- Images Section -->
+        <div class="products_drawer-images">
+          <img src="" loading="lazy" alt="" class="products_drawer-main-image" id="drawer-main-image">
+          <div class="products_drawer-more-collection" id="drawer-gallery">
+            <!-- Gallery images will be populated dynamically -->
+          </div>
+        </div>
+        
+        <!-- Product Details Section -->
+        <div class="products_drawer-text">
+          <div class="products_text-top">
+            <div class="products_quantity-wrapper">
+              <div class="margin-bottom margin-xsmall">
+                <h4 class="uppercase">qty</h4>
+              </div>
+              <input type="number" pattern="^[0-9]+$" inputmode="numeric" id="drawer-quantity" name="quantity" min="1" class="products_quantity" value="1">
+            </div>
+            <button id="drawer-add-to-cart" class="button-secondary">Add to Cart</button>
+            <div style="display:none" class="products_out-of-stock" id="drawer-out-of-stock">
+              <div>This product is out of stock.</div>
+            </div>
+            <div style="display:none" class="products_error" id="drawer-error">
+              <div>Error loading product details.</div>
+            </div>
+          </div>
+          
+          <div class="products_text-bottom">
+            <div class="margin-bottom margin-medium">
+              <h4 class="uppercase">product info</h4>
+            </div>
+            
+            <!-- Description Section -->
+            <div class="products_description-item">
+              <div class="products_description-question">
+                <div class="products_description-left">
+                  <span class="products_description-icon">📄</span>
+                  <p>Description</p>
+                </div>
+                <span class="product_description-plus">+</span>
+              </div>
+              <div class="products_description-answer" style="display:none;">
+                <div class="paragraph" id="drawer-description"></div>
+              </div>
+            </div>
+            
+            <!-- Care Instructions Section -->
+            <div class="products_description-item">
+              <div class="products_description-question">
+                <div class="products_description-left">
+                  <span class="products_description-icon">ℹ️</span>
+                  <p>Care Instructions</p>
+                </div>
+                <span class="product_description-plus">+</span>
+              </div>
+              <div class="products_description-answer" style="display:none;">
+                <div class="paragraph" id="drawer-care-instructions"></div>
+              </div>
+            </div>
+            
+            <!-- Delivery Section -->
+            <div class="products_description-item">
+              <div class="products_description-question">
+                <div class="products_description-left">
+                  <span class="products_description-icon">🚚</span>
+                  <p>Delivery</p>
+                </div>
+                <span class="product_description-plus">+</span>
+              </div>
+              <div class="products_description-answer" style="display:none;">
+                <p id="drawer-delivery">Standard delivery information will be displayed here.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div class="drawer-loading" id="drawer-loading" style="display:none;">
+      <div class="loading-spinner"></div>
+      <p>Loading product details...</p>
     </div>
   </div>
 
@@ -505,6 +939,245 @@
             nextEl.removeClass("swiper-button-disabled");
           });
         }
+      });
+    });
+
+    // Product Drawer Functionality
+    $(document).ready(function() {
+      const drawer = $('#product-drawer');
+      const drawerOverlay = $('#drawer-close-overlay');
+      const drawerCloseBtn = $('#drawer-close-btn');
+      const viewDetailsBtns = $('.view-details-btn');
+      
+      // Shopify Storefront API Configuration
+      // For production, move token to Cloudflare Pages environment variables
+      // Note: If API calls fail, try using your myshopify.com domain (e.g., onlyatthekiosk.myshopify.com)
+      const SHOPIFY_STORE = 'onlyatthekiosk.com';
+      const SHOPIFY_TOKEN = '3c7e207a3167fe57edd75d8133a36967'; // TODO: Move to environment variable for production
+      const SHOPIFY_API_URL = `https://${SHOPIFY_STORE}/api/2024-01/graphql.json`;
+
+      // GraphQL query to fetch product by handle
+      function getProductQuery(handle) {
+        return `
+          query getProduct($handle: String!) {
+            product(handle: $handle) {
+              id
+              title
+              description
+              descriptionHtml
+              priceRange {
+                minVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+              images(first: 10) {
+                edges {
+                  node {
+                    id
+                    url
+                    altText
+                  }
+                }
+              }
+              variants(first: 1) {
+                edges {
+                  node {
+                    id
+                    availableForSale
+                    price {
+                      amount
+                      currencyCode
+                    }
+                  }
+                }
+              }
+              metafields(identifiers: [
+                {namespace: "custom", key: "care_instructions"}
+                {namespace: "custom", key: "delivery"}
+              ]) {
+                id
+                namespace
+                key
+                value
+                type
+              }
+            }
+          }
+        `;
+      }
+
+      // Fetch product from Shopify Storefront API
+      async function fetchProduct(handle) {
+        try {
+          const response = await fetch(SHOPIFY_API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Shopify-Storefront-Access-Token': SHOPIFY_TOKEN
+            },
+            body: JSON.stringify({
+              query: getProductQuery(handle),
+              variables: { handle: handle }
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          
+          if (data.errors) {
+            throw new Error(data.errors[0].message);
+          }
+
+          return data.data.product;
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          throw error;
+        }
+      }
+
+      // Populate drawer with product data
+      function populateDrawer(product) {
+        // Product title and price
+        $('#drawer-product-title').text(product.title);
+        const price = product.priceRange.minVariantPrice;
+        $('#drawer-product-price').text(`${price.amount} ${price.currencyCode}`);
+
+        // Main image
+        if (product.images.edges.length > 0) {
+          const mainImage = product.images.edges[0].node;
+          $('#drawer-main-image').attr('src', mainImage.url).attr('alt', mainImage.altText || product.title);
+          
+          // Gallery images
+          const gallery = $('#drawer-gallery');
+          gallery.empty();
+          
+          if (product.images.edges.length > 1) {
+            product.images.edges.slice(1).forEach(({ node: image }) => {
+              const galleryItem = $('<div class="products_drawer-more-item"></div>');
+              const galleryImg = $('<img class="products_drawer-more-image" loading="lazy">');
+              galleryImg.attr('src', image.url).attr('alt', image.altText || product.title);
+              galleryItem.append(galleryImg);
+              galleryItem.on('click', () => {
+                $('#drawer-main-image').attr('src', image.url).attr('alt', image.altText || product.title);
+              });
+              gallery.append(galleryItem);
+            });
+          }
+        }
+
+        // Description
+        if (product.descriptionHtml) {
+          $('#drawer-description').html(product.descriptionHtml);
+        } else if (product.description) {
+          $('#drawer-description').text(product.description);
+        } else {
+          $('#drawer-description').text('No description available.');
+        }
+
+        // Care instructions (from metafield)
+        const careInstructionsMetafield = product.metafields?.find(m => m.key === 'care_instructions');
+        if (careInstructionsMetafield) {
+          if (careInstructionsMetafield.type === 'rich_text_field' || careInstructionsMetafield.type === 'multi_line_text_field') {
+            $('#drawer-care-instructions').html(careInstructionsMetafield.value);
+          } else {
+            $('#drawer-care-instructions').text(careInstructionsMetafield.value);
+          }
+        } else {
+          $('#drawer-care-instructions').html('<p>Care instructions not available.</p>');
+        }
+
+        // Delivery (from metafield or default)
+        const deliveryMetafield = product.metafields?.find(m => m.key === 'delivery');
+        if (deliveryMetafield) {
+          $('#drawer-delivery').html(deliveryMetafield.value);
+        } else {
+          $('#drawer-delivery').text('Standard delivery information will be displayed here.');
+        }
+
+        // Stock status
+        const isAvailable = product.variants.edges[0]?.node.availableForSale || false;
+        if (!isAvailable) {
+          $('#drawer-out-of-stock').show();
+          $('#drawer-add-to-cart').prop('disabled', true);
+        } else {
+          $('#drawer-out-of-stock').hide();
+          $('#drawer-add-to-cart').prop('disabled', false);
+        }
+
+        // Hide error if previously shown
+        $('#drawer-error').hide();
+      }
+
+      // Open drawer
+      function openDrawer(productHandle) {
+        drawer.addClass('open');
+        $('#drawer-loading').show();
+        $('body').css('overflow', 'hidden'); // Lock body scroll
+
+        // Fetch and populate product data
+        fetchProduct(productHandle)
+          .then(product => {
+            populateDrawer(product);
+            $('#drawer-loading').hide();
+          })
+          .catch(error => {
+            console.error('Error loading product:', error);
+            $('#drawer-loading').hide();
+            $('#drawer-error').show().find('div').text('Failed to load product details. Please try again.');
+          });
+      }
+
+      // Close drawer
+      function closeDrawer() {
+        drawer.removeClass('open');
+        $('body').css('overflow', ''); // Unlock body scroll
+      }
+
+      // Event handlers
+      viewDetailsBtns.on('click', function(e) {
+        e.preventDefault();
+        const slide = $(this).closest('.swiper-slide');
+        const productHandle = slide.data('product-handle');
+        
+        if (productHandle) {
+          openDrawer(productHandle);
+        } else {
+          alert('Product handle not found. Please add data-product-handle attribute.');
+        }
+      });
+
+      drawerCloseBtn.on('click', closeDrawer);
+      drawerOverlay.on('click', closeDrawer);
+
+      // Close drawer on ESC key
+      $(document).on('keydown', function(e) {
+        if (e.key === 'Escape' && drawer.hasClass('open')) {
+          closeDrawer();
+        }
+      });
+
+      // Accordion functionality for description sections
+      $('.products_description-question').on('click', function() {
+        const item = $(this).closest('.products_description-item');
+        const isActive = item.hasClass('active');
+        
+        // Close all items
+        $('.products_description-item').removeClass('active');
+        
+        // Open clicked item if it wasn't active
+        if (!isActive) {
+          item.addClass('active');
+        }
+      });
+
+      // Add to cart button (placeholder - integrate with your cart system)
+      $('#drawer-add-to-cart').on('click', function() {
+        // TODO: Integrate with Shopify cart or your checkout system
+        alert('Add to cart functionality will be integrated with Shopify checkout.');
       });
     });
   </script>
