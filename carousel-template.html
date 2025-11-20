@@ -718,7 +718,7 @@
       <div class="products_drawer-content">
         <!-- Images Section -->
         <div class="products_drawer-images">
-          <img src="" loading="lazy" alt="" class="products_drawer-main-image" id="drawer-main-image">
+          <img src="" loading="lazy" alt="Product image" class="products_drawer-main-image" id="drawer-main-image">
           <div class="products_drawer-more-collection" id="drawer-gallery">
             <!-- Gallery images will be populated dynamically -->
           </div>
@@ -785,7 +785,7 @@
                 <span class="product_description-plus">+</span>
               </div>
               <div class="products_description-answer" style="display:none;">
-                <p id="drawer-delivery">Standard delivery information will be displayed here.</p>
+                <p id="drawer-delivery"></p>
               </div>
             </div>
           </div>
@@ -1112,13 +1112,115 @@
         $('#drawer-error').hide();
       }
 
+      // Placeholder product data for template products
+      // Each product handle corresponds to a carousel slide
+      function getPlaceholderProduct(productHandle) {
+        const placeholderImages = [
+          { main: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800', gallery: ['https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800', gallery: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800', gallery: ['https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800', gallery: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400', 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800', gallery: ['https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400', 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800', gallery: ['https://images.unsplash.com/photo-1560472355-536de3962603?w=400', 'https://images.unsplash.com/photo-1558199141-0d5b1e0f3c4a?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800', gallery: ['https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=400', 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=800', gallery: ['https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=800', gallery: ['https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1558199141-0d5b1e0f3c4a?w=800', gallery: ['https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=400', 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=800', gallery: ['https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800', gallery: ['https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800', gallery: ['https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400', 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800', gallery: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800', gallery: ['https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'] },
+          { main: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800', gallery: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400', 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400'] }
+        ];
+
+        const productTitles = ['NeoTech', 'Innovate', 'Catalyst', 'Quantum', 'Fusion', 'Apex', 'Evolve', 'Synergy', 'Lumina', 'Pinnacle', 'Odyssey', 'Zenith', 'Elysium', 'Nexus', 'Stellar', 'Vortex'];
+        const productPrices = ['299.00', '349.00', '379.00', '399.00', '429.00', '449.00', '479.00', '499.00', '529.00', '549.00', '579.00', '599.00', '629.00', '649.00', '679.00', '699.00'];
+        
+        // Extract product index from handle (e.g., 'product-handle-1' -> 0)
+        const handleMatch = productHandle.match(/product-handle-(\d+)/);
+        const index = handleMatch ? parseInt(handleMatch[1]) - 1 : 0;
+        const imageData = placeholderImages[index] || placeholderImages[0];
+        const title = productTitles[index] || 'Product';
+        const price = productPrices[index] || '199.00';
+
+        return {
+          title: title,
+          price: { amount: price, currencyCode: 'SEK' },
+          mainImage: imageData.main,
+          gallery: imageData.gallery,
+          description: `<p>${title} is a premium product designed for the modern lifestyle. Crafted with cutting-edge technology and attention to detail, this item represents the perfect blend of style and functionality. Each piece is carefully selected and designed to meet the highest standards of quality.</p><p>Experience the difference with ${title} - where innovation meets timeless design.</p>`,
+          careInstructions: '<p><strong>Care Instructions:</strong></p><ul><li>Hand wash recommended in cold water</li><li>Do not bleach or use harsh detergents</li><li>Lay flat to dry</li><li>Iron on low heat if needed</li><li>Store in a cool, dry place</li><li>Keep away from direct sunlight when storing</li></ul>'
+        };
+      }
+
+      // Populate drawer with placeholder data
+      function populatePlaceholderDrawer(placeholderData) {
+        // Product title and price
+        $('#drawer-product-title').text(placeholderData.title);
+        $('#drawer-product-price').text(`${placeholderData.price.amount} ${placeholderData.price.currencyCode}`);
+
+        // Main image
+        $('#drawer-main-image').attr('src', placeholderData.mainImage).attr('alt', placeholderData.title);
+        
+        // Gallery images
+        const gallery = $('#drawer-gallery');
+        gallery.empty();
+        
+        if (placeholderData.gallery && placeholderData.gallery.length > 0) {
+          placeholderData.gallery.forEach((imageUrl, index) => {
+            const galleryItem = $('<div class="products_drawer-more-item"></div>');
+            const galleryImg = $('<img class="products_drawer-more-image" loading="lazy">');
+            galleryImg.attr('src', imageUrl).attr('alt', `${placeholderData.title} - Image ${index + 2}`);
+            galleryItem.append(galleryImg);
+            galleryItem.on('click', () => {
+              $('#drawer-main-image').attr('src', imageUrl).attr('alt', `${placeholderData.title} - Image ${index + 2}`);
+            });
+            gallery.append(galleryItem);
+          });
+        }
+
+        // Description
+        if (placeholderData.description) {
+          $('#drawer-description').html(placeholderData.description);
+        }
+
+        // Care instructions
+        if (placeholderData.careInstructions) {
+          $('#drawer-care-instructions').html(placeholderData.careInstructions);
+        }
+
+        // Delivery (default for all)
+        $('#drawer-delivery').html(`
+          <strong>Delivery Information:</strong><br>
+          Standard shipping: 5-7 business days<br>
+          Express shipping: 2-3 business days<br>
+          Free shipping on orders over $100<br>
+          International shipping available<br>
+          Track your order through our shipping partner
+        `);
+
+        // Hide error and out of stock
+        $('#drawer-error').hide();
+        $('#drawer-out-of-stock').hide();
+        $('#drawer-add-to-cart').prop('disabled', false);
+      }
+
       // Open drawer
       function openDrawer(productHandle) {
         drawer.addClass('open');
-        $('#drawer-loading').show();
         $('body').css('overflow', 'hidden'); // Lock body scroll
 
-        // Fetch and populate product data
+        // Check if it's a placeholder handle
+        if (productHandle && productHandle.startsWith('product-handle-')) {
+          // Show placeholder data immediately
+          const placeholderData = getPlaceholderProduct(productHandle);
+          populatePlaceholderDrawer(placeholderData);
+          return;
+        }
+
+        // Otherwise, fetch from Shopify
+        $('#drawer-loading').show();
         fetchProduct(productHandle)
           .then(product => {
             populateDrawer(product);
