@@ -6,7 +6,7 @@ The carousel now supports multiple image sources. This document explains how to 
 
 ## Current Setup
 
-The carousel is currently using **placeholder images** from `via.placeholder.com` for fast loading and testing.
+The carousel is currently using **placeholder images** from the local WebP file (`images/kiosk-placeholder-product-img.webp`) for fast loading and testing.
 
 ## Image Source Options
 
