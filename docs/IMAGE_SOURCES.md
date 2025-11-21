@@ -15,7 +15,7 @@ The carousel is currently using **placeholder images** from the local WebP file 
 
 ```javascript
 // In carousel-template.html, line ~1495
-const placeholderImage = 'https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product+Placeholder';
+const placeholderImage = '/images/kiosk-placeholder-product-img.webp';
 ```
 
 **Pros:**
