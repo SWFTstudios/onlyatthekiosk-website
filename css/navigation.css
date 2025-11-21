@@ -148,6 +148,20 @@
   padding: 2px;
   transition: background-color 0.3s ease;
   margin-right: 1rem;
+  /* Mobile touch support */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Ensure button is clickable on mobile */
+  z-index: 10;
+  pointer-events: auto;
+  /* Minimum touch target size for mobile (44x44px recommended) */
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navbar-theme-toggle:hover {

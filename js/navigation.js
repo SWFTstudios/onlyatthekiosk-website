@@ -125,19 +125,66 @@
     }
     html.setAttribute('data-theme', savedTheme);
 
-    // Theme Toggle Button
+    // Theme Toggle Button - Support both click and touch events for mobile
     const themeToggle = document.querySelector('.navbar-theme-toggle');
     if (themeToggle) {
-      themeToggle.addEventListener('click', function() {
+      function toggleTheme(e) {
+        // Prevent default and stop propagation to avoid conflicts
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        
         const currentTheme = html.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
         html.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         
+        // Update toggle button state
+        if (newTheme === 'dark') {
+          themeToggle.classList.add('is-dark');
+        } else {
+          themeToggle.classList.remove('is-dark');
+        }
+        
         // Dispatch a custom event so other components can listen for theme changes
         window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
-      });
+      }
+      
+      // Add click event (desktop)
+      themeToggle.addEventListener('click', toggleTheme);
+      
+      // Add touch events (mobile)
+      themeToggle.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleTheme(e);
+      }, { passive: false });
+      
+      // Also handle touchend to ensure it works on all mobile devices
+      let touchStartTime = 0;
+      themeToggle.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const touchEndTime = Date.now();
+        // Only trigger if it was a quick tap (not a swipe)
+        if (touchEndTime - touchStartTime < 300) {
+          toggleTheme(e);
+        }
+      }, { passive: false });
+      
+      themeToggle.addEventListener('touchstart', function() {
+        touchStartTime = Date.now();
+      }, { passive: true });
+      
+      // Initialize toggle button state based on current theme
+      const currentTheme = html.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        themeToggle.classList.add('is-dark');
+      } else {
+        themeToggle.classList.remove('is-dark');
+      }
     }
 
     // Initialize Promotional Slider
