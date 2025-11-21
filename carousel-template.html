@@ -915,6 +915,67 @@
   </style>
 </head>
 <body>
+  <!-- Fullscreen Navigation -->
+  <nav class="kiosk-navbar">
+    <div class="kiosk-navbar-inner">
+      <a href="index.html" class="kiosk-navbar-brand">
+        <span class="special-k">K</span>IOSK
+      </a>
+      <div class="kiosk-navbar-right">
+        <button class="kiosk-navbar-theme-toggle" id="navbarThemeToggle" aria-label="Toggle theme">
+          <span class="kiosk-navbar-theme-toggle-slider">
+            <svg class="kiosk-navbar-theme-icon sun" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="8" r="3" fill="currentColor"/>
+              <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="kiosk-navbar-theme-icon moon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6.5 1C6.5 1 7 2.5 7 4C7 5.5 6 7 4.5 7C4.5 7 5 8.5 6.5 8.5C9.81371 8.5 12.5 5.81371 12.5 2.5C12.5 2.5 11 3 9.5 3C8 3 6.5 2 6.5 1Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </button>
+        <button class="kiosk-nav-toggle w-nav-button" id="navToggle" aria-label="Toggle menu">
+          <div class="kiosk-nav-toggle-icon">
+            <div class="kiosk-nav-toggle-line _01"></div>
+            <div class="kiosk-nav-toggle-line _02"></div>
+          </div>
+          <span class="kiosk-nav-toggle-text">Menu</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Fullscreen Navigation Overlay -->
+  <div class="kiosk-nav-fullscreen" id="navFullscreen">
+    <div class="kiosk-nav-fullscreen-header">
+      <div class="kiosk-nav-fullscreen-header-inner">
+        <div></div>
+        <button class="kiosk-nav-toggle w-nav-button w--open" id="navToggleClose" aria-label="Close menu">
+          <div class="kiosk-nav-toggle-icon">
+            <div class="kiosk-nav-toggle-line _01"></div>
+            <div class="kiosk-nav-toggle-line _02"></div>
+          </div>
+          <span class="kiosk-nav-toggle-text">Close</span>
+        </button>
+      </div>
+    </div>
+    <div class="kiosk-nav-fullscreen-content">
+      <div class="kiosk-nav-fullscreen-left">
+        <div class="kiosk-nav-fullscreen-left-inner">
+          <nav class="kiosk-nav-links-main">
+            <a href="index.html" class="kiosk-nav-link-item">Home</a>
+            <a href="store.html" class="kiosk-nav-link-item">Shop</a>
+            <a href="carousel-template.html" class="kiosk-nav-link-item">Collection</a>
+            <a href="kiosk-styleguide.html" class="kiosk-nav-link-item">Styleguide</a>
+          </nav>
+        </div>
+      </div>
+      <div class="kiosk-nav-fullscreen-right">
+        <div class="kiosk-nav-fullscreen-right-content">
+          <!-- Additional content can go here -->
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- 3D Carousel Component -->
   <div carousel="component" class="carousel_component">
     
@@ -1965,6 +2026,66 @@
         alert('Add to cart functionality will be integrated with Shopify checkout.');
       });
     });
+  </script>
+  <script>
+    // Fullscreen Navigation Toggle
+    (function() {
+      const navToggle = document.getElementById('navToggle');
+      const navToggleClose = document.getElementById('navToggleClose');
+      const navFullscreen = document.getElementById('navFullscreen');
+      const html = document.documentElement;
+      
+      function openNav() {
+        navFullscreen.classList.add('w--open');
+        navToggle.classList.add('w--open');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function closeNav() {
+        navFullscreen.classList.remove('w--open');
+        navToggle.classList.remove('w--open');
+        document.body.style.overflow = '';
+      }
+      
+      if (navToggle) {
+        navToggle.addEventListener('click', openNav);
+      }
+      
+      if (navToggleClose) {
+        navToggleClose.addEventListener('click', closeNav);
+      }
+      
+      // Close on link click
+      const navLinks = navFullscreen.querySelectorAll('.kiosk-nav-link-item');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          setTimeout(closeNav, 300);
+        });
+      });
+      
+      // Close on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navFullscreen.classList.contains('w--open')) {
+          closeNav();
+        }
+      });
+      
+      // Theme Toggle in Navbar
+      const navbarThemeToggle = document.getElementById('navbarThemeToggle');
+      if (navbarThemeToggle) {
+        // Check for saved theme preference
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        
+        navbarThemeToggle.addEventListener('click', function() {
+          const currentTheme = html.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          
+          html.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+    })();
   </script>
 </body>
 </html>
