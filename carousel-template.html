@@ -396,6 +396,8 @@
       display: flex;
       gap: 1rem;
       pointer-events: none;
+      position: relative;
+      z-index: 9999; /* Highest z-index to appear above everything */
     }
 
     .carousel_arrow_link {
@@ -411,6 +413,7 @@
       pointer-events: auto;
       transition: all 0.3s ease;
       position: relative;
+      z-index: 10000; /* Even higher z-index for the buttons themselves */
       /* Touch-friendly size */
       min-width: 44px;
       min-height: 44px;
