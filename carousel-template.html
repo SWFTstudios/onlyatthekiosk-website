@@ -179,11 +179,16 @@
 
     /* Carousel Image */
     .carousel_img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
       /* Prevent image drag and touch interactions on mobile */
       -webkit-user-drag: none;
       user-select: none;
@@ -191,6 +196,11 @@
       touch-action: none;
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
+      /* Ensure image is visible */
+      opacity: 1;
+      visibility: visible;
+      /* Ensure image renders */
+      will-change: transform;
     }
 
     @media screen and (max-width: 479px) {
@@ -203,6 +213,8 @@
     /* Carousel Ratio (for aspect ratio) */
     .carousel_ratio {
       padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      position: relative;
+      z-index: 0;
     }
 
     /* Swiper Container for Titles */
@@ -857,7 +869,7 @@
       <div class="carousel_list">
         <!-- Carousel Items - Add your images here -->
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 001" class="carousel_img">
+          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 001" class="carousel_img" loading="eager">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
@@ -1141,6 +1153,23 @@
             top: '50%',
             transform: `translate(-50%, -50%) rotateY(${rotateAmount * index}deg) translateZ(${posTranslate})`
           });
+          
+          // Ensure images load and are visible
+          const img = $(this).find('.carousel_img');
+          if (img.length) {
+            img.on('load', function() {
+              $(this).css({ opacity: 1, visibility: 'visible' });
+            }).on('error', function() {
+              console.error('Failed to load image:', $(this).attr('src'));
+              // Try to reload or show placeholder
+              $(this).css({ opacity: 1, visibility: 'visible', backgroundColor: '#333' });
+            });
+            
+            // Force image to be visible if already loaded
+            if (img[0].complete && img[0].naturalHeight !== 0) {
+              img.css({ opacity: 1, visibility: 'visible' });
+            }
+          }
         });
 
         // Prevent touch events on carousel wrapper from moving the page on mobile
