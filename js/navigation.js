@@ -139,6 +139,53 @@
         window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
       });
     }
+
+    // Initialize Promotional Slider
+    // Wait for Swiper to be available (it might load after this script)
+    function initPromoSlider() {
+      if (typeof Swiper !== 'undefined') {
+        const promoSlider = document.querySelector('.promo-slider');
+        if (promoSlider && !promoSlider.swiper) {
+          new Swiper('.promo-slider', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: {
+              delay: 5000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true
+            },
+            pagination: {
+              el: '.promo-slider-pagination',
+              clickable: true,
+              type: 'bullets'
+            },
+            navigation: {
+              nextEl: '.promo-slider-button-next',
+              prevEl: '.promo-slider-button-prev',
+              disabledClass: 'swiper-button-disabled'
+            },
+            effect: 'fade',
+            fadeEffect: {
+              crossFade: true
+            },
+            speed: 800,
+            // Touch gestures
+            grabCursor: true,
+            touchRatio: 1,
+            touchAngle: 45,
+            simulateTouch: true,
+            allowTouchMove: true
+          });
+        }
+      } else {
+        // If Swiper isn't loaded yet, try again after a short delay
+        setTimeout(initPromoSlider, 100);
+      }
+    }
+
+    // Initialize slider when DOM is ready and Swiper is available
+    initPromoSlider();
   }
 })();
 

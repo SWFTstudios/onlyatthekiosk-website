@@ -390,7 +390,7 @@ h1 {
 .special-k {
   transform-style: preserve-3d;
   display: inline-block;
-  transform: rotateX(0)rotateY(180deg)rotateZ(0);
+  transform: scaleX(-1); /* Mirror horizontally for backwards K */
 }
 
 .body {

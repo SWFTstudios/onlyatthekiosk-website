@@ -10,6 +10,8 @@
   <link href="css/normalize.css" rel="stylesheet" type="text/css">
   <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
   <link href="css/navigation.css" rel="stylesheet" type="text/css">
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
   
   <style>
     /* Theme Variables */
@@ -456,22 +458,22 @@
                           </div>
                           <div class="nav-links-column">
                             <div class="nav-animate-1">
-                              <a href="#" class="nav-link-item w-inline-block">
+                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Bracelets</div>
                               </a>
                             </div>
                             <div class="nav-animate-2">
-                              <a href="#" class="nav-link-item w-inline-block">
+                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Chains</div>
                               </a>
                             </div>
                             <div class="nav-animate-3">
-                              <a href="#" class="nav-link-item w-inline-block">
+                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Hoodies</div>
                               </a>
                             </div>
                             <div class="nav-animate-4">
-                              <a href="#" class="nav-link-item w-inline-block">
+                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">T-shirts</div>
                               </a>
                             </div>
@@ -493,39 +495,67 @@
                       <div class="page-padding is-navbar">
                         <div class="navbar-right-content-wrapper">
                           <div class="navbar-right-content">
-                            <div class="scale-on-hover">
-                              <a href="index.html" class="navbar-right-item w-inline-block">
-                                <img src="images/kiosk-placeholder-product-img.png" alt="Home" class="navbar-right-image">
-                                <div class="navbar-right-text-wrapper">
-                                  <div class="navbar-right-text">Home</div>
+                            <!-- Promotional Slider -->
+                            <div class="promo-slider swiper">
+                              <div class="swiper-wrapper">
+                                <!-- Promotional Card 1 -->
+                                <div class="swiper-slide">
+                                  <a href="carousel-template.html" class="promo-card">
+                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.png');"></div>
+                                    <div class="promo-card-overlay"></div>
+                                    <div class="promo-card-content">
+                                      <h3 class="promo-card-heading">New Collection Drop</h3>
+                                      <p class="promo-card-description">Discover our latest limited edition pieces. Exclusive designs you won't find anywhere else.</p>
+                                    </div>
+                                  </a>
                                 </div>
-                              </a>
-                            </div>
-                            <div class="scale-on-hover">
-                              <a href="store.html" class="navbar-right-item w-inline-block">
-                                <img src="images/kiosk-placeholder-product-img.png" alt="Shop" class="navbar-right-image">
-                                <div class="navbar-right-text-wrapper">
-                                  <div class="navbar-right-text">Shop</div>
+                                <!-- Promotional Card 2 -->
+                                <div class="swiper-slide">
+                                  <a href="carousel-template.html" class="promo-card">
+                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.png');"></div>
+                                    <div class="promo-card-overlay"></div>
+                                    <div class="promo-card-content">
+                                      <h3 class="promo-card-heading">Summer Sale</h3>
+                                      <p class="promo-card-description">Up to 50% off selected items. Limited time offer while supplies last.</p>
+                                    </div>
+                                  </a>
                                 </div>
-                              </a>
-                            </div>
-                            <div class="scale-on-hover">
-                              <a href="#" class="navbar-right-item w-inline-block">
-                                <img src="images/kiosk-placeholder-product-img.png" alt="Media" class="navbar-right-image">
-                                <div class="navbar-right-text-wrapper">
-                                  <div class="navbar-right-text">Media</div>
+                                <!-- Promotional Card 3 -->
+                                <div class="swiper-slide">
+                                  <a href="carousel-template.html" class="promo-card">
+                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.png');"></div>
+                                    <div class="promo-card-overlay"></div>
+                                    <div class="promo-card-content">
+                                      <h3 class="promo-card-heading">Exclusive Media</h3>
+                                      <p class="promo-card-description">Behind the scenes content, exclusive interviews, and more from The Kiosk.</p>
+                                    </div>
+                                  </a>
                                 </div>
-                              </a>
+                              </div>
                             </div>
+                            <!-- Navigation Buttons -->
+                            <div class="promo-slider-nav">
+                              <button class="promo-slider-button promo-slider-button-prev" aria-label="Previous slide">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                              <button class="promo-slider-button promo-slider-button-next" aria-label="Next slide">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                            </div>
+                            <!-- Pagination (below cards) -->
+                            <div class="promo-slider-pagination"></div>
                           </div>
-                          <div class="navbar-right-last-element">
-                            <div class="nav-animate-3">
-                              <a href="kiosk-styleguide.html" class="w-inline-block">
-                                <div class="scale-on-hover">
-                                  <div class="navbar-right-text navbar-right-text-low-visibility">See Styleguide</div>
-                                </div>
-                              </a>
-                            </div>
+                          <!-- See Styleguide (bottom right) -->
+                          <div class="navbar-right-styleguide">
+                            <a href="kiosk-styleguide.html" class="w-inline-block">
+                              <div class="scale-on-hover">
+                                <div class="navbar-right-text navbar-right-text-low-visibility">See Styleguide</div>
+                              </div>
+                            </a>
                           </div>
                         </div>
                       </div>
@@ -835,6 +865,8 @@
   </main>
   
   <script src="js/navigation.js" type="text/javascript"></script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 </body>
 </html>
 
