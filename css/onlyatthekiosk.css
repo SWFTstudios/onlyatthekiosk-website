@@ -3040,14 +3040,23 @@ h1 {
 /* Override Webflow button styles for unified buttons */
 .btn.w-button {
   /* Remove any Webflow-specific button styles */
-  margin: 0;
+  margin: 0 !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border: 1px solid !important;
+  display: inline-block !important;
+  background-color: inherit !important;
 }
 
 /* Ensure button text is styled correctly */
 .btn, .btn.w-button {
-  font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
 .btn-primary {
@@ -3124,14 +3133,39 @@ h1 {
 }
 
 .btn-accent {
-  background-color: #FF6600;
-  color: #ffffff;
-  border-color: #FF6600;
+  background-color: #FF6600 !important;
+  color: #ffffff !important;
+  border-color: #FF6600 !important;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
 .btn-accent:hover {
-  background-color: #FB9F89;
-  border-color: #FB9F89;
+  background-color: #FB9F89 !important;
+  border-color: #FB9F89 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure btn-accent overrides any Webflow .w-button styles */
+.btn-accent.w-button {
+  background-color: #FF6600 !important;
+  color: #ffffff !important;
+  border-color: #FF6600 !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  border: 1px solid #FF6600 !important;
+  display: inline-block !important;
+}
+
+.btn-accent.w-button:hover {
+  background-color: #FB9F89 !important;
+  border-color: #FB9F89 !important;
+  color: #ffffff !important;
 }
 
 /* Unified Typography Classes */
