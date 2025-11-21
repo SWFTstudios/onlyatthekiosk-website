@@ -52,15 +52,40 @@
       max-height: 100dvh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
-      padding: 1.5rem 1rem;
+      padding: 2rem 1rem 3rem 1rem; /* Extra bottom padding for scrolling */
       box-sizing: border-box;
-      overflow: visible; /* Allow 3D carousel items to extend beyond bounds */
-      /* Prevent touch scrolling */
-      touch-action: none;
+      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+      /* Enable smooth scrolling */
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+      /* Allow touch scrolling on this container */
+      touch-action: pan-y;
       /* Keep container centered */
       margin: 0;
+      /* Custom scrollbar styling (optional) */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    /* Custom scrollbar for webkit browsers */
+    [carousel="component"]::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    [carousel="component"]::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    [carousel="component"]::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+    
+    [carousel="component"]::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
     }
 
     /* Tablet - Adjust padding */
@@ -73,14 +98,14 @@
     /* Mobile - Minimal padding */
     @media screen and (max-width: 767px) {
       [carousel="component"] {
-        padding: 0.5rem;
+        padding: 1rem 0.5rem 2rem 0.5rem; /* Extra bottom padding for scrolling */
         height: 100svh; /* Small viewport height for mobile */
       }
     }
 
     @media screen and (max-width: 479px) {
       [carousel="component"] {
-        padding: 0.25rem;
+        padding: 0.75rem 0.25rem 1.5rem 0.25rem; /* Extra bottom padding for scrolling */
       }
     }
 
@@ -255,9 +280,33 @@
       max-height: 180px;
       margin-bottom: 1rem;
       box-sizing: border-box;
-      overflow: visible; /* Allow content to be fully visible */
-      /* Enable touch gestures for swiper only */
+      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+      /* Enable touch gestures for swiper */
       touch-action: pan-y;
+      /* Custom scrollbar styling (optional) */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    /* Custom scrollbar for swiper */
+    .swiper::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .swiper::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .swiper::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+    
+    .swiper::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
     }
     
     /* Swiper Wrapper - ensure content is visible */
@@ -1173,33 +1222,44 @@
 
   <!-- 3D Carousel Script -->
   <script>
-    // Prevent all scrolling on the page
+    // Prevent scrolling on page, but allow on carousel and swiper containers
     document.addEventListener('DOMContentLoaded', function() {
       // Prevent scroll on window
       window.addEventListener('scroll', function(e) {
-        e.preventDefault();
-        window.scrollTo(0, 0);
+        // Allow scrolling within carousel component and swiper
+        const target = e.target;
+        if (!target.closest('[carousel="component"]') && 
+            !target.closest('.swiper') &&
+            !target.closest('.products_drawer-wrapper')) {
+          e.preventDefault();
+          window.scrollTo(0, 0);
+        }
       }, { passive: false });
       
-      // Prevent scroll on touch devices
+      // Prevent scroll on touch devices, but allow on scrollable containers
       document.addEventListener('touchmove', function(e) {
-        // Allow touch events only on Swiper and drawer
-        if (!$(e.target).closest('.swiper').length && 
-            !$(e.target).closest('.products_drawer-wrapper').length &&
-            !$(e.target).closest('.products_collection-drawer').length) {
+        // Allow touch events on scrollable containers
+        const target = e.target;
+        if (!target.closest('[carousel="component"]') && 
+            !target.closest('.swiper') &&
+            !target.closest('.products_drawer-wrapper') &&
+            !target.closest('.products_collection-drawer')) {
           e.preventDefault();
         }
       }, { passive: false });
       
-      // Prevent wheel scrolling
+      // Prevent wheel scrolling on page, but allow on scrollable containers
       document.addEventListener('wheel', function(e) {
-        // Allow wheel only on drawer
-        if (!$(e.target).closest('.products_drawer-wrapper').length) {
+        // Allow wheel scrolling on scrollable containers
+        const target = e.target;
+        if (!target.closest('[carousel="component"]') && 
+            !target.closest('.swiper') &&
+            !target.closest('.products_drawer-wrapper')) {
           e.preventDefault();
         }
       }, { passive: false });
       
-      // Lock body scroll
+      // Lock body scroll (page itself)
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
       
