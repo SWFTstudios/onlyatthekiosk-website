@@ -867,69 +867,69 @@
     <!-- 3D Image Carousel -->
     <div carousel="wrap" class="carousel_wrap">
       <div class="carousel_list">
-        <!-- Carousel Items - Add your images here -->
-        <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 001" class="carousel_img" loading="eager">
+        <!-- Carousel Items - Images will be loaded dynamically -->
+        <div class="carousel_item" data-product-index="0">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product+001" alt="Product 001" class="carousel_img" loading="eager">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 002" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product+002" alt="Product 002" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 003" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 003" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 004" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 004" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 005" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 005" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 006" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 006" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 007" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 007" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 008" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 008" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 009" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 009" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 010" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 010" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 011" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 011" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 012" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 012" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 013" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 013" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 014" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 014" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 015" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 015" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
         <div class="carousel_item">
-          <img src="/images/kiosk-placeholder-product-img.png" alt="Product 016" class="carousel_img">
+          <img src="https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product 016" class="carousel_img">
           <div class="carousel_ratio"></div>
         </div>
       </div>
@@ -1171,6 +1171,14 @@
             }
           }
         });
+        
+        // OPTIONAL: Load images dynamically from Shopify or Supabase
+        // Uncomment and configure if you want to fetch real product images
+        /*
+        loadCarouselImagesFromShopify();
+        // OR
+        loadCarouselImagesFromSupabase();
+        */
 
         // Prevent touch events on carousel wrapper from moving the page on mobile
         wrapEl[0].addEventListener('touchstart', function(e) {
@@ -1316,6 +1324,62 @@
           });
         }
       });
+      
+      // Function to load carousel images from Shopify
+      async function loadCarouselImagesFromShopify() {
+        const slides = $('.swiper-slide');
+        slides.each(async function(index) {
+          const handle = $(this).data('product-handle');
+          if (handle && !handle.startsWith('product-handle-')) {
+            try {
+              const product = await fetchProduct(handle);
+              if (product && product.images.edges.length > 0) {
+                const imageUrl = product.images.edges[0].node.url;
+                const carouselItem = $('.carousel_item').eq(index);
+                carouselItem.find('.carousel_img').attr('src', imageUrl);
+              }
+            } catch (error) {
+              console.error(`Failed to load image for ${handle}:`, error);
+            }
+          }
+        });
+      }
+      
+      // Function to load carousel images from Supabase
+      async function loadCarouselImagesFromSupabase() {
+        // Uncomment and configure if using Supabase
+        /*
+        const slides = $('.swiper-slide');
+        const handles = slides.map(function() {
+          return $(this).data('product-handle');
+        }).get();
+        
+        try {
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/products?handle=in.(${handles.join(',')})&select=handle,primary_image`,
+            {
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              }
+            }
+          );
+          const products = await response.json();
+          
+          products.forEach(product => {
+            if (product.primary_image) {
+              const slideIndex = handles.indexOf(product.handle);
+              if (slideIndex !== -1) {
+                const carouselItem = $('.carousel_item').eq(slideIndex);
+                carouselItem.find('.carousel_img').attr('src', product.primary_image);
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Failed to load images from Supabase:', error);
+        }
+        */
+      }
     });
 
     // Product Drawer Functionality
@@ -1331,6 +1395,11 @@
       const SHOPIFY_STORE = 'onlyatthekiosk.com';
       const SHOPIFY_TOKEN = '3c7e207a3167fe57edd75d8133a36967'; // TODO: Move to environment variable for production
       const SHOPIFY_API_URL = `https://${SHOPIFY_STORE}/api/2024-01/graphql.json`;
+      
+      // Supabase Configuration (optional - for custom image URLs)
+      // Uncomment and configure if you want to fetch images from Supabase
+      // const SUPABASE_URL = 'https://your-project.supabase.co';
+      // const SUPABASE_ANON_KEY = 'your-anon-key';
 
       // GraphQL query to fetch product by handle
       function getProductQuery(handle) {
@@ -1488,11 +1557,51 @@
         $('#drawer-error').hide();
       }
 
+      // Fetch image from Supabase (optional - if you store image URLs in Supabase)
+      async function fetchImageFromSupabase(productHandle) {
+        try {
+          // Uncomment and configure if using Supabase
+          /*
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/products?handle=eq.${productHandle}&select=primary_image`,
+            {
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              }
+            }
+          );
+          const data = await response.json();
+          if (data && data.length > 0 && data[0].primary_image) {
+            return data[0].primary_image;
+          }
+          */
+          return null;
+        } catch (error) {
+          console.error('Error fetching image from Supabase:', error);
+          return null;
+        }
+      }
+
       // Placeholder product data for template products
       // Each product handle corresponds to a carousel slide
       function getPlaceholderProduct(productHandle) {
-        // Use the same placeholder image for all products
-        const placeholderImage = '/images/kiosk-placeholder-product-img.png';
+        // IMAGE SOURCE OPTIONS (choose one):
+        
+        // Option 1: Placeholder service (fast, no hosting, good for testing)
+        const placeholderImage = 'https://via.placeholder.com/800x800/1a1a1a/ffffff?text=Product+Placeholder';
+        
+        // Option 2: Unsplash (free, high-quality, good for demos)
+        // const placeholderImage = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop&auto=format';
+        
+        // Option 3: Your hosted placeholder (if optimized to <500KB)
+        // const placeholderImage = '/images/kiosk-placeholder-product-img.png';
+        
+        // Option 4: Cloudinary or other CDN (best for production)
+        // const placeholderImage = 'https://res.cloudinary.com/your-cloud/image/upload/w_800,h_800,c_fill/product-placeholder.jpg';
+        
+        // Option 5: Fetch from Supabase (async - see fetchImageFromSupabase above)
+        // This would require making the function async and awaiting the result
         
         // Generate product titles (Product 001, Product 002, etc.)
         const productTitles = [];
