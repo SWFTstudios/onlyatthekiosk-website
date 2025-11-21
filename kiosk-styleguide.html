@@ -13,6 +13,20 @@
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
   
+  <!-- Initialize theme immediately before page renders -->
+  <script>
+    // Initialize theme immediately to prevent flash of unstyled content
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } catch(e) {
+        // Fallback if localStorage is not available
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  
   <style>
     /* Theme Variables */
     :root {
