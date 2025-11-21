@@ -1535,12 +1535,15 @@
       
       // Prevent scroll on touch devices, but allow swipe gestures
       document.addEventListener('touchmove', function(e) {
-        // Allow touch events on carousel component (for swiping) and drawer
+        // Allow touch events on carousel component (for swiping), drawer, and navigation
         const target = e.target;
         if (!target.closest('[carousel="component"]') && 
+            !target.closest('[carousel="wrap"]') &&
             !target.closest('.swiper') &&
             !target.closest('.products_drawer-wrapper') &&
-            !target.closest('.products_collection-drawer')) {
+            !target.closest('.products_collection-drawer') &&
+            !target.closest('.navbar') &&
+            !target.closest('.carousel_arrow_link')) {
           e.preventDefault();
         }
       }, { passive: false });
@@ -1773,44 +1776,98 @@
           let touchEndX = 0;
           let minSwipeDistance = 50; // Minimum distance for a swipe
           let maxHorizontalDistance = 30; // Max horizontal movement to consider it a vertical swipe
+          let isSwipeGesture = false; // Track if we're in a swipe gesture
           
-          // Track touch start on carousel component
-          componentEl[0].addEventListener('touchstart', function(e) {
-            // Don't interfere with Swiper's own touch handling or drawer
-            if ($(e.target).closest('.swiper').length || 
-                $(e.target).closest('.products_collection-drawer').length ||
-                $(e.target).closest('.carousel_arrow_link').length) {
+          // Track touch start on carousel component or carousel wrap
+          const carouselContainer = document.querySelector('[carousel="component"]');
+          const carouselWrap = document.querySelector('[carousel="wrap"]');
+          
+          function handleTouchStart(e) {
+            // Only process touches on carousel elements (not swiper titles or drawer)
+            const target = e.target;
+            if (target.closest('.swiper') && !target.closest('[carousel="wrap"]')) {
+              // Allow swiper title slider to handle its own touches
               return;
             }
-            touchStartY = e.touches[0].clientY;
-            touchStartX = e.touches[0].clientX;
-          }, { passive: true });
+            if (target.closest('.products_collection-drawer') ||
+                target.closest('.carousel_arrow_link') ||
+                target.closest('.products_drawer-close-icon')) {
+              return;
+            }
+            
+            // Check if touch is on carousel component or wrap
+            if (target.closest('[carousel="component"]') || 
+                target.closest('[carousel="wrap"]') ||
+                target.closest('.carousel_item') ||
+                target.closest('.carousel_img')) {
+              isSwipeGesture = true;
+              touchStartY = e.touches[0].clientY;
+              touchStartX = e.touches[0].clientX;
+              e.stopPropagation(); // Prevent event from bubbling to prevent scroll
+            }
+          }
           
-          // Track touch move to detect swipe direction
-          componentEl[0].addEventListener('touchmove', function(e) {
-            // Don't interfere with Swiper's own touch handling or drawer
-            if ($(e.target).closest('.swiper').length || 
-                $(e.target).closest('.products_collection-drawer').length ||
-                $(e.target).closest('.carousel_arrow_link').length) {
+          function handleTouchMove(e) {
+            if (!isSwipeGesture) return;
+            
+            const target = e.target;
+            // Don't interfere with drawer or arrow touches
+            if (target.closest('.products_collection-drawer') ||
+                target.closest('.carousel_arrow_link') ||
+                target.closest('.products_drawer-close-icon')) {
+              isSwipeGesture = false;
+              return;
+            }
+            
+            // Allow swiper title slider to handle its own touches
+            if (target.closest('.swiper') && !target.closest('[carousel="wrap"]')) {
               return;
             }
             
             if (touchStartY && e.touches[0]) {
               touchEndY = e.touches[0].clientY;
               touchEndX = e.touches[0].clientX;
+              
+              // Calculate current swipe distance
+              const currentDistanceY = Math.abs(touchStartY - touchEndY);
+              const currentDistanceX = Math.abs(touchStartX - touchEndX);
+              
+              // If vertical movement is greater, prevent default scroll
+              if (currentDistanceY > currentDistanceX && currentDistanceY > 10) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
             }
-          }, { passive: true });
+          }
           
-          // Handle touch end and trigger swipe
-          componentEl[0].addEventListener('touchend', function(e) {
-            // Don't interfere with Swiper's own touch handling or drawer
-            if ($(e.target).closest('.swiper').length || 
-                $(e.target).closest('.products_collection-drawer').length ||
-                $(e.target).closest('.carousel_arrow_link').length) {
+          function handleTouchEnd(e) {
+            if (!isSwipeGesture) return;
+            
+            const target = e.target;
+            // Don't interfere with drawer or arrow touches
+            if (target.closest('.products_collection-drawer') ||
+                target.closest('.carousel_arrow_link') ||
+                target.closest('.products_drawer-close-icon')) {
+              isSwipeGesture = false;
+              touchStartY = 0;
+              touchStartX = 0;
+              touchEndY = 0;
+              touchEndX = 0;
+              return;
+            }
+            
+            // Allow swiper title slider to handle its own touches
+            if (target.closest('.swiper') && !target.closest('[carousel="wrap"]')) {
+              isSwipeGesture = false;
+              touchStartY = 0;
+              touchStartX = 0;
+              touchEndY = 0;
+              touchEndX = 0;
               return;
             }
             
             if (!touchStartY || !e.changedTouches[0]) {
+              isSwipeGesture = false;
               touchStartY = 0;
               touchStartX = 0;
               touchEndY = 0;
@@ -1830,6 +1887,9 @@
               
               // Check if swipe distance is significant
               if (Math.abs(swipeDistanceY) > minSwipeDistance) {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 if (swipeDistanceY > 0) {
                   // Swipe up = swipe right (next product)
                   swiper.slideNext();
@@ -1841,11 +1901,25 @@
             }
             
             // Reset
+            isSwipeGesture = false;
             touchStartY = 0;
             touchStartX = 0;
             touchEndY = 0;
             touchEndX = 0;
-          }, { passive: true });
+          }
+          
+          // Attach event listeners to the carousel component and wrap
+          if (carouselContainer) {
+            carouselContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+            carouselContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+            carouselContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
+          }
+          
+          if (carouselWrap) {
+            carouselWrap.addEventListener('touchstart', handleTouchStart, { passive: true });
+            carouselWrap.addEventListener('touchmove', handleTouchMove, { passive: false });
+            carouselWrap.addEventListener('touchend', handleTouchEnd, { passive: true });
+          }
           
           // Add mouse wheel support for desktop (up/down scrolling = left/right navigation)
           componentEl[0].addEventListener('wheel', function(e) {
