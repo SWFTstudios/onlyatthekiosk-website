@@ -54,9 +54,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 1rem;
+      padding: 1.5rem 1rem;
       box-sizing: border-box;
-      overflow: hidden; /* Prevent any overflow */
+      overflow: visible; /* Allow 3D carousel items to extend beyond bounds */
       /* Prevent touch scrolling */
       touch-action: none;
       /* Keep container centered */
@@ -97,13 +97,13 @@
       max-width: 100%;
       height: 50vh;
       max-height: 50vh;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
       perspective-origin: center center;
       box-sizing: border-box;
-      overflow: hidden; /* Prevent overflow */
+      overflow: visible; /* Allow 3D items to extend beyond bounds */
       /* Prevent touch events from moving the carousel on mobile */
       touch-action: none;
       -webkit-user-select: none;
@@ -122,7 +122,7 @@
         --3d-carousel-gap: 6vw;
         height: 45vh;
         max-height: 45vh;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
       }
     }
 
@@ -166,6 +166,8 @@
       /* Ensure container stays centered */
       margin-left: auto;
       margin-right: auto;
+      /* Allow 3D items to extend beyond bounds */
+      overflow: visible;
     }
 
     /* Individual Item Container */
@@ -186,6 +188,7 @@
       user-select: none;
       pointer-events: none;
       position: relative;
+      overflow: visible; /* Allow 3D items to extend beyond bounds */
     }
 
     /* Carousel Item */
@@ -201,6 +204,7 @@
       -webkit-user-select: none;
       user-select: none;
       pointer-events: none;
+      overflow: visible; /* Ensure content isn't clipped */
     }
 
     /* Carousel Image */
@@ -247,13 +251,18 @@
     .swiper {
       width: 100%;
       max-width: 600px;
-      height: 150px;
-      max-height: 150px;
+      height: 180px;
+      max-height: 180px;
       margin-bottom: 1rem;
       box-sizing: border-box;
-      overflow: hidden; /* Prevent overflow */
+      overflow: visible; /* Allow content to be fully visible */
       /* Enable touch gestures for swiper only */
       touch-action: pan-y;
+    }
+    
+    /* Swiper Wrapper - ensure content is visible */
+    .swiper-wrapper {
+      overflow: visible !important;
     }
 
     .swiper-slide {
@@ -262,10 +271,13 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 2rem;
+      padding: 1.5rem 2rem;
+      box-sizing: border-box;
       /* Prevent text selection during swipe */
       user-select: none;
       -webkit-user-select: none;
+      /* Ensure content is fully visible */
+      overflow: visible;
     }
 
     .swiper-slide h2 {
@@ -274,41 +286,42 @@
       margin-bottom: 0.75rem;
       color: #fff;
       line-height: 1.2;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: nowrap; /* Prevent text wrapping */
+      overflow: visible; /* Don't clip text */
+      text-overflow: clip; /* Show full text */
     }
 
     /* Tablet */
     @media screen and (max-width: 991px) {
       .swiper {
-        height: 120px;
-        max-height: 120px;
+        height: 150px;
+        max-height: 150px;
         margin-bottom: 0.75rem;
       }
       
       .swiper-slide {
-        padding: 1rem;
+        padding: 1rem 1.5rem;
       }
 
       .swiper-slide h2 {
-        font-size: 1.75rem;
+        font-size: 2rem;
       }
     }
 
     /* Mobile */
     @media screen and (max-width: 767px) {
       .swiper {
-        height: 100px;
-        max-height: 100px;
-        margin-bottom: 0.5rem;
+        height: 130px;
+        max-height: 130px;
+        margin-bottom: 0.75rem;
       }
 
       .swiper-slide {
-        padding: 0.75rem;
+        padding: 0.75rem 1rem;
       }
 
       .swiper-slide h2 {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         margin-bottom: 0.5rem;
       }
     }
@@ -316,18 +329,18 @@
     /* Small Mobile */
     @media screen and (max-width: 479px) {
       .swiper {
-        height: 90px;
-        max-height: 90px;
+        height: 120px;
+        max-height: 120px;
         margin-bottom: 0.5rem;
       }
 
       .swiper-slide {
-        padding: 0.5rem;
+        padding: 0.5rem 0.75rem;
       }
 
       .swiper-slide h2 {
-        font-size: 1.25rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
       }
     }
 
