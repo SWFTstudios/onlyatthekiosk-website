@@ -58,6 +58,25 @@ This project creates a completely custom frontend and user experience while leve
 
 ---
 
+## Component Architecture
+
+### Reusable Components
+
+**Important**: Components are shared across all pages. When you modify a component on one page, the change should automatically apply to all pages that use it.
+
+#### Components List:
+- **Navigation Bar**: The fullscreen navigation overlay (`navbar`) is a shared component. Changes made to `css/navigation.css` or the navigation HTML structure in one file should be reflected across all pages (index.html, store.html, carousel-template.html, kiosk-styleguide.html).
+
+**Component Implementation Guidelines**:
+1. **CSS Components**: Store component styles in `css/navigation.css` or `css/components.css`
+2. **HTML Components**: Use the same HTML structure across all pages for shared components
+3. **JavaScript Components**: Component logic should be in shared files (e.g., `js/navigation.js`)
+4. **Single Source of Truth**: When making changes to components, update the shared CSS/JS files, not individual page styles
+
+**Example**: If you change the navigation menu on index.html, make the same change to all other pages that include the navigation. Better yet, create a shared navigation snippet that can be included across pages.
+
+---
+
 ## File Organization
 
 ### Core Files

@@ -1,0 +1,144 @@
+/**
+ * Fullscreen Navigation Overlay
+ * Handles navigation toggle, animations, and theme toggle
+ */
+
+(function() {
+  'use strict';
+
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  function init() {
+    const navToggle = document.querySelector('.nav-toggle-wrapper');
+    const navbarFullscreen = document.querySelector('.navbar-fullscreen-component');
+    const navbarMenu = document.querySelector('.navbar-menu');
+    const body = document.body;
+    const html = document.documentElement;
+
+    if (!navToggle || !navbarFullscreen || !navbarMenu) {
+      console.warn('Navigation elements not found');
+      return;
+    }
+
+    // Navigation Toggle
+    navToggle.addEventListener('click', function() {
+      const isOpen = navbarFullscreen.classList.contains('w--open');
+      
+      if (isOpen) {
+        closeNav();
+      } else {
+        openNav();
+      }
+    });
+
+    // Close button inside the fullscreen nav
+    const navCloseButton = navbarFullscreen.querySelector('.navbar-open .nav-toggle-wrapper');
+    if (navCloseButton) {
+      navCloseButton.addEventListener('click', closeNav);
+    }
+
+    // Close on link click
+    const navLinks = navbarFullscreen.querySelectorAll('.nav-link-item');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function() {
+        setTimeout(closeNav, 300);
+      });
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && navbarFullscreen.classList.contains('w--open')) {
+        closeNav();
+      }
+    });
+
+    // Close on outside click (click on overlay background)
+    navbarFullscreen.addEventListener('click', function(e) {
+      if (e.target === navbarFullscreen) {
+        closeNav();
+      }
+    });
+
+    function openNav() {
+      // Show the fullscreen component
+      navbarFullscreen.style.display = 'flex';
+      
+      // Trigger reflow to ensure display change is applied
+      navbarFullscreen.offsetHeight;
+      
+      // Add open class
+      navbarFullscreen.classList.add('w--open');
+      navToggle.classList.add('w--open');
+      navbarMenu.style.display = 'flex';
+      
+      // Lock body scroll
+      body.classList.add('nav-open');
+      
+      // Prevent scrolling on touch devices
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+    }
+
+    function closeNav() {
+      // Remove open class
+      navbarFullscreen.classList.remove('w--open');
+      navToggle.classList.remove('w--open');
+      
+      // Hide menu after animation
+      setTimeout(function() {
+        if (!navbarFullscreen.classList.contains('w--open')) {
+          navbarMenu.style.display = 'none';
+          navbarFullscreen.style.display = 'none';
+        }
+      }, 600); // Match animation duration
+      
+      // Unlock body scroll
+      body.classList.remove('nav-open');
+      
+      // Re-enable scrolling
+      document.removeEventListener('touchmove', preventScroll);
+    }
+
+    function preventScroll(e) {
+      if (!navbarFullscreen.classList.contains('w--open')) {
+        return;
+      }
+      
+      // Allow scrolling within the navigation menu
+      if (e.target.closest('.navbar-menu')) {
+        return;
+      }
+      
+      e.preventDefault();
+    }
+
+    // Theme Toggle - Initialize theme first before setting up toggle
+    // Initialize theme on page load (this runs for all pages)
+    let savedTheme = localStorage.getItem('theme');
+    if (!savedTheme) {
+      savedTheme = 'light'; // Default to light theme
+      localStorage.setItem('theme', savedTheme);
+    }
+    html.setAttribute('data-theme', savedTheme);
+
+    // Theme Toggle Button
+    const themeToggle = document.querySelector('.navbar-theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        // Dispatch a custom event so other components can listen for theme changes
+        window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
+      });
+    }
+  }
+})();
+

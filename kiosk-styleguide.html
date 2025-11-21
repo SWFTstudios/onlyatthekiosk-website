@@ -9,6 +9,7 @@
   <!-- Stylesheets -->
   <link href="css/normalize.css" rel="stylesheet" type="text/css">
   <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
+  <link href="css/navigation.css" rel="stylesheet" type="text/css">
   
   <style>
     /* Theme Variables */
@@ -79,8 +80,8 @@
       border-bottom: 1px solid var(--border);
       padding: 2rem 2rem;
       position: sticky;
-      top: 4rem; /* Account for navbar height */
-      z-index: 100;
+      top: 4rem; /* Account for navigation bar height */
+      z-index: 50; /* Below navigation (100) */
       transition: background-color 0.3s ease, border-color 0.3s ease;
     }
     
@@ -165,7 +166,6 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 3rem 2rem;
-      padding-top: 8rem; /* Account for navbar */
     }
     
     /* Section */
@@ -364,62 +364,177 @@
 </head>
 <body>
   <!-- Fullscreen Navigation -->
-  <nav class="kiosk-navbar">
-    <div class="kiosk-navbar-inner">
-      <a href="index.html" class="kiosk-navbar-brand">
-        <span class="special-k">K</span>IOSK
-      </a>
-      <div class="kiosk-navbar-right">
-        <button class="kiosk-navbar-theme-toggle" id="navbarThemeToggle" aria-label="Toggle theme">
-          <span class="kiosk-navbar-theme-toggle-slider">
-            <svg class="kiosk-navbar-theme-icon sun" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="8" cy="8" r="3" fill="currentColor"/>
-              <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <svg class="kiosk-navbar-theme-icon moon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6.5 1C6.5 1 7 2.5 7 4C7 5.5 6 7 4.5 7C4.5 7 5 8.5 6.5 8.5C9.81371 8.5 12.5 5.81371 12.5 2.5C12.5 2.5 11 3 9.5 3C8 3 6.5 2 6.5 1Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </button>
-        <button class="kiosk-nav-toggle w-nav-button" id="navToggle" aria-label="Toggle menu">
-          <div class="kiosk-nav-toggle-icon">
-            <div class="kiosk-nav-toggle-line _01"></div>
-            <div class="kiosk-nav-toggle-line _02"></div>
+  <div data-collapse="all" data-animation="default" data-duration="0" data-easing2="ease" data-easing="ease" role="banner" class="navbar w-nav">
+    <div class="page-padding">
+      <div class="nav-main-inner">
+        <div class="nav-main-column">
+          <div class="nav-main-column-item">
+            <div class="nav-main-column-content">
+              <div class="scale-on-hover">
+                <a href="index.html" class="brand-wrapper w-inline-block">
+                  <span class="special-k">K</span>IOSK
+                </a>
+              </div>
+            </div>
           </div>
-          <span class="kiosk-nav-toggle-text">Menu</span>
-        </button>
-      </div>
-    </div>
-  </nav>
-  
-  <!-- Fullscreen Navigation Overlay -->
-  <div class="kiosk-nav-fullscreen" id="navFullscreen">
-    <div class="kiosk-nav-fullscreen-header">
-      <div class="kiosk-nav-fullscreen-header-inner">
-        <div></div>
-        <button class="kiosk-nav-toggle w-nav-button w--open" id="navToggleClose" aria-label="Close menu">
-          <div class="kiosk-nav-toggle-icon">
-            <div class="kiosk-nav-toggle-line _01"></div>
-            <div class="kiosk-nav-toggle-line _02"></div>
-          </div>
-          <span class="kiosk-nav-toggle-text">Close</span>
-        </button>
-      </div>
-    </div>
-    <div class="kiosk-nav-fullscreen-content">
-      <div class="kiosk-nav-fullscreen-left">
-        <div class="kiosk-nav-fullscreen-left-inner">
-          <nav class="kiosk-nav-links-main">
-            <a href="index.html" class="kiosk-nav-link-item">Home</a>
-            <a href="store.html" class="kiosk-nav-link-item">Shop</a>
-            <a href="carousel-template.html" class="kiosk-nav-link-item">Collection</a>
-            <a href="kiosk-styleguide.html" class="kiosk-nav-link-item">Styleguide</a>
-          </nav>
         </div>
-      </div>
-      <div class="kiosk-nav-fullscreen-right">
-        <div class="kiosk-nav-fullscreen-right-content">
-          <!-- Additional content can go here -->
+        <div class="nav-main-column">
+          <div class="nav-main-column-content">
+            <div class="hide-tablet-down">
+              <div class="nav-main-column-item">
+                <!-- Desktop links can be added here if needed -->
+              </div>
+            </div>
+            <div class="nav-main-column-item">
+              <button class="navbar-theme-toggle" aria-label="Toggle theme">
+                <span class="navbar-theme-toggle-slider">
+                  <svg class="navbar-theme-icon sun" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                    <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  <svg class="navbar-theme-icon moon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.5 8C13.5 11.5899 10.5899 14.5 7 14.5C5.5 14.5 4.1 14 3 13.1C3.3 12.9 3.6 12.6 3.8 12.3C4.1 12.4 4.4 12.5 4.7 12.5C7.26142 12.5 9.5 10.2614 9.5 7.7C9.5 5.13858 7.26142 3 4.7 3C4.4 3 4.1 3.1 3.8 3.2C3.6 2.9 3.3 2.6 3 2.4C4.1 1.5 5.5 1 7 1C10.5899 1 13.5 3.91015 13.5 7.5V8Z" fill="currentColor"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <div class="nav-fullscreen-wrapper">
+              <div class="nav-toggle-wrapper w-nav-button">
+                <div class="nav-toggle-inner">
+                  <div class="nav-toggle-icon-wrapper">
+                    <div class="nav-toggle-icon-line _01"></div>
+                    <div class="nav-toggle-icon-line _02"></div>
+                  </div>
+                  <div class="nav-toggle-text">Menu</div>
+                </div>
+              </div>
+              <div style="display:none" class="navbar-fullscreen-component">
+                <div class="navbar-open">
+                  <div class="page-padding">
+                    <div class="nav-main-inner">
+                      <div class="nav-main-column is-ghost"></div>
+                      <div class="nav-toggle-wrapper w-nav-button">
+                        <div class="nav-toggle-inner">
+                          <div class="nav-toggle-icon-wrapper">
+                            <div class="nav-toggle-icon-line _01"></div>
+                            <div class="nav-toggle-icon-line _02"></div>
+                          </div>
+                          <div class="nav-toggle-text">Menu</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <nav role="navigation" style="display:none" class="navbar-menu w-nav-menu">
+                  <div class="navbar-content-wrapper">
+                    <div class="navbar-left">
+                      <div class="page-padding is-navbar">
+                        <div class="navbar-left-inner">
+                          <div class="nav-links-column is-main">
+                            <div class="nav-animate-1">
+                              <a href="index.html" class="nav-link-item is-main-link w-inline-block">
+                                <div class="nav-link-text">HOME</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-2">
+                              <a href="store.html" class="nav-link-item is-main-link w-inline-block">
+                                <div class="nav-link-text">SHOP</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-3">
+                              <a href="#" class="nav-link-item is-main-link w-inline-block">
+                                <div class="nav-link-text">MEDIA</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-4">
+                              <div class="social-links-component">
+                                <div class="social-media-links-list is-large">
+                                  <!-- Social links can be added here if needed -->
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="nav-links-column">
+                            <div class="nav-animate-1">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">Bracelets</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-2">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">Chains</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-3">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">Hoodies</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-4">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">T-shirts</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-5">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">About Us</div>
+                              </a>
+                            </div>
+                            <div class="nav-animate-5">
+                              <a href="#" class="nav-link-item w-inline-block">
+                                <div class="nav-link-text">Contact Us</div>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="navbar-right">
+                      <div class="page-padding is-navbar">
+                        <div class="navbar-right-content-wrapper">
+                          <div class="navbar-right-content">
+                            <div class="scale-on-hover">
+                              <a href="index.html" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.png" alt="Home" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">Home</div>
+                                </div>
+                              </a>
+                            </div>
+                            <div class="scale-on-hover">
+                              <a href="store.html" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.png" alt="Shop" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">Shop</div>
+                                </div>
+                              </a>
+                            </div>
+                            <div class="scale-on-hover">
+                              <a href="#" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.png" alt="Media" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">Media</div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+                          <div class="navbar-right-last-element">
+                            <div class="nav-animate-3">
+                              <a href="kiosk-styleguide.html" class="w-inline-block">
+                                <div class="scale-on-hover">
+                                  <div class="navbar-right-text navbar-right-text-low-visibility">See Styleguide</div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -429,17 +544,7 @@
   <header class="styleguide-header">
     <div class="styleguide-header-content">
       <h1 class="styleguide-title">Kiosk Styleguide</h1>
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <span class="theme-toggle-slider">
-          <svg class="theme-icon sun" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="8" cy="8" r="3" fill="currentColor"/>
-            <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <svg class="theme-icon moon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6.5 1C6.5 1 7 2.5 7 4C7 5.5 6 7 4.5 7C4.5 7 5 8.5 6.5 8.5C9.81371 8.5 12.5 5.81371 12.5 2.5C12.5 2.5 11 3 9.5 3C8 3 6.5 2 6.5 1Z" fill="currentColor"/>
-          </svg>
-        </span>
-      </button>
+      <!-- Theme toggle moved to navigation bar -->
     </div>
   </header>
   
@@ -729,74 +834,7 @@
     </section>
   </main>
   
-  <script>
-    // Theme Toggle Functionality
-    const themeToggle = document.getElementById('themeToggle');
-    const navbarThemeToggle = document.getElementById('navbarThemeToggle');
-    const html = document.documentElement;
-    
-    // Check for saved theme preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    html.setAttribute('data-theme', currentTheme);
-    
-    function toggleTheme() {
-      const currentTheme = html.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      html.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-    }
-    
-    if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
-    }
-    
-    if (navbarThemeToggle) {
-      navbarThemeToggle.addEventListener('click', toggleTheme);
-    }
-    
-    // Fullscreen Navigation Toggle
-    (function() {
-      const navToggle = document.getElementById('navToggle');
-      const navToggleClose = document.getElementById('navToggleClose');
-      const navFullscreen = document.getElementById('navFullscreen');
-      
-      function openNav() {
-        navFullscreen.classList.add('w--open');
-        navToggle.classList.add('w--open');
-        document.body.style.overflow = 'hidden';
-      }
-      
-      function closeNav() {
-        navFullscreen.classList.remove('w--open');
-        navToggle.classList.remove('w--open');
-        document.body.style.overflow = '';
-      }
-      
-      if (navToggle) {
-        navToggle.addEventListener('click', openNav);
-      }
-      
-      if (navToggleClose) {
-        navToggleClose.addEventListener('click', closeNav);
-      }
-      
-      // Close on link click
-      const navLinks = navFullscreen.querySelectorAll('.kiosk-nav-link-item');
-      navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          setTimeout(closeNav, 300);
-        });
-      });
-      
-      // Close on escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && navFullscreen.classList.contains('w--open')) {
-          closeNav();
-        }
-      });
-    })();
-  </script>
+  <script src="js/navigation.js" type="text/javascript"></script>
 </body>
 </html>
 
