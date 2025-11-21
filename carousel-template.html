@@ -16,17 +16,22 @@
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* Prevent all scrolling */
+      position: fixed; /* Lock viewport */
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background-color: #000;
       color: #fff;
-      overflow-x: hidden;
       overscroll-behavior: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      /* Improve touch scrolling on mobile */
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
+      /* Prevent touch scrolling */
+      touch-action: none;
+      -webkit-overflow-scrolling: none;
     }
 
     /* Fade-up elements start hidden */
@@ -36,32 +41,46 @@
 
     /* 3D Carousel Container */
     [carousel="component"] {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh; /* Dynamic viewport height for mobile */
+      max-width: 100vw;
+      max-height: 100vh;
+      max-height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 2rem;
-      /* Allow vertical scrolling but prevent carousel from moving */
-      touch-action: pan-y;
+      padding: 1rem;
+      box-sizing: border-box;
+      overflow: hidden; /* Prevent any overflow */
+      /* Prevent touch scrolling */
+      touch-action: none;
       /* Keep container centered */
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0;
     }
 
-    /* Mobile - Reduce padding */
+    /* Tablet - Adjust padding */
+    @media screen and (max-width: 991px) {
+      [carousel="component"] {
+        padding: 0.75rem;
+      }
+    }
+
+    /* Mobile - Minimal padding */
     @media screen and (max-width: 767px) {
       [carousel="component"] {
-        padding: 1rem;
-        min-height: 100svh; /* Use svh for mobile viewport */
+        padding: 0.5rem;
+        height: 100svh; /* Small viewport height for mobile */
       }
     }
 
     @media screen and (max-width: 479px) {
       [carousel="component"] {
-        padding: 0.5rem;
+        padding: 0.25rem;
       }
     }
 
@@ -75,12 +94,16 @@
       --3d-carousel-z: 0px;
       position: relative;
       width: 100%;
-      height: 60vh;
-      margin-bottom: 4rem;
+      max-width: 100%;
+      height: 50vh;
+      max-height: 50vh;
+      margin-bottom: 2rem;
       display: flex;
       align-items: center;
       justify-content: center;
       perspective-origin: center center;
+      box-sizing: border-box;
+      overflow: hidden; /* Prevent overflow */
       /* Prevent touch events from moving the carousel on mobile */
       touch-action: none;
       -webkit-user-select: none;
@@ -97,8 +120,9 @@
       [carousel="wrap"] {
         --3d-carousel-item-width: 70vw;
         --3d-carousel-gap: 6vw;
-        height: 50vh;
-        margin-bottom: 2rem;
+        height: 45vh;
+        max-height: 45vh;
+        margin-bottom: 1.5rem;
       }
     }
 
@@ -107,8 +131,9 @@
       [carousel="wrap"] {
         --3d-carousel-item-width: 80vw;
         --3d-carousel-gap: 5vw;
-        height: 45vh;
-        margin-bottom: 1.5rem;
+        height: 40vh;
+        max-height: 40vh;
+        margin-bottom: 1rem;
       }
     }
 
@@ -117,8 +142,9 @@
       [carousel="wrap"] {
         --3d-carousel-item-width: 85vw;
         --3d-carousel-gap: 4vw;
-        height: 40vh;
-        margin-bottom: 1rem;
+        height: 35vh;
+        max-height: 35vh;
+        margin-bottom: 0.75rem;
       }
     }
 
@@ -221,9 +247,12 @@
     .swiper {
       width: 100%;
       max-width: 600px;
-      height: 200px;
-      margin-bottom: 2rem;
-      /* Enable touch gestures */
+      height: 150px;
+      max-height: 150px;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+      overflow: hidden; /* Prevent overflow */
+      /* Enable touch gestures for swiper only */
       touch-action: pan-y;
     }
 
@@ -240,50 +269,38 @@
     }
 
     .swiper-slide h2 {
-      font-size: 3rem;
+      font-size: 2.5rem;
       font-weight: 700;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       color: #fff;
       line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Tablet */
     @media screen and (max-width: 991px) {
       .swiper {
-        height: 180px;
-        margin-bottom: 1.5rem;
+        height: 120px;
+        max-height: 120px;
+        margin-bottom: 0.75rem;
       }
       
-      .swiper-slide {
-        padding: 1.5rem;
-      }
-
-      .swiper-slide h2 {
-        font-size: 2rem;
-      }
-    }
-
-    /* Mobile */
-    @media screen and (max-width: 767px) {
-      .swiper {
-        height: 160px;
-        margin-bottom: 1rem;
-      }
-
       .swiper-slide {
         padding: 1rem;
       }
 
       .swiper-slide h2 {
         font-size: 1.75rem;
-        margin-bottom: 0.75rem;
       }
     }
 
-    /* Small Mobile */
-    @media screen and (max-width: 479px) {
+    /* Mobile */
+    @media screen and (max-width: 767px) {
       .swiper {
-        height: 140px;
+        height: 100px;
+        max-height: 100px;
+        margin-bottom: 0.5rem;
       }
 
       .swiper-slide {
@@ -296,23 +313,42 @@
       }
     }
 
+    /* Small Mobile */
+    @media screen and (max-width: 479px) {
+      .swiper {
+        height: 90px;
+        max-height: 90px;
+        margin-bottom: 0.5rem;
+      }
+
+      .swiper-slide {
+        padding: 0.5rem;
+      }
+
+      .swiper-slide h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+
     .swiper-slide .button {
-      padding: 12px 32px;
+      padding: 10px 24px;
       background-color: #fff;
       color: #000;
       text-decoration: none;
       border-radius: 50px;
       font-weight: 600;
       transition: all 0.3s ease;
-      display: inline-block;
-      /* Touch-friendly button size */
-      min-height: 44px;
-      min-width: 44px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      /* Touch-friendly button size */
+      min-height: 40px;
+      min-width: 40px;
+      font-size: 0.875rem;
+      white-space: nowrap;
     }
 
     .swiper-slide .button:hover {
@@ -327,16 +363,18 @@
     /* Mobile button adjustments */
     @media screen and (max-width: 767px) {
       .swiper-slide .button {
-        padding: 10px 24px;
-        font-size: 0.875rem;
+        padding: 8px 20px;
+        font-size: 0.8rem;
+        min-height: 36px;
       }
     }
 
     @media screen and (max-width: 479px) {
       .swiper-slide .button {
-        padding: 8px 20px;
-        font-size: 0.8rem;
+        padding: 6px 16px;
+        font-size: 0.75rem;
         border-radius: 30px;
+        min-height: 32px;
       }
     }
 
@@ -1122,6 +1160,41 @@
 
   <!-- 3D Carousel Script -->
   <script>
+    // Prevent all scrolling on the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prevent scroll on window
+      window.addEventListener('scroll', function(e) {
+        e.preventDefault();
+        window.scrollTo(0, 0);
+      }, { passive: false });
+      
+      // Prevent scroll on touch devices
+      document.addEventListener('touchmove', function(e) {
+        // Allow touch events only on Swiper and drawer
+        if (!$(e.target).closest('.swiper').length && 
+            !$(e.target).closest('.products_drawer-wrapper').length &&
+            !$(e.target).closest('.products_collection-drawer').length) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      // Prevent wheel scrolling
+      document.addEventListener('wheel', function(e) {
+        // Allow wheel only on drawer
+        if (!$(e.target).closest('.products_drawer-wrapper').length) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      
+      // Prevent pull-to-refresh on mobile
+      document.body.style.overscrollBehavior = 'none';
+      document.documentElement.style.overscrollBehavior = 'none';
+    });
+    
     $(document).ready(function() {
       $("[carousel='component']").each(function () {
         let componentEl = $(this);
