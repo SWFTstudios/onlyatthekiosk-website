@@ -135,7 +135,7 @@ const placeholderImage = 'https://res.cloudinary.com/your-cloud/image/upload/w_8
 3. Update the path in `getPlaceholderProduct()`
 
 ```javascript
-const placeholderImage = '/images/kiosk-placeholder-product-img-optimized.png';
+const placeholderImage = '/images/kiosk-placeholder-product-img.webp';
 ```
 
 ---

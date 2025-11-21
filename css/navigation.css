@@ -458,11 +458,18 @@
   .nav-links-column {
     text-align: center;
     align-items: center;
+    justify-content: center; /* Center content vertically */
     font-size: 1.2em;
+    width: 100%; /* Full width for centering */
   }
   
   .nav-links-column.is-main {
     grid-row-gap: .4em;
+  }
+  
+  .nav-link-item {
+    justify-content: center; /* Center links */
+    align-items: center; /* Center items */
   }
 }
 
@@ -637,6 +644,15 @@
   display: flex;
   flex: 1; /* Allow content to expand */
   min-height: 0; /* Allow flex shrinking */
+  width: 100%; /* Full width for centering */
+}
+
+@media screen and (max-width: 991px) {
+  .navbar-right-content {
+    align-items: center; /* Center align on mobile */
+    justify-content: center; /* Center content vertically */
+    margin-top: 0; /* Remove margin-top on mobile for better centering */
+  }
 }
 
 .navbar-right-item {
@@ -762,18 +778,28 @@
     margin-right: 0;
     padding-top: 6em;
     padding-bottom: 2.8em;
+    padding-left: 0; /* Remove left padding for center alignment */
+    padding-right: 0; /* Remove right padding for center alignment */
+    justify-content: center; /* Center align content */
+    align-items: center; /* Center align vertically */
+  }
+  
+  .navbar-left-inner {
+    justify-content: center; /* Center align content */
+    align-items: center; /* Center align items */
+    width: 100%; /* Full width for centering */
   }
   
   .navbar-right {
     border-bottom-left-radius: 0;
-    justify-content: flex-start;
-    align-items: flex-start;
+    justify-content: center; /* Center align content */
+    align-items: center; /* Center align vertically */
     width: 100%;
     min-width: auto;
     max-width: none;
     height: auto;
     max-height: 100vh; /* Limit to viewport height */
-    padding-top: 8em;
+    padding-top: 6em; /* Consistent with navbar-left */
     padding-left: 0;
     padding-right: 0;
     overflow-y: auto; /* Allow scrolling on mobile to see full promo cards */
@@ -797,10 +823,15 @@
     overflow-x: hidden; /* Prevent horizontal scrolling */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     max-height: calc(100vh - 12em); /* Limit height to allow scrolling */
+    text-align: center; /* Center align text content */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align items */
+    justify-content: center; /* Center content vertically */
   }
   
   .navbar-right {
-    padding-top: 6em; /* Reduce top padding on mobile */
+    padding-top: 6em; /* Consistent top padding on mobile */
     padding-bottom: 2em;
   }
   
