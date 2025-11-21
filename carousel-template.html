@@ -51,8 +51,8 @@
       overscroll-behavior: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      /* Prevent touch scrolling */
-      touch-action: none;
+      /* Allow touch scrolling */
+      touch-action: auto;
       -webkit-overflow-scrolling: none;
     }
 
@@ -2158,6 +2158,11 @@
         drawer.addClass('open');
         $('body').css('overflow', 'hidden'); // Lock body scroll
         $(document).trigger('drawerOpen'); // Trigger event for scroll lock
+        
+        // Also trigger the native event
+        if (typeof window.CustomEvent !== 'undefined') {
+          document.dispatchEvent(new CustomEvent('drawerOpen'));
+        }
 
         // Check if it's a placeholder handle
         if (productHandle && productHandle.startsWith('product-handle-')) {
@@ -2186,6 +2191,11 @@
         drawer.removeClass('open');
         $('body').css('overflow', ''); // Unlock body scroll
         $(document).trigger('drawerClose'); // Trigger event for scroll unlock
+        
+        // Also trigger the native event
+        if (typeof window.CustomEvent !== 'undefined') {
+          document.dispatchEvent(new CustomEvent('drawerClose'));
+        }
       }
 
       // Event handlers
