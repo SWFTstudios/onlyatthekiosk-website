@@ -1417,6 +1417,109 @@
             prevEl.removeClass("swiper-button-disabled");
             nextEl.removeClass("swiper-button-disabled");
           });
+          
+          // Add vertical swipe gesture detection (up/down mimics left/right)
+          let touchStartY = 0;
+          let touchStartX = 0;
+          let touchEndY = 0;
+          let touchEndX = 0;
+          let minSwipeDistance = 50; // Minimum distance for a swipe
+          let maxHorizontalDistance = 30; // Max horizontal movement to consider it a vertical swipe
+          
+          // Track touch start on carousel component
+          componentEl[0].addEventListener('touchstart', function(e) {
+            // Don't interfere with Swiper's own touch handling or drawer
+            if ($(e.target).closest('.swiper').length || 
+                $(e.target).closest('.products_collection-drawer').length ||
+                $(e.target).closest('.carousel_arrow_link').length) {
+              return;
+            }
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+          }, { passive: true });
+          
+          // Track touch move to detect swipe direction
+          componentEl[0].addEventListener('touchmove', function(e) {
+            // Don't interfere with Swiper's own touch handling or drawer
+            if ($(e.target).closest('.swiper').length || 
+                $(e.target).closest('.products_collection-drawer').length ||
+                $(e.target).closest('.carousel_arrow_link').length) {
+              return;
+            }
+            
+            if (touchStartY && e.touches[0]) {
+              touchEndY = e.touches[0].clientY;
+              touchEndX = e.touches[0].clientX;
+            }
+          }, { passive: true });
+          
+          // Handle touch end and trigger swipe
+          componentEl[0].addEventListener('touchend', function(e) {
+            // Don't interfere with Swiper's own touch handling or drawer
+            if ($(e.target).closest('.swiper').length || 
+                $(e.target).closest('.products_collection-drawer').length ||
+                $(e.target).closest('.carousel_arrow_link').length) {
+              return;
+            }
+            
+            if (!touchStartY || !e.changedTouches[0]) {
+              touchStartY = 0;
+              touchStartX = 0;
+              touchEndY = 0;
+              touchEndX = 0;
+              return;
+            }
+            
+            touchEndY = e.changedTouches[0].clientY;
+            touchEndX = e.changedTouches[0].clientX;
+            
+            let swipeDistanceY = touchStartY - touchEndY;
+            let swipeDistanceX = touchStartX - touchEndX;
+            
+            // Check if it's primarily a vertical swipe (not horizontal)
+            if (Math.abs(swipeDistanceY) > Math.abs(swipeDistanceX) && 
+                Math.abs(swipeDistanceX) < maxHorizontalDistance) {
+              
+              // Check if swipe distance is significant
+              if (Math.abs(swipeDistanceY) > minSwipeDistance) {
+                if (swipeDistanceY > 0) {
+                  // Swipe up = swipe right (next product)
+                  swiper.slideNext();
+                } else {
+                  // Swipe down = swipe left (previous product)
+                  swiper.slidePrev();
+                }
+              }
+            }
+            
+            // Reset
+            touchStartY = 0;
+            touchStartX = 0;
+            touchEndY = 0;
+            touchEndX = 0;
+          }, { passive: true });
+          
+          // Add mouse wheel support for desktop (up/down scrolling = left/right navigation)
+          componentEl[0].addEventListener('wheel', function(e) {
+            // Don't interfere with Swiper's own wheel handling or drawer
+            if ($(e.target).closest('.swiper').length || 
+                $(e.target).closest('.products_collection-drawer').length) {
+              return;
+            }
+            
+            e.preventDefault();
+            
+            // Check if it's primarily vertical scrolling
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+              if (e.deltaY > 0) {
+                // Scroll down = swipe left (previous product)
+                swiper.slidePrev();
+              } else {
+                // Scroll up = swipe right (next product)
+                swiper.slideNext();
+              }
+            }
+          }, { passive: false });
         }
       });
       
