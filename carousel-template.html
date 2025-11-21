@@ -181,8 +181,8 @@
       perspective-origin: center center;
       box-sizing: border-box;
       overflow: visible; /* Allow 3D items to extend beyond bounds */
-      /* Prevent touch events from moving the carousel on mobile */
-      touch-action: none;
+      /* Allow touch gestures - Swiper handles its own touch events */
+      touch-action: pan-y pan-x;
       -webkit-user-select: none;
       user-select: none;
       /* Keep carousel centered */
@@ -1659,25 +1659,8 @@
         */
 
         // Prevent touch events on carousel wrapper from moving the page on mobile
-        wrapEl[0].addEventListener('touchstart', function(e) {
-          // Only prevent if touching the carousel itself, not the Swiper slider
-          if (!$(e.target).closest('.swiper').length) {
-            e.stopPropagation();
-          }
-        }, { passive: true });
-        
-        wrapEl[0].addEventListener('touchmove', function(e) {
-          // Prevent page scroll when touching carousel images
-          if (!$(e.target).closest('.swiper').length) {
-            e.stopPropagation();
-          }
-        }, { passive: true });
-        
-        wrapEl[0].addEventListener('touchend', function(e) {
-          if (!$(e.target).closest('.swiper').length) {
-            e.stopPropagation();
-          }
-        }, { passive: true });
+        // Removed touch event handlers - allow free swiping everywhere
+        // Swiper will handle its own touch events naturally
 
         // INTRO ANIMATION
         let introTl = gsap.timeline({
@@ -2202,6 +2185,7 @@
       function closeDrawer() {
         drawer.removeClass('open');
         $('body').css('overflow', ''); // Unlock body scroll
+        $(document).trigger('drawerClose'); // Trigger event for scroll unlock
       }
 
       // Event handlers
