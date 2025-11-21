@@ -152,31 +152,31 @@
         window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
       }
       
+      // Track touch state to prevent double-firing
+      let touchStarted = false;
+      
       // Add click event (desktop)
-      themeToggle.addEventListener('click', toggleTheme);
+      themeToggle.addEventListener('click', function(e) {
+        // Only trigger if this wasn't a touch event
+        if (!touchStarted) {
+          toggleTheme(e);
+        }
+        touchStarted = false;
+      });
       
-      // Add touch events (mobile)
+      // Add touch events (mobile) - simple tap on touchend
       themeToggle.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleTheme(e);
-      }, { passive: false });
+        touchStarted = true;
+      }, { passive: true });
       
-      // Also handle touchend to ensure it works on all mobile devices
-      let touchStartTime = 0;
       themeToggle.addEventListener('touchend', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        const touchEndTime = Date.now();
-        // Only trigger if it was a quick tap (not a swipe)
-        if (touchEndTime - touchStartTime < 300) {
+        if (touchStarted) {
           toggleTheme(e);
+          touchStarted = false;
         }
       }, { passive: false });
-      
-      themeToggle.addEventListener('touchstart', function() {
-        touchStartTime = Date.now();
-      }, { passive: true });
       
       // Initialize toggle button state based on current theme
       const currentTheme = html.getAttribute('data-theme');
