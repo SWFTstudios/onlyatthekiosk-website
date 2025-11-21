@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kiosk Styleguide - Only at The Kiosk</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta name="description" content="Design system and style guide for Only at The Kiosk">
+  
+  <!-- Stylesheets -->
+  <link href="css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
+  
+  <style>
+    /* Theme Variables */
+    :root {
+      /* Light Theme Colors */
+      --bg-primary-light: #ffffff;
+      --bg-secondary-light: #f1f1f1;
+      --text-primary-light: #000000;
+      --text-secondary-light: #4a4a4a;
+      --text-tertiary-light: #818181;
+      --border-light: #e7e7e7;
+      
+      /* Dark Theme Colors */
+      --bg-primary-dark: #000000;
+      --bg-secondary-dark: #101010;
+      --bg-tertiary-dark: #1d1d1d;
+      --text-primary-dark: #ffffff;
+      --text-secondary-dark: #b0b0b0;
+      --text-tertiary-dark: #888888;
+      --border-dark: #2a2a2a;
+      
+      /* Accent Colors from Image Palette */
+      --accent-orange: #FF6600;
+      --accent-orange-light: #FB9F89;
+      --accent-teal: #81AE9D;
+      --accent-brown: #C4AF9A;
+      
+      /* Current Theme (defaults to light) */
+      --bg-primary: var(--bg-primary-light);
+      --bg-secondary: var(--bg-secondary-light);
+      --bg-tertiary: var(--bg-secondary-light);
+      --text-primary: var(--text-primary-light);
+      --text-secondary: var(--text-secondary-light);
+      --text-tertiary: var(--text-tertiary-light);
+      --border: var(--border-light);
+    }
+    
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-primary: var(--bg-primary-dark);
+      --bg-secondary: var(--bg-secondary-dark);
+      --bg-tertiary: var(--bg-tertiary-dark);
+      --text-primary: var(--text-primary-dark);
+      --text-secondary: var(--text-secondary-dark);
+      --text-tertiary: var(--text-tertiary-dark);
+      --border: var(--border-dark);
+    }
+    
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    /* Header */
+    .styleguide-header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .styleguide-header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .styleguide-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text-primary);
+      font-family: 'Suisseintl', sans-serif;
+    }
+    
+    /* Theme Toggle */
+    .theme-toggle {
+      position: relative;
+      width: 60px;
+      height: 32px;
+      background-color: var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      border: none;
+      padding: 2px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--text-tertiary);
+    }
+    
+    .theme-toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 28px;
+      height: 28px;
+      background-color: var(--bg-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-theme="dark"] .theme-toggle-slider {
+      transform: translateX(28px);
+    }
+    
+    .theme-icon {
+      width: 16px;
+      height: 16px;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    
+    .theme-icon.sun {
+      opacity: 1;
+    }
+    
+    .theme-icon.moon {
+      opacity: 0;
+      position: absolute;
+    }
+    
+    [data-theme="dark"] .theme-icon.sun {
+      opacity: 0;
+    }
+    
+    [data-theme="dark"] .theme-icon.moon {
+      opacity: 1;
+    }
+    
+    /* Container */
+    .styleguide-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+    
+    /* Section */
+    .styleguide-section {
+      margin-bottom: 4rem;
+    }
+    
+    .styleguide-section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 1.5rem 0;
+      color: var(--text-primary);
+      font-family: 'Suisseintl', sans-serif;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    
+    .styleguide-subsection {
+      margin-bottom: 3rem;
+    }
+    
+    .styleguide-subsection-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 1rem 0;
+      color: var(--text-primary);
+    }
+    
+    /* Colors Grid */
+    .colors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .color-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .color-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .color-swatch {
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .color-info {
+      padding: 1rem;
+    }
+    
+    .color-name {
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: var(--text-primary);
+    }
+    
+    .color-value {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+      font-family: 'Courier New', monospace;
+      margin: 0;
+    }
+    
+    /* Typography */
+    .typography-sample {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    
+    .typography-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Buttons */
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+    
+    .button-sample {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--text-secondary);
+      border-color: var(--text-secondary);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      border-color: var(--accent-orange);
+    }
+    
+    .btn-accent:hover {
+      background-color: var(--accent-orange-light);
+      border-color: var(--accent-orange-light);
+    }
+    
+    /* Spacing */
+    .spacing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .spacing-sample {
+      padding: 1rem;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    
+    .spacing-visual {
+      background-color: var(--accent-orange);
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .styleguide-header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      
+      .styleguide-title {
+        font-size: 1.5rem;
+      }
+      
+      .styleguide-container {
+        padding: 2rem 1rem;
+      }
+      
+      .colors-grid,
+      .buttons-grid,
+      .spacing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="styleguide-header">
+    <div class="styleguide-header-content">
+      <h1 class="styleguide-title">Kiosk Styleguide</h1>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="theme-toggle-slider">
+          <svg class="theme-icon sun" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="3" fill="currentColor"/>
+            <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon moon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.5 1C6.5 1 7 2.5 7 4C7 5.5 6 7 4.5 7C4.5 7 5 8.5 6.5 8.5C9.81371 8.5 12.5 5.81371 12.5 2.5C12.5 2.5 11 3 9.5 3C8 3 6.5 2 6.5 1Z" fill="currentColor"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="styleguide-container">
+    <!-- Colors Section -->
+    <section class="styleguide-section">
+      <h2 class="styleguide-section-title">Colors</h2>
+      
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Primary Palette</h3>
+        <div class="colors-grid">
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #000000;">
+              <span style="color: #ffffff; font-weight: 600;">Black</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Black</p>
+              <p class="color-value">#000000</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #ffffff; border: 1px solid #e7e7e7;">
+              <span style="color: #000000; font-weight: 600;">White</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">White</p>
+              <p class="color-value">#FFFFFF</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #101010;">
+              <span style="color: #ffffff; font-weight: 600;">Dark Grey</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Dark Grey</p>
+              <p class="color-value">#101010</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #1d1d1d;">
+              <span style="color: #ffffff; font-weight: 600;">Charcoal</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Charcoal</p>
+              <p class="color-value">#1D1D1D</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #4a4a4a;">
+              <span style="color: #ffffff; font-weight: 600;">Medium Grey</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Medium Grey</p>
+              <p class="color-value">#4A4A4A</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #818181;">
+              <span style="color: #ffffff; font-weight: 600;">Light Grey</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Light Grey</p>
+              <p class="color-value">#818181</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #b0b0b0;">
+              <span style="color: #000000; font-weight: 600;">Pale Grey</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Pale Grey</p>
+              <p class="color-value">#B0B0B0</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #e7e7e7;">
+              <span style="color: #000000; font-weight: 600;">Off White</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Off White</p>
+              <p class="color-value">#E7E7E7</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #f1f1f1;">
+              <span style="color: #000000; font-weight: 600;">Light Grey</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Light Grey</p>
+              <p class="color-value">#F1F1F1</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Accent Colors</h3>
+        <div class="colors-grid">
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #FF6600;">
+              <span style="color: #ffffff; font-weight: 600;">Orange</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Orange</p>
+              <p class="color-value">#FF6600</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #FB9F89;">
+              <span style="color: #000000; font-weight: 600;">Orange Light</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Orange Light</p>
+              <p class="color-value">#FB9F89</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #81AE9D;">
+              <span style="color: #ffffff; font-weight: 600;">Teal</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Teal</p>
+              <p class="color-value">#81AE9D</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: #C4AF9A;">
+              <span style="color: #000000; font-weight: 600;">Brown</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">Brown</p>
+              <p class="color-value">#C4AF9A</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Typography Section -->
+    <section class="styleguide-section">
+      <h2 class="styleguide-section-title">Typography</h2>
+      
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Font Families</h3>
+        <div class="typography-sample">
+          <p class="typography-label">GeneralSans (Primary)</p>
+          <p style="font-family: 'Generalsans Variable', sans-serif; font-size: 1.5rem; margin: 0;">
+            The quick brown fox jumps over the lazy dog
+          </p>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">SuisseIntl (Secondary)</p>
+          <p style="font-family: 'Suisseintl', sans-serif; font-size: 1.5rem; margin: 0;">
+            The quick brown fox jumps over the lazy dog
+          </p>
+        </div>
+      </div>
+      
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Headings</h3>
+        <div class="typography-sample">
+          <p class="typography-label">H1</p>
+          <h1 style="margin: 0;">Heading 1</h1>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">H2</p>
+          <h2 style="margin: 0;">Heading 2</h2>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">H3</p>
+          <h3 style="margin: 0;">Heading 3</h3>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">H4</p>
+          <h4 style="margin: 0;">Heading 4</h4>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">H5</p>
+          <h5 style="margin: 0;">Heading 5</h5>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">H6</p>
+          <h6 style="margin: 0;">Heading 6</h6>
+        </div>
+      </div>
+      
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Body Text</h3>
+        <div class="typography-sample">
+          <p class="typography-label">Body Regular</p>
+          <p style="margin: 0;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </div>
+        
+        <div class="typography-sample">
+          <p class="typography-label">Body Small</p>
+          <p style="font-size: 0.875rem; margin: 0;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Buttons Section -->
+    <section class="styleguide-section">
+      <h2 class="styleguide-section-title">Buttons</h2>
+      
+      <div class="buttons-grid">
+        <div class="button-sample">
+          <button class="btn btn-primary">Primary Button</button>
+        </div>
+        
+        <div class="button-sample">
+          <button class="btn btn-secondary">Secondary Button</button>
+        </div>
+        
+        <div class="button-sample">
+          <button class="btn btn-accent">Accent Button</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Spacing Section -->
+    <section class="styleguide-section">
+      <h2 class="styleguide-section-title">Spacing</h2>
+      
+      <div class="spacing-grid">
+        <div class="spacing-sample">
+          <p class="typography-label">8px</p>
+          <div class="spacing-visual" style="height: 8px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">16px</p>
+          <div class="spacing-visual" style="height: 16px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">24px</p>
+          <div class="spacing-visual" style="height: 24px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">32px</p>
+          <div class="spacing-visual" style="height: 32px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">48px</p>
+          <div class="spacing-visual" style="height: 48px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">64px</p>
+          <div class="spacing-visual" style="height: 64px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">96px</p>
+          <div class="spacing-visual" style="height: 96px;"></div>
+        </div>
+        
+        <div class="spacing-sample">
+          <p class="typography-label">128px</p>
+          <div class="spacing-visual" style="height: 128px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', currentTheme);
+    
+    themeToggle.addEventListener('click', function() {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  </script>
+</body>
+</html>
+

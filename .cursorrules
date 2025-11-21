@@ -1,0 +1,191 @@
+# Cursor Rules - Only at The Kiosk Website
+
+## Project Context
+
+This is a custom frontend e-commerce website with Shopify as the backend. The goal is to create a unique, branded user experience while leveraging Shopify for all e-commerce functionality (products, cart, checkout, payments, orders).
+
+## Core Principles
+
+1. **Custom Frontend, Shopify Backend**: All UI/UX is custom-built. Shopify handles e-commerce backend.
+2. **Minimalistic Design**: Black, white, and various greys only. Simple, clean, purposeful.
+3. **Mobile-First**: Always design and test for mobile devices first.
+4. **Performance Matters**: Optimize for fast loading, smooth animations, efficient code.
+
+## Technology Stack
+
+- **Frontend**: HTML5, CSS3, JavaScript (vanilla preferred, minimal dependencies)
+- **Libraries**: Swiper.js (carousels), GSAP (animations), jQuery (DOM, consider migrating to vanilla)
+- **Backend**: Shopify Storefront API (products, cart), Cloudflare Pages Functions (API endpoints)
+- **Hosting**: Cloudflare Pages (static site)
+- **Storage**: Airtable (email signups), Supabase (CRM, configured but not actively used)
+
+## Code Style Guidelines
+
+### JavaScript
+- Use ES6+ syntax (`const`, `let`, arrow functions)
+- Prefer vanilla JavaScript over jQuery when possible
+- Add comments for complex logic
+- Handle errors gracefully with try/catch
+- Use async/await for API calls
+- Never hardcode API tokens or secrets (use environment variables)
+
+### CSS
+- Mobile-first approach (base styles for mobile, media queries for larger screens)
+- Use semantic class names (BEM-like: `.component__element--modifier`)
+- Keep selectors specific but not overly nested (max 3 levels)
+- Use CSS custom properties for theming (colors, spacing)
+- Black/white/grey color palette only (no accent colors unless explicitly requested)
+- Use `rem` or `em` for responsive typography
+- Animations should use `transform` and `opacity` (GPU-accelerated)
+
+### HTML
+- Semantic HTML5 elements
+- Include ARIA labels for accessibility
+- SEO-friendly structure (meta tags, structured data)
+- Use data attributes for dynamic content (`data-product-handle`, etc.)
+
+## File Organization
+
+- Root: HTML files (`index.html`, `store.html`, `carousel-template.html`)
+- `css/`: Stylesheets (`normalize.css`, `components.css`, `onlyatthekiosk.css`)
+- `js/`: JavaScript files (`email-signup.js`, `onlyatthekiosk.js`)
+- `functions/api/`: Cloudflare Pages Functions (`subscribe.js`)
+- `images/`: Image assets
+- `fonts/`: Font files (GeneralSans, SuisseIntl - preserve these)
+- `docs/`: Documentation
+
+## Shopify Integration
+
+### Storefront API
+- Store domain: `onlyatthekiosk.com`
+- API endpoint: `https://onlyatthekiosk.com/api/2024-01/graphql.json`
+- Use GraphQL queries to fetch products, variants, images
+- Access token must come from environment variables (never hardcode)
+- Use product handles as identifiers (`data-product-handle`)
+
+### Environment Variables
+- `SHOPIFY_STOREFRONT_TOKEN`: Shopify Storefront API access token
+- `AIRTABLE_ACCESS_TOKEN`: Airtable Personal Access Token
+- `AIRTABLE_BASE_ID`: Airtable Base ID
+
+## Design Guidelines
+
+### Colors
+- Background: `#000000` (black)
+- Text: `#ffffff` (white)
+- Secondary text: `#888888`, `#aaaaaa`, `#cccccc` (greys)
+- No accent colors unless explicitly requested
+
+### Typography
+- Primary font: GeneralSans (variable font available)
+- Secondary font: SuisseIntl (headings, special text)
+- Preserve existing font configurations
+- Responsive sizing with `rem` or `em`
+
+### Spacing & Layout
+- Generous whitespace, but purposeful
+- Centered content using flexbox/grid
+- Responsive breakpoints:
+  - Mobile: `< 768px`
+  - Tablet: `768px - 1024px`
+  - Desktop: `> 1024px`
+
+### Animations
+- Purposeful and smooth (target 60fps)
+- Use GSAP or CSS transitions
+- Prefer `transform` and `opacity` over layout properties
+
+## Mobile Development
+
+- Touch targets minimum 44x44px
+- Support swipe gestures where appropriate
+- Test on real devices
+- Use `width=device-width, initial-scale=1` viewport
+- Consider `viewport-fit=cover` for notched devices
+- Test with `100svh` for mobile browsers
+- Prevent unwanted page scrolling (use `overflow: hidden`, `position: fixed`)
+
+## Performance Best Practices
+
+- Optimize images (WebP, AVIF when possible, lazy load)
+- Minimize JavaScript dependencies
+- Load scripts asynchronously when possible
+- Use event delegation for dynamic content
+- Debounce/throttle scroll and resize handlers
+- Remove unused CSS
+- Use Shopify CDN URLs for product images
+
+## Common Patterns
+
+### Adding Shopify Products
+1. Use product handle from Shopify Admin
+2. Add `data-product-handle="handle"` attribute
+3. Fetch via Storefront API GraphQL query
+4. Display using custom UI (don't use default Shopify themes)
+
+### Email Signup
+- Form submits to `/api/subscribe` (Cloudflare Pages Function)
+- See `functions/api/subscribe.js` for implementation
+- Stores in Airtable "Incoming Interest" table
+
+### Adding New Pages
+1. Create HTML file in root
+2. Link CSS files in `<head>`
+3. Link JS files before `</body>`
+4. Follow existing design patterns
+
+## Error Handling
+
+- Always handle API errors gracefully
+- Show user-friendly error messages
+- Log errors to console for debugging
+- Never expose sensitive information in errors
+
+## Testing Requirements
+
+Before suggesting changes, ensure:
+- [ ] Works on mobile devices (< 768px)
+- [ ] Works on tablets (768px - 1024px)
+- [ ] Works on desktop (> 1024px)
+- [ ] Touch gestures work
+- [ ] Animations are smooth
+- [ ] No console errors
+- [ ] API calls work correctly
+- [ ] Images load and are optimized
+
+## What NOT to Do
+
+- ❌ Don't hardcode API tokens or secrets
+- ❌ Don't add accent colors without explicit request
+- ❌ Don't change existing fonts (GeneralSans, SuisseIntl)
+- ❌ Don't use default Shopify theme styling
+- ❌ Don't add unnecessary dependencies
+- ❌ Don't break existing functionality
+- ❌ Don't create database tables for products (Shopify handles this)
+- ❌ Don't implement custom checkout (use Shopify checkout)
+
+## What TO Do
+
+- ✅ Use Shopify Storefront API for all product data
+- ✅ Create custom, branded UI/UX
+- ✅ Optimize for mobile performance
+- ✅ Use environment variables for secrets
+- ✅ Follow existing code patterns
+- ✅ Test on real devices
+- ✅ Write clear, descriptive commit messages
+- ✅ Document complex logic
+
+## When Making Changes
+
+1. Read existing code to understand patterns
+2. Follow the established architecture (custom frontend + Shopify backend)
+3. Maintain the minimalistic design (black/white/grey)
+4. Test on mobile devices
+5. Check for console errors
+6. Verify API calls work
+7. Ensure no breaking changes to existing functionality
+
+---
+
+**Remember**: This is a custom frontend project. The uniqueness is in the UI/UX, not the backend. Shopify handles all e-commerce functionality—we create the experience around it.
+
