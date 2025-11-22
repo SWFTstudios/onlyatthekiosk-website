@@ -1756,7 +1756,7 @@
   <script>
     // Prevent scrolling on page, but allow swipe gestures on carousel
     document.addEventListener('DOMContentLoaded', function() {
-      // Get collection handle from URL parameter
+      // Extract collection from URL path
       // Extract collection from URL path (e.g., /collections/t-shirts -> t-shirts)
       const pathParts = window.location.pathname.split('/');
       const collectionHandle = pathParts[pathParts.length - 1].replace('.html', '') || 'bracelets';
