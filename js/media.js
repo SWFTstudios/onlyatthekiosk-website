@@ -92,27 +92,53 @@ document.addEventListener('DOMContentLoaded', function() {
   const switchElement = document.querySelector('.switch');
   const switchHandle = document.querySelector('.switch__handle');
   const rickAndMorty = document.querySelector('.rick_and_morty');
+  const gestureRecognizer = document.querySelector('.gesture-recognizer');
   
   if (switchElement && switchHandle) {
-    switchElement.addEventListener('click', function() {
-      // Toggle switch position
-      const isActive = switchHandle.style.transform === 'translate(0px, 0px)' || 
-                       switchHandle.style.transform === 'translate(0)' ||
-                       !switchHandle.style.transform || 
-                       switchHandle.style.transform === '';
-      
-      if (isActive) {
-        // Move to right (backlight on)
-        switchHandle.style.transform = 'translate(100%)';
-        if (rickAndMorty) {
-          rickAndMorty.classList.remove('active');
-        }
-      } else {
-        // Move to left (backlight off / cabin shake on)
-        switchHandle.style.transform = 'translate(0)';
+    // Helper function to check if switch is in right position (backlight on)
+    function isSwitchOnRight() {
+      const transform = switchHandle.style.transform || '';
+      return transform.includes('translate(100%)') || 
+             transform.includes('translate3d(100%') ||
+             transform === '';
+    }
+    
+    // Helper function to update cabin shake state
+    function updateCabinShakeState(isCabinShakeActive) {
+      if (isCabinShakeActive) {
+        // Cabin shake ON - switch is on the left
         if (rickAndMorty) {
           rickAndMorty.classList.add('active');
         }
+        if (gestureRecognizer) {
+          gestureRecognizer.classList.add('cabin-shake-active');
+        }
+      } else {
+        // Cabin shake OFF - switch is on the right
+        if (rickAndMorty) {
+          rickAndMorty.classList.remove('active');
+        }
+        if (gestureRecognizer) {
+          gestureRecognizer.classList.remove('cabin-shake-active');
+        }
+      }
+    }
+    
+    // Check initial state - inline style has translate3d(100%, 0, 0) = backlight on, cabin shake off
+    const initialIsOnRight = isSwitchOnRight();
+    updateCabinShakeState(!initialIsOnRight);
+    
+    switchElement.addEventListener('click', function() {
+      const isOnRight = isSwitchOnRight();
+      
+      if (isOnRight) {
+        // Currently on right (backlight on) - move to left (cabin shake on)
+        switchHandle.style.transform = 'translate(0)';
+        updateCabinShakeState(true);
+      } else {
+        // Currently on left (cabin shake on) - move to right (backlight on)
+        switchHandle.style.transform = 'translate(100%)';
+        updateCabinShakeState(false);
       }
     });
   }

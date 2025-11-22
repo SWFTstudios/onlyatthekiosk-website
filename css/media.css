@@ -146,7 +146,7 @@
 
 /* Spaceship Decorative Element */
 .spaceship {
-  z-index: 3;
+  z-index: 2; /* Middle layer */
   background-image: url('../images/spaceship-only-landscape.webp');
   background-position: 50%;
   background-repeat: no-repeat;
@@ -155,7 +155,7 @@
   height: 100vh;
   position: absolute;
   inset: 0%;
-  opacity: 0.3; /* Reduced opacity for Kiosk theme */
+  opacity: 1; /* Full opacity */
   pointer-events: none;
 }
 
@@ -179,7 +179,7 @@
 
 /* Rick and Morty Decorative Element */
 .rick_and_morty {
-  z-index: 3;
+  z-index: 3; /* Top layer - closest to viewer */
   background-image: url('../images/rick-and-morty-landscape.webp');
   background-position: 50%;
   background-repeat: no-repeat;
@@ -188,7 +188,7 @@
   height: 100vh;
   position: absolute;
   inset: 0%;
-  opacity: 0.2; /* Reduced opacity for Kiosk theme */
+  opacity: 1; /* Full opacity */
   pointer-events: none;
   display: none; /* Hidden by default - can be enabled via switch */
 }
@@ -211,7 +211,7 @@
 
 /* Vignette Overlay */
 .vignette-overlay {
-  z-index: 3;
+  z-index: 4; /* Above all content layers */
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0) 36%, rgba(0, 0, 0, 0.93) 100%);
   width: 100%;
   height: 100%;
@@ -220,20 +220,66 @@
   pointer-events: none;
 }
 
+/* Cabin Shake Animation */
+@keyframes cabinShake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-2px, -1px) rotate(-0.5deg);
+  }
+  20% {
+    transform: translate(2px, 1px) rotate(0.5deg);
+  }
+  30% {
+    transform: translate(-1px, 2px) rotate(-0.3deg);
+  }
+  40% {
+    transform: translate(1px, -2px) rotate(0.3deg);
+  }
+  50% {
+    transform: translate(-2px, 1px) rotate(-0.5deg);
+  }
+  60% {
+    transform: translate(2px, -1px) rotate(0.5deg);
+  }
+  70% {
+    transform: translate(-1px, -2px) rotate(-0.3deg);
+  }
+  80% {
+    transform: translate(1px, 2px) rotate(0.3deg);
+  }
+  90% {
+    transform: translate(-2px, -1px) rotate(-0.5deg);
+  }
+}
+
+/* Apply cabin shake animation when switch is in cabin shake position */
+.gesture-recognizer.cabin-shake-active {
+  animation: cabinShake 0.5s infinite;
+}
+
+.gesture-recognizer.cabin-shake-active .container-3,
+.gesture-recognizer.cabin-shake-active .video-wrapper {
+  animation: cabinShake 0.5s infinite;
+}
+
 /* Background Video */
 .background-video {
-  z-index: -1;
+  z-index: 1; /* Bottom layer - furthest from viewer */
   width: 100%;
   height: 100%;
   position: fixed;
   inset: 0%;
   object-fit: cover;
+  opacity: 1; /* Full opacity */
 }
 
 .background-video video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 1; /* Full opacity */
 }
 
 /* Backlight Switch */
