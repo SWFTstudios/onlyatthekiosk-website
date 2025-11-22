@@ -366,9 +366,48 @@ This project creates a completely custom frontend and user experience while leve
 **Never hardcode API tokens or secrets in code!**
 
 Store these in Cloudflare Pages environment variables:
-- `SHOPIFY_STOREFRONT_TOKEN`: Shopify Storefront API access token
-- `AIRTABLE_ACCESS_TOKEN`: Airtable Personal Access Token
-- `AIRTABLE_BASE_ID`: Airtable Base ID
+
+#### Required Variables
+
+- **`SHOPIFY_STOREFRONT_TOKEN`**: Shopify Storefront API access token
+  - Get from: Shopify Admin → Settings → Apps and sales channels → Develop apps → Your app → Storefront API access token
+  - See: `docs/SHOPIFY_STOREFRONT_API_SETUP.md` for detailed setup
+
+#### Optional Variables (with defaults)
+
+- **`SHOPIFY_STORE`**: Shopify store domain (default: `onlyatthekiosk.com`)
+- **`SHOPIFY_API_VERSION`**: Shopify API version (default: `2024-01`)
+
+#### Other Variables
+
+- **`AIRTABLE_ACCESS_TOKEN`**: Airtable Personal Access Token (for email signups)
+- **`AIRTABLE_BASE_ID`**: Airtable Base ID (for email signups)
+
+#### Setting Environment Variables in Cloudflare Pages
+
+1. Go to **Cloudflare Dashboard** → **Pages** → Select your project
+2. Go to **Settings** → **Environment Variables**
+3. Click **"Add variable"**
+4. Enter variable name and value
+5. Select environments (Production, Preview, Development)
+6. Click **"Save"**
+
+#### Local Development
+
+For local development with `wrangler pages dev`, create a `.dev.vars` file in your project root:
+
+```bash
+# .dev.vars (DO NOT COMMIT THIS FILE - add to .gitignore)
+SHOPIFY_STOREFRONT_TOKEN=your_storefront_api_token_here
+SHOPIFY_STORE=onlyatthekiosk.com
+SHOPIFY_API_VERSION=2024-01
+AIRTABLE_ACCESS_TOKEN=your_airtable_token_here
+AIRTABLE_BASE_ID=your_airtable_base_id_here
+```
+
+**Important**: 
+- Add `.dev.vars` to `.gitignore` to prevent committing secrets
+- Never commit API tokens to version control
 
 ---
 

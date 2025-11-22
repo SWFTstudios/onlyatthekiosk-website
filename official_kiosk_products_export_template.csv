@@ -1,0 +1,102 @@
+Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Option1 Linked To,Option2 Name,Option2 Value,Option2 Linked To,Option3 Name,Option3 Value,Option3 Linked To,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Unit Price Total Measure,Unit Price Total Measure Unit,Unit Price Base Measure,Unit Price Base Measure Unit,Variant Barcode,Image Src,Image Position,Image Alt Text,Gift Card,SEO Title,SEO Description,Care guide (product.metafields.descriptors.care_guide),Care instructions (product.metafields.shopify.care-instructions),Variant Image,Variant Weight Unit,Variant Tax Code,Cost per item,Status
+001-gold-chain,#001 Gold Chain,"<p>Bold, raw and refined. Each piece crafted for the multi-sport rebel. This exclusive design from Only at The Kiosk represents the perfect blend of style and functionality.</p>
+<p>Available in Small, Medium, and Large sizes. Limited edition. Once it drops—it's gone.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Jewelry > Necklaces,"","Chains, Gold",false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Store in a cool, dry place when not in use
+Avoid contact with harsh chemicals, perfumes, or lotions
+Clean gently with a soft, dry cloth
+Remove before swimming or showering
+Store separately to prevent scratching
+For gold pieces, use appropriate cleaning solution if needed",,,lb,,,active
+001-silver-chain,#001 Silver Chain,"<p>Bold, raw and refined. Each piece crafted for the multi-sport rebel. This exclusive design from Only at The Kiosk represents the perfect blend of style and functionality.</p>
+<p>Available in Small, Medium, and Large sizes. Limited edition. Once it drops—it's gone.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Jewelry > Necklaces,"","Chains, Silver",false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Store in a cool, dry place when not in use
+Avoid contact with harsh chemicals, perfumes, or lotions
+Clean gently with a soft, dry cloth
+Remove before swimming or showering
+Store separately to prevent scratching
+For silver pieces, use appropriate cleaning solution if needed",,,lb,,,active
+001-gold-bracelet,#001 Gold Bracelet,"<p>Bold, raw and refined. Each piece crafted for the multi-sport rebel. This exclusive design from Only at The Kiosk represents the perfect blend of style and functionality.</p>
+<p>Available in Small, Medium, and Large sizes. Limited edition. Once it drops—it's gone.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Jewelry > Bracelets,"","Bracelets, Gold",false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Care Instructions:
+Store in a cool, dry place when not in use
+Avoid contact with harsh chemicals, perfumes, or lotions
+Clean gently with a soft, dry cloth
+Remove before swimming or showering
+Store separately to prevent scratching
+For gold pieces, use appropriate cleaning solution if needed",,,lb,,,active
+001-silver-bracelet,#001 Silver Bracelet,"<p>Bold, raw and refined. Each piece crafted for the multi-sport rebel. This exclusive design from Only at The Kiosk represents the perfect blend of style and functionality.</p>
+<p>Available in Small, Medium, and Large sizes. Limited edition. Once it drops—it's gone.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Jewelry > Bracelets,"","Bracelets, Silver",false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Store in a cool, dry place when not in use
+Avoid contact with harsh chemicals, perfumes, or lotions
+Clean gently with a soft, dry cloth
+Remove before swimming or showering
+Store separately to prevent scratching
+For silver pieces, use appropriate cleaning solution if needed",,,lb,,,active
+001-black-hoodie,#001 Black Hoodie,"<p>Graphic tees built for risk, style and story. Our exclusive drops reflect the culture of the streets, the skate park and everything in-between.</p>
+<p>Available in sizes XS through XXL. Premium quality materials. Limited edition design.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Clothing > Activewear > Activewear Sweatshirts & Hoodies > Hoodies,"",Hoodies,false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Care Instructions:
+
+Machine wash cold with like colors
+Do not bleach
+Tumble dry low or hang dry
+Iron on low heat if needed (avoid direct heat on graphics)
+Do not dry clean
+Wash inside out to preserve graphics",,,lb,,,active
+001-white-hoodie,#001 White Hoodie,"<p>Graphic tees built for risk, style and story. Our exclusive drops reflect the culture of the streets, the skate park and everything in-between.</p>
+<p>Available in sizes XS through XXL. Premium quality materials. Limited edition design.</p>
+<p><em>Only at The Kiosk.</em></p>
+<p><strong>Delivery Information:</strong></p>
+<p>Free shipping in the EU. Limited stock. Once it drops—it's gone.</p>
+<ul>
+<li>Standard shipping: 5-7 business days</li>
+<li>Express shipping: 2-3 business days (additional fee)</li>
+<li>International shipping available</li>
+<li>Track your order through our shipping partner</li>
+</ul>",The Kiosk,Apparel & Accessories > Clothing > Activewear > Activewear Sweatshirts & Hoodies > Hoodies,"",Hoodies,false,Title,Default Title,,,,,,,,,0.0,shopify,deny,manual,0.00,,true,true,,,,,,,,,false,,,"Care Instructions:
+
+Machine wash cold with like colors
+Do not bleach
+Tumble dry low or hang dry
+Iron on low heat if needed (avoid direct heat on graphics)
+Do not dry clean
+Wash inside out to preserve graphics",,,lb,,,active

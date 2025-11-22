@@ -45,6 +45,7 @@ yarn-error.log*
 # Cloudflare
 .wrangler/
 wrangler.toml.local
+.dev.vars
 
 # Airtable (tokens in scripts should use placeholders)
 # Keep scripts but remove actual tokens before committing
