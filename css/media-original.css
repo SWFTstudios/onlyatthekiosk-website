@@ -1,0 +1,262 @@
+/* ========================================
+   MEDIA PAGE STYLES - Original Wanderlostgalaxy
+   Extracted from wanderlostgalaxy.webflow.css
+   ======================================== */
+
+/* CSS Variables */
+:root {
+  --white: #fff;
+  --black: #000;
+}
+
+/* Container for Video Wrapper */
+.container-3 {
+  z-index: 1;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding-left: 20vw;
+  padding-right: 20vw;
+  display: flex;
+  position: relative;
+}
+
+/* Video Wrapper */
+.video-wrapper {
+  aspect-ratio: 16 / 9;
+  background-color: #af9494;
+  border: 3px solid #000;
+  width: 100%;
+  position: relative;
+}
+
+.video-wrapper.mobile-portrrait {
+  aspect-ratio: 2 / 3;
+  display: none;
+}
+
+/* Loading Indicator */
+.loading {
+  width: 112px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Video Players */
+.video {
+  position: absolute;
+  inset: 0%;
+}
+
+.video.back {
+  z-index: 0;
+  filter: brightness(200%) blur(60px);
+  transform: scale(1.1);
+}
+
+.video.front {
+  z-index: 1;
+  border: 1px red;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  transform: scale(.8);
+}
+
+/* Backlight Switch */
+.backlight-switch {
+  z-index: 5;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 32px;
+  display: flex;
+  position: absolute;
+  inset: auto 0% 14%;
+}
+
+.switch {
+  background-color: var(--white);
+  border-radius: 20px;
+  width: 300px;
+  height: 40px;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+
+.switch:hover {
+  background-color: #fd3846;
+}
+
+.switch__handle {
+  background-color: #000;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  width: 147px;
+  height: 100%;
+  display: flex;
+  transform: translate(100%);
+  transition: transform 0.3s ease;
+}
+
+.switch__label {
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  font-size: 8px;
+  color: #fff;
+}
+
+/* Gesture Recognizer Container */
+.gesture-recognizer {
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  position: relative;
+}
+
+/* Spaceship Decorative Element */
+.spaceship {
+  z-index: 3;
+  background-image: url('../images/spaceship-only-landscape.webp');
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  inset: 0%;
+}
+
+/* Background Video */
+.background-video {
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  inset: 0%;
+}
+
+.background-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Vignette Overlay */
+.vignette-overlay {
+  z-index: 3;
+  background-image: radial-gradient(circle, #0000 36%, #000000ed);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0%;
+  pointer-events: none;
+}
+
+/* Rick and Morty Decorative Element */
+.rick_and_morty {
+  z-index: 3;
+  background-image: url('../images/rick-and-morty-landscape.webp');
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  inset: 0%;
+}
+
+/* Text Block */
+.text-block {
+  color: #fff;
+  font-family: Audiowide, sans-serif;
+}
+
+/* Cabin Shake Animation - Spaceship moves up and down on y-axis */
+@keyframes spaceshipShake {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+/* Apply cabin shake animation only to spaceship when switch is in cabin shake position */
+.spaceship.cabin-shake-active {
+  animation: spaceshipShake 0.8s ease-in-out infinite;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 991px) {
+  .container-3 {
+    width: 100vw;
+    padding-left: 20vw;
+    padding-right: 20vw;
+  }
+
+  .video.front {
+    transform: none;
+  }
+
+  .gesture-recognizer {
+    flex-flow: column;
+  }
+
+  .spaceship {
+    background-image: url('../images/spaceship-only-tablet.webp');
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .rick_and_morty {
+    background-image: url('../images/rick-and-morty-tablet.webp');
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .spaceship {
+    background-image: url('../images/spaceship-only-landscape.webp');
+  }
+
+  .rick_and_morty {
+    background-image: url('../images/rick-and-morty-landscape.webp');
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .video-wrapper {
+    border-style: none;
+    display: block;
+  }
+
+  .video-wrapper.mobile-portrrait {
+    aspect-ratio: 2 / 3;
+    display: none;
+  }
+
+  .spaceship {
+    background-image: url('../images/spaceship-only-portrait.webp');
+    background-position: 50%;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .rick_and_morty {
+    background-image: url('../images/rick-and-morty-portrait.webp');
+    background-position: 50%;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
