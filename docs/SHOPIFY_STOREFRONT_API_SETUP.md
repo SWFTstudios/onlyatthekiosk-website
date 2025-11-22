@@ -1,5 +1,9 @@
 # Shopify Storefront API Setup Guide
 
+**📚 For comprehensive API reference, queries, best practices, and troubleshooting, see**: [`SHOPIFY_STOREFRONT_API_REFERENCE.md`](SHOPIFY_STOREFRONT_API_REFERENCE.md)
+
+**Official Documentation**: [https://shopify.dev/docs/api/storefront/latest](https://shopify.dev/docs/api/storefront/latest)
+
 ## Overview
 
 This guide walks you through setting up and verifying access to the Shopify Storefront API for the Only at The Kiosk website. The Storefront API allows your custom frontend to fetch products, collections, and manage cart operations.

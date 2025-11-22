@@ -1,5 +1,9 @@
 # Shopify Integration Testing Guide
 
+**📚 For comprehensive API reference, queries, and troubleshooting, see**: [`SHOPIFY_STOREFRONT_API_REFERENCE.md`](SHOPIFY_STOREFRONT_API_REFERENCE.md)
+
+**Official Documentation**: [https://shopify.dev/docs/api/storefront/latest](https://shopify.dev/docs/api/storefront/latest)
+
 ## Overview
 
 This guide helps you verify that the Shopify backend integration is working correctly. Follow these steps to test each component of the integration.
