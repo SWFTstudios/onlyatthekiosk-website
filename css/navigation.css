@@ -118,7 +118,7 @@
 .brand-wrapper .special-k {
   color: var(--text-primary);
   font-weight: 900;
-  margin-right: -0.15em; /* Bring the backwards K closer to IOSK */
+  margin-right: -0.30em; /* Bring the backwards K closer to IOSK */
   display: inline-block;
 }
 
