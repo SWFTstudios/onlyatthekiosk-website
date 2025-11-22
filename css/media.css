@@ -180,7 +180,7 @@
 
 /* Rick and Morty Decorative Element */
 .rick_and_morty {
-  z-index: 3; /* Top layer - closest to viewer */
+  z-index: 5; /* Top layer - always visible, above everything else */
   background-image: url('../images/rick-and-morty-landscape.webp');
   background-position: 50%;
   background-repeat: no-repeat;
@@ -191,11 +191,7 @@
   inset: 0%;
   opacity: 1; /* Full opacity */
   pointer-events: none;
-  display: none; /* Hidden by default - can be enabled via switch */
-}
-
-.rick_and_morty.active {
-  display: block;
+  display: block; /* Always visible */
 }
 
 @media screen and (max-width: 991px) {
@@ -212,7 +208,7 @@
 
 /* Vignette Overlay */
 .vignette-overlay {
-  z-index: 4; /* Above all content layers */
+  z-index: 4; /* Above content layers, below Rick and Morty */
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0) 36%, rgba(0, 0, 0, 0.93) 100%);
   width: 100%;
   height: 100%;
@@ -285,7 +281,7 @@
 
 /* Backlight Switch */
 .backlight-switch {
-  z-index: 5;
+  z-index: 6; /* Above Rick and Morty so it's always clickable */
   flex-direction: column;
   align-items: center;
   margin-top: 32px;

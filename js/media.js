@@ -91,7 +91,6 @@ function syncStateChange(e){
 document.addEventListener('DOMContentLoaded', function() {
   const switchElement = document.querySelector('.switch');
   const switchHandle = document.querySelector('.switch__handle');
-  const rickAndMorty = document.querySelector('.rick_and_morty');
   const gestureRecognizer = document.querySelector('.gesture-recognizer');
   
   if (switchElement && switchHandle) {
@@ -107,17 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCabinShakeState(isCabinShakeActive) {
       if (isCabinShakeActive) {
         // Cabin shake ON - switch is on the left
-        if (rickAndMorty) {
-          rickAndMorty.classList.add('active');
-        }
         if (gestureRecognizer) {
           gestureRecognizer.classList.add('cabin-shake-active');
         }
       } else {
         // Cabin shake OFF - switch is on the right
-        if (rickAndMorty) {
-          rickAndMorty.classList.remove('active');
-        }
         if (gestureRecognizer) {
           gestureRecognizer.classList.remove('cabin-shake-active');
         }
