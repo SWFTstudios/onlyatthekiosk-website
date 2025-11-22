@@ -984,7 +984,7 @@ h1 {
 
 .text-block {
   text-align: center;
-  font-size: 24px;
+  font-size: 14px;
   color: var(--text-primary);
   transition: color 0.3s ease;
 }
@@ -3413,6 +3413,7 @@ h1 {
   .email-modal-title {
     font-size: 24px;
   }
+}
 
 /* ========================================
    UNIFIED STYLEGUIDE CLASSES
