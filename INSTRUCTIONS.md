@@ -308,11 +308,15 @@ This project creates a completely custom frontend and user experience while leve
 
 ## Shopify Integration
 
+**📚 Comprehensive Reference**: See [`docs/SHOPIFY_STOREFRONT_API_REFERENCE.md`](docs/SHOPIFY_STOREFRONT_API_REFERENCE.md) for complete API documentation, best practices, troubleshooting, and official Shopify links.
+
 ### Storefront API Configuration
 
 **Store Domain**: `onlyatthekiosk.com`  
 **API Endpoint**: `https://onlyatthekiosk.com/api/2024-01/graphql.json`  
 **Access Token**: Stored in environment variables (not hardcoded)
+
+**Official Documentation**: [Shopify Storefront API](https://shopify.dev/docs/api/storefront/latest)
 
 ### Using Storefront API
 
@@ -370,6 +374,8 @@ Store these in Cloudflare Pages environment variables:
 #### Required Variables
 
 - **`SHOPIFY_STOREFRONT_TOKEN`**: Shopify Storefront API access token
+
+**For complete Shopify setup, API reference, queries, error handling, and troubleshooting, see**: [`docs/SHOPIFY_STOREFRONT_API_REFERENCE.md`](docs/SHOPIFY_STOREFRONT_API_REFERENCE.md)
   - Get from: Shopify Admin → Settings → Apps and sales channels → Develop apps → Your app → Storefront API access token
   - See: `docs/SHOPIFY_STOREFRONT_API_SETUP.md` for detailed setup
 
