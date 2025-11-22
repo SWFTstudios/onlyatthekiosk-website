@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collection Products Test - Only at The Kiosk</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Generalsans Variable', 'Generalsans', Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    
+    .test-controls {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+      background: #ff6600;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      transition: background 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: #ff8533;
+    }
+    
+    .btn-secondary {
+      background: #333;
+      color: #fff;
+    }
+    
+    .btn-secondary:hover {
+      background: #444;
+    }
+    
+    .results {
+      margin-top: 2rem;
+    }
+    
+    .result-item {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+      border-left: 4px solid #ff6600;
+    }
+    
+    .result-item.success {
+      border-left-color: #00ff00;
+    }
+    
+    .result-item.error {
+      border-left-color: #ff0000;
+    }
+    
+    .result-item h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
+    
+    .result-item .count {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0.5rem 0;
+    }
+    
+    .result-item .products {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #333;
+    }
+    
+    .result-item .product-item {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      background: #0a0a0a;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    
+    .summary {
+      padding: 1.5rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+    
+    .summary h2 {
+      margin-bottom: 1rem;
+    }
+    
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat {
+      padding: 1rem;
+      background: #0a0a0a;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ff6600;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #888;
+      margin-top: 0.5rem;
+    }
+    
+    .loading {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: #333;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+    
+    .error-message {
+      color: #ff0000;
+      margin-top: 0.5rem;
+    }
+    
+    pre {
+      background: #0a0a0a;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Collection Products Test</h1>
+    <p>Test each collection to verify product counts from Shopify</p>
+    
+    <div class="test-controls">
+      <button class="btn" onclick="runFullTest()">Run Full Test</button>
+      <button class="btn btn-secondary" onclick="runQuickTest()">Quick Count Test</button>
+      <button class="btn btn-secondary" onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="loading" class="loading" style="display: none;">Testing collections...</div>
+    
+    <div id="results" class="results"></div>
+    
+    <div id="summary" class="summary" style="display: none;"></div>
+  </div>
+
+  <!-- Shopify Client -->
+  <script src="js/config.js"></script>
+  <script src="js/shopify.js"></script>
+  
+  <!-- Test Script -->
+  <script src="js/test-collection-products.js"></script>
+  
+  <script>
+    // Wait for Shopify client to load
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        if (window.shopify) {
+          console.log('✅ Shopify client loaded');
+        } else {
+          console.error('❌ Shopify client not loaded');
+          document.getElementById('results').innerHTML = `
+            <div class="result-item error">
+              <h3>Error</h3>
+              <p>Shopify client not loaded. Please ensure js/shopify.js is accessible.</p>
+            </div>
+          `;
+        }
+      }, 1000);
+    });
+
+    function clearResults() {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('summary').style.display = 'none';
+      document.getElementById('summary').innerHTML = '';
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function displayResults(testResults) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      testResults.collections.forEach((result, index) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = `result-item ${result.success ? 'success' : 'error'}`;
+        
+        let html = `
+          <h3>${result.handle.toUpperCase()}</h3>
+          <p><strong>Title:</strong> ${result.collectionTitle || 'N/A'}</p>
+          <p><strong>Status:</strong> ${result.success ? '✅ Success' : '❌ Failed'}</p>
+        `;
+
+        if (result.success) {
+          html += `
+            <div class="count">Products: ${result.productCount}</div>
+          `;
+
+          if (result.products && result.products.length > 0) {
+            html += `
+              <div class="products">
+                <strong>Product List:</strong>
+                ${result.products.map((p, i) => `
+                  <div class="product-item">${i + 1}. ${p.title} (${p.handle})</div>
+                `).join('')}
+              </div>
+            `;
+          }
+        } else {
+          html += `
+            <div class="error-message">Error: ${result.error || 'Unknown error'}</div>
+          `;
+        }
+
+        resultDiv.innerHTML = html;
+        resultsDiv.appendChild(resultDiv);
+      });
+
+      // Display summary
+      const summaryDiv = document.getElementById('summary');
+      summaryDiv.style.display = 'block';
+      summaryDiv.innerHTML = `
+        <h2>📊 Test Summary</h2>
+        <p><strong>Store:</strong> ${testResults.store}</p>
+        <p><strong>Timestamp:</strong> ${new Date(testResults.timestamp).toLocaleString()}</p>
+        <div class="summary-stats">
+          <div class="stat">
+            <div class="stat-value">${testResults.summary.total}</div>
+            <div class="stat-label">Collections Tested</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" style="color: #00ff00;">${testResults.summary.successful}</div>
+            <div class="stat-label">Successful</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" style="color: #ff0000;">${testResults.summary.failed}</div>
+            <div class="stat-label">Failed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${testResults.summary.totalProducts}</div>
+            <div class="stat-label">Total Products</div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function runFullTest() {
+      if (!window.shopify) {
+        alert('Shopify client not loaded. Please refresh the page.');
+        return;
+      }
+
+      clearResults();
+      showLoading();
+
+      try {
+        const results = await testAllCollections();
+        hideLoading();
+        displayResults(results);
+      } catch (error) {
+        hideLoading();
+        document.getElementById('results').innerHTML = `
+          <div class="result-item error">
+            <h3>Test Error</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    async function runQuickTest() {
+      if (!window.shopify) {
+        alert('Shopify client not loaded. Please refresh the page.');
+        return;
+      }
+
+      clearResults();
+      showLoading();
+
+      try {
+        const counts = await quickCountTest();
+        hideLoading();
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        Object.entries(counts).forEach(([handle, data]) => {
+          const resultDiv = document.createElement('div');
+          resultDiv.className = `result-item ${data.success ? 'success' : 'error'}`;
+          resultDiv.innerHTML = `
+            <h3>${handle.toUpperCase()}</h3>
+            <p><strong>Title:</strong> ${data.title || handle}</p>
+            <div class="count">Products: ${data.count}</div>
+            ${data.error ? `<div class="error-message">Error: ${data.error}</div>` : ''}
+          `;
+          resultsDiv.appendChild(resultDiv);
+        });
+
+        const total = Object.values(counts).reduce((sum, c) => sum + c.count, 0);
+        document.getElementById('summary').style.display = 'block';
+        document.getElementById('summary').innerHTML = `
+          <h2>📊 Quick Test Summary</h2>
+          <div class="summary-stats">
+            <div class="stat">
+              <div class="stat-value">${total}</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        hideLoading();
+        document.getElementById('results').innerHTML = `
+          <div class="result-item error">
+            <h3>Test Error</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
+
