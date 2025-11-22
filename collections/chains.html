@@ -1803,19 +1803,25 @@
           return Promise.resolve();
         }
         
+        console.log(`🛍️ Loading products from Shopify collection: "${handle}"`);
+        console.log(`📡 Store: ${window.shopify.storeDomain || 'onlyatthekiosk.com'}`);
+        
         try {
-          // Fetch collection data
+          // Fetch collection data from live Shopify store
           const collection = await window.shopify.getProductsByCollection(handle, 50);
           
           if (collection && collection.products && collection.products.edges && collection.products.edges.length > 0) {
             collectionData = collection;
             collectionProducts = collection.products.edges.map(edge => edge.node);
             
-            // Update collection title
+            console.log(`✅ Loaded ${collectionProducts.length} products from Shopify`);
+            console.log(`📦 Collection: "${collection.title || handle}"`);
+            
+            // Update collection title with actual Shopify title
             const collectionTitle = collection.title || formatCollectionTitle(handle);
             updateCollectionTitle(collectionTitle);
             
-            // Update carousel with products
+            // Update carousel with products from live store
             updateCarouselWithProducts(collectionProducts);
             
             // Trigger products loaded event
@@ -1824,12 +1830,18 @@
             return Promise.resolve();
           } else {
             // Collection exists but has no products, or collection not found
-            console.warn(`Collection "${handle}" has no products or was not found`);
+            console.warn(`⚠️ Collection "${handle}" has no products or was not found in Shopify`);
+            console.warn(`💡 Check Shopify Admin → Collections → "${handle}" to verify products are assigned`);
+            // Still update title with formatted handle
             updateCollectionTitle(formatCollectionTitle(handle));
             return Promise.resolve();
           }
         } catch (error) {
-          console.error('Error loading collection products:', error);
+          console.error('❌ Error loading collection products from Shopify:', error);
+          console.error('💡 Verify:');
+          console.error('   1. SHOPIFY_STOREFRONT_TOKEN is set in Cloudflare Pages');
+          console.error('   2. Collection handle matches Shopify (case-sensitive)');
+          console.error('   3. API endpoint is accessible');
           // Fallback to formatted handle
           updateCollectionTitle(formatCollectionTitle(handle));
           return Promise.resolve();
