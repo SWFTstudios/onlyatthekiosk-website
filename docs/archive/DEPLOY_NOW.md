@@ -9,7 +9,7 @@
 
 ### Step 1: Open Edge Functions in Dashboard
 
-1. Go to: https://supabase.com/dashboard/project/aszjrkqvkewoykteczxf/functions
+1. Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions
 2. Click **"Create a new function"** or **"New Function"**
 
 ### Step 2: Create Function
@@ -48,15 +48,15 @@ cd "/Users/elombe.kisala/Library/Mobile Documents/com~apple~CloudDocs/Work - SWF
 
 **Option C: Manual curl**
 ```bash
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk"
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products \
+  -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY"
 ```
 
 ## 📋 Function Details
 
 - **Function Name**: `sync-airtable-products`
-- **Project URL**: https://aszjrkqvkewoykteczxf.supabase.co
-- **Function Endpoint**: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products`
+- **Project URL**: https://YOUR_SUPABASE_PROJECT_REF.supabase.co
+- **Function Endpoint**: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products`
 - **Airtable Table**: Products (`tbljwWvetx3bScjJ2`)
 
 ## ✅ After Deployment

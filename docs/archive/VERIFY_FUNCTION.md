@@ -65,8 +65,8 @@ Once deployed, test it:
 
 ### Option 2: Via Terminal
 ```bash
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk" \
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products \
+  -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -104,7 +104,7 @@ After deployment:
 
 Once deployed correctly, the function URL should be:
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products
 ```
 
 If you see it in the Dashboard, the exact URL might be shown there - use that one for testing.

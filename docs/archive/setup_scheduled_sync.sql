@@ -11,10 +11,10 @@ SELECT cron.schedule(
   $$
   SELECT
     net.http_post(
-      url := 'https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-processor',
+      url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/super-processor',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
-        'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk'
+        'Authorization', 'Bearer YOUR_SUPABASE_ANON_KEY'
       ),
       body := '{}'::jsonb
     ) AS request_id;

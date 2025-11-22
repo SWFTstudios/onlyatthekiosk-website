@@ -29,7 +29,7 @@ Airtable (CMS) → Supabase Edge Function → Supabase Products Table → Websit
 ### 2. Sync Edge Function
 - **File**: `supabase/functions/sync-airtable-products/index.ts`
 - **Function Name**: `sync-airtable-products` (slug: `super-processor`)
-- **Endpoint**: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-processor`
+- **Endpoint**: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/super-processor`
 - **Features**:
   - Fetches all products from Airtable Products table (`tbljwWvetx3bScjJ2`)
   - Maps Airtable fields to Supabase schema
@@ -56,7 +56,7 @@ Airtable (CMS) → Supabase Edge Function → Supabase Products Table → Websit
 ### Manual Sync
 Call the Edge Function endpoint:
 ```bash
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-processor \
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/super-processor \
   -H "Authorization: Bearer SUPABASE_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -69,7 +69,7 @@ curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-process
 ### Query Products from Website
 ```javascript
 const response = await fetch(
-  'https://aszjrkqvkewoykteczxf.supabase.co/rest/v1/store_products?featured=eq.true',
+  'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/store_products?featured=eq.true',
   {
     headers: {
       'apikey': SUPABASE_ANON_KEY,

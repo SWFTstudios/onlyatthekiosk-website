@@ -1,8 +1,8 @@
 #!/bin/bash
 # Test Sync Function Script
 
-SUPABASE_URL="https://aszjrkqvkewoykteczxf.supabase.co"
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk"
+SUPABASE_URL="https://YOUR_SUPABASE_PROJECT_REF.supabase.co"
+SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 
 echo "🔄 Testing Airtable → Supabase sync..."
 echo ""

@@ -48,7 +48,7 @@ Or run the updated migration file which already includes this.
      - `products/update` - Updated products  
      - `products/delete` - Deleted products
    - **Format**: JSON
-   - **URL**: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product`
+   - **URL**: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product`
    - **API version**: Latest (2024-01 or newer)
 
 4. **Copy the webhook secret** - You'll need this for security
@@ -93,7 +93,7 @@ supabase functions deploy sync-shopify-product
 
 ```bash
 # Test webhook manually (without HMAC for testing)
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product \
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product \
   -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY" \
   -H "Content-Type: application/json" \
   -H "x-shopify-topic: products/create" \
@@ -222,7 +222,7 @@ If you sync from both Airtable and Shopify:
 
 **Shopify Sync Function:**
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product
 ```
 
 Use this URL when creating webhooks in Shopify.

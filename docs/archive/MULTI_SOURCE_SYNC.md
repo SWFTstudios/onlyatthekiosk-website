@@ -90,7 +90,7 @@ Or run the migration file:
 ### Step 2: Set Up Airtable Sync (Already Done ✅)
 
 - ✅ Function deployed: `sync-airtable-products` (slug: `super-processor`)
-- ✅ Endpoint: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-processor`
+- ✅ Endpoint: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/super-processor`
 - ✅ Sync tested and working
 
 ### Step 3: Set Up Shopify Sync
@@ -103,7 +103,7 @@ Or run the migration file:
 2. **Create Shopify webhook**:
    - Shopify Admin → Settings → Notifications → Webhooks
    - Event: `products/create`, `products/update`, `products/delete`
-   - URL: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product`
+   - URL: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product`
 
 3. **Test sync**:
    - Create a product in Shopify
@@ -175,11 +175,11 @@ WHERE airtable_record_id IS NOT NULL
 
 **Airtable Sync:**
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/super-processor
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/super-processor
 ```
 
 **Shopify Sync:**
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product
 ```
 

@@ -52,7 +52,7 @@ Sync products FROM Shopify TO Supabase when products change in Shopify.
      - `products/delete` - Deleted products
      - OR use all three
    - **Format**: JSON
-   - **URL**: `https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-shopify-product`
+   - **URL**: `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-shopify-product`
    - **API version**: Latest
 
 #### Step 2: Create Supabase Edge Function

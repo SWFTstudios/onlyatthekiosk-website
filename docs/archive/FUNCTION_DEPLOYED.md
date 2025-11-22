@@ -67,9 +67,9 @@ SELECT * FROM public.store_products;
 ### Option C: Via REST API
 ```bash
 # Get all products
-curl "https://aszjrkqvkewoykteczxf.supabase.co/rest/v1/products?select=handle,title,variant_price&limit=10" \
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk"
+curl "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/products?select=handle,title,variant_price&limit=10" \
+  -H "apikey: YOUR_SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY"
 ```
 
 ## ⚠️ If Products Were Skipped
@@ -97,13 +97,13 @@ If the sync shows skipped products, they're missing required fields in Airtable:
 
 **Sync Function URL:**
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products
 ```
 
 **Test Command:**
 ```bash
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk" \
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products \
+  -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```

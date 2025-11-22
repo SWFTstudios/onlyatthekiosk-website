@@ -40,12 +40,12 @@ SELECT * FROM public.store_products;
 ### Option C: Via REST API
 ```bash
 # Get all products
-curl "https://aszjrkqvkewoykteczxf.supabase.co/rest/v1/products?select=*&limit=10" \
+curl "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/products?select=*&limit=10" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Authorization: Bearer YOUR_ANON_KEY"
 
 # Get store products (published + active)
-curl "https://aszjrkqvkewoykteczxf.supabase.co/rest/v1/store_products?select=*" \
+curl "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/store_products?select=*" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Authorization: Bearer YOUR_ANON_KEY"
 ```
@@ -68,7 +68,7 @@ Choose one method:
 - Create automation: "When record matches conditions"
 - Action: Send web request to:
   ```
-  https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products
+  https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products
   ```
 - Method: POST
 - Headers: `Authorization: Bearer YOUR_SUPABASE_ANON_KEY`
@@ -83,10 +83,10 @@ SELECT cron.schedule(
   '*/5 * * * *',
   $$
   SELECT net.http_post(
-    url := 'https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products',
+    url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk'
+      'Authorization', 'Bearer YOUR_SUPABASE_ANON_KEY'
     ),
     body := '{}'::jsonb
   ) AS request_id;
@@ -99,8 +99,8 @@ SELECT cron.schedule(
 Update `store.html` to fetch products from Supabase REST API:
 
 ```javascript
-const SUPABASE_URL = 'https://aszjrkqvkewoykteczxf.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk'
+const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co'
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
 
 async function fetchProducts() {
   const response = await fetch(
@@ -131,13 +131,13 @@ async function fetchProducts() {
 
 **Sync Function URL:**
 ```
-https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products
+https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products
 ```
 
 **Test Command:**
 ```bash
-curl -X POST https://aszjrkqvkewoykteczxf.supabase.co/functions/v1/sync-airtable-products \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzempya3F2a2V3b3lrdGVjenhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzI5OTEsImV4cCI6MjA3OTIwODk5MX0.7KnXY1W2t6WwBilIJwJA6lfVqU913SJK6NmSCk6yfUk"
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/sync-airtable-products \
+  -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY"
 ```
 
 Congratulations! Your Airtable → Supabase sync is now live! 🎉

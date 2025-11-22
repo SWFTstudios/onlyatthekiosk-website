@@ -3168,6 +3168,33 @@ h1 {
   color: #ffffff !important;
 }
 
+/* Desktop-specific accent button styling */
+@media screen and (min-width: 992px) {
+  #notify-me-btn.btn-accent,
+  #notify-me-btn.btn-accent.w-button {
+    background-color: #FF6600 !important;
+    color: #ffffff !important;
+    border-color: #FF6600 !important;
+    border: 1px solid #FF6600 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 50px !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    display: inline-block !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  #notify-me-btn.btn-accent:hover,
+  #notify-me-btn.btn-accent.w-button:hover {
+    background-color: #FB9F89 !important;
+    border-color: #FB9F89 !important;
+    color: #ffffff !important;
+  }
+}
+
 /* Unified Typography Classes */
 .text-primary {
   color: var(--text-primary);

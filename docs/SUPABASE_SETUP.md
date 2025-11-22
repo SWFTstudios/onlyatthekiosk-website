@@ -42,6 +42,6 @@ If you want to set up CRM tables in Supabase, see:
 
 ## Connection
 
-- **Project URL**: https://aszjrkqvkewoykteczxf.supabase.co
+- **Project URL**: https://YOUR_SUPABASE_PROJECT_REF.supabase.co
 - **API Key**: Set in environment variables or Supabase Dashboard
 
