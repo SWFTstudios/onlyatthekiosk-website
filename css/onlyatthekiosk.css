@@ -3248,6 +3248,8 @@ h1 {
   .email-modal-title {
     font-size: 24px;
   }
+}
+
 /* Email Signup Modal Styles */
 .email-modal {
   position: fixed;
