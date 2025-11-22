@@ -102,17 +102,25 @@ document.addEventListener('DOMContentLoaded', function() {
              transform === '';
     }
     
-    // Helper function to update cabin shake state (spaceship animation)
+    // Helper function to update cabin shake state (spaceship animation and switch color)
     function updateCabinShakeState(isCabinShakeActive) {
       if (isCabinShakeActive) {
         // Cabin shake ON - switch is on the left, move spaceship up and down
         if (spaceship) {
           spaceship.classList.add('cabin-shake-active');
         }
+        // Change switch background to accent color
+        if (switchElement) {
+          switchElement.classList.add('cabin-shake-active');
+        }
       } else {
         // Cabin shake OFF - switch is on the right, stop spaceship movement
         if (spaceship) {
           spaceship.classList.remove('cabin-shake-active');
+        }
+        // Change switch background to grey
+        if (switchElement) {
+          switchElement.classList.remove('cabin-shake-active');
         }
       }
     }

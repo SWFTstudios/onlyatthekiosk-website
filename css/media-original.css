@@ -77,16 +77,21 @@
 }
 
 .switch {
-  background-color: var(--white);
+  background-color: #4a4a4a; /* Grey - default (backlight on) */
   border-radius: 20px;
   width: 300px;
   height: 40px;
   padding: 4px 2px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.switch.cabin-shake-active {
+  background-color: #FF6600; /* Accent orange - when cabin shake is active */
 }
 
 .switch:hover {
-  background-color: #fd3846;
+  opacity: 0.9;
 }
 
 .switch__handle {
