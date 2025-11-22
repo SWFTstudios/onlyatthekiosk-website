@@ -193,7 +193,12 @@
       if (typeof Swiper !== 'undefined') {
         const navSlider = document.querySelector('.navbar-right-content.v2 .slider');
         if (navSlider && !navSlider.swiper) {
-          new Swiper('.navbar-right-content.v2 .slider', {
+          // Check if slider element exists and is a valid DOM element
+          const sliderElement = navSlider.closest('.navbar-right-content.v2')?.querySelector('.slider');
+          if (!sliderElement) {
+            return; // Exit if slider element not found
+          }
+          new Swiper(sliderElement, {
             slidesPerView: 1,
             spaceBetween: 0,
             loop: true,
@@ -203,7 +208,7 @@
               pauseOnMouseEnter: true
             },
             pagination: {
-              el: navSlider.closest('.navbar-right-content.v2').querySelector('.slider-nav'),
+              el: navSlider.closest('.navbar-right-content.v2')?.querySelector('.slider-nav') || null,
               clickable: true,
               type: 'bullets',
               bulletClass: 'swiper-pagination-bullet',
