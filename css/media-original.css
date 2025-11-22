@@ -181,7 +181,7 @@
 .text-block {
   color: #fff;
   font-family: Audiowide, sans-serif;
-  font-size: 0.7rem;
+  font-size: 16px;
   white-space: nowrap;
   letter-spacing: 0.05em;
 }
