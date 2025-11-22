@@ -1767,10 +1767,16 @@
       // Function to format collection title for display
       function formatCollectionTitle(handle) {
         if (!handle) return 'Collection';
-        // Convert handle to title: "gold-bracelets" -> "Gold Bracelets"
+        // Convert handle to title: "gold-bracelets" -> "Gold Bracelets", "t-shirts" -> "T-Shirts"
         return handle.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
+      }
+      
+      // Update title immediately if collection handle is present (before API call)
+      if (collectionHandle) {
+        const initialTitle = formatCollectionTitle(collectionHandle);
+        updateCollectionTitle(initialTitle);
       }
       
       // Function to update collection title and page title
@@ -1904,25 +1910,6 @@
         
         // Store products count for carousel initialization
         window.dynamicProductsCount = products.length;
-        
-        // Recalculate carousel rotation if it's already been set up
-        const wrapEl = $("[carousel='wrap']");
-        if (wrapEl.length > 0) {
-          const rotateAmount = 360 / products.length;
-          const zTranslate = 2 * Math.tan((rotateAmount / 2) * (Math.PI / 180));
-          const negTranslate = `calc(var(--3d-carousel-item-width) / -${zTranslate} - var(--3d-carousel-gap))`;
-          const posTranslate = `calc(var(--3d-carousel-item-width) / ${zTranslate} + var(--3d-carousel-gap))`;
-          
-          wrapEl.css("--3d-carousel-z", negTranslate);
-          wrapEl.css("perspective", posTranslate);
-          
-          // Reposition items
-          itemEl.each(function (index) {
-            $(this).css({
-              transform: `translate(-50%, -50%) rotateY(${rotateAmount * index}deg) translateZ(${posTranslate})`
-            });
-          });
-        }
       }
       
       // Animate collection title from center to top using GSAP
@@ -1999,12 +1986,25 @@
         let componentEl = $(this);
         let wrapEl = componentEl.find("[carousel='wrap']");
         let swiperEl = componentEl.find(".swiper");
-        let itemEl = wrapEl.find(".carousel_item");
         let nextEl = componentEl.find("[carousel='next']");
         let prevEl = componentEl.find("[carousel='prev']");
         
+        // Check if wrapEl exists before proceeding
+        if (wrapEl.length === 0) {
+          console.warn('Carousel wrap element not found, skipping initialization');
+          return;
+        }
+        
+        let itemEl = wrapEl.find(".carousel_item");
+        
         // Use dynamic products count if available, otherwise use existing items
         const productCount = window.dynamicProductsCount || itemEl.length;
+        
+        // Skip if no products
+        if (productCount === 0) {
+          console.warn('No products found, skipping carousel initialization');
+          return;
+        }
         
         // Calculate rotation angle per item (360° / number of items)
         let rotateAmount = 360 / productCount;
@@ -2016,9 +2016,11 @@
         let negTranslate = `calc(var(--3d-carousel-item-width) / -${zTranslate} - var(--3d-carousel-gap))`;
         let posTranslate = `calc(var(--3d-carousel-item-width) / ${zTranslate} + var(--3d-carousel-gap))`;
 
-        // Set perspective and Z-position
-        wrapEl.css("--3d-carousel-z", negTranslate);
-        wrapEl.css("perspective", posTranslate);
+        // Set perspective and Z-position (only if wrapEl exists)
+        if (wrapEl.length > 0) {
+          wrapEl.css("--3d-carousel-z", negTranslate);
+          wrapEl.css("perspective", posTranslate);
+        }
         
         // Position each item in 3D space (only if items exist)
         // Items are centered at origin, then rotated and translated outward
@@ -2077,24 +2079,26 @@
           }
         });
         
-        // Fade in
-        introTl.to(wrapEl, { opacity: 1, duration: 0.3 });
-        
-        // Rotate from off-screen to position
-        introTl.fromTo(
-          wrapEl, 
-          { 
-            "--3d-carousel-rotate": 100,
-            "--3d-carousel-rotate-x": -90
-          }, 
-          { 
-            "--3d-carousel-rotate": 0,
-            "--3d-carousel-rotate-x": -4,
-            duration: 4, 
-            ease: "power2.inOut" 
-          }, 
-          "<"
-        );
+        // Fade in (only if wrapEl exists)
+        if (wrapEl.length > 0) {
+          introTl.to(wrapEl, { opacity: 1, duration: 0.3 });
+          
+          // Rotate from off-screen to position
+          introTl.fromTo(
+            wrapEl, 
+            { 
+              "--3d-carousel-rotate": 100,
+              "--3d-carousel-rotate-x": -90
+            }, 
+            { 
+              "--3d-carousel-rotate": 0,
+              "--3d-carousel-rotate-x": -4,
+              duration: 4, 
+              ease: "power2.inOut" 
+            }, 
+            "<"
+          );
+        }
         
         // Fade in titles and arrows
         introTl.to("[fade-up]", { opacity: 1 }, ">-0.3");
