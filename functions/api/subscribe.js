@@ -1,11 +1,13 @@
 // Cloudflare Pages Function to handle email subscriptions via Airtable
-export async function onRequestPost(context) {
+
+// Handle all HTTP methods
+export async function onRequest(context) {
   const { request, env } = context;
   
   // CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
@@ -13,6 +15,32 @@ export async function onRequestPost(context) {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Handle GET requests (health check)
+  if (request.method === 'GET') {
+    return new Response(
+      JSON.stringify({ 
+        status: 'ok',
+        service: 'email-subscription',
+        method: request.method
+      }),
+      { 
+        status: 200,
+        headers: corsHeaders
+      }
+    );
+  }
+
+  // Handle POST requests
+  if (request.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { 
+        status: 405,
+        headers: corsHeaders
+      }
+    );
   }
   
   try {

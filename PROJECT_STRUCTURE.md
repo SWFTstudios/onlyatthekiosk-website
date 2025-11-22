@@ -53,10 +53,6 @@ onlyatthekiosk-website/
 │           ├── sync-airtable-products/
 │           └── sync-shopify-product/
 │
-└── workers/                        # Cloudflare Workers (separate)
-    ├── kiosk-form-submission-handler.js
-    ├── wrangler.toml
-    └── README.md
 ```
 
 ## Active Files (In Use)
