@@ -190,47 +190,84 @@
     // Initialize Navigation Slider (v2)
     // Wait for Swiper to be available (it might load after this script)
     function initNavSlider() {
-      if (typeof Swiper !== 'undefined') {
-        const navSlider = document.querySelector('.navbar-right-content.v2 .slider');
-        if (navSlider && !navSlider.swiper) {
-          // Check if slider element exists and is a valid DOM element
-          const sliderElement = navSlider.closest('.navbar-right-content.v2')?.querySelector('.slider');
-          if (!sliderElement) {
-            return; // Exit if slider element not found
-          }
-          new Swiper(sliderElement, {
-            slidesPerView: 1,
-            spaceBetween: 0,
-            loop: true,
-            autoplay: {
-              delay: 4000,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true
-            },
-            pagination: {
-              el: navSlider.closest('.navbar-right-content.v2')?.querySelector('.slider-nav') || null,
-              clickable: true,
-              type: 'bullets',
-              bulletClass: 'swiper-pagination-bullet',
-              bulletActiveClass: 'swiper-pagination-bullet-active'
-            },
-            effect: 'slide',
-            speed: 500,
-            // Touch gestures
-            grabCursor: true,
-            touchRatio: 1,
-            touchAngle: 45,
-            simulateTouch: true,
-            allowTouchMove: true,
-            // Show one slide at a time
-            slidesPerGroup: 1,
-            // Ensure only one slide is visible
-            breakpoints: {}
-          });
-        }
-      } else {
+      if (typeof Swiper === 'undefined') {
         // If Swiper isn't loaded yet, try again after a short delay
         setTimeout(initNavSlider, 100);
+        return;
+      }
+      
+      // Find the slider container
+      const navSliderContainer = document.querySelector('.navbar-right-content.v2');
+      if (!navSliderContainer) {
+        return; // Exit if container doesn't exist
+      }
+      
+      // Check if it's a Webflow slider (w-slider) - don't convert to Swiper
+      const webflowSlider = navSliderContainer.querySelector('.w-slider');
+      if (webflowSlider) {
+        // This is a Webflow slider, let Webflow handle it
+        return;
+      }
+      
+      // Only initialize Swiper if it's a regular .slider element
+      const navSlider = navSliderContainer.querySelector('.slider:not(.w-slider)');
+      if (!navSlider) {
+        return; // Exit if no Swiper-compatible slider found
+      }
+      
+      // Check if already initialized
+      if (navSlider.swiper) {
+        return; // Already initialized
+      }
+      
+      // Verify element is a valid DOM element
+      if (!(navSlider instanceof Element)) {
+        console.warn('Slider element is not a valid DOM element');
+        return;
+      }
+      
+      // Get pagination element safely
+      const paginationEl = navSliderContainer.querySelector('.slider-nav');
+      
+      // Only initialize if pagination exists or if we allow null pagination
+      try {
+        const swiperConfig = {
+          slidesPerView: 1,
+          spaceBetween: 0,
+          loop: true,
+          autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          },
+          effect: 'slide',
+          speed: 500,
+          // Touch gestures
+          grabCursor: true,
+          touchRatio: 1,
+          touchAngle: 45,
+          simulateTouch: true,
+          allowTouchMove: true,
+          // Show one slide at a time
+          slidesPerGroup: 1,
+          // Ensure only one slide is visible
+          breakpoints: {}
+        };
+        
+        // Only add pagination if element exists and is valid
+        if (paginationEl && paginationEl instanceof Element) {
+          swiperConfig.pagination = {
+            el: paginationEl,
+            clickable: true,
+            type: 'bullets',
+            bulletClass: 'swiper-pagination-bullet',
+            bulletActiveClass: 'swiper-pagination-bullet-active'
+          };
+        }
+        
+        new Swiper(navSlider, swiperConfig);
+      } catch (error) {
+        console.error('Error initializing navigation slider:', error);
       }
     }
 
