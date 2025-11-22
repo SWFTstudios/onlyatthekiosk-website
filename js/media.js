@@ -91,7 +91,7 @@ function syncStateChange(e){
 document.addEventListener('DOMContentLoaded', function() {
   const switchElement = document.querySelector('.switch');
   const switchHandle = document.querySelector('.switch__handle');
-  const gestureRecognizer = document.querySelector('.gesture-recognizer');
+  const spaceship = document.querySelector('.spaceship');
   
   if (switchElement && switchHandle) {
     // Helper function to check if switch is in right position (backlight on)
@@ -102,17 +102,17 @@ document.addEventListener('DOMContentLoaded', function() {
              transform === '';
     }
     
-    // Helper function to update cabin shake state
+    // Helper function to update cabin shake state (spaceship animation)
     function updateCabinShakeState(isCabinShakeActive) {
       if (isCabinShakeActive) {
-        // Cabin shake ON - switch is on the left
-        if (gestureRecognizer) {
-          gestureRecognizer.classList.add('cabin-shake-active');
+        // Cabin shake ON - switch is on the left, move spaceship up and down
+        if (spaceship) {
+          spaceship.classList.add('cabin-shake-active');
         }
       } else {
-        // Cabin shake OFF - switch is on the right
-        if (gestureRecognizer) {
-          gestureRecognizer.classList.remove('cabin-shake-active');
+        // Cabin shake OFF - switch is on the right, stop spaceship movement
+        if (spaceship) {
+          spaceship.classList.remove('cabin-shake-active');
         }
       }
     }
