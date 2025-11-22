@@ -1353,22 +1353,22 @@
                           </div>
                           <div class="nav-links-column">
                             <div class="nav-animate-1">
-                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
+                              <a href="collections/bracelets.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Bracelets</div>
                               </a>
                             </div>
                             <div class="nav-animate-2">
-                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
+                              <a href="collections/chains.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Chains</div>
                               </a>
                             </div>
                             <div class="nav-animate-3">
-                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
+                              <a href="collections/hoodies.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">Hoodies</div>
                               </a>
                             </div>
                             <div class="nav-animate-4">
-                              <a href="carousel-template.html" class="nav-link-item w-inline-block">
+                              <a href="collections/t-shirts.html" class="nav-link-item w-inline-block">
                                 <div class="nav-link-text">T-shirts</div>
                               </a>
                             </div>
@@ -1802,19 +1802,25 @@
           return Promise.resolve();
         }
         
+        console.log(`🛍️ Loading products from Shopify collection: "${handle}"`);
+        console.log(`📡 Store: ${window.shopify.storeDomain || 'onlyatthekiosk.com'}`);
+        
         try {
-          // Fetch collection data
+          // Fetch collection data from live Shopify store
           const collection = await window.shopify.getProductsByCollection(handle, 50);
           
           if (collection && collection.products && collection.products.edges && collection.products.edges.length > 0) {
             collectionData = collection;
             collectionProducts = collection.products.edges.map(edge => edge.node);
             
+            console.log(`✅ Loaded ${collectionProducts.length} products from Shopify`);
+            console.log(`📦 Collection: "${collection.title || handle}"`);
+            
             // Update collection title
             const collectionTitle = collection.title || formatCollectionTitle(handle);
             updateCollectionTitle(collectionTitle);
             
-            // Update carousel with products
+            // Update carousel with products from live store
             updateCarouselWithProducts(collectionProducts);
             
             // Trigger products loaded event
@@ -1823,12 +1829,17 @@
             return Promise.resolve();
           } else {
             // Collection exists but has no products, or collection not found
-            console.warn(`Collection "${handle}" has no products or was not found`);
+            console.warn(`⚠️ Collection "${handle}" has no products or was not found in Shopify`);
+            console.warn(`💡 Check Shopify Admin → Collections → "${handle}" to verify products are assigned`);
             updateCollectionTitle(formatCollectionTitle(handle));
             return Promise.resolve();
           }
         } catch (error) {
-          console.error('Error loading collection products:', error);
+          console.error('❌ Error loading collection products from Shopify:', error);
+          console.error('💡 Verify:');
+          console.error('   1. SHOPIFY_STOREFRONT_TOKEN is set in Cloudflare Pages');
+          console.error('   2. Collection handle matches Shopify (case-sensitive)');
+          console.error('   3. API endpoint is accessible');
           // Fallback to formatted handle
           updateCollectionTitle(formatCollectionTitle(handle));
           return Promise.resolve();
@@ -2272,15 +2283,27 @@
             throw new Error('Shopify client not loaded. Please ensure js/shopify.js is loaded.');
           }
           
+          console.log(`🛍️ Fetching product from Shopify: "${handle}"`);
+          console.log(`📡 Store: ${window.shopify.storeDomain || 'onlyatthekiosk.com'}`);
+          
+          // Fetch from live Shopify store
           const product = await window.shopify.getProductByHandle(handle);
           
           if (!product) {
-            throw new Error(`Product with handle "${handle}" not found`);
+            throw new Error(`Product with handle "${handle}" not found in Shopify store`);
           }
+          
+          console.log(`✅ Product loaded from Shopify: "${product.title}"`);
+          console.log(`💰 Price: ${product.priceRange?.minVariantPrice?.amount || 'N/A'} ${product.priceRange?.minVariantPrice?.currencyCode || ''}`);
+          console.log(`🖼️ Images: ${product.images?.edges?.length || 0}`);
           
           return product;
         } catch (error) {
-          console.error('Error fetching product:', error);
+          console.error('❌ Error fetching product from Shopify:', error);
+          console.error('💡 Verify:');
+          console.error('   1. Product handle is correct');
+          console.error('   2. Product exists in Shopify store');
+          console.error('   3. SHOPIFY_STOREFRONT_TOKEN is configured');
           throw error;
         }
       }

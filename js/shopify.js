@@ -14,6 +14,12 @@ class ShopifyClient {
     // Store configuration (can be overridden via config.js)
     this.storeDomain = window.SHOPIFY_CONFIG?.storeDomain || 'onlyatthekiosk.com';
     this.apiVersion = window.SHOPIFY_CONFIG?.apiVersion || '2024-01';
+    
+    // Log initialization
+    console.log('🛍️ Shopify Client initialized');
+    console.log(`📡 Store: ${this.storeDomain}`);
+    console.log(`🔌 API Version: ${this.apiVersion}`);
+    console.log(`🌐 API Endpoint: ${this.apiEndpoint}`);
   }
 
   /**
