@@ -1,0 +1,368 @@
+/* ========================================
+   MEDIA PAGE STYLES
+   Extracted from wanderlostgalaxy-media-template
+   Adapted for Kiosk theme system
+   ======================================== */
+
+/* Main Container */
+.old-main {
+  flex-flow: column;
+  width: 100%;
+  display: flex;
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
+}
+
+/* Theme-aware main background */
+[data-theme="light"] .old-main {
+  background-color: var(--bg-primary-light, #fff);
+}
+
+[data-theme="dark"] .old-main {
+  background-color: var(--bg-primary-dark, #000);
+}
+
+/* Gesture Recognizer Container */
+.gesture-recognizer {
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  position: relative;
+}
+
+@media screen and (max-width: 991px) {
+  .gesture-recognizer {
+    flex-flow: column;
+  }
+}
+
+/* Container for Video Wrapper */
+.container-3 {
+  z-index: 1;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding-left: 20vw;
+  padding-right: 20vw;
+  display: flex;
+  position: relative;
+}
+
+@media screen and (max-width: 991px) {
+  .container-3 {
+    width: 100vw;
+    padding-left: 20vw;
+    padding-right: 20vw;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .container-3 {
+    justify-content: center;
+    align-items: center;
+    padding-left: 10vw;
+    padding-right: 10vw;
+  }
+}
+
+/* Video Wrapper */
+.video-wrapper {
+  aspect-ratio: 16 / 9;
+  background-color: var(--bg-secondary);
+  border: 3px solid var(--border);
+  width: 100%;
+  position: relative;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.video-wrapper.mobile-portrrait {
+  aspect-ratio: 2 / 3;
+  display: none;
+}
+
+@media screen and (max-width: 479px) {
+  .video-wrapper {
+    border-style: none;
+    display: block;
+  }
+  
+  .video-wrapper.mobile-portrrait {
+    aspect-ratio: 2 / 3;
+    display: none;
+  }
+}
+
+/* Loading Indicator */
+.loading {
+  width: 112px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+/* Video Players */
+.video {
+  position: absolute;
+  inset: 0%;
+}
+
+.video.back {
+  z-index: 0;
+  filter: brightness(200%) blur(60px);
+  transform: scale(1.1);
+}
+
+.video.front {
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  transform: scale(.8);
+  transition: border-color 0.3s ease;
+}
+
+@media screen and (max-width: 991px) {
+  .video.front {
+    transform: none;
+  }
+}
+
+/* Theme-aware video borders */
+[data-theme="light"] .video.front {
+  border-color: var(--border-light, #e7e7e7);
+}
+
+[data-theme="dark"] .video.front {
+  border-color: var(--border-dark, #2a2a2a);
+}
+
+/* Spaceship Decorative Element */
+.spaceship {
+  z-index: 3;
+  background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-landscape.webp');
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  inset: 0%;
+  opacity: 0.3; /* Reduced opacity for Kiosk theme */
+  pointer-events: none;
+}
+
+@media screen and (max-width: 991px) {
+  .spaceship {
+    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-tablet.webp');
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .spaceship {
+    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-landscape.webp');
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .spaceship {
+    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-portrait.webp');
+  }
+}
+
+/* Rick and Morty Decorative Element */
+.rick_and_morty {
+  z-index: 3;
+  background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-landscape.webp');
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  inset: 0%;
+  opacity: 0.2; /* Reduced opacity for Kiosk theme */
+  pointer-events: none;
+  display: none; /* Hidden by default - can be enabled via switch */
+}
+
+.rick_and_morty.active {
+  display: block;
+}
+
+@media screen and (max-width: 991px) {
+  .rick_and_morty {
+    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-tablet.webp');
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .rick_and_morty {
+    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-portrait.webp');
+  }
+}
+
+/* Vignette Overlay */
+.vignette-overlay {
+  z-index: 3;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0) 36%, rgba(0, 0, 0, 0.93) 100%);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0%;
+  pointer-events: none;
+}
+
+/* Background Video */
+.background-video {
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  inset: 0%;
+  object-fit: cover;
+}
+
+.background-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Backlight Switch */
+.backlight-switch {
+  z-index: 5;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 32px;
+  display: flex;
+  position: absolute;
+  inset: auto 0% 14%;
+}
+
+.switch {
+  background-color: var(--bg-primary-light, #fff);
+  border-radius: 20px;
+  width: 300px;
+  height: 40px;
+  padding: 4px 2px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.switch:hover {
+  background-color: var(--bg-secondary-light, #f1f1f1);
+}
+
+[data-theme="dark"] .switch {
+  background-color: var(--bg-secondary-dark, #1d1d1d);
+}
+
+[data-theme="dark"] .switch:hover {
+  background-color: var(--bg-tertiary-dark, #2a2a2a);
+}
+
+.switch__handle {
+  background-color: var(--text-primary-light, #000);
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  width: 147px;
+  height: 100%;
+  display: flex;
+  transform: translate(100%);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+[data-theme="dark"] .switch__handle {
+  background-color: var(--bg-primary-light, #fff);
+  transform: translate(0);
+}
+
+.switch__handle .text-block {
+  color: var(--text-primary-light, #fff);
+  font-family: 'Generalsans Variable', 'Generalsans', Arial, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-theme="dark"] .switch__handle .text-block {
+  color: var(--text-primary-dark, #000);
+}
+
+.switch__label {
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  font-size: 8px;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+[data-theme="light"] .switch__label {
+  color: var(--text-secondary-light, #4a4a4a);
+}
+
+[data-theme="dark"] .switch__label {
+  color: var(--text-secondary-dark, #b0b0b0);
+}
+
+/* Text Block (used in switch) */
+.text-block {
+  color: var(--text-primary);
+  font-family: 'Generalsans Variable', 'Generalsans', Arial, sans-serif;
+  transition: color 0.3s ease;
+}
+
+[data-theme="light"] .text-block {
+  color: var(--text-primary-light, #000);
+}
+
+[data-theme="dark"] .text-block {
+  color: var(--text-primary-dark, #fff);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 767px) {
+  .backlight-switch {
+    margin-top: 20px;
+  }
+  
+  .switch {
+    width: 250px;
+    height: 36px;
+  }
+  
+  .switch__handle {
+    width: 120px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .backlight-switch {
+    margin-top: 16px;
+  }
+  
+  .switch {
+    width: 200px;
+    height: 32px;
+  }
+  
+  .switch__handle {
+    width: 96px;
+  }
+  
+  .switch__handle .text-block {
+    font-size: 0.75rem;
+  }
+}
+

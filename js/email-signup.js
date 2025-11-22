@@ -59,6 +59,11 @@
     submitBtn.textContent = 'Signing Up...';
 
     try {
+      // Check if we're in local development (Cloudflare Pages Functions don't work locally)
+      const isLocalDev = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.port !== '';
+      
       // Call Cloudflare Pages Function
       // The function is automatically deployed at /api/subscribe when using Cloudflare Pages
       const response = await fetch('/api/subscribe', {
@@ -69,7 +74,58 @@
         body: JSON.stringify({ email: email }),
       });
 
-      const data = await response.json();
+      // Check if response is OK and has content
+      if (!response.ok) {
+        // Handle 405 (Method Not Allowed) - likely local development
+        if (response.status === 405 || response.status === 404) {
+          if (isLocalDev) {
+            showMessage('⚠️ This feature only works when deployed to Cloudflare Pages. In local development, use: wrangler pages dev', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign Up';
+            return;
+          }
+        }
+        
+        // Try to parse error response, but handle empty responses
+        let errorMessage = 'Something went wrong. Please try again.';
+        try {
+          const text = await response.text();
+          if (text) {
+            const data = JSON.parse(text);
+            errorMessage = data.error || errorMessage;
+          }
+        } catch (parseError) {
+          // If we can't parse, use default message
+          console.error('Error parsing response:', parseError);
+        }
+        
+        showMessage(errorMessage, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign Up';
+        return;
+      }
+
+      // Parse successful response
+      let data;
+      try {
+        const text = await response.text();
+        if (!text) {
+          throw new Error('Empty response');
+        }
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Error parsing JSON response:', parseError);
+        // If parsing fails but status is OK, still show success
+        if (response.ok) {
+          showMessage('Thank you! You\'ll be the first to know when we launch.', 'success');
+          form.reset();
+          setTimeout(() => {
+            closeModal();
+          }, 2000);
+          return;
+        }
+        throw parseError;
+      }
 
       if (response.ok) {
         showMessage('Thank you! You\'ll be the first to know when we launch.', 'success');
@@ -86,7 +142,16 @@
       }
     } catch (error) {
       console.error('Error submitting email:', error);
-      showMessage('Network error. Please check your connection and try again.', 'error');
+      
+      // Provide more specific error messages
+      if (error.message && error.message.includes('fetch')) {
+        showMessage('Network error. Please check your connection and try again.', 'error');
+      } else if (error.message && error.message.includes('JSON')) {
+        showMessage('Server response error. This may work when deployed to Cloudflare Pages.', 'error');
+      } else {
+        showMessage('Network error. Please check your connection and try again.', 'error');
+      }
+      
       submitBtn.disabled = false;
       submitBtn.textContent = 'Sign Up';
     }

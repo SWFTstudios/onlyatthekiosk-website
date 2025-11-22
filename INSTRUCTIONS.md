@@ -106,6 +106,175 @@ This project creates a completely custom frontend and user experience while leve
 └── webflow-exports/        # Reference designs from Webflow
 ```
 
+### Complete Project Structure
+
+```
+.
+├── 401.html
+├── build.sh
+├── carousel-template.html
+├── css
+│   ├── components.css
+│   ├── media.css
+│   ├── navigation.css
+│   ├── normalize.css
+│   ├── onlyatthekiosk.css
+│   └── webflow.css
+├── docs
+│   ├── 3D_CAROUSEL_ANALYSIS.md
+│   ├── architecture
+│   │   └── ARCHITECTURE_CLARIFICATION.md
+│   ├── ARCHITECTURE.md
+│   ├── archive
+│   │   ├── AIRTABLE_ADD_FIELDS_GUIDE.md
+│   │   ├── AIRTABLE_FIELD_MAPPING_GUIDE.md
+│   │   ├── AIRTABLE_FIELD_MAPPING.md
+│   │   ├── AIRTABLE_PRODUCTS_TABLE_STRUCTURE.md
+│   │   ├── AIRTABLE_SETUP_GUIDE.md
+│   │   ├── AIRTABLE_TO_SUPABASE_SYNC.md
+│   │   ├── AUTOMATIC_SYNC_SETUP.md
+│   │   ├── COMMIT_MESSAGE.md
+│   │   ├── COMPLETE_SYNC_SETUP.md
+│   │   ├── CORRECT_FUNCTION_URL.md
+│   │   ├── CREATE_INDEXES_AND_VIEW.sql
+│   │   ├── CREATE_PRODUCTS_TABLE_FIXED.sql
+│   │   ├── DEPLOY_NOW.md
+│   │   ├── DEPLOY_SYNC_FUNCTION.md
+│   │   ├── FIX_SYNC_ERROR.md
+│   │   ├── FIX_VIEW_ERROR.sql
+│   │   ├── FUNCTION_DEPLOYED.md
+│   │   ├── MULTI_SOURCE_SYNC.md
+│   │   ├── PRODUCT_BLOCK_MAPPING.md
+│   │   ├── README.md
+│   │   ├── SETUP_CHECKLIST.md
+│   │   ├── setup_scheduled_sync.sql
+│   │   ├── SHOPIFY_SUPABASE_SYNC.md
+│   │   ├── SHOPIFY_SYNC_SETUP.md
+│   │   ├── SYNC_SETUP_SUMMARY.md
+│   │   ├── SYNC_SUCCESS.md
+│   │   ├── UPDATE_FOREIGN_TABLE.sql
+│   │   ├── UPDATE_SYNC_FOR_NEW_TABLE.md
+│   │   ├── VERIFY_AIRTABLE_FIELDS.sql
+│   │   └── VERIFY_FUNCTION.md
+│   ├── CLEANUP_SUMMARY.md
+│   ├── CONTAINER_BORDERS_CHEATSHEET.md
+│   ├── EMAIL_SIGNUP.md
+│   ├── IMAGE_SOURCES.md
+│   ├── scripts
+│   ├── SETUP.md
+│   ├── supabase
+│   │   ├── SUPABASE_AIRTABLE_SETUP.md
+│   │   ├── SUPABASE_GITHUB_SETUP.md
+│   │   ├── SUPABASE_QUICK_START.md
+│   │   └── SUPABASE_SETUP_SQL.sql
+│   ├── SUPABASE_SETUP.md
+│   └── TROUBLESHOOTING_EMAIL_SIGNUP.md
+├── documents
+│   └── Excon_Complete.zip
+├── fonts
+│   ├── Excon_Complete.zip
+│   ├── GeneralSans-Bold.ttf
+│   ├── GeneralSans-BoldItalic.ttf
+│   ├── GeneralSans-Extralight.ttf
+│   ├── GeneralSans-ExtralightItalic.ttf
+│   ├── GeneralSans-Italic.ttf
+│   ├── GeneralSans-Light.ttf
+│   ├── GeneralSans-LightItalic.ttf
+│   ├── GeneralSans-Medium.ttf
+│   ├── GeneralSans-MediumItalic.ttf
+│   ├── GeneralSans-Regular.ttf
+│   ├── GeneralSans-Semibold.ttf
+│   ├── GeneralSans-SemiboldItalic.ttf
+│   ├── GeneralSans-Variable.ttf
+│   ├── GeneralSans-VariableItalic.ttf
+│   ├── SuisseIntl-Medium-WebS.woff2
+│   └── SuisseIntl-Regular-WebS.woff2
+├── functions
+│   └── api
+│       └── subscribe.js
+├── images
+│   └── [Image assets - see docs/IMAGE_SOURCES.md]
+├── index.html
+├── INSTRUCTIONS.md
+├── js
+│   ├── email-signup.js
+│   ├── lenis.js
+│   ├── media.js
+│   ├── navigation.js
+│   ├── onlyatthekiosk.js
+│   └── webflow.js
+├── kiosk-styleguide.html
+├── media.html
+├── PROJECT_STRUCTURE.md
+├── README.md
+├── scripts
+│   ├── archive
+│   ├── find_products_table.js
+│   ├── read_airtable_products.js
+│   └── test_sync.sh
+├── store.html
+├── supabase
+│   ├── functions
+│   │   └── archive
+│   └── migrations
+│       ├── 20250101000000_create_products_table.sql
+│       └── archive
+├── videos
+│   ├── index.html
+│   ├── ledefile-final-poster-00001.jpg
+│   ├── ledefile-final-transcode.mp4
+│   ├── ledefile-final-transcode.webm
+│   ├── ledefile-final.mp4
+│   ├── media.html
+│   ├── purple_galaxy-poster-00001.jpg
+│   ├── purple_galaxy-transcode.mp4
+│   ├── purple_galaxy-transcode.webm
+│   ├── purple_galaxy.mp4
+│   ├── shop.html
+│   └── stories.html
+└── webflow-exports
+    ├── 8xflow-styleguide-starter
+    │   ├── 8xflow-figma-to-webflow-styleguide.html
+    │   ├── css
+    │   ├── images
+    │   ├── index.html
+    │   ├── js
+    │   └── sample-page.html
+    ├── free-e-commerce-cloneable
+    │   ├── 401.html
+    │   ├── 404.html
+    │   ├── checkout.html
+    │   ├── css
+    │   ├── delivery-and-returns.html
+    │   ├── detail_category.html
+    │   ├── detail_product.html
+    │   ├── detail_sku.html
+    │   ├── fonts
+    │   ├── images
+    │   ├── index.html
+    │   ├── js
+    │   ├── order-confirmation.html
+    │   ├── paypal-checkout.html
+    │   ├── privacy-policy.html
+    │   ├── style-guide.html
+    │   └── terms-and-conditions.html
+    ├── full-screen-overlay-navigation-v3
+    │   ├── 401.html
+    │   ├── 404.html
+    │   ├── css
+    │   ├── fonts
+    │   ├── images
+    │   ├── index.html
+    │   └── js
+    └── wanderlostgalaxy-media-template
+        ├── css
+        ├── images
+        ├── js
+        └── videos
+```
+
+**Note**: The `images/` directory contains many image assets (product images, promotional images, icons, etc.). See `docs/IMAGE_SOURCES.md` for details on image sources and organization.
+
 ---
 
 ## Design Guidelines

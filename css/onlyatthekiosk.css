@@ -127,62 +127,465 @@
 }
 
 :root {
-  --white: white;
-  --black: black;
-  --old-lace: #f5f2e4;
+  /* ========================================
+     COMPREHENSIVE COLOR SYSTEM
+     Day and Night Mode Swatches for All UI Elements
+     ======================================== */
   
-  /* Light Theme Colors */
+  /* === BACKGROUNDS - LIGHT MODE === */
   --bg-primary-light: #ffffff;
   --bg-secondary-light: #f1f1f1;
-  --text-primary-light: #000000;
-  --text-secondary-light: #4a4a4a;
-  --text-tertiary-light: #818181;
-  --border-light: #e7e7e7;
+  --bg-tertiary-light: #eeeeee;
+  --bg-overlay-light: rgba(255, 255, 255, 0.95);
+  --bg-navbar-light: #ffffff;
+  --bg-nav-left-light: #ffffff;
+  --bg-nav-right-light: #f5f5f5;
+  --bg-card-light: #ffffff;
+  --bg-panel-light: #fafafa;
+  --bg-hover-light: #f8f8f8;
   
-  /* Dark Theme Colors */
+  /* === BACKGROUNDS - DARK MODE === */
   --bg-primary-dark: #000000;
   --bg-secondary-dark: #101010;
   --bg-tertiary-dark: #1d1d1d;
+  --bg-overlay-dark: rgba(0, 0, 0, 0.95);
+  --bg-navbar-dark: #111111;
+  --bg-nav-left-dark: #0a0a0a;
+  --bg-nav-right-dark: #1a1a1a;
+  --bg-card-dark: #151515;
+  --bg-panel-dark: #1a1a1a;
+  --bg-hover-dark: #222222;
+  
+  /* === TEXT - LIGHT MODE === */
+  --text-primary-light: #000000;
+  --text-secondary-light: #4a4a4a;
+  --text-tertiary-light: #818181;
+  --text-muted-light: #999999;
+  --text-link-light: #000000;
+  --text-link-hover-light: #333333;
+  --text-nav-link-light: #000000;
+  --text-nav-link-hover-light: #FF6600;
+  --text-heading-light: #000000;
+  --text-label-light: #666666;
+  
+  /* === TEXT - DARK MODE === */
   --text-primary-dark: #ffffff;
   --text-secondary-dark: #b0b0b0;
   --text-tertiary-dark: #888888;
-  --border-dark: #2a2a2a;
+  --text-muted-dark: #666666;
+  --text-link-dark: #ffffff;
+  --text-link-hover-dark: #cccccc;
+  --text-nav-link-dark: #ffffff;
+  --text-nav-link-hover-dark: #FF6600;
+  --text-heading-dark: #ffffff;
+  --text-label-dark: #aaaaaa;
   
-  /* Accent Colors from Image Palette */
+  /* === BORDERS - LIGHT MODE === */
+  --border-primary-light: #e7e7e7;
+  --border-secondary-light: #d0d0d0;
+  --border-divider-light: #cccccc;
+  --border-focus-light: #000000;
+  --border-nav-light: #e7e7e7;
+  --border-card-light: #e0e0e0;
+  --border-input-light: #cccccc;
+  --border-input-focus-light: #000000;
+  
+  /* === BORDERS - DARK MODE === */
+  --border-primary-dark: #2a2a2a;
+  --border-secondary-dark: #333333;
+  --border-divider-dark: #444444;
+  --border-focus-dark: #ffffff;
+  --border-nav-dark: #2a2a2a;
+  --border-card-dark: #333333;
+  --border-input-dark: #444444;
+  --border-input-focus-dark: #ffffff;
+  
+  /* === BUTTONS - LIGHT MODE === */
+  --btn-primary-bg-light: #000000;
+  --btn-primary-text-light: #ffffff;
+  --btn-primary-border-light: #000000;
+  --btn-primary-hover-bg-light: #333333;
+  --btn-primary-hover-text-light: #ffffff;
+  --btn-primary-hover-border-light: #333333;
+  
+  --btn-secondary-bg-light: transparent;
+  --btn-secondary-text-light: #000000;
+  --btn-secondary-border-light: #000000;
+  --btn-secondary-hover-bg-light: rgba(0, 0, 0, 0.05);
+  --btn-secondary-hover-text-light: #000000;
+  --btn-secondary-hover-border-light: #000000;
+  
+  --btn-accent-bg-light: #FF6600;
+  --btn-accent-text-light: #ffffff;
+  --btn-accent-border-light: #FF6600;
+  --btn-accent-hover-bg-light: #FB9F89;
+  --btn-accent-hover-text-light: #ffffff;
+  --btn-accent-hover-border-light: #FB9F89;
+  
+  /* === BUTTONS - DARK MODE === */
+  --btn-primary-bg-dark: #ffffff;
+  --btn-primary-text-dark: #000000;
+  --btn-primary-border-dark: #ffffff;
+  --btn-primary-hover-bg-dark: #cccccc;
+  --btn-primary-hover-text-dark: #000000;
+  --btn-primary-hover-border-dark: #cccccc;
+  
+  --btn-secondary-bg-dark: transparent;
+  --btn-secondary-text-dark: #ffffff;
+  --btn-secondary-border-dark: #ffffff;
+  --btn-secondary-hover-bg-dark: rgba(255, 255, 255, 0.1);
+  --btn-secondary-hover-text-dark: #ffffff;
+  --btn-secondary-hover-border-dark: #ffffff;
+  
+  --btn-accent-bg-dark: #FF6600;
+  --btn-accent-text-dark: #ffffff;
+  --btn-accent-border-dark: #FF6600;
+  --btn-accent-hover-bg-dark: #FB9F89;
+  --btn-accent-hover-text-dark: #ffffff;
+  --btn-accent-hover-border-dark: #FB9F89;
+  
+  /* === NAVIGATION - LIGHT MODE === */
+  --nav-bg-light: #ffffff;
+  --nav-text-light: #000000;
+  --nav-toggle-bg-light: transparent;
+  --nav-toggle-text-light: #000000;
+  --nav-toggle-icon-light: #000000;
+  --nav-toggle-hover-bg-light: rgba(0, 0, 0, 0.05);
+  --nav-link-light: #000000;
+  --nav-link-hover-light: #FF6600;
+  --nav-link-active-light: #FF6600;
+  
+  /* === NAVIGATION - DARK MODE === */
+  --nav-bg-dark: #111111;
+  --nav-text-dark: #ffffff;
+  --nav-toggle-bg-dark: transparent;
+  --nav-toggle-text-dark: #ffffff;
+  --nav-toggle-icon-dark: #ffffff;
+  --nav-toggle-hover-bg-dark: rgba(255, 255, 255, 0.1);
+  --nav-link-dark: #ffffff;
+  --nav-link-hover-dark: #FF6600;
+  --nav-link-active-dark: #FF6600;
+  
+  /* === SLIDER - LIGHT MODE === */
+  --slider-bg-light: transparent;
+  --slider-text-light: #000000;
+  --slider-dot-light: rgba(0, 0, 0, 0.4);
+  --slider-dot-active-light: #000000;
+  --slider-arrow-light: #000000;
+  --slider-nav-bg-light: rgba(0, 0, 0, 0.1);
+  
+  /* === SLIDER - DARK MODE === */
+  --slider-bg-dark: transparent;
+  --slider-text-dark: #ffffff;
+  --slider-dot-dark: rgba(255, 255, 255, 0.4);
+  --slider-dot-active-dark: #ffffff;
+  --slider-arrow-dark: #ffffff;
+  --slider-nav-bg-dark: rgba(255, 255, 255, 0.1);
+  
+  /* === FORMS - LIGHT MODE === */
+  --form-input-bg-light: #ffffff;
+  --form-input-text-light: #000000;
+  --form-input-border-light: #cccccc;
+  --form-input-focus-bg-light: #ffffff;
+  --form-input-focus-border-light: #000000;
+  --form-placeholder-light: #999999;
+  --form-label-light: #666666;
+  --form-error-light: #cc0000;
+  --form-success-light: #00aa00;
+  
+  /* === FORMS - DARK MODE === */
+  --form-input-bg-dark: #1a1a1a;
+  --form-input-text-dark: #ffffff;
+  --form-input-border-dark: #444444;
+  --form-input-focus-bg-dark: #1a1a1a;
+  --form-input-focus-border-dark: #ffffff;
+  --form-placeholder-dark: #666666;
+  --form-label-dark: #aaaaaa;
+  --form-error-dark: #ff4444;
+  --form-success-dark: #44ff44;
+  
+  /* === CARDS/PANELS - LIGHT MODE === */
+  --card-bg-light: #ffffff;
+  --card-border-light: #e0e0e0;
+  --card-shadow-light: rgba(0, 0, 0, 0.1);
+  --panel-bg-light: #fafafa;
+  --panel-border-light: #e7e7e7;
+  
+  /* === CARDS/PANELS - DARK MODE === */
+  --card-bg-dark: #151515;
+  --card-border-dark: #333333;
+  --card-shadow-dark: rgba(0, 0, 0, 0.5);
+  --panel-bg-dark: #1a1a1a;
+  --panel-border-dark: #2a2a2a;
+  
+  /* === ALERTS/FEEDBACK - LIGHT MODE === */
+  --alert-success-bg-light: #f0f9f0;
+  --alert-success-text-light: #00aa00;
+  --alert-success-border-light: #00aa00;
+  --alert-error-bg-light: #fff0f0;
+  --alert-error-text-light: #cc0000;
+  --alert-error-border-light: #cc0000;
+  --alert-warning-bg-light: #fff9f0;
+  --alert-warning-text-light: #cc8800;
+  --alert-warning-border-light: #cc8800;
+  --alert-info-bg-light: #f0f9ff;
+  --alert-info-text-light: #0088cc;
+  --alert-info-border-light: #0088cc;
+  
+  /* === ALERTS/FEEDBACK - DARK MODE === */
+  --alert-success-bg-dark: #0a1a0a;
+  --alert-success-text-dark: #44ff44;
+  --alert-success-border-dark: #44ff44;
+  --alert-error-bg-dark: #1a0a0a;
+  --alert-error-text-dark: #ff4444;
+  --alert-error-border-dark: #ff4444;
+  --alert-warning-bg-dark: #1a150a;
+  --alert-warning-text-dark: #ffaa44;
+  --alert-warning-border-dark: #ffaa44;
+  --alert-info-bg-dark: #0a151a;
+  --alert-info-text-dark: #44aaff;
+  --alert-info-border-dark: #44aaff;
+  
+  /* === ACCENT COLORS (Theme-agnostic) === */
   --accent-orange: #FF6600;
   --accent-orange-light: #FB9F89;
   --accent-teal: #81AE9D;
   --accent-brown: #C4AF9A;
   
-  /* Current Theme (defaults to light) */
+  /* === CURRENT THEME (defaults to light) === */
   --bg-primary: var(--bg-primary-light);
   --bg-secondary: var(--bg-secondary-light);
-  --bg-tertiary: var(--bg-secondary-light);
+  --bg-tertiary: var(--bg-tertiary-light);
+  --bg-overlay: var(--bg-overlay-light);
   --text-primary: var(--text-primary-light);
   --text-secondary: var(--text-secondary-light);
   --text-tertiary: var(--text-tertiary-light);
-  --border: var(--border-light);
+  --text-muted: var(--text-muted-light);
+  --text-link: var(--text-link-light);
+  --text-link-hover: var(--text-link-hover-light);
+  --border: var(--border-primary-light);
+  --border-secondary: var(--border-secondary-light);
+  --border-divider: var(--border-divider-light);
+  --border-focus: var(--border-focus-light);
   
   /* Legacy color aliases for backward compatibility */
   --white: var(--bg-primary-light);
   --black: var(--text-primary-light);
+  --old-lace: #f5f2e4;
 }
 
-/* Update legacy aliases for dark theme */
+/* ========================================
+   DARK THEME OVERRIDES
+   ======================================== */
 [data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary: var(--bg-primary-dark);
+  --bg-secondary: var(--bg-secondary-dark);
+  --bg-tertiary: var(--bg-tertiary-dark);
+  --bg-overlay: var(--bg-overlay-dark);
+  --bg-navbar: var(--bg-navbar-dark);
+  --bg-nav-left: var(--bg-nav-left-dark);
+  --bg-nav-right: var(--bg-nav-right-dark);
+  --bg-card: var(--card-bg-dark);
+  --bg-panel: var(--panel-bg-dark);
+  --bg-hover: var(--bg-hover-dark);
+  
+  /* Text */
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --text-tertiary: var(--text-tertiary-dark);
+  --text-muted: var(--text-muted-dark);
+  --text-link: var(--text-link-dark);
+  --text-link-hover: var(--text-link-hover-dark);
+  --text-nav-link: var(--text-nav-link-dark);
+  --text-nav-link-hover: var(--text-nav-link-hover-dark);
+  --text-heading: var(--text-heading-dark);
+  --text-label: var(--text-label-light);
+  
+  /* Borders */
+  --border: var(--border-primary-dark);
+  --border-secondary: var(--border-secondary-dark);
+  --border-divider: var(--border-divider-dark);
+  --border-focus: var(--border-focus-dark);
+  --border-nav: var(--border-nav-dark);
+  --border-card: var(--border-card-dark);
+  --border-input: var(--border-input-dark);
+  --border-input-focus: var(--border-input-focus-dark);
+  
+  /* Buttons */
+  --btn-primary-bg: var(--btn-primary-bg-dark);
+  --btn-primary-text: var(--btn-primary-text-dark);
+  --btn-primary-border: var(--btn-primary-border-dark);
+  --btn-primary-hover-bg: var(--btn-primary-hover-bg-dark);
+  --btn-primary-hover-text: var(--btn-primary-hover-text-dark);
+  --btn-primary-hover-border: var(--btn-primary-hover-border-dark);
+  
+  --btn-secondary-bg: var(--btn-secondary-bg-dark);
+  --btn-secondary-text: var(--btn-secondary-text-dark);
+  --btn-secondary-border: var(--btn-secondary-border-dark);
+  --btn-secondary-hover-bg: var(--btn-secondary-hover-bg-dark);
+  --btn-secondary-hover-text: var(--btn-secondary-hover-text-dark);
+  --btn-secondary-hover-border: var(--btn-secondary-hover-border-dark);
+  
+  --btn-accent-bg: var(--btn-accent-bg-dark);
+  --btn-accent-text: var(--btn-accent-text-dark);
+  --btn-accent-border: var(--btn-accent-border-dark);
+  --btn-accent-hover-bg: var(--btn-accent-hover-bg-dark);
+  --btn-accent-hover-text: var(--btn-accent-hover-text-dark);
+  --btn-accent-hover-border: var(--btn-accent-hover-border-dark);
+  
+  /* Navigation */
+  --nav-bg: var(--nav-bg-dark);
+  --nav-text: var(--nav-text-dark);
+  --nav-toggle-bg: var(--nav-toggle-bg-dark);
+  --nav-toggle-text: var(--nav-toggle-text-dark);
+  --nav-toggle-icon: var(--nav-toggle-icon-dark);
+  --nav-toggle-hover-bg: var(--nav-toggle-hover-bg-dark);
+  --nav-link: var(--nav-link-dark);
+  --nav-link-hover: var(--nav-link-hover-dark);
+  --nav-link-active: var(--nav-link-active-dark);
+  
+  /* Slider */
+  --slider-bg: var(--slider-bg-dark);
+  --slider-text: var(--slider-text-dark);
+  --slider-dot: var(--slider-dot-dark);
+  --slider-dot-active: var(--slider-dot-active-dark);
+  --slider-arrow: var(--slider-arrow-dark);
+  --slider-nav-bg: var(--slider-nav-bg-dark);
+  
+  /* Forms */
+  --form-input-bg: var(--form-input-bg-dark);
+  --form-input-text: var(--form-input-text-dark);
+  --form-input-border: var(--form-input-border-dark);
+  --form-input-focus-bg: var(--form-input-focus-bg-dark);
+  --form-input-focus-border: var(--form-input-focus-border-dark);
+  --form-placeholder: var(--form-placeholder-dark);
+  --form-label: var(--form-label-dark);
+  --form-error: var(--form-error-dark);
+  --form-success: var(--form-success-dark);
+  
+  /* Cards/Panels */
+  --card-bg: var(--card-bg-dark);
+  --card-border: var(--card-border-dark);
+  --card-shadow: var(--card-shadow-dark);
+  --panel-bg: var(--panel-bg-dark);
+  --panel-border: var(--panel-border-dark);
+  
+  /* Alerts */
+  --alert-success-bg: var(--alert-success-bg-dark);
+  --alert-success-text: var(--alert-success-text-dark);
+  --alert-success-border: var(--alert-success-border-dark);
+  --alert-error-bg: var(--alert-error-bg-dark);
+  --alert-error-text: var(--alert-error-text-dark);
+  --alert-error-border: var(--alert-error-border-dark);
+  --alert-warning-bg: var(--alert-warning-bg-dark);
+  --alert-warning-text: var(--alert-warning-text-dark);
+  --alert-warning-border: var(--alert-warning-border-dark);
+  --alert-info-bg: var(--alert-info-bg-dark);
+  --alert-info-text: var(--alert-info-text-dark);
+  --alert-info-border: var(--alert-info-border-dark);
+  
+  /* Legacy aliases */
   --white: var(--bg-primary-dark);
   --black: var(--text-primary-dark);
 }
 
-/* Dark Theme */
-[data-theme="dark"] {
-  --bg-primary: var(--bg-primary-dark);
-  --bg-secondary: var(--bg-secondary-dark);
-  --bg-tertiary: var(--bg-tertiary-dark);
-  --text-primary: var(--text-primary-dark);
-  --text-secondary: var(--text-secondary-dark);
-  --text-tertiary: var(--text-tertiary-dark);
-  --border: var(--border-dark);
+/* ========================================
+   LIGHT THEME DEFAULTS (Current Theme Variables)
+   ======================================== */
+:root {
+  /* Backgrounds */
+  --bg-navbar: var(--bg-navbar-light);
+  --bg-nav-left: var(--bg-nav-left-light);
+  --bg-nav-right: var(--bg-nav-right-light);
+  --bg-card: var(--card-bg-light);
+  --bg-panel: var(--panel-bg-light);
+  --bg-hover: var(--bg-hover-light);
+  
+  /* Text */
+  --text-nav-link: var(--text-nav-link-light);
+  --text-nav-link-hover: var(--text-nav-link-hover-light);
+  --text-heading: var(--text-heading-light);
+  --text-label: var(--text-label-light);
+  
+  /* Borders */
+  --border-nav: var(--border-nav-light);
+  --border-card: var(--border-card-light);
+  --border-input: var(--border-input-light);
+  --border-input-focus: var(--border-input-focus-light);
+  
+  /* Buttons */
+  --btn-primary-bg: var(--btn-primary-bg-light);
+  --btn-primary-text: var(--btn-primary-text-light);
+  --btn-primary-border: var(--btn-primary-border-light);
+  --btn-primary-hover-bg: var(--btn-primary-hover-bg-light);
+  --btn-primary-hover-text: var(--btn-primary-hover-text-light);
+  --btn-primary-hover-border: var(--btn-primary-hover-border-light);
+  
+  --btn-secondary-bg: var(--btn-secondary-bg-light);
+  --btn-secondary-text: var(--btn-secondary-text-light);
+  --btn-secondary-border: var(--btn-secondary-border-light);
+  --btn-secondary-hover-bg: var(--btn-secondary-hover-bg-light);
+  --btn-secondary-hover-text: var(--btn-secondary-hover-text-light);
+  --btn-secondary-hover-border: var(--btn-secondary-hover-border-light);
+  
+  --btn-accent-bg: var(--btn-accent-bg-light);
+  --btn-accent-text: var(--btn-accent-text-light);
+  --btn-accent-border: var(--btn-accent-border-light);
+  --btn-accent-hover-bg: var(--btn-accent-hover-bg-light);
+  --btn-accent-hover-text: var(--btn-accent-hover-text-light);
+  --btn-accent-hover-border: var(--btn-accent-hover-border-light);
+  
+  /* Navigation */
+  --nav-bg: var(--nav-bg-light);
+  --nav-text: var(--nav-text-light);
+  --nav-toggle-bg: var(--nav-toggle-bg-light);
+  --nav-toggle-text: var(--nav-toggle-text-light);
+  --nav-toggle-icon: var(--nav-toggle-icon-light);
+  --nav-toggle-hover-bg: var(--nav-toggle-hover-bg-light);
+  --nav-link: var(--nav-link-light);
+  --nav-link-hover: var(--nav-link-hover-light);
+  --nav-link-active: var(--nav-link-active-light);
+  
+  /* Slider */
+  --slider-bg: var(--slider-bg-light);
+  --slider-text: var(--slider-text-light);
+  --slider-dot: var(--slider-dot-light);
+  --slider-dot-active: var(--slider-dot-active-light);
+  --slider-arrow: var(--slider-arrow-light);
+  --slider-nav-bg: var(--slider-nav-bg-light);
+  
+  /* Forms */
+  --form-input-bg: var(--form-input-bg-light);
+  --form-input-text: var(--form-input-text-light);
+  --form-input-border: var(--form-input-border-light);
+  --form-input-focus-bg: var(--form-input-focus-bg-light);
+  --form-input-focus-border: var(--form-input-focus-border-light);
+  --form-placeholder: var(--form-placeholder-light);
+  --form-label: var(--form-label-light);
+  --form-error: var(--form-error-light);
+  --form-success: var(--form-success-light);
+  
+  /* Cards/Panels */
+  --card-bg: var(--card-bg-light);
+  --card-border: var(--card-border-light);
+  --card-shadow: var(--card-shadow-light);
+  --panel-bg: var(--panel-bg-light);
+  --panel-border: var(--panel-border-light);
+  
+  /* Alerts */
+  --alert-success-bg: var(--alert-success-bg-light);
+  --alert-success-text: var(--alert-success-text-light);
+  --alert-success-border: var(--alert-success-border-light);
+  --alert-error-bg: var(--alert-error-bg-light);
+  --alert-error-text: var(--alert-error-text-light);
+  --alert-error-border: var(--alert-error-border-light);
+  --alert-warning-bg: var(--alert-warning-bg-light);
+  --alert-warning-text: var(--alert-warning-text-light);
+  --alert-warning-border: var(--alert-warning-border-light);
+  --alert-info-bg: var(--alert-info-bg-light);
+  --alert-info-text: var(--alert-info-text-light);
+  --alert-info-border: var(--alert-info-border-light);
 }
 
 body {

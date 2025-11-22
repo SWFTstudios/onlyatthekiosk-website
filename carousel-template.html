@@ -5,7 +5,7 @@
   <title>3D Carousel Template - Only at The Kiosk</title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes" name="viewport">
   
-  <!-- Swiper CSS -->
+  <!-- Swiper CSS (kept for carousel) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
   
   <!-- Main Stylesheet (contains theme variables) -->
@@ -14,6 +14,7 @@
   
   <!-- Navigation CSS -->
   <link href="css/navigation.css" rel="stylesheet" type="text/css">
+  <link href="css/webflow.css" rel="stylesheet" type="text/css">
   
   <!-- Lenis Smooth Scroll CSS -->
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.15/dist/lenis.css">
@@ -1338,7 +1339,7 @@
                               </a>
                             </div>
                             <div class="nav-animate-3">
-                              <a href="#" class="nav-link-item is-main-link w-inline-block">
+                              <a href="media.html" class="nav-link-item is-main-link w-inline-block">
                                 <div class="nav-link-text">MEDIA</div>
                               </a>
                             </div>
@@ -1390,10 +1391,11 @@
                         <div class="navbar-right-content-wrapper">
                           <!-- Slider Version (v2) - Visible for desktop and mobile -->
                           <div class="navbar-right-content v2">
-                            <div class="slider swiper">
-                              <div class="swiper-wrapper">
+                            <!-- Promotional Slider (Webflow w-slider) -->
+                            <div data-delay="4000" data-animation="slide" class="slider w-slider" data-autoplay="false" data-easing="ease" data-hide-arrows="false" data-disable-swipe="false" data-autoplay-limit="0" data-nav-spacing="3" data-duration="500" data-infinite="true">
+                              <div class="w-slider-mask">
                                 <!-- Slide 1 -->
-                                <div class="swiper-slide">
+                                <div class="w-slide">
                                   <div class="slider-content">
                                     <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="New Collection Drop" class="slider-img">
                                     <div class="slider-content-wrapper">
@@ -1403,7 +1405,7 @@
                                   </div>
                                 </div>
                                 <!-- Slide 2 -->
-                                <div class="swiper-slide">
+                                <div class="w-slide">
                                   <div class="slider-content">
                                     <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Summer Sale" class="slider-img">
                                     <div class="slider-content-wrapper">
@@ -1413,7 +1415,7 @@
                                   </div>
                                 </div>
                                 <!-- Slide 3 -->
-                                <div class="swiper-slide">
+                                <div class="w-slide">
                                   <div class="slider-content">
                                     <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Exclusive Media" class="slider-img">
                                     <div class="slider-content-wrapper">
@@ -1423,8 +1425,7 @@
                                   </div>
                                 </div>
                               </div>
-                              <!-- Slider Navigation -->
-                              <div class="slider-nav swiper-pagination"></div>
+                              <div class="w-slider-nav w-slider-nav-invert w-shadow w-round"></div>
                             </div>
                           </div>
                           <!-- Static Cards Version (v1) - Hidden -->
@@ -1737,7 +1738,10 @@
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   
-  <!-- Swiper JS -->
+  <!-- Webflow JS (for navigation slider) -->
+  <script src="js/webflow.js" type="text/javascript"></script>
+  
+  <!-- Swiper JS (for 3D carousel - carousel uses its own JS) -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
   
   <!-- Lenis Smooth Scroll JS -->

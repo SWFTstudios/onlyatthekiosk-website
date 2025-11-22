@@ -10,8 +10,7 @@
   <link href="css/normalize.css" rel="stylesheet" type="text/css">
   <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
   <link href="css/navigation.css" rel="stylesheet" type="text/css">
-  <!-- Swiper CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <link href="css/webflow.css" rel="stylesheet" type="text/css">
   <!-- Lenis Smooth Scroll CSS -->
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.15/dist/lenis.css">
   
@@ -30,51 +29,10 @@
   </script>
   
   <style>
-    /* Theme Variables */
-    :root {
-      /* Light Theme Colors */
-      --bg-primary-light: #ffffff;
-      --bg-secondary-light: #f1f1f1;
-      --text-primary-light: #000000;
-      --text-secondary-light: #4a4a4a;
-      --text-tertiary-light: #818181;
-      --border-light: #e7e7e7;
-      
-      /* Dark Theme Colors */
-      --bg-primary-dark: #000000;
-      --bg-secondary-dark: #101010;
-      --bg-tertiary-dark: #1d1d1d;
-      --text-primary-dark: #ffffff;
-      --text-secondary-dark: #b0b0b0;
-      --text-tertiary-dark: #888888;
-      --border-dark: #2a2a2a;
-      
-      /* Accent Colors from Image Palette */
-      --accent-orange: #FF6600;
-      --accent-orange-light: #FB9F89;
-      --accent-teal: #81AE9D;
-      --accent-brown: #C4AF9A;
-      
-      /* Current Theme (defaults to light) */
-      --bg-primary: var(--bg-primary-light);
-      --bg-secondary: var(--bg-secondary-light);
-      --bg-tertiary: var(--bg-secondary-light);
-      --text-primary: var(--text-primary-light);
-      --text-secondary: var(--text-secondary-light);
-      --text-tertiary: var(--text-tertiary-light);
-      --border: var(--border-light);
-    }
-    
-    /* Dark Theme */
-    [data-theme="dark"] {
-      --bg-primary: var(--bg-primary-dark);
-      --bg-secondary: var(--bg-secondary-dark);
-      --bg-tertiary: var(--bg-tertiary-dark);
-      --text-primary: var(--text-primary-dark);
-      --text-secondary: var(--text-secondary-dark);
-      --text-tertiary: var(--text-tertiary-dark);
-      --border: var(--border-dark);
-    }
+    /* 
+      Color Variables are defined in css/onlyatthekiosk.css
+      This page uses those variables - see the comprehensive color system documentation below
+    */
     
     /* Base Styles */
     * {
@@ -460,7 +418,7 @@
                               </a>
                             </div>
                             <div class="nav-animate-3">
-                              <a href="#" class="nav-link-item is-main-link w-inline-block">
+                              <a href="media.html" class="nav-link-item is-main-link w-inline-block">
                                 <div class="nav-link-text">MEDIA</div>
                               </a>
                             </div>
@@ -510,60 +468,43 @@
                     <div class="navbar-right">
                       <div class="page-padding is-navbar">
                         <div class="navbar-right-content-wrapper">
-                          <div class="navbar-right-content">
-                            <!-- Promotional Slider -->
-                            <div class="promo-slider swiper">
-                              <div class="swiper-wrapper">
+                          <div class="navbar-right-content v2">
+                            <!-- Promotional Slider (Webflow w-slider) -->
+                            <div data-delay="4000" data-animation="slide" class="slider w-slider" data-autoplay="false" data-easing="ease" data-hide-arrows="false" data-disable-swipe="false" data-autoplay-limit="0" data-nav-spacing="3" data-duration="500" data-infinite="true">
+                              <div class="w-slider-mask">
                                 <!-- Promotional Card 1 -->
-                                <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">New Collection Drop</h3>
-                                      <p class="promo-card-description">Discover our latest limited edition pieces. Exclusive designs you won't find anywhere else.</p>
+                                <div class="w-slide">
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="New Collection Drop" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>New Collection Drop</h3>
+                                      <p>Discover our latest limited edition pieces. Exclusive designs you won't find anywhere else.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
                                 <!-- Promotional Card 2 -->
-                                <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">Summer Sale</h3>
-                                      <p class="promo-card-description">Up to 50% off selected items. Limited time offer while supplies last.</p>
+                                <div class="w-slide">
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Summer Sale" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>Summer Sale</h3>
+                                      <p>Up to 50% off selected items. Limited time offer while supplies last.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
                                 <!-- Promotional Card 3 -->
-                                <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">Exclusive Media</h3>
-                                      <p class="promo-card-description">Behind the scenes content, exclusive interviews, and more from The Kiosk.</p>
+                                <div class="w-slide">
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Exclusive Media" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>Exclusive Media</h3>
+                                      <p>Behind the scenes content, exclusive interviews, and more from The Kiosk.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
                               </div>
+                              <div class="w-slider-nav w-slider-nav-invert w-shadow w-round"></div>
                             </div>
-                            <!-- Navigation Buttons -->
-                            <div class="promo-slider-nav">
-                              <button class="promo-slider-button promo-slider-button-prev" aria-label="Previous slide">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              </button>
-                              <button class="promo-slider-button promo-slider-button-next" aria-label="Next slide">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              </button>
-                            </div>
-                            <!-- Pagination (below cards) -->
-                            <div class="promo-slider-pagination"></div>
                           </div>
                           <!-- See Styleguide (bottom right) -->
                           <div class="navbar-right-styleguide">
@@ -598,145 +539,296 @@
   <main class="styleguide-container">
     <!-- Colors Section -->
     <section class="styleguide-section">
-      <h2 class="styleguide-section-title">Colors</h2>
+      <h2 class="styleguide-section-title">Color System</h2>
+      <p style="margin-bottom: 2rem; color: var(--text-secondary);">Comprehensive day/night mode color swatches for all UI elements. All variables are defined in <code>css/onlyatthekiosk.css</code> and automatically switch based on the <code>data-theme</code> attribute.</p>
       
+      <!-- Backgrounds -->
       <div class="styleguide-subsection">
-        <h3 class="styleguide-subsection-title">Primary Palette</h3>
+        <h3 class="styleguide-subsection-title">Backgrounds</h3>
         <div class="colors-grid">
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #000000;">
-              <span style="color: #ffffff; font-weight: 600;">Black</span>
+            <div class="color-swatch" style="background-color: var(--bg-primary-light); border: 1px solid var(--border-primary-light);">
+              <span style="color: var(--text-primary-light); font-weight: 600;">Primary Light</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Black</p>
-              <p class="color-value">#000000</p>
-            </div>
-          </div>
-          
-          <div class="color-card">
-            <div class="color-swatch" style="background-color: #ffffff; border: 1px solid #e7e7e7;">
-              <span style="color: #000000; font-weight: 600;">White</span>
-            </div>
-            <div class="color-info">
-              <p class="color-name">White</p>
+              <p class="color-name">--bg-primary-light</p>
               <p class="color-value">#FFFFFF</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #101010;">
-              <span style="color: #ffffff; font-weight: 600;">Dark Grey</span>
+            <div class="color-swatch" style="background-color: var(--bg-primary-dark);">
+              <span style="color: var(--text-primary-dark); font-weight: 600;">Primary Dark</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Dark Grey</p>
+              <p class="color-name">--bg-primary-dark</p>
+              <p class="color-value">#000000</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--bg-secondary-light); border: 1px solid var(--border-primary-light);">
+              <span style="color: var(--text-primary-light); font-weight: 600;">Secondary Light</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--bg-secondary-light</p>
+              <p class="color-value">#F1F1F1</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--bg-secondary-dark);">
+              <span style="color: var(--text-primary-dark); font-weight: 600;">Secondary Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--bg-secondary-dark</p>
               <p class="color-value">#101010</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #1d1d1d;">
-              <span style="color: #ffffff; font-weight: 600;">Charcoal</span>
+            <div class="color-swatch" style="background-color: var(--bg-navbar-light); border: 1px solid var(--border-nav-light);">
+              <span style="color: var(--text-primary-light); font-weight: 600;">Navbar Light</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Charcoal</p>
-              <p class="color-value">#1D1D1D</p>
+              <p class="color-name">--bg-navbar-light</p>
+              <p class="color-value">#FFFFFF</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #4a4a4a;">
-              <span style="color: #ffffff; font-weight: 600;">Medium Grey</span>
+            <div class="color-swatch" style="background-color: var(--bg-navbar-dark);">
+              <span style="color: var(--text-primary-dark); font-weight: 600;">Navbar Dark</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Medium Grey</p>
-              <p class="color-value">#4A4A4A</p>
-            </div>
-          </div>
-          
-          <div class="color-card">
-            <div class="color-swatch" style="background-color: #818181;">
-              <span style="color: #ffffff; font-weight: 600;">Light Grey</span>
-            </div>
-            <div class="color-info">
-              <p class="color-name">Light Grey</p>
-              <p class="color-value">#818181</p>
-            </div>
-          </div>
-          
-          <div class="color-card">
-            <div class="color-swatch" style="background-color: #b0b0b0;">
-              <span style="color: #000000; font-weight: 600;">Pale Grey</span>
-            </div>
-            <div class="color-info">
-              <p class="color-name">Pale Grey</p>
-              <p class="color-value">#B0B0B0</p>
-            </div>
-          </div>
-          
-          <div class="color-card">
-            <div class="color-swatch" style="background-color: #e7e7e7;">
-              <span style="color: #000000; font-weight: 600;">Off White</span>
-            </div>
-            <div class="color-info">
-              <p class="color-name">Off White</p>
-              <p class="color-value">#E7E7E7</p>
-            </div>
-          </div>
-          
-          <div class="color-card">
-            <div class="color-swatch" style="background-color: #f1f1f1;">
-              <span style="color: #000000; font-weight: 600;">Light Grey</span>
-            </div>
-            <div class="color-info">
-              <p class="color-name">Light Grey</p>
-              <p class="color-value">#F1F1F1</p>
+              <p class="color-name">--bg-navbar-dark</p>
+              <p class="color-value">#111111</p>
             </div>
           </div>
         </div>
       </div>
       
+      <!-- Text Colors -->
       <div class="styleguide-subsection">
-        <h3 class="styleguide-subsection-title">Accent Colors</h3>
+        <h3 class="styleguide-subsection-title">Text Colors</h3>
         <div class="colors-grid">
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #FF6600;">
-              <span style="color: #ffffff; font-weight: 600;">Orange</span>
+            <div class="color-swatch" style="background-color: var(--text-primary-light);">
+              <span style="color: var(--bg-primary-light); font-weight: 600;">Primary Light</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Orange</p>
+              <p class="color-name">--text-primary-light</p>
+              <p class="color-value">#000000</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--text-primary-dark);">
+              <span style="color: var(--bg-primary-dark); font-weight: 600;">Primary Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--text-primary-dark</p>
+              <p class="color-value">#FFFFFF</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--text-secondary-light);">
+              <span style="color: var(--bg-primary-light); font-weight: 600;">Secondary Light</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--text-secondary-light</p>
+              <p class="color-value">#4A4A4A</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--text-secondary-dark);">
+              <span style="color: var(--bg-primary-dark); font-weight: 600;">Secondary Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--text-secondary-dark</p>
+              <p class="color-value">#B0B0B0</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--text-nav-link-hover-light);">
+              <span style="color: var(--bg-primary-light); font-weight: 600;">Nav Link Hover</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--text-nav-link-hover</p>
+              <p class="color-value">#FF6600</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Button Colors -->
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Button Colors</h3>
+        <div class="colors-grid">
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--btn-primary-bg-light);">
+              <span style="color: var(--btn-primary-text-light); font-weight: 600;">Primary BG</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--btn-primary-bg-light</p>
+              <p class="color-value">#000000</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--btn-primary-bg-dark);">
+              <span style="color: var(--btn-primary-text-dark); font-weight: 600;">Primary BG Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--btn-primary-bg-dark</p>
+              <p class="color-value">#FFFFFF</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--btn-secondary-bg-light); border: 2px solid var(--btn-secondary-border-light);">
+              <span style="color: var(--btn-secondary-text-light); font-weight: 600;">Secondary BG</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--btn-secondary-bg-light</p>
+              <p class="color-value">transparent</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--btn-accent-bg-light);">
+              <span style="color: var(--btn-accent-text-light); font-weight: 600;">Accent BG</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--btn-accent-bg-light</p>
               <p class="color-value">#FF6600</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #FB9F89;">
+            <div class="color-swatch" style="background-color: var(--btn-accent-hover-bg-light);">
+              <span style="color: var(--btn-accent-text-light); font-weight: 600;">Accent Hover</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--btn-accent-hover-bg-light</p>
+              <p class="color-value">#FB9F89</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Border Colors -->
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Border Colors</h3>
+        <div class="colors-grid">
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--border-primary-light); border: 1px solid var(--border-primary-light);">
+              <span style="color: var(--text-primary-light); font-weight: 600;">Primary Light</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--border-primary-light</p>
+              <p class="color-value">#E7E7E7</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--border-primary-dark); border: 1px solid var(--border-primary-dark);">
+              <span style="color: var(--text-primary-dark); font-weight: 600;">Primary Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--border-primary-dark</p>
+              <p class="color-value">#2A2A2A</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--border-focus-light);">
+              <span style="color: var(--bg-primary-light); font-weight: 600;">Focus Light</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--border-focus-light</p>
+              <p class="color-value">#000000</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--border-focus-dark);">
+              <span style="color: var(--bg-primary-dark); font-weight: 600;">Focus Dark</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--border-focus-dark</p>
+              <p class="color-value">#FFFFFF</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Accent Colors -->
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Accent Colors (Theme-agnostic)</h3>
+        <div class="colors-grid">
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--accent-orange);">
+              <span style="color: #ffffff; font-weight: 600;">Orange</span>
+            </div>
+            <div class="color-info">
+              <p class="color-name">--accent-orange</p>
+              <p class="color-value">#FF6600</p>
+            </div>
+          </div>
+          
+          <div class="color-card">
+            <div class="color-swatch" style="background-color: var(--accent-orange-light);">
               <span style="color: #000000; font-weight: 600;">Orange Light</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Orange Light</p>
+              <p class="color-name">--accent-orange-light</p>
               <p class="color-value">#FB9F89</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #81AE9D;">
+            <div class="color-swatch" style="background-color: var(--accent-teal);">
               <span style="color: #ffffff; font-weight: 600;">Teal</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Teal</p>
+              <p class="color-name">--accent-teal</p>
               <p class="color-value">#81AE9D</p>
             </div>
           </div>
           
           <div class="color-card">
-            <div class="color-swatch" style="background-color: #C4AF9A;">
+            <div class="color-swatch" style="background-color: var(--accent-brown);">
               <span style="color: #000000; font-weight: 600;">Brown</span>
             </div>
             <div class="color-info">
-              <p class="color-name">Brown</p>
+              <p class="color-name">--accent-brown</p>
               <p class="color-value">#C4AF9A</p>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <!-- Usage Note -->
+      <div class="styleguide-subsection">
+        <h3 class="styleguide-subsection-title">Color System Usage</h3>
+        <div class="typography-sample">
+          <p><strong>All color variables are defined in <code>css/onlyatthekiosk.css</code></strong></p>
+          <p>Use semantic variable names that automatically adapt to the theme:</p>
+          <ul style="margin-top: 1rem; padding-left: 2rem;">
+            <li><code>--bg-primary</code> - Main background color</li>
+            <li><code>--text-primary</code> - Main text color</li>
+            <li><code>--btn-primary-bg</code> - Primary button background</li>
+            <li><code>--nav-link-hover</code> - Navigation link hover color</li>
+            <li><code>--slider-dot</code> - Slider pagination dot color</li>
+            <li><code>--form-input-border</code> - Form input border color</li>
+            <li><code>--card-bg</code> - Card background color</li>
+            <li><code>--alert-success-bg</code> - Success alert background</li>
+          </ul>
+          <p style="margin-top: 1rem;"><strong>Theme Toggle:</strong> All colors automatically switch between light and dark modes based on the <code>data-theme</code> attribute on the <code>&lt;html&gt;</code> element.</p>
         </div>
       </div>
     </section>
@@ -816,18 +908,42 @@
     <!-- Buttons Section -->
     <section class="styleguide-section">
       <h2 class="styleguide-section-title">Buttons</h2>
+      <p style="margin-bottom: 2rem; color: var(--text-secondary);">Button styles use the comprehensive color system. All buttons automatically adapt to light/dark theme.</p>
       
       <div class="buttons-grid">
         <div class="button-sample">
           <button class="btn btn-primary">Primary Button</button>
+          <p class="typography-label" style="margin-top: 0.5rem;">Uses: --btn-primary-bg, --btn-primary-text</p>
         </div>
         
         <div class="button-sample">
           <button class="btn btn-secondary">Secondary Button</button>
+          <p class="typography-label" style="margin-top: 0.5rem;">Uses: --btn-secondary-bg, --btn-secondary-text, --btn-secondary-border</p>
         </div>
         
         <div class="button-sample">
           <button class="btn btn-accent">Accent Button</button>
+          <p class="typography-label" style="margin-top: 0.5rem;">Uses: --btn-accent-bg, --btn-accent-text</p>
+        </div>
+      </div>
+      
+      <div class="styleguide-subsection" style="margin-top: 2rem;">
+        <h3 class="styleguide-subsection-title">Button States</h3>
+        <div class="buttons-grid">
+          <div class="button-sample">
+            <button class="btn btn-primary" style="opacity: 0.7;">Primary Hover</button>
+            <p class="typography-label" style="margin-top: 0.5rem;">--btn-primary-hover-bg</p>
+          </div>
+          
+          <div class="button-sample">
+            <button class="btn btn-secondary" style="opacity: 0.7;">Secondary Hover</button>
+            <p class="typography-label" style="margin-top: 0.5rem;">--btn-secondary-hover-bg</p>
+          </div>
+          
+          <div class="button-sample">
+            <button class="btn btn-accent" style="opacity: 0.7;">Accent Hover</button>
+            <p class="typography-label" style="margin-top: 0.5rem;">--btn-accent-hover-bg (#FB9F89)</p>
+          </div>
         </div>
       </div>
     </section>
@@ -881,8 +997,8 @@
   </main>
   
   <script src="js/navigation.js" type="text/javascript"></script>
-  <!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+  <!-- Webflow JS (for navigation slider) -->
+  <script src="js/webflow.js" type="text/javascript"></script>
   <!-- Lenis Smooth Scroll JS -->
   <script src="https://unpkg.com/lenis@1.3.15/dist/lenis.min.js"></script>
   <script src="js/lenis.js" type="text/javascript"></script>
