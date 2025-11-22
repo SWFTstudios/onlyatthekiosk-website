@@ -286,17 +286,19 @@
   transform: translate(0);
 }
 
+/* Text inside switch handle - must contrast with handle background */
 .switch__handle .text-block {
-  color: var(--text-primary-light, #fff);
+  color: var(--bg-primary-light, #fff); /* White text on black handle (light mode) */
   font-family: 'Generalsans Variable', 'Generalsans', Arial, sans-serif;
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  transition: color 0.3s ease;
 }
 
 [data-theme="dark"] .switch__handle .text-block {
-  color: var(--text-primary-dark, #000);
+  color: var(--text-primary-light, #000); /* Black text on white handle (dark mode) */
 }
 
 .switch__label {
@@ -304,16 +306,16 @@
   text-transform: uppercase;
   margin-top: 8px;
   font-size: 8px;
-  color: var(--text-secondary);
   transition: color 0.3s ease;
 }
 
+/* Switch label must contrast with old-main background */
 [data-theme="light"] .switch__label {
-  color: var(--text-secondary-light, #4a4a4a);
+  color: var(--text-primary-light, #000); /* Black text on white background */
 }
 
 [data-theme="dark"] .switch__label {
-  color: var(--text-secondary-dark, #b0b0b0);
+  color: var(--text-primary-dark, #fff); /* White text on black background */
 }
 
 /* Text Block (used in switch) */
