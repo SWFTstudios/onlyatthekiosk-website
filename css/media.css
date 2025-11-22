@@ -147,7 +147,7 @@
 /* Spaceship Decorative Element */
 .spaceship {
   z-index: 3;
-  background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-landscape.webp');
+  background-image: url('../images/spaceship-only-landscape.webp');
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
@@ -161,26 +161,26 @@
 
 @media screen and (max-width: 991px) {
   .spaceship {
-    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-tablet.webp');
+    background-image: url('../images/spaceship-only-tablet.webp');
   }
 }
 
 @media screen and (max-width: 767px) {
   .spaceship {
-    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-landscape.webp');
+    background-image: url('../images/spaceship-only-landscape.webp');
   }
 }
 
 @media screen and (max-width: 479px) {
   .spaceship {
-    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/spaceship-only-portrait.webp');
+    background-image: url('../images/spaceship-only-portrait.webp');
   }
 }
 
 /* Rick and Morty Decorative Element */
 .rick_and_morty {
   z-index: 3;
-  background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-landscape.webp');
+  background-image: url('../images/rick-and-morty-landscape.webp');
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
@@ -199,13 +199,13 @@
 
 @media screen and (max-width: 991px) {
   .rick_and_morty {
-    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-tablet.webp');
+    background-image: url('../images/rick-and-morty-tablet.webp');
   }
 }
 
 @media screen and (max-width: 767px) {
   .rick_and_morty {
-    background-image: url('../webflow-exports/wanderlostgalaxy-media-template/images/rick-and-morty-portrait.webp');
+    background-image: url('../images/rick-and-morty-portrait.webp');
   }
 }
 
