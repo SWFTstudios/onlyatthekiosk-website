@@ -176,21 +176,24 @@
 .text-block {
   color: #fff;
   font-family: Audiowide, sans-serif;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
 }
 
-/* Cabin Shake Animation - Spaceship moves up and down on y-axis */
+/* Cabin Shake Animation - Spaceship moves up and down on y-axis (subtle) */
 @keyframes spaceshipShake {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-30px);
+    transform: translateY(-8px);
   }
 }
 
 /* Apply cabin shake animation only to spaceship when switch is in cabin shake position */
 .spaceship.cabin-shake-active {
-  animation: spaceshipShake 0.8s ease-in-out infinite;
+  animation: spaceshipShake 1.2s ease-in-out infinite;
 }
 
 /* Responsive Styles */
