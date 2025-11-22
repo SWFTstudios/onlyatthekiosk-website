@@ -17,11 +17,11 @@ This is the official, tested product upload template for Only at The Kiosk. It h
 
 ## Overview
 
-This guide explains how to import the product CSV file (`shopify-products-import.csv`) into your Shopify store. The CSV contains all 80 products with their variants, ready for import.
+This guide explains how to import the product CSV file (`kiosk-shopify-products.csv`) into your Shopify store. The CSV contains all 80 products with their variants, ready for import.
 
 ## CSV File Details
 
-- **File**: `docs/shopify-products-import.csv`
+- **File**: `kiosk-shopify-products.csv` (Official template - tested and validated)
 - **Template Format**: Matches Shopify's latest CSV import template
 - **Total Products**: 80
 - **Total Rows**: 360 (includes all size variants)
@@ -57,7 +57,7 @@ Before importing, ensure you have:
 
 ### Step 1: Prepare the CSV File
 
-1. Open `docs/shopify-products-import.csv` in a spreadsheet application (Excel, Google Sheets, Numbers)
+1. Open `kiosk-shopify-products.csv` in a spreadsheet application (Excel, Google Sheets, Numbers)
 2. Review the data to ensure everything looks correct
 3. **Important**: Update image paths if you have product images ready
    - Replace `images/kiosk-placeholder-product-img.webp` with actual image URLs
