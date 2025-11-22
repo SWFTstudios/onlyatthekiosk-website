@@ -330,6 +330,13 @@
   transition: color 0.3s ease;
 }
 
+/* Hide menu text on mobile devices */
+@media screen and (max-width: 991px) {
+  .nav-toggle-text {
+    display: none;
+  }
+}
+
 /* Theme-aware nav toggle text - inherits from nav-toggle-inner */
 [data-theme="light"] .nav-toggle-inner .nav-toggle-text {
   color: var(--text-primary-light, #000);
