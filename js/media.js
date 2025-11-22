@@ -94,27 +94,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const spaceship = document.querySelector('.spaceship');
   
   if (switchElement && switchHandle) {
-    // Helper function to check if switch is in right position (backlight on)
+    // Helper function to check if switch is in right position (cabin shake ON)
     function isSwitchOnRight() {
       const transform = switchHandle.style.transform || '';
       return transform.includes('translate(100%)') || 
-             transform.includes('translate3d(100%') ||
-             transform === '';
+             transform.includes('translate3d(100%');
     }
     
     // Helper function to update cabin shake state (spaceship animation and switch color)
     function updateCabinShakeState(isCabinShakeActive) {
       if (isCabinShakeActive) {
-        // Cabin shake ON - switch is on the left, move spaceship up and down
+        // Cabin shake ON - switch is on the RIGHT, move spaceship up and down
         if (spaceship) {
           spaceship.classList.add('cabin-shake-active');
         }
-        // Change switch background to accent color
+        // Change switch background to accent color (orange)
         if (switchElement) {
           switchElement.classList.add('cabin-shake-active');
         }
       } else {
-        // Cabin shake OFF - switch is on the right, stop spaceship movement
+        // Cabin shake OFF - switch is on the LEFT, stop spaceship movement
         if (spaceship) {
           spaceship.classList.remove('cabin-shake-active');
         }
@@ -125,21 +124,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
-    // Check initial state - inline style has translate3d(100%, 0, 0) = backlight on, cabin shake off
+    // Check initial state - starts on LEFT (translate(0)) = cabin shake OFF
     const initialIsOnRight = isSwitchOnRight();
-    updateCabinShakeState(!initialIsOnRight);
+    updateCabinShakeState(initialIsOnRight);
     
     switchElement.addEventListener('click', function() {
       const isOnRight = isSwitchOnRight();
       
       if (isOnRight) {
-        // Currently on right (backlight on) - move to left (cabin shake on)
+        // Currently on RIGHT (cabin shake ON) - move to LEFT (cabin shake OFF)
         switchHandle.style.transform = 'translate(0)';
-        updateCabinShakeState(true);
-      } else {
-        // Currently on left (cabin shake on) - move to right (backlight on)
-        switchHandle.style.transform = 'translate(100%)';
         updateCabinShakeState(false);
+      } else {
+        // Currently on LEFT (cabin shake OFF) - move to RIGHT (cabin shake ON)
+        switchHandle.style.transform = 'translate(100%)';
+        updateCabinShakeState(true);
       }
     });
   }
