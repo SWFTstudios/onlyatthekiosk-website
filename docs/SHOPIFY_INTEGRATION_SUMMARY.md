@@ -1,5 +1,9 @@
 # Shopify Backend Integration - Implementation Summary
 
+**📚 Comprehensive API Reference**: See [`SHOPIFY_STOREFRONT_API_REFERENCE.md`](SHOPIFY_STOREFRONT_API_REFERENCE.md) for complete API documentation, queries, error handling, and official Shopify links.
+
+**Official Documentation**: [https://shopify.dev/docs/api/storefront/latest](https://shopify.dev/docs/api/storefront/latest)
+
 ## Overview
 
 This document summarizes the Shopify backend integration implementation for the Only at The Kiosk website. The integration connects the custom frontend to Shopify's Storefront API for e-commerce functionality.
