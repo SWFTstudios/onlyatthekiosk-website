@@ -187,52 +187,57 @@
       }
     }
 
-    // Initialize Promotional Slider
+    // Initialize Navigation Slider (v2)
     // Wait for Swiper to be available (it might load after this script)
-    function initPromoSlider() {
+    function initNavSlider() {
       if (typeof Swiper !== 'undefined') {
-        const promoSlider = document.querySelector('.promo-slider');
-        if (promoSlider && !promoSlider.swiper) {
-          new Swiper('.promo-slider', {
+        const navSlider = document.querySelector('.navbar-right-content.v2 .slider');
+        if (navSlider && !navSlider.swiper) {
+          new Swiper('.navbar-right-content.v2 .slider', {
             slidesPerView: 1,
-            spaceBetween: 20,
+            spaceBetween: 0,
             loop: true,
             autoplay: {
-              delay: 5000,
+              delay: 4000,
               disableOnInteraction: false,
               pauseOnMouseEnter: true
             },
             pagination: {
-              el: '.promo-slider-pagination',
+              el: navSlider.closest('.navbar-right-content.v2').querySelector('.slider-nav'),
               clickable: true,
-              type: 'bullets'
+              type: 'bullets',
+              bulletClass: 'swiper-pagination-bullet',
+              bulletActiveClass: 'swiper-pagination-bullet-active'
             },
-            navigation: {
-              nextEl: '.promo-slider-button-next',
-              prevEl: '.promo-slider-button-prev',
-              disabledClass: 'swiper-button-disabled'
-            },
-            effect: 'fade',
-            fadeEffect: {
-              crossFade: true
-            },
-            speed: 800,
+            effect: 'slide',
+            speed: 500,
             // Touch gestures
             grabCursor: true,
             touchRatio: 1,
             touchAngle: 45,
             simulateTouch: true,
-            allowTouchMove: true
+            allowTouchMove: true,
+            // Show one slide at a time
+            slidesPerGroup: 1,
+            // Ensure only one slide is visible
+            breakpoints: {}
           });
         }
       } else {
         // If Swiper isn't loaded yet, try again after a short delay
-        setTimeout(initPromoSlider, 100);
+        setTimeout(initNavSlider, 100);
       }
     }
 
     // Initialize slider when DOM is ready and Swiper is available
-    initPromoSlider();
+    initNavSlider();
+    
+    // Re-initialize slider when navigation opens (in case it wasn't ready initially)
+    if (navToggle) {
+      navToggle.addEventListener('click', function() {
+        setTimeout(initNavSlider, 100);
+      });
+    }
   }
 })();
 

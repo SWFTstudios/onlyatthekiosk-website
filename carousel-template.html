@@ -34,6 +34,46 @@
   
   <!-- Custom Styles -->
   <style>
+    /*
+    ========================================
+    CONTAINER BORDER DEBUGGING SYSTEM
+    ========================================
+    
+    How to Enable Debug Borders:
+    1. Via Console: Run toggleDebugBorders()
+    2. Via URL: Add ?debug=borders to the page URL
+    3. Via HTML class: Add class="debug-borders" to <html> element
+    
+    Quick Color Reference:
+    - Red (#FF0000): navbar
+    - Dark Red (#CC0000): navbar-content-wrapper
+    - Orange (#FF6600): navbar-left
+    - Coral (#FF7F50): navbar-right
+    - Salmon (#FA8072): navbar-right-content-wrapper
+    - Light Salmon (#FFA07A): navbar-right-content
+    - Maroon (#800000): page-padding
+    - Blue (#0000FF): carousel_component
+    - Dark Blue (#0000CC): carousel_wrap
+    - Navy (#000080): carousel_list
+    - Teal (#008080): carousel_item
+    - Cyan (#00FFFF): carousel_arrow_wrap
+    - Green (#00FF00): .swiper (main)
+    - Dark Green (#00CC00): .swiper-wrapper
+    - Lime (#32CD32): .swiper-slide
+    - Purple (#800080): collection-title
+    - Violet (#8A2BE2): collection-title-text
+    - Magenta (#FF00FF): products_collection-drawer
+    - Dark Magenta (#CC00CC): products_drawer-wrapper
+    - Fuchsia (#FF00CC): products_drawer-content
+    - Hot Pink (#FF69B4): products_drawer-images
+    - Pink (#FFC0CB): products_drawer-text
+    - Gold (#FFD700): promo-slider
+    - Yellow (#FFFF00): promo-card
+    - Khaki (#F0E68C): promo-slider-nav
+    
+    See docs/CONTAINER_BORDERS_CHEATSHEET.md for complete documentation.
+    ========================================
+    */
     * {
       margin: 0;
       padding: 0;
@@ -1081,6 +1121,141 @@
       margin: 0;
       font-size: 0.875rem;
     }
+
+    /*
+    ========================================
+    DEBUG BORDER SYSTEM - Development Only
+    ========================================
+    These borders are only visible when html.debug-borders class is present.
+    Enable via: toggleDebugBorders() in console or ?debug=borders in URL
+    ========================================
+    */
+    
+    /* Debug borders - only active when html.debug-borders is present */
+    html.debug-borders .navbar {
+      border: 2px solid #FF0000 !important; /* Red - Main navigation */
+    }
+    
+    html.debug-borders .navbar-content-wrapper {
+      border: 2px solid #CC0000 !important; /* Dark Red - Nav content wrapper */
+    }
+    
+    html.debug-borders .navbar-left {
+      border: 2px solid #FF6600 !important; /* Orange - Nav left section */
+    }
+    
+    html.debug-borders .navbar-right {
+      border: 2px solid #FF7F50 !important; /* Coral - Nav right section */
+    }
+    
+    html.debug-borders .navbar-right-content-wrapper {
+      border: 2px solid #FA8072 !important; /* Salmon - Nav right content wrapper */
+    }
+    
+    html.debug-borders .navbar-right-content {
+      border: 2px solid #FFA07A !important; /* Light Salmon - Nav right content */
+    }
+    
+    html.debug-borders .page-padding {
+      border: 2px solid #800000 !important; /* Maroon - Page padding container */
+    }
+    
+    html.debug-borders [carousel="component"] {
+      border: 2px solid #0000FF !important; /* Blue - Carousel component */
+    }
+    
+    html.debug-borders [carousel="wrap"] {
+      border: 2px solid #0000CC !important; /* Dark Blue - Carousel wrap */
+    }
+    
+    html.debug-borders .carousel_list {
+      border: 2px solid #000080 !important; /* Navy - Carousel list */
+    }
+    
+    html.debug-borders .carousel_item {
+      border: 2px solid #008080 !important; /* Teal - Carousel item */
+    }
+    
+    html.debug-borders .carousel_arrow_wrap {
+      border: 2px solid #00FFFF !important; /* Cyan - Carousel arrow wrap */
+    }
+    
+    html.debug-borders .swiper:not(.promo-slider) {
+      border: 2px solid #00FF00 !important; /* Green - Swiper container (main, not promo) */
+    }
+    
+    html.debug-borders .swiper-wrapper:not(.promo-slider .swiper-wrapper) {
+      border: 2px solid #00CC00 !important; /* Dark Green - Swiper wrapper */
+    }
+    
+    html.debug-borders .swiper-slide:not(.promo-slider .swiper-slide) {
+      border: 2px solid #32CD32 !important; /* Lime - Swiper slide */
+    }
+    
+    html.debug-borders .collection-title {
+      border: 2px solid #800080 !important; /* Purple - Collection title */
+    }
+    
+    html.debug-borders .collection-title-text {
+      border: 2px solid #8A2BE2 !important; /* Violet - Collection title text */
+    }
+    
+    html.debug-borders .products_collection-drawer {
+      border: 2px solid #FF00FF !important; /* Magenta - Product drawer */
+    }
+    
+    html.debug-borders .products_drawer-wrapper {
+      border: 2px solid #CC00CC !important; /* Dark Magenta - Drawer wrapper */
+    }
+    
+    html.debug-borders .products_drawer-content {
+      border: 2px solid #FF00CC !important; /* Fuchsia - Drawer content */
+    }
+    
+    html.debug-borders .products_drawer-images {
+      border: 2px solid #FF69B4 !important; /* Hot Pink - Drawer images */
+    }
+    
+    html.debug-borders .products_drawer-text {
+      border: 2px solid #FFC0CB !important; /* Pink - Drawer text */
+    }
+    
+    html.debug-borders .promo-slider {
+      border: 2px solid #FFD700 !important; /* Gold - Promo slider */
+    }
+    
+    html.debug-borders .promo-card {
+      border: 2px solid #FFFF00 !important; /* Yellow - Promo card */
+    }
+    
+    html.debug-borders .promo-slider-nav {
+      border: 2px solid #F0E68C !important; /* Khaki - Promo slider nav */
+    }
+    
+    /* Additional navigation containers */
+    html.debug-borders .nav-main-inner {
+      border: 2px solid #DC143C !important; /* Crimson - Nav main inner */
+    }
+    
+    html.debug-borders .nav-main-column {
+      border: 2px solid #B22222 !important; /* Fire Brick - Nav main column */
+    }
+    
+    html.debug-borders .navbar-left-inner {
+      border: 2px solid #FF4500 !important; /* Orange Red - Nav left inner */
+    }
+    
+    html.debug-borders .nav-links-column {
+      border: 2px solid #FF6347 !important; /* Tomato - Nav links column */
+    }
+    
+    html.debug-borders .promo-slider .swiper-wrapper {
+      border: 2px solid #FFA500 !important; /* Orange - Promo slider wrapper */
+    }
+    
+    html.debug-borders .promo-slider .swiper-slide {
+      border: 2px solid #FFD700 !important; /* Gold - Promo slider slide */
+    }
   </style>
 </head>
 <body>
@@ -1213,60 +1388,71 @@
                     <div class="navbar-right">
                       <div class="page-padding is-navbar">
                         <div class="navbar-right-content-wrapper">
-                          <div class="navbar-right-content">
-                            <!-- Promotional Slider -->
-                            <div class="promo-slider swiper">
+                          <!-- Slider Version (v2) - Visible for desktop and mobile -->
+                          <div class="navbar-right-content v2">
+                            <div class="slider swiper">
                               <div class="swiper-wrapper">
-                                <!-- Promotional Card 1 -->
+                                <!-- Slide 1 -->
                                 <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">New Collection Drop</h3>
-                                      <p class="promo-card-description">Discover our latest limited edition pieces. Exclusive designs you won't find anywhere else.</p>
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="New Collection Drop" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>New Collection Drop</h3>
+                                      <p>Discover our latest limited edition pieces. Exclusive designs you won't find anywhere else.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
-                                <!-- Promotional Card 2 -->
+                                <!-- Slide 2 -->
                                 <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">Summer Sale</h3>
-                                      <p class="promo-card-description">Up to 50% off selected items. Limited time offer while supplies last.</p>
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Summer Sale" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>Summer Sale</h3>
+                                      <p>Up to 50% off selected items. Limited time offer while supplies last.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
-                                <!-- Promotional Card 3 -->
+                                <!-- Slide 3 -->
                                 <div class="swiper-slide">
-                                  <a href="carousel-template.html" class="promo-card">
-                                    <div class="promo-card-bg" style="background-image: url('images/kiosk-placeholder-product-img.webp');"></div>
-                                    <div class="promo-card-overlay"></div>
-                                    <div class="promo-card-content">
-                                      <h3 class="promo-card-heading">Exclusive Media</h3>
-                                      <p class="promo-card-description">Behind the scenes content, exclusive interviews, and more from The Kiosk.</p>
+                                  <div class="slider-content">
+                                    <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Exclusive Media" class="slider-img">
+                                    <div class="slider-content-wrapper">
+                                      <h3>Exclusive Media</h3>
+                                      <p>Behind the scenes content, exclusive interviews, and more from The Kiosk.</p>
                                     </div>
-                                  </a>
+                                  </div>
                                 </div>
                               </div>
+                              <!-- Slider Navigation -->
+                              <div class="slider-nav swiper-pagination"></div>
                             </div>
-                            <!-- Navigation Buttons -->
-                            <div class="promo-slider-nav">
-                              <button class="promo-slider-button promo-slider-button-prev" aria-label="Previous slide">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              </button>
-                              <button class="promo-slider-button promo-slider-button-next" aria-label="Next slide">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              </button>
+                          </div>
+                          <!-- Static Cards Version (v1) - Hidden -->
+                          <div class="navbar-right-content v1">
+                            <div class="scale-on-hover">
+                              <a href="carousel-template.html" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="New Collection Drop" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">New Collection Drop</div>
+                                </div>
+                              </a>
                             </div>
-                            <!-- Pagination (below cards) -->
-                            <div class="promo-slider-pagination"></div>
+                            <div class="scale-on-hover">
+                              <a href="carousel-template.html" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Summer Sale" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">Summer Sale</div>
+                                </div>
+                              </a>
+                            </div>
+                            <div class="scale-on-hover">
+                              <a href="carousel-template.html" class="navbar-right-item w-inline-block">
+                                <img src="images/kiosk-placeholder-product-img.webp" loading="lazy" alt="Exclusive Media" class="navbar-right-image">
+                                <div class="navbar-right-text-wrapper">
+                                  <div class="navbar-right-text">Exclusive Media</div>
+                                </div>
+                              </a>
+                            </div>
                           </div>
                           <!-- See Styleguide (bottom right) -->
                           <div class="navbar-right-styleguide">
@@ -2242,6 +2428,26 @@
         // TODO: Integrate with Shopify cart or your checkout system
         alert('Add to cart functionality will be integrated with Shopify checkout.');
       });
+
+      // ========================================
+      // Development Mode Toggle for Container Borders
+      // ========================================
+      function toggleDebugBorders() {
+        document.documentElement.classList.toggle('debug-borders');
+        const isEnabled = document.documentElement.classList.contains('debug-borders');
+        console.log('Debug borders:', isEnabled ? 'ON' : 'OFF');
+        console.log('All container divs and wrappers now have colored 2px borders for debugging.');
+        console.log('See docs/CONTAINER_BORDERS_CHEATSHEET.md for color reference.');
+        return isEnabled;
+      }
+
+      // Auto-enable if URL parameter is present
+      if (window.location.search.includes('debug=borders')) {
+        toggleDebugBorders();
+      }
+
+      // Make function globally available
+      window.toggleDebugBorders = toggleDebugBorders;
     });
   </script>
 </body>
