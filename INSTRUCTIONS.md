@@ -373,21 +373,33 @@ Store these in Cloudflare Pages environment variables:
 
 #### Required Variables
 
-- **`SHOPIFY_STOREFRONT_TOKEN`**: Shopify Storefront API access token
+- **`AIRTABLE_ACCESS_TOKEN`**: Airtable Personal Access Token
+  - Get from: Airtable Account → Developer hub → Personal access tokens
+  - Required scopes: `data.records:read`, `data.records:write`
+  - Used for: Products and Orders API access
 
-**For complete Shopify setup, API reference, queries, error handling, and troubleshooting, see**: [`docs/SHOPIFY_STOREFRONT_API_REFERENCE.md`](docs/SHOPIFY_STOREFRONT_API_REFERENCE.md)
-  - Get from: Shopify Admin → Settings → Apps and sales channels → Develop apps → Your app → Storefront API access token
-  - See: `docs/SHOPIFY_STOREFRONT_API_SETUP.md` for detailed setup
+- **`AIRTABLE_BASE_ID`**: Airtable Base ID
+  - Get from: Airtable base URL: `https://airtable.com/app{BaseID}/...`
+  - Used for: Products and Orders tables
+
+- **`SHOPIFY_WEBHOOK_SECRET`**: Shopify webhook secret (for order tracking)
+  - Get from: Shopify Admin → Settings → Notifications → Webhooks → Your webhook
+  - Used for: Verifying webhook authenticity
 
 #### Optional Variables (with defaults)
 
-- **`SHOPIFY_STORE`**: Shopify store domain (default: `onlyatthekiosk.com`)
-- **`SHOPIFY_API_VERSION`**: Shopify API version (default: `2024-01`)
+- **`AIRTABLE_PRODUCTS_TABLE`**: Airtable Products table name (default: `Products`)
+- **`AIRTABLE_ORDERS_TABLE`**: Airtable Orders table name (default: `Orders`)
+- **`SHOPIFY_STORE_DOMAIN`**: Shopify store domain (default: `onlyatthekiosk.com`)
 
-#### Other Variables
+#### Deprecated Variables
 
-- **`AIRTABLE_ACCESS_TOKEN`**: Airtable Personal Access Token (for email signups)
-- **`AIRTABLE_BASE_ID`**: Airtable Base ID (for email signups)
+- **`SHOPIFY_STOREFRONT_TOKEN`**: No longer needed (products now from Airtable)
+- **`SHOPIFY_API_VERSION`**: No longer needed (products now from Airtable)
+
+**For Airtable setup, see**: [`docs/AIRTABLE_PRODUCTS_SETUP.md`](docs/AIRTABLE_PRODUCTS_SETUP.md)  
+**For Shopify Buy Button setup, see**: [`docs/SHOPIFY_BUY_BUTTON_SETUP.md`](docs/SHOPIFY_BUY_BUTTON_SETUP.md)  
+**For Shopify webhook setup, see**: [`docs/SHOPIFY_WEBHOOK_SETUP.md`](docs/SHOPIFY_WEBHOOK_SETUP.md)
 
 #### Setting Environment Variables in Cloudflare Pages
 
@@ -404,11 +416,12 @@ For local development with `wrangler pages dev`, create a `.dev.vars` file in yo
 
 ```bash
 # .dev.vars (DO NOT COMMIT THIS FILE - add to .gitignore)
-SHOPIFY_STOREFRONT_TOKEN=your_storefront_api_token_here
-SHOPIFY_STORE=onlyatthekiosk.com
-SHOPIFY_API_VERSION=2024-01
 AIRTABLE_ACCESS_TOKEN=your_airtable_token_here
 AIRTABLE_BASE_ID=your_airtable_base_id_here
+AIRTABLE_PRODUCTS_TABLE=Products
+AIRTABLE_ORDERS_TABLE=Orders
+SHOPIFY_WEBHOOK_SECRET=your_webhook_secret_here
+SHOPIFY_STORE_DOMAIN=onlyatthekiosk.com
 ```
 
 **Important**: 

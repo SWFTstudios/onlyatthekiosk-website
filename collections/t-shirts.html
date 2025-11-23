@@ -1748,9 +1748,9 @@
   <script src="https://unpkg.com/lenis@1.3.15/dist/lenis.min.js"></script>
   <script src="../js/lenis.js" type="text/javascript"></script>
   
-  <!-- Shopify Integration -->
-  <script src="../js/shopify.js" type="text/javascript"></script>
-  <script src="../js/cart.js" type="text/javascript"></script>
+  <!-- Airtable Integration -->
+  <script src="../js/config.js" type="text/javascript"></script>
+  <script src="../js/airtable.js" type="text/javascript"></script>
 
   <!-- 3D Carousel Script -->
   <script>
@@ -1794,26 +1794,26 @@
         }
       }
       
-      // Function to load products from Shopify collection
+      // Function to load products from Airtable collection
       async function loadCollectionProducts(handle) {
-        if (!window.shopify) {
-          console.warn('Shopify client not loaded, using placeholder products');
+        if (!window.airtable) {
+          console.warn('Airtable client not loaded, using placeholder products');
           updateCollectionTitle(formatCollectionTitle(handle));
           return Promise.resolve();
         }
         
-        console.log(`🛍️ Loading products from Shopify collection: "${handle}"`);
-        console.log(`📡 Store: ${window.shopify.storeDomain || 'onlyatthekiosk.com'}`);
+        console.log(`🛍️ Loading products from Airtable collection: "${handle}"`);
+        console.log(`📡 Store: ${window.airtable.storeDomain || 'onlyatthekiosk.com'}`);
         
         try {
-          // Fetch collection data from live Shopify store
-          const collection = await window.shopify.getProductsByCollection(handle, 50);
+          // Fetch collection data from live Airtable
+          const collection = await window.airtable.getProductsByCollection(handle, 50);
           
           if (collection && collection.products && collection.products.edges && collection.products.edges.length > 0) {
             collectionData = collection;
             collectionProducts = collection.products.edges.map(edge => edge.node);
             
-            console.log(`✅ Loaded ${collectionProducts.length} products from Shopify`);
+            console.log(`✅ Loaded ${collectionProducts.length} products from Airtable`);
             console.log(`📦 Collection: "${collection.title || handle}"`);
             
             // Update collection title with actual Shopify title
@@ -1830,7 +1830,7 @@
           } else if (collection && (!collection.products || !collection.products.edges || collection.products.edges.length === 0)) {
             // Collection exists but has no products
             console.warn(`⚠️ Collection "${handle}" exists but has no products in Shopify`);
-            console.warn(`💡 Check Shopify Admin → Collections → "${handle}" to verify products are assigned`);
+            console.warn(`💡 Check Airtable → Collections → "${handle}" to verify products are assigned`);
             // Update title but keep placeholder products
             updateCollectionTitle(collection.title || formatCollectionTitle(handle));
             return Promise.resolve();
@@ -1841,9 +1841,9 @@
             return Promise.resolve();
           }
         } catch (error) {
-          console.error('❌ Error loading collection products from Shopify:', error);
+          console.error('❌ Error loading collection products from Airtable:', error);
           console.error('💡 Verify:');
-          console.error('   1. SHOPIFY_STOREFRONT_TOKEN is set in Cloudflare Pages');
+          console.error('   1. AIRTABLE_ACCESS_TOKEN is set in Cloudflare Pages');
           console.error('   2. Collection handle matches Shopify (case-sensitive)');
           console.error('   3. API endpoint is accessible');
           // Fallback to formatted handle
@@ -1951,28 +1951,28 @@
         });
       }
       
-      // Function to wait for Shopify client to be ready
-      function waitForShopify(maxAttempts = 50, attempt = 0) {
+      // Function to wait for Airtable client to be ready
+      function waitForAirtable(maxAttempts = 50, attempt = 0) {
         return new Promise((resolve, reject) => {
-          if (window.shopify) {
+          if (window.airtable) {
             resolve();
           } else if (attempt >= maxAttempts) {
-            console.warn('Shopify client not loaded after maximum attempts');
-            reject(new Error('Shopify client not available'));
+            console.warn('Airtable client not loaded after maximum attempts');
+            reject(new Error('Airtable client not available'));
           } else {
-            setTimeout(() => waitForShopify(maxAttempts, attempt + 1).then(resolve).catch(reject), 100);
+            setTimeout(() => waitForAirtable(maxAttempts, attempt + 1).then(resolve).catch(reject), 100);
           }
         });
       }
       
       // Load collection if handle is provided (after DOM is ready)
       if (collectionHandle) {
-        // Wait for Shopify client to be ready, then load collection
-        waitForShopify()
+        // Wait for Airtable client to be ready, then load collection
+        waitForAirtable()
           .then(() => loadCollectionProducts(collectionHandle))
           .catch(() => {
-            // Shopify client not available, use placeholder
-            console.warn('Using placeholder products - Shopify client not available');
+            // Airtable client not available, use placeholder
+            console.warn('Using placeholder products - Airtable client not available');
             updateCollectionTitle(formatCollectionTitle(collectionHandle));
           });
       } else {
@@ -2229,7 +2229,7 @@
         }
       });
       
-      // Function to load carousel images from Shopify (legacy - now handled by updateCarouselWithProducts)
+      // Function to load carousel images from Airtable (legacy - now handled by updateCarouselWithProducts)
       // This function is kept for backward compatibility but is no longer needed
       async function loadCarouselImagesFromShopify() {
         // This is now handled by updateCarouselWithProducts() which loads products and images together
@@ -2281,15 +2281,15 @@
       const viewDetailsBtns = $('.view-details-btn');
       
       // Shopify Storefront API Configuration
-      // Fetch product from Shopify using the Shopify client
-      // The Shopify client uses the /api/shopify proxy function to keep tokens server-side
+      // Fetch product from Airtable using the Airtable client
+      // The Airtable client uses the /api/shopify proxy function to keep tokens server-side
       async function fetchProduct(handle) {
         try {
-          if (!window.shopify) {
-            throw new Error('Shopify client not loaded. Please ensure js/shopify.js is loaded.');
+          if (!window.airtable) {
+            throw new Error('Airtable client not loaded. Please ensure js/airtable.js is loaded.');
           }
           
-          const product = await window.shopify.getProductByHandle(handle);
+          const product = await window.airtable.getProductByHandle(handle);
           
           if (!product) {
             throw new Error(`Product with handle "${handle}" not found`);
@@ -2307,7 +2307,7 @@
         // Product title and price
         $('#drawer-product-title').text(product.title);
         const price = product.priceRange.minVariantPrice;
-        const formattedPrice = window.shopify ? window.shopify.formatPrice(price.amount, price.currencyCode) : `${price.amount} ${price.currencyCode}`;
+        const formattedPrice = window.airtable ? window.airtable.formatPrice(price.amount, price.currencyCode) : `${price.amount} ${price.currencyCode}`;
         $('#drawer-product-price').text(formattedPrice);
 
         // Main image
@@ -2343,7 +2343,7 @@
         }
 
         // Care instructions (from metafield)
-        const careInstructions = window.shopify ? window.shopify.getCareGuide(product) : null;
+        const careInstructions = window.airtable ? window.airtable.getCareGuide(product) : null;
         if (careInstructions) {
           $('#drawer-care-instructions').html(careInstructions);
         } else {
@@ -2361,7 +2361,7 @@
         }
 
         // Delivery (from metafield or default)
-        const delivery = window.shopify ? window.shopify.getMetafield(product, 'custom', 'delivery') : null;
+        const delivery = window.airtable ? window.airtable.getMetafield(product, 'custom', 'delivery') : null;
         if (delivery) {
           $('#drawer-delivery').html(delivery);
         } else {
@@ -2545,7 +2545,7 @@
           return;
         }
 
-        // Otherwise, fetch from Shopify
+        // Otherwise, fetch from Airtable
         $('#drawer-loading').show();
         fetchProduct(productHandle)
           .then(product => {
