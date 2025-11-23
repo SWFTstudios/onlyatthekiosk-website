@@ -2,107 +2,105 @@
 
 ## Overview
 
-This guide explains how to set up the Airtable Products table to store all product data for the Only at The Kiosk website. Products are loaded from Airtable instead of Shopify Storefront API, while Shopify Buy Button handles payments.
+This guide explains how to set up the Airtable Products table to match the exact structure of `kiosk-shopify-products.csv`. The table will store all product data for the Only at The Kiosk website, with products loaded from Airtable while Shopify Buy Button handles payments.
 
 ## Table Structure
 
 ### Table Name: "Products"
 
-### Required Fields
+**Important**: The CSV has multiple rows per product (one per variant). In Airtable, you can either:
+- **Option A**: Store one record per product with variants in a JSON field
+- **Option B**: Store one record per variant (matching CSV structure exactly)
+
+This guide uses **Option B** to match the CSV structure exactly.
+
+## Field Mapping (Matching CSV Headers)
+
+### Column 1-10: Basic Product Information
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **Handle** | Handle | Single line text | URL-friendly identifier | Yes | Unique, e.g., `001-gold-chain` |
+| **Title** | Title | Single line text | Product title | Yes | e.g., "#001 Gold Chain" |
+| **Body (HTML)** | Body (HTML) | Long text | Product description | No | HTML allowed |
+| **Vendor** | Vendor | Single line text | Product vendor | No | Default: "The Kiosk" |
+| **Product Category** | Product Category | Single line text | Category path | No | For organization |
+| **Type** | Type | Single line text | Product type | No | e.g., "Chains", "Bracelets" |
+| **Tags** | Tags | Multiple select | Product tags | No | Options: "Gold", "Silver", "Chains", "Bracelets", "Hoodies", "T-Shirts" |
+| **Published** | Published | Checkbox | Product is published | Yes | Default: checked |
+| **Option1 Name** | Option1 Name | Single line text | First option name | No | e.g., "Size" |
+| **Option1 Value** | Option1 Value | Single line text | First option value | No | e.g., "Small", "Medium", "Large" |
+
+### Column 11-17: Additional Options
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **Option1 Linked To** | Option1 Linked To | Single line text | Linked product | No | Usually empty |
+| **Option2 Name** | Option2 Name | Single line text | Second option name | No | Usually empty |
+| **Option2 Value** | Option2 Value | Single line text | Second option value | No | Usually empty |
+| **Option2 Linked To** | Option2 Linked To | Single line text | Linked product | No | Usually empty |
+| **Option3 Name** | Option3 Name | Single line text | Third option name | No | Usually empty |
+| **Option3 Value** | Option3 Value | Single line text | Third option value | No | Usually empty |
+| **Option3 Linked To** | Option3 Linked To | Single line text | Linked product | No | Usually empty |
+
+### Column 18-25: Variant Information
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **Variant SKU** | Variant SKU | Single line text | Stock keeping unit | No | e.g., "001-gold-chain-small" |
+| **Variant Grams** | Variant Grams | Number | Weight in grams | No | Decimal allowed |
+| **Variant Inventory Tracker** | Variant Inventory Tracker | Single select | Inventory tracking method | No | Options: "shopify", "" (empty) |
+| **Variant Inventory Policy** | Variant Inventory Policy | Single select | Inventory policy | No | Options: "deny", "continue" |
+| **Variant Fulfillment Service** | Variant Fulfillment Service | Single select | Fulfillment service | No | Options: "manual", "" (empty) |
+| **Variant Price** | Variant Price | Currency | Product price | Yes | USD format, e.g., 79.99 |
+| **Variant Compare At Price** | Variant Compare At Price | Currency | Original/compare price | No | For sale prices |
+| **Variant Requires Shipping** | Variant Requires Shipping | Checkbox | Requires shipping | Yes | Default: checked |
+
+### Column 26-30: Shipping & Tax
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **Variant Taxable** | Variant Taxable | Checkbox | Product is taxable | Yes | Default: checked |
+| **Unit Price Total Measure** | Unit Price Total Measure | Number | Unit price measure | No | Usually empty |
+| **Unit Price Total Measure Unit** | Unit Price Total Measure Unit | Single line text | Unit measure unit | No | Usually empty |
+| **Unit Price Base Measure** | Unit Price Base Measure | Number | Base measure | No | Usually empty |
+| **Unit Price Base Measure Unit** | Unit Price Base Measure Unit | Single line text | Base measure unit | No | Usually empty |
+| **Variant Barcode** | Variant Barcode | Single line text | Product barcode | No | Usually empty |
+
+### Column 31-35: Images
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **Image Src** | Image Src | Attachment | Primary product image | Yes | Upload image or use URL |
+| **Image Position** | Image Position | Number | Image order | No | 1, 2, 3... |
+| **Image Alt Text** | Image Alt Text | Single line text | Image alt text | No | For accessibility |
+| **Gift Card** | Gift Card | Checkbox | Is gift card | No | Default: unchecked |
+| **SEO Title** | SEO Title | Single line text | SEO meta title | No | For search engines |
+
+### Column 36-43: SEO & Care Instructions
+
+| CSV Column | Airtable Field Name | Field Type | Description | Required | Notes |
+|------------|---------------------|-----------|-------------|----------|-------|
+| **SEO Description** | SEO Description | Long text | SEO meta description | No | For search engines |
+| **Care guide (product.metafields.descriptors.care_guide)** | Care guide (product.metafields.descriptors.care_guide) | Long text | Care instructions | No | HTML allowed, detailed list |
+| **Care instructions (product.metafields.shopify.care-instructions)** | Care instructions (product.metafields.shopify.care-instructions) | Long text | Alternative care instructions | No | Usually empty |
+| **Variant Image** | Variant Image | Attachment | Variant-specific image | No | Usually empty |
+| **Variant Weight Unit** | Variant Weight Unit | Single line text | Weight unit | No | Options: "g", "kg", "oz", "lb" |
+| **Variant Tax Code** | Variant Tax Code | Single line text | Tax code | No | Usually empty |
+| **Cost per item** | Cost per item | Number | Product cost | No | For profit calculation |
+| **Status** | Status | Single select | Product status | Yes | Options: "active", "draft", "archived" |
+
+## Additional Fields (Not in CSV but Recommended)
 
 | Field Name | Field Type | Description | Required | Notes |
 |------------|-----------|-------------|----------|-------|
-| **Product ID** | Single line text | Unique identifier | Yes | Format: `001`, `002`, etc. |
-| **Title** | Single line text | Product title | Yes | e.g., "#001 Gold Chain" |
-| **Handle** | Single line text | URL-friendly identifier | Yes | Unique, e.g., `001-gold-chain` |
-| **Description** | Long text | Product description | No | HTML allowed |
-| **Price** | Currency | Product price | Yes | USD format |
-| **Images** | Multiple attachments | Product images | Yes | First image is main image |
-| **Image URLs** | Long text | Alternative: Image URLs (JSON array) | No | If not using attachments |
-| **Variants** | Long text | Product variants (JSON) | No | Size, color options |
-| **Collection** | Single select | Product collection | Yes | Options: Bracelets, Chains, Hoodies, T-shirts |
-| **Care Instructions** | Long text | Product care guide | No | HTML allowed |
 | **Shopify Buy Button ID** | Single line text | Shopify Buy Button ID | Yes | From Shopify Buy Button embed code |
 | **Shopify Product ID** | Single line text | Shopify product ID | No | For reference (gid://shopify/Product/...) |
+| **Collection** | Single select | Product collection | Yes | Options: Bracelets, Chains, Hoodies, T-shirts |
 | **Active** | Checkbox | Product is active | Yes | Default: checked |
 | **Sort Order** | Number | Display order | No | Lower numbers first |
 | **Created Date** | Created time | Auto-generated | Auto | Auto-populated |
 | **Last Modified** | Last modified time | Auto-generated | Auto | Auto-populated |
-
-### Optional Fields
-
-| Field Name | Field Type | Description |
-|------------|-----------|-------------|
-| **Tags** | Multiple select | Product tags | For filtering/search |
-| **SKU** | Single line text | Stock keeping unit | For inventory |
-| **Weight** | Number | Product weight | For shipping |
-| **Dimensions** | Long text | Product dimensions | For shipping |
-
-## Field Details
-
-### Product ID
-- **Format**: Sequential numbers (001, 002, 003, etc.)
-- **Example**: `001`, `002`, `010`
-- **Purpose**: Internal product identifier
-- **Unique**: Yes
-
-### Handle
-- **Format**: Lowercase, hyphens for spaces
-- **Example**: `001-gold-chain`, `001-black-hoodie`
-- **Purpose**: URL-friendly identifier, used in product drawer
-- **Unique**: Yes (set as unique field in Airtable)
-- **Pattern**: `{product-id}-{color/material}-{type}`
-
-### Images
-- **Type**: Multiple attachments OR Long text (JSON array)
-- **Format**: 
-  - Option 1: Upload images directly to Airtable
-  - Option 2: Store URLs as JSON: `["https://...", "https://..."]`
-- **First Image**: Used as main product image
-- **Additional Images**: Used in product gallery
-
-### Variants
-- **Type**: Long text (JSON format)
-- **Format**:
-```json
-[
-  {
-    "id": "variant-1",
-    "title": "Small",
-    "price": "49.99",
-    "available": true
-  },
-  {
-    "id": "variant-2",
-    "title": "Medium",
-    "price": "49.99",
-    "available": true
-  }
-]
-```
-
-### Collection
-- **Type**: Single select
-- **Options**: 
-  - Bracelets
-  - Chains
-  - Hoodies
-  - T-shirts
-- **Purpose**: Filter products by collection on collection pages
-
-### Shopify Buy Button ID
-- **Format**: Extract from Shopify Buy Button embed code
-- **Example**: `1234567890` (numeric ID)
-- **How to get**:
-  1. Go to Shopify Admin → Apps → Buy Button
-  2. Create Buy Button for product
-  3. Copy embed code
-  4. Extract ID from embed code or data attributes
-
-### Shopify Buy Button Embed Code
-- **Type**: Long text
-- **Format**: Full HTML embed code from Shopify
-- **Alternative**: Store just the ID and generate embed code dynamically
 
 ## Setup Steps
 
@@ -113,13 +111,13 @@ This guide explains how to set up the Airtable Products table to store all produ
 3. Name it "Products"
 4. Delete default "Name" field if not needed
 
-### 2. Add Required Fields
+### 2. Add All Fields (In CSV Order)
 
-Add each field from the Required Fields table above:
+Add each field from the mapping table above:
 1. Click "+" next to field headers
-2. Select field type
-3. Name the field exactly as specified
-4. Configure field options (unique, required, etc.)
+2. Select the correct field type
+3. Name the field **exactly** as specified (case-sensitive, including spaces and parentheses)
+4. Configure field options (unique, required, default values, etc.)
 
 ### 3. Configure Field Options
 
@@ -127,29 +125,85 @@ Add each field from the Required Fields table above:
 - Set as "Unique" (prevent duplicates)
 - Set as "Required"
 
-**Collection Field:**
-- Set as "Single select"
-- Add options: Bracelets, Chains, Hoodies, T-shirts
-- Set as "Required"
+**Tags Field:**
+- Set as "Multiple select"
+- Add options: "Gold", "Silver", "Chains", "Bracelets", "Hoodies", "T-Shirts"
+- These match the tags in your CSV
 
-**Active Field:**
+**Published Field:**
+- Set as "Checkbox"
 - Set default value to checked (true)
 
-**Price Field:**
+**Variant Inventory Tracker Field:**
+- Set as "Single select"
+- Add options: "shopify", "" (empty string option)
+- Allow custom values: No
+
+**Variant Inventory Policy Field:**
+- Set as "Single select"
+- Add options: "deny", "continue"
+- Allow custom values: No
+
+**Variant Fulfillment Service Field:**
+- Set as "Single select"
+- Add options: "manual", "" (empty string option)
+- Allow custom values: No
+
+**Variant Price Field:**
+- Set as "Currency"
 - Set currency to USD
 - Set as "Required"
 
-### 4. Import Products
+**Variant Compare At Price Field:**
+- Set as "Currency"
+- Set currency to USD
 
-**Option A: Manual Entry**
+**Variant Requires Shipping Field:**
+- Set as "Checkbox"
+- Set default value to checked (true)
+
+**Variant Taxable Field:**
+- Set as "Checkbox"
+- Set default value to checked (true)
+
+**Image Src Field:**
+- Set as "Attachment"
+- Allow multiple files: Yes (for product gallery)
+- First attachment is main image
+
+**Variant Image Field:**
+- Set as "Attachment"
+- Allow multiple files: No
+- Usually empty, but available for variant-specific images
+
+**Gift Card Field:**
+- Set as "Checkbox"
+- Set default value to unchecked (false)
+
+**Status Field:**
+- Set as "Single select"
+- Add options: "active", "draft", "archived"
+- Set default to "active"
+- Allow custom values: No
+
+**Collection Field (Additional):**
+- Set as "Single select"
+- Add options: "Bracelets", "Chains", "Hoodies", "T-shirts"
+- Set as "Required"
+- This is derived from Tags or Type field
+
+### 4. Import Products from CSV
+
+**Option A: Direct CSV Import**
+1. In Airtable, click "Import data" → "CSV file"
+2. Upload `kiosk-shopify-products.csv`
+3. Map CSV columns to Airtable fields (should auto-match if field names match exactly)
+4. Review and import
+
+**Option B: Manual Entry**
 - Add products one by one in Airtable
 - Fill in all required fields
 - Upload images or add image URLs
-
-**Option B: CSV Import**
-- Export products from Shopify (if available)
-- Map CSV columns to Airtable fields
-- Import CSV file
 
 **Option C: API Import**
 - Use Airtable API to bulk import
@@ -167,64 +221,103 @@ For each product:
 
 ## Data Format Examples
 
-### Example Product Record
+### Example Product Record (Matching CSV Row)
 
 ```
-Product ID: 001
-Title: #001 Gold Chain
 Handle: 001-gold-chain
-Description: Premium gold chain with classic design...
-Price: $49.99
-Images: [uploaded images or JSON array of URLs]
-Variants: [{"id":"small","title":"Small","price":"49.99"},{"id":"medium","title":"Medium","price":"49.99"}]
-Collection: Chains
-Care Instructions: <ul><li>Store in a dry place</li><li>Avoid contact with chemicals</li></ul>
-Shopify Buy Button ID: 1234567890
-Active: ✓
-Sort Order: 1
+Title: #001 Gold Chain
+Body (HTML): <p>Bold, raw and refined...</p>
+Vendor: The Kiosk
+Product Category: (empty)
+Type: Chains
+Tags: Gold, Chains
+Published: ✓ (checked)
+Option1 Name: Size
+Option1 Value: Small
+Option1 Linked To: (empty)
+Option2 Name: (empty)
+Option2 Value: (empty)
+Option2 Linked To: (empty)
+Option3 Name: (empty)
+Option3 Value: (empty)
+Option3 Linked To: (empty)
+Variant SKU: 001-gold-chain-small
+Variant Grams: 0
+Variant Inventory Tracker: shopify
+Variant Inventory Policy: deny
+Variant Fulfillment Service: manual
+Variant Price: $79.99
+Variant Compare At Price: (empty)
+Variant Requires Shipping: ✓ (checked)
+Variant Taxable: ✓ (checked)
+Unit Price Total Measure: (empty)
+Unit Price Total Measure Unit: (empty)
+Unit Price Base Measure: (empty)
+Unit Price Base Measure Unit: (empty)
+Variant Barcode: (empty)
+Image Src: [uploaded image or URL]
+Image Position: 1.0
+Image Alt Text: #001 Gold Chain
+Gift Card: ✗ (unchecked)
+SEO Title: #001 Gold Chain
+SEO Description: Shop #001 Gold Chain at Only at The Kiosk...
+Care guide (product.metafields.descriptors.care_guide): Store in a cool, dry place...
+Care instructions (product.metafields.shopify.care-instructions): (empty)
+Variant Image: (empty)
+Variant Weight Unit: g
+Variant Tax Code: (empty)
+Cost per item: (empty)
+Status: active
 ```
 
-### Image URLs Format (JSON)
+### Image URLs Format
 
-If using Image URLs field instead of attachments:
-```json
-[
-  "https://cdn.shopify.com/s/files/1/001/001-gold-chain-main.jpg",
-  "https://cdn.shopify.com/s/files/1/001/001-gold-chain-2.jpg",
-  "https://cdn.shopify.com/s/files/1/001/001-gold-chain-3.jpg"
-]
+If using Image Src as Attachment:
+- Upload images directly to Airtable
+- First image is main product image
+- Additional images are gallery images
+
+If using Image Src as URL (Long text):
+- Store full URL: `https://cdn.prod.website-files.com/68cc5218804d49fba2fc73a1/69223bf1fd1b5ee76eac1e08_kiosk-placeholder-product-img.webp`
+
+### Care Instructions Format
+
+The Care guide field should contain a detailed list without a title:
+```
+Store in a cool, dry place when not in use
+Avoid contact with harsh chemicals, perfumes, or lotions
+Clean gently with a soft, dry cloth
+Remove before swimming or showering
+Store separately to prevent scratching
+For gold pieces, use appropriate cleaning solution if needed
+Polish regularly to maintain shine
+Avoid exposure to extreme temperatures
+Keep away from abrasive surfaces
 ```
 
-### Variants Format (JSON)
+## Field Type Reference
 
-```json
-[
-  {
-    "id": "small",
-    "title": "Small",
-    "price": "49.99",
-    "currency": "USD",
-    "available": true,
-    "sku": "001-GC-S"
-  },
-  {
-    "id": "medium",
-    "title": "Medium",
-    "price": "49.99",
-    "currency": "USD",
-    "available": true,
-    "sku": "001-GC-M"
-  },
-  {
-    "id": "large",
-    "title": "Large",
-    "price": "49.99",
-    "currency": "USD",
-    "available": true,
-    "sku": "001-GC-L"
-  }
-]
-```
+### Text Fields
+- **Single line text**: Handle, Title, Vendor, SKU, etc.
+- **Long text**: Body (HTML), SEO Description, Care guide
+
+### Number Fields
+- **Number**: Variant Grams, Image Position, Cost per item
+- **Currency**: Variant Price, Variant Compare At Price
+
+### Selection Fields
+- **Single select**: Type, Variant Inventory Tracker, Status, Collection
+- **Multiple select**: Tags
+
+### Boolean Fields
+- **Checkbox**: Published, Variant Requires Shipping, Variant Taxable, Gift Card, Active
+
+### Media Fields
+- **Attachment**: Image Src, Variant Image
+
+### Auto Fields
+- **Created time**: Created Date
+- **Last modified time**: Last Modified
 
 ## API Access
 
@@ -244,16 +337,17 @@ If using Image URLs field instead of attachments:
 ## Testing
 
 ### Verify Table Structure
-1. Check all required fields exist
+1. Check all 43 fields exist (matching CSV columns)
 2. Verify field types are correct
 3. Test unique constraint on Handle field
-4. Test collection dropdown options
+4. Test dropdown options (Tags, Status, Collection, etc.)
 
 ### Verify Data
-1. Add test product
+1. Import test products from CSV
 2. Verify all fields save correctly
 3. Test image uploads/URLs
-4. Verify JSON fields parse correctly
+4. Verify checkbox fields work correctly
+5. Verify currency fields format correctly
 
 ### Test API Access
 ```javascript
@@ -263,34 +357,48 @@ fetch('/api/airtable?table=Products&maxRecords=1')
   .then(data => console.log('Products:', data));
 ```
 
-## Migration from Shopify
+## Migration from CSV
 
-If migrating existing Shopify products:
+### Step 1: Prepare CSV
+- Ensure CSV matches `kiosk-shopify-products.csv` format exactly
+- Verify all column headers match Airtable field names
+- Check data types are correct
 
-1. Export products from Shopify (CSV or API)
-2. Map Shopify fields to Airtable fields:
-   - Shopify Title → Airtable Title
-   - Shopify Handle → Airtable Handle
-   - Shopify Price → Airtable Price
-   - Shopify Images → Airtable Images/Image URLs
-   - Shopify Description → Airtable Description
-   - Shopify Metafield (care_guide) → Airtable Care Instructions
-3. Create Buy Buttons in Shopify for each product
-4. Add Buy Button IDs to Airtable
-5. Import data to Airtable
+### Step 2: Import to Airtable
+1. In Airtable, click "Import data" → "CSV file"
+2. Upload `kiosk-shopify-products.csv`
+3. Map columns (should auto-match)
+4. Review data types
+5. Import
+
+### Step 3: Post-Import Tasks
+1. Add "Shopify Buy Button ID" for each product
+2. Set "Collection" field based on Tags or Type
+3. Verify images uploaded correctly
+4. Check all required fields are filled
 
 ## Troubleshooting
+
+### Issue: CSV import fails
+- Check field names match exactly (case-sensitive, including spaces)
+- Verify field types are correct
+- Ensure required fields have data
 
 ### Issue: Products not loading
 - Check Airtable base ID and access token
 - Verify table name matches exactly
 - Check field names match (case-sensitive)
-- Verify products have "Active" checked
+- Verify products have "Published" checked and "Status" = "active"
 
 ### Issue: Images not displaying
-- Verify image URLs are accessible
-- Check JSON format if using Image URLs field
-- Ensure first image URL is valid
+- Verify Image Src field is Attachment type
+- Check image URLs are accessible (if using URLs)
+- Ensure first image is valid
+
+### Issue: Variants not showing
+- Check Option1 Name and Option1 Value fields
+- Verify Variant Price is set
+- Ensure Variant SKU is unique
 
 ### Issue: Buy Button not working
 - Verify Buy Button ID is correct
@@ -302,4 +410,3 @@ If migrating existing Shopify products:
 - [`AIRTABLE_ORDERS_SETUP.md`](AIRTABLE_ORDERS_SETUP.md) - Orders table setup
 - [`SHOPIFY_BUY_BUTTON_SETUP.md`](SHOPIFY_BUY_BUTTON_SETUP.md) - Buy Button setup
 - [`SHOPIFY_WEBHOOK_SETUP.md`](SHOPIFY_WEBHOOK_SETUP.md) - Webhook setup
-
