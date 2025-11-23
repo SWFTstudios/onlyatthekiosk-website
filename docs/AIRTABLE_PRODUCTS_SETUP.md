@@ -8,6 +8,12 @@ This guide explains how to set up the Airtable Products table to match the exact
 
 ### Table Name: "Products"
 
+**Airtable Configuration:**
+- **Base ID**: `appA3qQw0NAqz8ru3`
+- **Table ID**: `tblY2SEY8FTMUo6HU`
+- **Table Name**: `Products`
+- **View URL**: https://airtable.com/appA3qQw0NAqz8ru3/tblY2SEY8FTMUo6HU/viw9yJb2c1mrWd5zN
+
 **Important**: The CSV has multiple rows per product (one per variant). In Airtable, you can either:
 - **Option A**: Store one record per product with variants in a JSON field
 - **Option B**: Store one record per variant (matching CSV structure exactly)
