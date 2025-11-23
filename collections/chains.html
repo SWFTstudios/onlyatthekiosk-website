@@ -1828,11 +1828,18 @@
             $(document).trigger('productsLoaded');
             
             return Promise.resolve();
-          } else {
-            // Collection exists but has no products, or collection not found
-            console.warn(`⚠️ Collection "${handle}" has no products or was not found in Shopify`);
+          } else if (collection && (!collection.products || !collection.products.edges || collection.products.edges.length === 0)) {
+            // Collection exists but has no products
+            console.warn(`⚠️ Collection "${handle}" exists but has no products in Shopify`);
             console.warn(`💡 Check Shopify Admin → Collections → "${handle}" to verify products are assigned`);
-            // Still update title with formatted handle
+            console.warn(`💡 Products may be in sub-collections (e.g., gold-chains, silver-chains)`);
+            // Update title but keep placeholder products
+            updateCollectionTitle(collection.title || formatCollectionTitle(handle));
+            return Promise.resolve();
+          } else {
+            // Collection not found
+            console.error(`❌ Collection "${handle}" not found in Shopify`);
+            console.error(`💡 Available collections may be: gold-chains, silver-chains, etc.`);
             updateCollectionTitle(formatCollectionTitle(handle));
             return Promise.resolve();
           }
