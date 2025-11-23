@@ -286,8 +286,26 @@ class ShopifyClient {
       }
     `;
 
-    const data = await this.query(query, { handle: collectionHandle, first });
-    return data.collection;
+    try {
+      const data = await this.query(query, { handle: collectionHandle, first });
+      
+      // Log collection data for debugging
+      if (data && data.collection) {
+        const productCount = data.collection.products?.edges?.length || 0;
+        console.log(`📊 Collection "${collectionHandle}": ${productCount} products found`);
+        
+        if (productCount === 0) {
+          console.warn(`⚠️ Collection "${collectionHandle}" has no products. Check if products are in sub-collections.`);
+        }
+      } else {
+        console.error(`❌ Collection "${collectionHandle}" not found in Shopify`);
+      }
+      
+      return data.collection;
+    } catch (error) {
+      console.error(`❌ Error fetching collection "${collectionHandle}":`, error);
+      throw error;
+    }
   }
 
   /**
