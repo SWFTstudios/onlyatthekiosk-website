@@ -1,402 +1,138 @@
 /**
- * Cart State Management
- * 
- * Handles cart operations, localStorage persistence, and cart count display.
- * Integrates with Shopify Cart API through the Cloudflare Pages Function proxy.
+ * Cart State Management (local, Stripe-backed)
+ *
+ * The cart lives in localStorage. Each line is a product + chosen size.
+ * Checkout hands the cart to /api/checkout, which builds a Stripe Checkout
+ * Session server-side. No prices are trusted from here — they're only used for
+ * display; the server re-prices everything against Airtable.
  */
+
+const CART_STORAGE_KEY = 'kiosk_cart';
 
 class CartManager {
   constructor() {
-    this.cartId = null;
-    this.cartItems = [];
-    this.cartCount = 0;
-    this.cartTotal = 0;
-    this.isLoading = false;
-    
-    // Load cart from localStorage on initialization
-    this.loadCartFromStorage();
-    
-    // Update cart count display
-    this.updateCartCount();
+    this.items = [];
+    this.load();
   }
 
-  /**
-   * Load cart data from localStorage
-   */
-  loadCartFromStorage() {
+  // Stable key per product+size so the same shirt in two sizes are separate lines.
+  static keyFor(handle, size) {
+    return `${handle}::${size || ''}`;
+  }
+
+  load() {
     try {
-      const storedCartId = localStorage.getItem('shopify_cart_id');
-      const storedCartItems = localStorage.getItem('shopify_cart_items');
-      
-      if (storedCartId) {
-        this.cartId = storedCartId;
-      }
-      
-      if (storedCartItems) {
-        this.cartItems = JSON.parse(storedCartItems);
-        this.calculateCartCount();
-      }
-    } catch (error) {
-      console.error('Error loading cart from storage:', error);
-      this.clearCart();
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      this.items = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(this.items)) this.items = [];
+    } catch {
+      this.items = [];
     }
+    this.emit();
   }
 
-  /**
-   * Save cart data to localStorage
-   */
-  saveCartToStorage() {
+  save() {
     try {
-      if (this.cartId) {
-        localStorage.setItem('shopify_cart_id', this.cartId);
-      }
-      localStorage.setItem('shopify_cart_items', JSON.stringify(this.cartItems));
-    } catch (error) {
-      console.error('Error saving cart to storage:', error);
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items));
+    } catch (e) {
+      console.error('Could not save cart:', e);
     }
+    this.emit();
   }
 
   /**
-   * Calculate cart count from items
+   * Add a product to the cart.
+   * @param {object} product - { handle, title, price, image }
+   * @param {string} size - chosen size ('' if the product has none)
+   * @param {number} quantity
    */
-  calculateCartCount() {
-    this.cartCount = this.cartItems.reduce((total, item) => {
-      return total + (item.quantity || 0);
-    }, 0);
+  addItem(product, size = '', quantity = 1) {
+    if (!product || !product.handle) {
+      throw new Error('addItem requires a product with a handle');
+    }
+    const key = CartManager.keyFor(product.handle, size);
+    const existing = this.items.find((i) => i.key === key);
+
+    if (existing) {
+      existing.quantity = Math.min(10, existing.quantity + quantity);
+    } else {
+      this.items.push({
+        key,
+        handle: product.handle,
+        title: product.title || product.handle,
+        price: Number(product.price) || 0,
+        image: product.image || (product.images && product.images[0] && product.images[0].url) || '',
+        size: size || '',
+        quantity: Math.max(1, Math.min(10, quantity)),
+      });
+    }
+    this.save();
   }
 
-  /**
-   * Calculate cart total from items
-   */
-  calculateCartTotal() {
-    this.cartTotal = this.cartItems.reduce((total, item) => {
-      const price = parseFloat(item.variant?.price?.amount || item.price || 0);
-      return total + (price * (item.quantity || 0));
-    }, 0);
+  removeItem(key) {
+    this.items = this.items.filter((i) => i.key !== key);
+    this.save();
   }
 
-  /**
-   * Update cart count display in UI
-   */
-  updateCartCount() {
-    this.calculateCartCount();
-    
-    // Update cart count badge/element if it exists
-    const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
-    cartCountElements.forEach(element => {
-      element.textContent = this.cartCount;
-      element.style.display = this.cartCount > 0 ? 'inline-block' : 'none';
-    });
-    
-    // Dispatch custom event for other components to listen
-    window.dispatchEvent(new CustomEvent('cartUpdated', {
-      detail: {
-        count: this.cartCount,
-        total: this.cartTotal,
-        items: this.cartItems
-      }
-    }));
-  }
-
-  /**
-   * Create a new cart or get existing cart
-   * @returns {Promise<object>} - Cart data
-   */
-  async createCart() {
-    if (this.isLoading) {
+  setQuantity(key, quantity) {
+    const item = this.items.find((i) => i.key === key);
+    if (!item) return;
+    const q = parseInt(quantity, 10) || 0;
+    if (q <= 0) {
+      this.removeItem(key);
       return;
     }
-
-    this.isLoading = true;
-
-    try {
-      const response = await fetch('/api/shopify-cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'create'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.cart) {
-        this.cartId = data.cart.id;
-        this.updateCartFromResponse(data.cart);
-        this.saveCartToStorage();
-        this.updateCartCount();
-      }
-
-      return data.cart;
-    } catch (error) {
-      console.error('Error creating cart:', error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
+    item.quantity = Math.min(10, q);
+    this.save();
   }
 
-  /**
-   * Add item to cart
-   * @param {string} variantId - Shopify variant ID
-   * @param {number} quantity - Quantity to add
-   * @returns {Promise<object>} - Updated cart data
-   */
-  async addItem(variantId, quantity = 1) {
-    if (this.isLoading) {
-      return;
-    }
-
-    // Ensure we have a cart
-    if (!this.cartId) {
-      await this.createCart();
-    }
-
-    this.isLoading = true;
-
-    try {
-      const response = await fetch('/api/shopify-cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'add',
-          cartId: this.cartId,
-          variantId: variantId,
-          quantity: quantity
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.cart) {
-        this.updateCartFromResponse(data.cart);
-        this.saveCartToStorage();
-        this.updateCartCount();
-      }
-
-      return data.cart;
-    } catch (error) {
-      console.error('Error adding item to cart:', error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
+  clear() {
+    this.items = [];
+    this.save();
   }
 
-  /**
-   * Update item quantity in cart
-   * @param {string} lineId - Cart line item ID
-   * @param {number} quantity - New quantity
-   * @returns {Promise<object>} - Updated cart data
-   */
-  async updateItem(lineId, quantity) {
-    if (this.isLoading || !this.cartId) {
-      return;
-    }
-
-    this.isLoading = true;
-
-    try {
-      const response = await fetch('/api/shopify-cart', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'update',
-          cartId: this.cartId,
-          lineId: lineId,
-          quantity: quantity
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.cart) {
-        this.updateCartFromResponse(data.cart);
-        this.saveCartToStorage();
-        this.updateCartCount();
-      }
-
-      return data.cart;
-    } catch (error) {
-      console.error('Error updating cart item:', error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  /**
-   * Remove item from cart
-   * @param {string} lineId - Cart line item ID
-   * @returns {Promise<object>} - Updated cart data
-   */
-  async removeItem(lineId) {
-    if (this.isLoading || !this.cartId) {
-      return;
-    }
-
-    this.isLoading = true;
-
-    try {
-      const response = await fetch('/api/shopify-cart', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'remove',
-          cartId: this.cartId,
-          lineId: lineId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.cart) {
-        this.updateCartFromResponse(data.cart);
-        this.saveCartToStorage();
-        this.updateCartCount();
-      }
-
-      return data.cart;
-    } catch (error) {
-      console.error('Error removing cart item:', error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  /**
-   * Get current cart data
-   * @returns {Promise<object>} - Cart data
-   */
-  async getCart() {
-    if (!this.cartId) {
-      return null;
-    }
-
-    if (this.isLoading) {
-      return;
-    }
-
-    this.isLoading = true;
-
-    try {
-      const response = await fetch(`/api/shopify-cart?cartId=${this.cartId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.cart) {
-        this.updateCartFromResponse(data.cart);
-        this.saveCartToStorage();
-        this.updateCartCount();
-      }
-
-      return data.cart;
-    } catch (error) {
-      console.error('Error getting cart:', error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  /**
-   * Update cart state from Shopify API response
-   * @param {object} cart - Cart object from Shopify API
-   */
-  updateCartFromResponse(cart) {
-    this.cartId = cart.id;
-    this.cartItems = cart.lines?.edges?.map(edge => ({
-      id: edge.node.id,
-      variantId: edge.node.merchandise.id,
-      quantity: edge.node.quantity,
-      variant: edge.node.merchandise,
-      price: edge.node.cost?.totalAmount?.amount
-    })) || [];
-    
-    this.calculateCartCount();
-    this.calculateCartTotal();
-  }
-
-  /**
-   * Clear cart (local only, doesn't delete from Shopify)
-   */
-  clearCart() {
-    this.cartId = null;
-    this.cartItems = [];
-    this.cartCount = 0;
-    this.cartTotal = 0;
-    localStorage.removeItem('shopify_cart_id');
-    localStorage.removeItem('shopify_cart_items');
-    this.updateCartCount();
-  }
-
-  /**
-   * Get cart items array
-   * @returns {Array} - Cart items
-   */
   getItems() {
-    return this.cartItems;
+    return this.items;
   }
 
-  /**
-   * Get cart count
-   * @returns {number} - Cart item count
-   */
   getCount() {
-    return this.cartCount;
+    return this.items.reduce((n, i) => n + i.quantity, 0);
   }
 
-  /**
-   * Get cart total
-   * @returns {number} - Cart total amount
-   */
-  getTotal() {
-    return this.cartTotal;
+  getSubtotal() {
+    return this.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  }
+
+  // The payload /api/checkout expects.
+  toCheckoutPayload() {
+    return {
+      items: this.items.map((i) => ({ handle: i.handle, size: i.size, quantity: i.quantity })),
+    };
+  }
+
+  // Update any cart-count badges and broadcast a change event.
+  emit() {
+    const count = this.getCount();
+    document.querySelectorAll('.cart-count, [data-cart-count]').forEach((el) => {
+      el.textContent = count;
+      el.style.display = count > 0 ? 'inline-flex' : 'none';
+    });
+    window.dispatchEvent(
+      new CustomEvent('cartUpdated', {
+        detail: { count, subtotal: this.getSubtotal(), items: this.items },
+      })
+    );
+  }
+
+  static formatPrice(amount, currency = 'USD') {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(amount) || 0);
   }
 }
 
-// Create and export singleton instance
 const cart = new CartManager();
+window.cart = cart;
+window.CartManager = CartManager;
 
-// Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = cart;
 }
-
-// Make available globally
-window.cart = cart;
-

@@ -1644,6 +1644,17 @@
         <h3 id="drawer-product-title"></h3>
         <h3 id="drawer-product-price"></h3>
       </div>
+      <div class="products_drawer-sizes-wrap" id="drawer-size-wrapper" style="display:none;padding:0 0 .5rem;">
+        <div class="margin-bottom margin-xsmall"><h4 class="uppercase">size</h4></div>
+        <div id="drawer-sizes" class="drawer-sizes"></div>
+      </div>
+      <style>
+        .drawer-sizes{display:flex;gap:.5rem;flex-wrap:wrap}
+        .drawer-size-btn{min-width:2.75rem;padding:.5rem .75rem;border:1px solid currentColor;background:transparent;
+          color:inherit;cursor:pointer;border-radius:6px;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+        .drawer-size-btn.selected{background:#000;color:#fff;border-color:#000}
+        [data-theme="dark"] .drawer-size-btn.selected{background:#fff;color:#000;border-color:#fff}
+      </style>
       
       <div class="products_drawer-content">
         <!-- Images Section -->
@@ -1751,6 +1762,9 @@
   <!-- Airtable Integration -->
   <script src="../js/config.js" type="text/javascript"></script>
   <script src="../js/airtable.js" type="text/javascript"></script>
+  <script src="../js/cart.js" type="text/javascript"></script>
+  <script src="../js/checkout.js" type="text/javascript"></script>
+  <script src="../js/cart-ui.js" type="text/javascript"></script>
 
   <!-- 3D Carousel Script -->
   <script>
@@ -2317,6 +2331,7 @@
         const price = product.priceRange.minVariantPrice;
         const formattedPrice = window.airtable ? window.airtable.formatPrice(price.amount, price.currencyCode) : `${price.amount} ${price.currencyCode}`;
         $('#drawer-product-price').text(formattedPrice);
+        renderDrawerSizes(product);
 
         // Main image
         if (product.images.edges.length > 0) {
@@ -2516,6 +2531,31 @@
       let currentProductData = null;
       let currentProductHandle = null;
 
+      // Size the shopper picked in the drawer (required for sized products)
+      let selectedSize = '';
+
+      function renderDrawerSizes(product) {
+        const wrapper = $('#drawer-size-wrapper');
+        const container = $('#drawer-sizes');
+        container.empty();
+        selectedSize = '';
+        const sizes = (product && product.sizes) || [];
+        if (!sizes.length) {
+          wrapper.hide();
+          return;
+        }
+        wrapper.show();
+        sizes.forEach((size) => {
+          const btn = $('<button type="button" class="drawer-size-btn"></button>').text(size);
+          btn.on('click', function () {
+            container.find('.drawer-size-btn').removeClass('selected');
+            $(this).addClass('selected');
+            selectedSize = size;
+          });
+          container.append(btn);
+        });
+      }
+
       // Open drawer
       function openDrawer(productHandle) {
         currentProductHandle = productHandle;
@@ -2638,7 +2678,19 @@
             throw new Error('Cart manager not loaded. Please ensure js/cart.js is loaded.');
           }
           
-          await window.cart.addItem(firstVariant.id, 1);
+          // Sized products require a size selection
+          if (product.sizes && product.sizes.length && !selectedSize) {
+            throw new Error('Please select a size first');
+          }
+          const qty = Math.max(1, parseInt($('#drawer-quantity').val(), 10) || 1);
+          const firstImage = (product.images && product.images.edges && product.images.edges[0] && product.images.edges[0].node.url) || '';
+          await window.cart.addItem({
+            handle: product.handle,
+            title: product.title,
+            price: product.price,
+            image: firstImage
+          }, selectedSize, qty);
+          if (window.cartUI) window.cartUI.open();
           
           // Show success message
           button.text('Added!').removeClass('btn-primary').addClass('btn-success');
