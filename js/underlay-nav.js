@@ -195,6 +195,7 @@
       toggleBtn.setAttribute('aria-expanded', String(isOpen));
       toggleBtn.setAttribute('aria-label', isOpen ? 'close menu' : 'open menu');
       setMenuStatus(isOpen);
+      gsap.set(toggleBtn, { clearProps: 'color' });
 
       if (isOpen) {
         pauseLenis();

@@ -162,13 +162,18 @@ html[data-theme="dark"] .underlay-nav__logo {
   background: transparent;
   border: none;
   outline: none;
-  color: inherit;
+  color: var(--text-primary-light, #000000);
   cursor: pointer;
   justify-content: center;
   align-items: center;
   margin: -1em;
   padding: 1em;
   display: flex;
+  transition: color 0.3s ease;
+}
+
+html[data-theme="dark"] .underlay-nav__toggle {
+  color: var(--text-primary-dark, #ffffff);
 }
 
 .underlay-nav__toggle-text {
@@ -186,7 +191,12 @@ html[data-theme="dark"] .underlay-nav__logo {
   font-family: 'Generalsans Variable', 'Generalsans', Arial, sans-serif;
   font-weight: 500;
   line-height: 1.5;
-  color: inherit;
+  color: var(--text-primary-light, #000000);
+  transition: color 0.3s ease;
+}
+
+html[data-theme="dark"] .underlay-nav__toggle-label {
+  color: var(--text-primary-dark, #ffffff);
 }
 
 .underlay-nav__toggle-icon {
