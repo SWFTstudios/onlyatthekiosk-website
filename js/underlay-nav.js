@@ -71,9 +71,6 @@
 
     if (!toggleBtn || !menuEl || !mainEl || !overlayEl) return;
 
-    const closedColor = getComputedStyle(toggleBtn).color;
-    const openColor = getComputedStyle(menuEl).color;
-
     let isOpen = false;
     let tl;
     let enterEndTime = 0;
@@ -124,8 +121,6 @@
       tl.to(overlayBorders, { yPercent: 0, duration: 0.5 }, 0);
 
       tl.to(toggleLabels, { yPercent: -100, duration: 0.4 }, 0);
-
-      tl.to(toggleBtn, { color: openColor, duration: 0.4 }, 0);
 
       tl.to(toggleBars[0], {
         y: '0.25em',
@@ -184,9 +179,7 @@
         tl.to(overlayBorders[1], { yPercent: 100, duration: 0.5 }, '<');
       }
 
-      tl.to(toggleBtn, { color: closedColor, duration: 0.25 }, '<+=0.1');
-
-      tl.to(toggleLabels, { yPercent: 0, duration: 0.25, ease: 'power3.in' }, '<');
+      tl.to(toggleLabels, { yPercent: 0, duration: 0.25, ease: 'power3.in' }, '<+=0.1');
 
       tl.to(toggleBars, { y: 0, rotation: 0, duration: 0.25, ease: 'power3.in' }, '<');
 
@@ -202,6 +195,7 @@
       toggleBtn.setAttribute('aria-expanded', String(isOpen));
       toggleBtn.setAttribute('aria-label', isOpen ? 'close menu' : 'open menu');
       setMenuStatus(isOpen);
+      gsap.set(toggleBtn, { clearProps: 'color' });
 
       if (isOpen) {
         pauseLenis();
@@ -216,6 +210,11 @@
     }
 
     buildTimeline();
+
+    window.addEventListener('themechange', () => {
+      gsap.set(toggleBtn, { clearProps: 'color' });
+    });
+
     toggleBtn.addEventListener('click', toggle);
 
     overlayEl.addEventListener('click', () => {
