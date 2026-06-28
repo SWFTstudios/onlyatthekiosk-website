@@ -1,0 +1,24 @@
+{
+  "primary": [
+    { "label": "Home", "path": "index.html", "match": ["index.html", ""] },
+    { "label": "Shop", "path": "store.html", "match": ["store.html"] },
+    { "label": "Media", "path": "media.html", "match": ["media.html"] }
+  ],
+  "categories": [
+    { "label": "Essential Tees", "path": "collections/t-shirts.html", "match": ["collections/t-shirts.html"] },
+    { "label": "Hoodies", "path": "collections/hoodies.html", "match": ["collections/hoodies.html"] },
+    { "label": "Chains", "path": "collections/chains.html", "match": ["collections/chains.html"] },
+    { "label": "Bracelets", "path": "collections/bracelets.html", "match": ["collections/bracelets.html"] }
+  ],
+  "socials": [
+    { "label": "Instagram", "href": "https://www.instagram.com/onlyatthekiosk", "external": true },
+    { "label": "Facebook", "href": "https://www.facebook.com/onlyatthekiosk", "external": true },
+    { "label": "LinkedIn", "href": "https://www.linkedin.com/company/onlyatthekiosk", "external": true }
+  ],
+  "quickLinks": [
+    { "label": "About", "path": "about.html", "match": ["about.html"] },
+    { "label": "Contact", "path": "contact.html", "match": ["contact.html"] },
+    { "label": "FAQ", "path": "faq.html", "match": ["faq.html"] },
+    { "label": "KIOSK Members", "path": "members.html", "match": ["members.html"] }
+  ]
+}

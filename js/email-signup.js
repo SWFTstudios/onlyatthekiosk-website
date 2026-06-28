@@ -56,7 +56,7 @@
 
     // Disable submit button
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Signing Up...';
+    submitBtn.textContent = 'Joining...';
 
     try {
       // Check if we're in local development (Cloudflare Pages Functions don't work locally)
@@ -81,7 +81,7 @@
           if (isLocalDev) {
             showMessage('⚠️ This feature only works when deployed to Cloudflare Pages. In local development, use: wrangler pages dev', 'error');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign Up';
+            submitBtn.textContent = 'Join the list';
             return;
           }
         }
@@ -101,7 +101,7 @@
         
         showMessage(errorMessage, 'error');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign Up';
+        submitBtn.textContent = 'Join the list';
         return;
       }
 
@@ -117,7 +117,7 @@
         console.error('Error parsing JSON response:', parseError);
         // If parsing fails but status is OK, still show success
         if (response.ok) {
-          showMessage('Thank you! You\'ll be the first to know when we launch.', 'success');
+          showMessage('You\'re on the list. We\'ll let you know when KIOSK drops.', 'success');
           form.reset();
           setTimeout(() => {
             closeModal();
@@ -128,7 +128,7 @@
       }
 
       if (response.ok) {
-        showMessage('Thank you! You\'ll be the first to know when we launch.', 'success');
+        showMessage('You\'re on the list. We\'ll let you know when KIOSK drops.', 'success');
         form.reset();
         
         // Close modal after 2 seconds
@@ -138,7 +138,7 @@
       } else {
         showMessage(data.error || 'Something went wrong. Please try again.', 'error');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign Up';
+        submitBtn.textContent = 'Join the list';
       }
     } catch (error) {
       console.error('Error submitting email:', error);
@@ -153,7 +153,7 @@
       }
       
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign Up';
+            submitBtn.textContent = 'Join the list';
     }
   }
 
