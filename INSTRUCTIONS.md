@@ -79,6 +79,15 @@ This project creates a completely custom frontend and user experience while leve
 
 **Example**: To change a nav link label, edit `partials/nav-config.json`, then run `node scripts/build-nav.js`. The script injects nav HTML between `<!-- NAV:BEGIN -->` / `<!-- NAV:END -->` markers in all 19 production pages.
 
+#### 3D Collection Carousel
+
+Collection pages and `carousel-template.html` share the 3D carousel via:
+
+- `css/carousel-3d.css` — carousel, drawer, and touch-layer styles
+- `js/carousel-3d.js` — load-first init, full-viewport swipe, Swiper + GSAP sync
+
+Configure per page with `window.KioskCarousel3DConfig` (`assetBase`, `collectionHandle`). Re-apply asset links after HTML edits with `node scripts/patch-collection-carousel.js`.
+
 ---
 
 ## File Organization
