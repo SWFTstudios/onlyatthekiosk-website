@@ -1,0 +1,72 @@
+<div class="underlay-nav">
+  <header class="underlay-nav__header">
+    <div class="underlay-nav__bar">
+      <div class="underlay-nav__container">
+        <a href="{{BASE}}index.html" class="underlay-nav__logo brand-wrapper">
+          <span class="special-k">K</span>IOSK
+        </a>
+        <div class="underlay-nav__actions">
+          <button class="underlay-nav__theme-toggle navbar-theme-toggle" aria-label="Toggle theme" type="button">
+            <span class="navbar-theme-toggle-slider">
+              <svg class="navbar-theme-icon sun" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <svg class="navbar-theme-icon moon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M13.5 8C13.5 11.5899 10.5899 14.5 7 14.5C5.5 14.5 4.1 14 3 13.1C3.3 12.9 3.6 12.6 3.8 12.3C4.1 12.4 4.4 12.5 4.7 12.5C7.26142 12.5 9.5 10.2614 9.5 7.7C9.5 5.13858 7.26142 3 4.7 3C4.4 3 4.1 3.1 3.8 3.2C3.6 2.9 3.3 2.6 3 2.4C4.1 1.5 5.5 1 7 1C10.5899 1 13.5 3.91015 13.5 7.5V8Z" fill="currentColor"/>
+              </svg>
+            </span>
+          </button>
+          <button data-underlay-nav-toggle type="button" aria-expanded="false" aria-label="open menu" class="underlay-nav__toggle">
+            <span class="underlay-nav__toggle-text">
+              <span class="underlay-nav__toggle-label">Menu</span>
+              <span class="underlay-nav__toggle-label">Close</span>
+            </span>
+            <span class="underlay-nav__toggle-icon" aria-hidden="true">
+              <span class="underlay-nav__toggle-bar"></span>
+              <span class="underlay-nav__toggle-bar"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <nav data-underlay-nav-menu class="underlay-nav__menu" aria-label="Main navigation">
+    <div class="underlay-nav__inner">
+      <ul class="underlay-nav__list underlay-nav__list--primary">
+        {{PRIMARY_LINKS}}
+      </ul>
+      <ul class="underlay-nav__list underlay-nav__list--categories">
+        {{CATEGORY_LINKS}}
+      </ul>
+      <div class="underlay-nav__bottom">
+        <div class="underlay-nav__bottom-col">
+          <div data-reveal-s><span class="underlay-nav__link-small is--faded">Socials</span></div>
+          <ul class="underlay-nav__list is--small">
+            {{SOCIAL_LINKS}}
+          </ul>
+        </div>
+        <div class="underlay-nav__bottom-col">
+          <div data-reveal-s><span class="underlay-nav__link-small is--faded">Quick Links</span></div>
+          <ul class="underlay-nav__list is--small">
+            {{QUICK_LINKS}}
+          </ul>
+        </div>
+        <div class="underlay-nav__bottom-border" aria-hidden="true"></div>
+      </div>
+    </div>
+  </nav>
+  <div data-underlay-nav-overlay class="underlay-nav__overlay" aria-hidden="true">
+    <div class="underlay-nav__dark"></div>
+    <div class="underlay-nav__borders">
+      <div class="underlay-nav__border-row">
+        <div class="underlay-nav__border"></div>
+        <div class="underlay-nav__corner"></div>
+      </div>
+      <div class="underlay-nav__border-row">
+        <div class="underlay-nav__corner is--bottom"></div>
+        <div class="underlay-nav__border"></div>
+      </div>
+    </div>
+  </div>
+</div>
