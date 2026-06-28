@@ -34,6 +34,14 @@ body[data-menu-status="open"] {
   overflow: hidden;
 }
 
+body[data-menu-status="open"] [data-main] {
+  overflow: hidden;
+}
+
+body[data-menu-status="open"] .underlay-nav__menu {
+  z-index: 20;
+}
+
 .underlay-nav__header {
   z-index: 100;
   color: var(--text-primary-light, #000000);
@@ -226,6 +234,7 @@ html[data-theme="dark"] .underlay-nav__toggle-label {
   top: 0;
   bottom: 0;
   right: 0;
+  isolation: isolate;
 }
 
 html[data-theme="dark"] .underlay-nav__menu {
