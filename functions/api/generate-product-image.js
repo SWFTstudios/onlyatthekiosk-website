@@ -13,24 +13,42 @@ async function generateOpenAIImage(prompt, apiKey, model) {
 
   let lastError = null;
   for (const currentModel of modelsToTry) {
+    const requestBody = {
+      model: currentModel,
+      prompt,
+      n: 1,
+      size: '1024x1024',
+    };
+
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: currentModel,
-        prompt,
-        n: 1,
-        size: '1024x1024',
-        response_format: 'b64_json',
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (response.ok) {
       const data = await response.json();
-      return { b64: data.data[0].b64_json, model: currentModel };
+      const image = data.data?.[0];
+      if (image?.b64_json) {
+        return { b64: image.b64_json, model: currentModel };
+      }
+      if (image?.url) {
+        const imageResponse = await fetch(image.url);
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to download generated image: ${imageResponse.status}`);
+        }
+        const imageBuffer = await imageResponse.arrayBuffer();
+        const bytes = new Uint8Array(imageBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return { b64: btoa(binary), model: currentModel };
+      }
+      throw new Error(`OpenAI response did not include image data for ${currentModel}`);
     }
 
     lastError = `${currentModel}: ${response.status} ${await response.text()}`;

@@ -78,7 +78,6 @@ async function generateOpenAILocal(prompt, apiKey) {
       prompt,
       n: 1,
       size: '1024x1024',
-      response_format: 'b64_json',
     }),
   });
 
@@ -87,7 +86,20 @@ async function generateOpenAILocal(prompt, apiKey) {
   }
 
   const data = await response.json();
-  return data.data[0].b64_json;
+  const image = data.data?.[0];
+  if (image?.b64_json) {
+    return image.b64_json;
+  }
+  if (image?.url) {
+    const imageResponse = await fetch(image.url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download generated image: ${imageResponse.status}`);
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    return Buffer.from(imageBuffer).toString('base64');
+  }
+
+  throw new Error('OpenAI response did not include image data');
 }
 
 async function generateOpenAIRemote(handle, kind) {
