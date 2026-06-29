@@ -1623,6 +1623,7 @@
   <script src="../js/lenis.js" type="text/javascript"></script>
   
   <!-- Airtable Integration -->
+    <script src="../js/product-image-manifest.js" type="text/javascript"></script>
   <script src="../js/config.js" type="text/javascript"></script>
   <script src="../js/airtable.js" type="text/javascript"></script>
   
@@ -1654,6 +1655,7 @@
       
       // Update title immediately if collection handle is present (before API call)
       if (collectionHandle) {
+        initStaticCarouselImages(collectionHandle);
         const initialTitle = formatCollectionTitle(collectionHandle);
         updateCollectionTitle(initialTitle);
       }
@@ -2285,60 +2287,38 @@
           return null;
         }
       }
+      function initStaticCarouselImages(collectionKey) {
+        if (typeof COLLECTION_HANDLES === 'undefined' || typeof PRODUCT_IMAGES === 'undefined') return;
+        const handles = COLLECTION_HANDLES[collectionKey] || [];
+        $('.carousel_item').each(function (i) {
+          const handle = handles[i];
+          if (!handle || !PRODUCT_IMAGES[handle]) return;
+          const entry = PRODUCT_IMAGES[handle];
+          $(this).find('.carousel_img')
+            .attr('src', entry.product)
+            .attr('alt', entry.productAlt);
+        });
+      }
+
+
 
       // Placeholder product data for template products
       // Each product handle corresponds to a carousel slide
       function getPlaceholderProduct(productHandle) {
-        // IMAGE SOURCE OPTIONS (choose one):
-        
-        // Option 1: Placeholder service (fast, no hosting, good for testing)
-        const placeholderImage = '/images/kiosk-placeholder-product-img.webp';
-        
-        // Option 2: Unsplash (free, high-quality, good for demos)
-        // const placeholderImage = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop&auto=format';
-        
-        // Option 3: Your hosted placeholder (now using WebP format)
-        // const placeholderImage = '/images/kiosk-placeholder-product-img.webp'; // Already active above
-        
-        // Option 4: Cloudinary or other CDN (best for production)
-        // const placeholderImage = 'https://res.cloudinary.com/your-cloud/image/upload/w_800,h_800,c_fill/product-placeholder.jpg';
-        
-        // Option 5: Fetch from Supabase (async - see fetchImageFromSupabase above)
-        // This would require making the function async and awaiting the result
-        
-        // Generate product titles (Product 001, Product 002, etc.)
-        const productTitles = [];
-        for (let i = 1; i <= 16; i++) {
-          const num = i.toString().padStart(3, '0');
-          productTitles.push(`Product ${num}`);
+        const collectionKey = typeof collectionHandle !== 'undefined' ? collectionHandle : null;
+        if (typeof getProductPlaceholder === 'function') {
+          return getProductPlaceholder(productHandle, collectionKey);
         }
-        
-        const productPrices = ['299.00', '349.00', '379.00', '399.00', '429.00', '449.00', '479.00', '499.00', '529.00', '549.00', '579.00', '599.00', '629.00', '649.00', '679.00', '699.00'];
-        
-        // Extract product index from handle (e.g., 'product-handle-1' -> 0)
-        const handleMatch = productHandle.match(/product-handle-(\d+)/);
-        const index = handleMatch ? parseInt(handleMatch[1]) - 1 : 0;
-        const title = productTitles[index] || 'Product 001';
-        const price = productPrices[index] || '299.00';
-
-        // Use placeholder image for main image and gallery
-        // You can add multiple gallery images later if needed
-        const galleryImages = [
-          placeholderImage,
-          placeholderImage,
-          placeholderImage
-        ];
-
+        const fallback = '/images/kiosk-placeholder-product-img.webp';
         return {
-          title: title,
-          price: { amount: price, currencyCode: 'SEK' },
-          mainImage: placeholderImage,
-          gallery: galleryImages,
-          description: `<p>${title} — an essential piece from KIOSK. Built for everyday wear, designed to feel like a find.</p>`,
-          careInstructions: '<p><strong>Care Instructions:</strong></p><ul><li>Hand wash recommended in cold water</li><li>Do not bleach or use harsh detergents</li><li>Lay flat to dry</li><li>Iron on low heat if needed</li><li>Store in a cool, dry place</li><li>Keep away from direct sunlight when storing</li></ul>'
+          title: 'Product',
+          price: { amount: '299.00', currencyCode: 'SEK' },
+          mainImage: fallback,
+          gallery: [fallback],
+          description: '<p>Product — an essential piece from KIOSK.</p>',
+          careInstructions: '<p><strong>Care Instructions:</strong></p><ul><li>Hand wash recommended in cold water</li></ul>'
         };
       }
-
       // Populate drawer with placeholder data
       function populatePlaceholderDrawer(placeholderData) {
         // Product title and price

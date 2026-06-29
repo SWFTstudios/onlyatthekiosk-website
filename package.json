@@ -1,0 +1,16 @@
+{
+  "name": "only-at-the-kiosk",
+  "private": true,
+  "scripts": {
+    "build:manifest": "node scripts/build-product-image-manifest.js",
+    "generate:images": "node scripts/generate-product-images.js",
+    "optimize:images": "node scripts/optimize-product-images.js",
+    "sync:airtable-images": "node scripts/sync-airtable-product-images.js",
+    "update:csv-images": "node scripts/update-csv-product-images.js",
+    "build:product-image-js": "node scripts/build-product-image-js.js",
+    "verify:images": "node scripts/verify-product-images.js"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}
