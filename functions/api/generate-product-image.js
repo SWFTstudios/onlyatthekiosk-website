@@ -9,27 +9,34 @@ const corsHeaders = {
 };
 
 async function generateOpenAIImage(prompt, apiKey, model) {
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      prompt,
-      n: 1,
-      size: '1024x1024',
-      response_format: 'b64_json',
-    }),
-  });
+  const modelsToTry = [model, 'dall-e-3'].filter((m, i, arr) => arr.indexOf(m) === i);
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status} ${await response.text()}`);
+  let lastError = null;
+  for (const currentModel of modelsToTry) {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: currentModel,
+        prompt,
+        n: 1,
+        size: '1024x1024',
+        response_format: 'b64_json',
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { b64: data.data[0].b64_json, model: currentModel };
+    }
+
+    lastError = `${currentModel}: ${response.status} ${await response.text()}`;
   }
 
-  const data = await response.json();
-  return data.data[0].b64_json;
+  throw new Error(`OpenAI API error — ${lastError}`);
 }
 
 export async function onRequest(context) {

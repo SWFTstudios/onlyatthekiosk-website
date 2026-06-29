@@ -48,6 +48,13 @@ node scripts/generate-product-images.js --openai --remote --force --collection c
 
 Add `OPENAI_API_KEY` to Cloudflare Pages secrets (same place as Airtable credentials). Optional: `OPENAI_IMAGE_MODEL` (default `gpt-image-1`), `IMAGE_SYNC_SECRET` for auth.
 
+After adding the secret and deploying, regenerate all images:
+
+```bash
+node scripts/generate-product-images.js --openai --remote --force
+npm run sync:airtable-images -- --remote
+```
+
 ### 3. Optimize (if re-processing raw files)
 
 ```bash
