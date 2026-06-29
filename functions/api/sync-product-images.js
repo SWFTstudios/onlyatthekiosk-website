@@ -144,6 +144,7 @@ export async function onRequest(context) {
         success: true,
         synced,
         missing,
+        uniqueHandles: updatedHandles.size,
         total: handles.length,
         missingHandles: missingHandlesList,
       }),
