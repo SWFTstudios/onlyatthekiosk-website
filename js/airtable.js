@@ -246,6 +246,34 @@ class AirtableClient {
       } catch (e) {
         console.warn('Error parsing Image URLs:', e);
       }
+    } else if (fields['Image Src']) {
+      const src = fields['Image Src'];
+      const primaryUrl = typeof src === 'string' ? src : src?.[0]?.url || '';
+      if (primaryUrl) {
+        images.push({
+          url: primaryUrl,
+          altText: fields['Image Alt Text'] || fields.Title || '',
+          width: 800,
+          height: 800
+        });
+      }
+    }
+
+    // Append lifestyle image from local manifest when available
+    const handle = fields.Handle || '';
+    if (handle && typeof getProductImagesByHandle === 'function') {
+      const manifestImages = getProductImagesByHandle(handle);
+      if (manifestImages?.lifestyle) {
+        const hasLifestyle = images.some((img) => img.url === manifestImages.lifestyle);
+        if (!hasLifestyle) {
+          images.push({
+            url: manifestImages.lifestyle,
+            altText: manifestImages.lifestyleAlt || `${fields.Title} lifestyle`,
+            width: 800,
+            height: 800
+          });
+        }
+      }
     }
     
     // Parse variants

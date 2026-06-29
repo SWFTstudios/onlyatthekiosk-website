@@ -114,39 +114,30 @@ export async function onRequest(context) {
     });
 
     const records = await fetchAllRecords(baseId, table, token);
-    const byHandle = new Map();
+
+    let synced = 0;
+    const missingHandles = new Set(handles);
+    const updatedHandles = new Set();
 
     for (const record of records) {
       const handle = record.fields?.Handle || record.fields?.handle;
-      if (handle) byHandle.set(handle, record);
-    }
+      if (!handle || !manifest[handle]) continue;
 
-    let synced = 0;
-    let missing = 0;
-    const missingHandles = [];
+      missingHandles.delete(handle);
+      updatedHandles.add(handle);
 
-    for (const handle of handles) {
       const entry = manifest[handle];
-      const record = byHandle.get(handle);
-
-      if (!record) {
-        missing++;
-        missingHandles.push(handle);
-        continue;
-      }
-
-      const imageUrls = [
-        absoluteUrl(siteOrigin, entry.productPath),
-        absoluteUrl(siteOrigin, entry.lifestylePath),
-      ];
-
       await updateRecord(baseId, table, token, record.id, {
-        'Image URLs': JSON.stringify(imageUrls),
+        'Image Src': absoluteUrl(siteOrigin, entry.productPath),
+        'Image Alt Text': entry.productAlt,
       });
 
       synced++;
       await sleep(220);
     }
+
+    const missing = missingHandles.size;
+    const missingHandlesList = [...missingHandles].slice(0, 20);
 
     return new Response(
       JSON.stringify({
@@ -154,7 +145,7 @@ export async function onRequest(context) {
         synced,
         missing,
         total: handles.length,
-        missingHandles: missingHandles.slice(0, 20),
+        missingHandles: missingHandlesList,
       }),
       { status: 200, headers: corsHeaders }
     );

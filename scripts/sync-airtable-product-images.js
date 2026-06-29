@@ -165,52 +165,50 @@ async function main() {
   }
 
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
-  let handles = Object.keys(manifest).filter((h) => manifest[h].status === 'optimized' || manifest[h].status === 'synced');
+  const handlesInManifest = new Set(
+    Object.keys(manifest).filter((h) => {
+      const status = manifest[h].status;
+      return status === 'optimized' || status === 'synced' || status === 'pending';
+    })
+  );
 
   if (opts.collection) {
-    handles = handles.filter((h) => manifest[h].collection === opts.collection);
+    for (const handle of [...handlesInManifest]) {
+      if (manifest[handle].collection !== opts.collection) handlesInManifest.delete(handle);
+    }
   }
 
-  console.log(`\n📤 Syncing ${handles.length} products to Airtable...`);
+  console.log(`\n📤 Syncing ${handlesInManifest.size} product handles to Airtable...`);
 
   const records = await fetchAllRecords();
-  const byHandle = new Map();
+  let synced = 0;
+  const updatedHandles = new Set();
 
   for (const record of records) {
     const handle = record.fields?.Handle || record.fields?.handle;
-    if (handle) byHandle.set(handle, record);
-  }
+    if (!handle || !handlesInManifest.has(handle)) continue;
 
-  let synced = 0;
-  let missing = 0;
-
-  for (const handle of handles) {
     const entry = manifest[handle];
-    const record = byHandle.get(handle);
+    await updateRecord(record.id, {
+      'Image Src': absoluteUrl(entry.productPath),
+      'Image Alt Text': entry.productAlt,
+    }, opts.dryRun);
 
-    if (!record) {
-      console.warn(`  ⚠️  No Airtable record for handle: ${handle}`);
-      missing++;
-      continue;
-    }
-
-    const imageUrls = [
-      absoluteUrl(entry.productPath),
-      absoluteUrl(entry.lifestylePath),
-    ];
-
-    await updateRecord(record.id, { 'Image URLs': JSON.stringify(imageUrls) }, opts.dryRun);
-    entry.status = 'synced';
+    updatedHandles.add(handle);
     synced++;
-
     await sleep(220);
   }
 
+  const missing = handlesInManifest.size - updatedHandles.size;
+
   if (!opts.dryRun) {
+    for (const handle of updatedHandles) {
+      manifest[handle].status = 'synced';
+    }
     fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n');
   }
 
-  console.log(`\n✅ Synced ${synced} records (${missing} handles not found in Airtable)`);
+  console.log(`\n✅ Synced ${synced} Airtable records (${updatedHandles.size} unique handles, ${missing} handles not found)`);
 }
 
 main().catch((err) => {
