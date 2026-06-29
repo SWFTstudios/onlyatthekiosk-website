@@ -8,9 +8,7 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const BATCH_SIZE = 10;
 
 function absoluteUrl(origin, relativePath) {
   if (relativePath.startsWith('http')) return relativePath;
@@ -42,19 +40,21 @@ async function fetchAllRecords(baseId, table, token) {
   return records;
 }
 
-async function updateRecord(baseId, table, token, recordId, fields) {
-  const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}/${recordId}`;
+async function updateRecordsBatch(baseId, table, token, updates) {
+  const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`;
   const response = await fetch(url, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ fields }),
+    body: JSON.stringify({
+      records: updates.map(({ id, fields }) => ({ id, fields })),
+    }),
   });
 
   if (!response.ok) {
-    throw new Error(`Airtable update failed: ${response.status} ${await response.text()}`);
+    throw new Error(`Airtable batch update failed: ${response.status} ${await response.text()}`);
   }
 }
 
@@ -87,7 +87,6 @@ export async function onRequest(context) {
     );
   }
 
-  // Optional auth when IMAGE_SYNC_SECRET is configured
   if (env.IMAGE_SYNC_SECRET) {
     const authHeader = request.headers.get('Authorization') || '';
     const provided = authHeader.replace(/^Bearer\s+/i, '').trim();
@@ -114,8 +113,7 @@ export async function onRequest(context) {
     });
 
     const records = await fetchAllRecords(baseId, table, token);
-
-    let synced = 0;
+    const updates = [];
     const missingHandles = new Set(handles);
     const updatedHandles = new Set();
 
@@ -127,26 +125,28 @@ export async function onRequest(context) {
       updatedHandles.add(handle);
 
       const entry = manifest[handle];
-      await updateRecord(baseId, table, token, record.id, {
-        'Image Src': absoluteUrl(siteOrigin, entry.productPath),
-        'Image Alt Text': entry.productAlt,
+      updates.push({
+        id: record.id,
+        fields: {
+          'Image Src': absoluteUrl(siteOrigin, entry.productPath),
+          'Image Alt Text': entry.productAlt,
+        },
       });
-
-      synced++;
-      await sleep(220);
     }
 
-    const missing = missingHandles.size;
-    const missingHandlesList = [...missingHandles].slice(0, 20);
+    for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+      await updateRecordsBatch(baseId, table, token, updates.slice(i, i + BATCH_SIZE));
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        synced,
-        missing,
+        synced: updates.length,
+        missing: missingHandles.size,
         uniqueHandles: updatedHandles.size,
         total: handles.length,
-        missingHandles: missingHandlesList,
+        batches: Math.ceil(updates.length / BATCH_SIZE),
+        missingHandles: [...missingHandles].slice(0, 20),
       }),
       { status: 200, headers: corsHeaders }
     );
