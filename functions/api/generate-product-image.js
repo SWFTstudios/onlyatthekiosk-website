@@ -104,14 +104,14 @@ export async function onRequest(context) {
     }
 
     const prompt = kind === 'product' ? entry.productPrompt : entry.lifestylePrompt;
-    const b64 = await generateOpenAIImage(prompt, apiKey, model);
+    const { b64, model: usedModel } = await generateOpenAIImage(prompt, apiKey, model);
 
     return new Response(
       JSON.stringify({
         success: true,
         handle,
         kind,
-        model,
+        model: usedModel,
         b64,
       }),
       { status: 200, headers: corsHeaders }
