@@ -1683,7 +1683,7 @@
         
         try {
           // Fetch collection data from live Airtable
-          const collection = await window.airtable.getProductsByCollection(handle, 50);
+          const collection = await window.airtable.getCollection(handle);
           
           if (collection && collection.products && collection.products.edges && collection.products.edges.length > 0) {
             collectionData = collection;
@@ -2290,6 +2290,10 @@
         }
       }
       function initStaticCarouselImages(collectionKey) {
+        if (typeof applyManifestCarouselImages === 'function') {
+          applyManifestCarouselImages(collectionKey);
+          return;
+        }
         if (typeof COLLECTION_HANDLES === 'undefined' || typeof PRODUCT_IMAGES === 'undefined') return;
         const handles = COLLECTION_HANDLES[collectionKey] || [];
         $('.carousel_item').each(function (i) {

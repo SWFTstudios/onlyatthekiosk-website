@@ -56,6 +56,7 @@ export async function onRequest(context) {
     const maxRecords = url.searchParams.get('maxRecords');
     const filterByFormula = url.searchParams.get('filterByFormula');
     const sort = url.searchParams.get('sort');
+    const offset = url.searchParams.get('offset');
     
     // Validate table parameter
     if (!table) {
@@ -83,6 +84,9 @@ export async function onRequest(context) {
     if (sort) {
       airtableParams.append('sort[0][field]', sort);
       airtableParams.append('sort[0][direction]', 'asc');
+    }
+    if (offset) {
+      airtableParams.append('offset', offset);
     }
     
     // Add view parameter (default to Grid view)
