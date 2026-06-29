@@ -70,6 +70,41 @@ class AirtableClient {
   }
 
   /**
+   * Fetch all records from a table, handling Airtable pagination.
+   * @param {string} table
+   * @param {object} params
+   * @returns {Promise<Array>}
+   */
+  async fetchAllRecords(table, params = {}) {
+    const records = [];
+    const seenIds = new Set();
+    let offset = null;
+
+    do {
+      const pageParams = { ...params };
+      if (offset) pageParams.offset = offset;
+
+      const data = await this.request(table, pageParams);
+      const pageRecords = data.records || [];
+      let added = 0;
+
+      for (const record of pageRecords) {
+        if (seenIds.has(record.id)) continue;
+        seenIds.add(record.id);
+        records.push(record);
+        added++;
+      }
+
+      // Stop if the API returned no new records (e.g. offset not supported yet)
+      if (added === 0) break;
+
+      offset = data.offset || null;
+    } while (offset);
+
+    return records;
+  }
+
+  /**
    * Get all products from Airtable
    * @param {object} options - Query options
    * @param {string} options.collection - Filter by collection
@@ -89,7 +124,7 @@ class AirtableClient {
         
         // Apply filters to cached data
         if (collection) {
-          products = products.filter(p => p.collection === collection);
+          products = products.filter(p => this.matchesCollection(p, collection));
         }
         if (activeOnly) {
           products = products.filter(p => p.active !== false);
@@ -105,18 +140,16 @@ class AirtableClient {
     try {
       console.log('📡 Fetching products from Airtable...');
       
+      // Do not filter by Active at the API level — the Products table may not have that field.
       const params = {};
-      if (activeOnly) {
-        params.filterByFormula = '{Active} = TRUE()';
-      }
       if (maxRecords) {
         params.maxRecords = maxRecords;
       }
       
-      const data = await this.request(this.productsTable, params);
+      const records = await this.fetchAllRecords(this.productsTable, params);
       
       // Transform Airtable records to product objects
-      const products = this.transformProducts(data.records || []);
+      const products = this.transformProducts(records);
       
       // Cache products
       this.productsCache = products;
@@ -127,7 +160,7 @@ class AirtableClient {
       // Apply filters
       let filteredProducts = products;
       if (collection) {
-        filteredProducts = filteredProducts.filter(p => p.collection === collection);
+        filteredProducts = filteredProducts.filter(p => this.matchesCollection(p, collection));
         console.log(`📦 Filtered to ${filteredProducts.length} products in "${collection}" collection`);
       }
       if (maxRecords && !collection) {
@@ -288,15 +321,15 @@ class AirtableClient {
       }
     }
     
-    // Format price
-    const price = fields.Price || 0;
+    // Format price (Shopify CSV export uses Variant Price)
+    const price = fields['Variant Price'] ?? fields.Price ?? 0;
     const priceAmount = typeof price === 'number' ? price.toString() : price;
     
     return {
       id: record.id,
       productId: fields['Product ID'] || '',
       title: fields.Title || '',
-      handle: fields.Handle || '',
+      handle: handle,
       description: fields.Description || '',
       descriptionHtml: fields.Description || '',
       price: parseFloat(priceAmount),
@@ -316,12 +349,12 @@ class AirtableClient {
         }))
       },
       variants: variants,
-      collection: fields.Collection || '',
-      careInstructions: fields['Care Instructions'] || '',
+      collection: fields.Collection || this.inferCollectionFromHandle(handle),
+      careInstructions: fields['Care Instructions'] || fields['Care guide (product.metafields.descriptors.care_guide)'] || '',
       buyButtonId: fields['Shopify Buy Button ID'] || '',
       shopifyProductId: fields['Shopify Product ID'] || '',
       active: fields.Active !== false,
-      sortOrder: fields['Sort Order'] || 0
+      sortOrder: fields['Sort Order'] || this.extractSortOrder(handle)
     };
   }
 
@@ -331,10 +364,60 @@ class AirtableClient {
    * @returns {Array} - Array of product objects
    */
   transformProducts(records) {
-    return records
-      .map(record => this.transformProduct(record))
-      .filter(product => product.active) // Filter out inactive products
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)); // Sort by sort order
+    const byHandle = new Map();
+
+    for (const record of records) {
+      const product = this.transformProduct(record);
+      if (!product.handle || product.active === false) continue;
+
+      // One carousel card per handle (Airtable has one row per size variant)
+      if (!byHandle.has(product.handle)) {
+        byHandle.set(product.handle, product);
+      }
+    }
+
+    return [...byHandle.values()].sort((a, b) => {
+      const orderDiff = (a.sortOrder || 0) - (b.sortOrder || 0);
+      if (orderDiff !== 0) return orderDiff;
+      return a.title.localeCompare(b.title);
+    });
+  }
+
+  /**
+   * Infer collection title from product handle when Airtable Collection field is empty.
+   * @param {string} handle
+   * @returns {string}
+   */
+  inferCollectionFromHandle(handle) {
+    if (!handle) return '';
+    if (handle.includes('-tshirt')) return 'T-shirts';
+    if (handle.includes('-hoodie')) return 'Hoodies';
+    if (handle.includes('-bracelet')) return 'Bracelets';
+    if (handle.includes('-chain')) return 'Chains';
+    return '';
+  }
+
+  /**
+   * Extract numeric sort order from handles like "003-black-tshirt".
+   * @param {string} handle
+   * @returns {number}
+   */
+  extractSortOrder(handle) {
+    const match = handle.match(/^(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * Match product to a collection title (handles inferred collections).
+   * @param {object} product
+   * @param {string} collectionTitle
+   * @returns {boolean}
+   */
+  matchesCollection(product, collectionTitle) {
+    if (!collectionTitle) return true;
+    const normalizedTarget = collectionTitle.toLowerCase();
+    const productCollection = (product.collection || this.inferCollectionFromHandle(product.handle) || '').toLowerCase();
+    return productCollection === normalizedTarget;
   }
 
   /**

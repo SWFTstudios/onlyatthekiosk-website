@@ -2288,6 +2288,10 @@
         }
       }
       function initStaticCarouselImages(collectionKey) {
+        if (typeof applyManifestCarouselImages === 'function') {
+          applyManifestCarouselImages(collectionKey);
+          return;
+        }
         if (typeof COLLECTION_HANDLES === 'undefined' || typeof PRODUCT_IMAGES === 'undefined') return;
         const handles = COLLECTION_HANDLES[collectionKey] || [];
         $('.carousel_item').each(function (i) {

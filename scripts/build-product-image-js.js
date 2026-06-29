@@ -104,11 +104,55 @@ function getProductPlaceholder(productHandle, collectionKey) {
   };
 }
 
+function getProductImagesByHandle(handle) {
+  const entry = PRODUCT_IMAGES[handle];
+  if (!entry) return null;
+  return {
+    product: entry.product,
+    lifestyle: entry.lifestyle,
+    productAlt: entry.productAlt,
+    lifestyleAlt: entry.lifestyleAlt,
+    title: entry.title,
+  };
+}
+
+/**
+ * Apply manifest product images to the 3D carousel and swiper titles.
+ * @param {string} collectionKey - e.g. "t-shirts"
+ */
+function applyManifestCarouselImages(collectionKey) {
+  if (!collectionKey || !COLLECTION_HANDLES[collectionKey]) return;
+
+  const handles = COLLECTION_HANDLES[collectionKey];
+  const carouselItems = document.querySelectorAll('.carousel_item');
+  const swiperSlides = document.querySelectorAll('.swiper-slide');
+
+  handles.forEach((handle, index) => {
+    const entry = PRODUCT_IMAGES[handle];
+    if (!entry) return;
+
+    const carouselImg = carouselItems[index]?.querySelector('.carousel_img');
+    if (carouselImg) {
+      carouselImg.src = entry.product;
+      carouselImg.alt = entry.productAlt;
+    }
+
+    const slide = swiperSlides[index];
+    if (slide) {
+      slide.dataset.productHandle = handle;
+      const titleEl = slide.querySelector('h2');
+      if (titleEl) titleEl.textContent = entry.title;
+    }
+  });
+}
+
 if (typeof window !== 'undefined') {
   window.PRODUCT_IMAGES = PRODUCT_IMAGES;
   window.COLLECTION_HANDLES = COLLECTION_HANDLES;
   window.resolveCatalogHandle = resolveCatalogHandle;
   window.getProductPlaceholder = getProductPlaceholder;
+  window.getProductImagesByHandle = getProductImagesByHandle;
+  window.applyManifestCarouselImages = applyManifestCarouselImages;
 }
 `;
 
