@@ -36,17 +36,17 @@ Parses [`kiosk-shopify-products.csv`](../kiosk-shopify-products.csv) and writes 
 ### 2. Generate images
 
 ```bash
-# All pending products
-npm run generate:images
+# All products via OpenAI (uses Cloudflare OPENAI_API_KEY secret)
+node scripts/generate-product-images.js --openai --remote --force
+
+# Local generation (requires OPENAI_API_KEY in .dev.vars or env)
+node scripts/generate-product-images.js --openai --force
 
 # One collection at a time
-node scripts/generate-product-images.js --collection chains
-node scripts/generate-product-images.js --collection bracelets
-node scripts/generate-product-images.js --collection hoodies
-node scripts/generate-product-images.js --collection t-shirts
+node scripts/generate-product-images.js --openai --remote --force --collection chains
 ```
 
-Uses **OpenAI DALL-E 3** when `IMAGE_GEN_API_KEY` or `OPENAI_API_KEY` is set. Otherwise generates brand-aligned procedural placeholders via sharp/SVG.
+Add `OPENAI_API_KEY` to Cloudflare Pages secrets (same place as Airtable credentials). Optional: `OPENAI_IMAGE_MODEL` (default `gpt-image-1`), `IMAGE_SYNC_SECRET` for auth.
 
 ### 3. Optimize (if re-processing raw files)
 
