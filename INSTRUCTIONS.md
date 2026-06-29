@@ -284,9 +284,9 @@ This project creates a completely custom frontend and user experience while leve
 
 ```bash
 npm run build:manifest          # Build manifest from CSV
-npm run generate:images         # Generate unique product + lifestyle images
+npm run generate:images -- --openai --remote --force  # Regenerate via ChatGPT (needs OPENAI_API_KEY in Cloudflare)
 npm run build:product-image-js  # Regenerate frontend fallback manifest
-npm run sync:airtable-images    # Push Image URLs to Airtable (requires env vars)
+npm run sync:airtable-images -- --remote            # Push Image URLs to Airtable
 npm run update:csv-images       # Update Shopify CSV with unique image URLs
 node scripts/verify-product-images.js  # Verify all 160 images exist
 ```
