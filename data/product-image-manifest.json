@@ -11,7 +11,7 @@
     "lifestylePath": "/images/products/001-gold-chain-lifestyle.webp",
     "productAlt": "#001 Gold Chain product shot",
     "lifestyleAlt": "#001 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-silver-chain": {
     "title": "#001 Silver Chain",
@@ -25,7 +25,7 @@
     "lifestylePath": "/images/products/001-silver-chain-lifestyle.webp",
     "productAlt": "#001 Silver Chain product shot",
     "lifestyleAlt": "#001 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-gold-bracelet": {
     "title": "#001 Gold Bracelet",
@@ -39,7 +39,7 @@
     "lifestylePath": "/images/products/001-gold-bracelet-lifestyle.webp",
     "productAlt": "#001 Gold Bracelet product shot",
     "lifestyleAlt": "#001 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-silver-bracelet": {
     "title": "#001 Silver Bracelet",
@@ -53,7 +53,7 @@
     "lifestylePath": "/images/products/001-silver-bracelet-lifestyle.webp",
     "productAlt": "#001 Silver Bracelet product shot",
     "lifestyleAlt": "#001 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-black-hoodie": {
     "title": "#001 Black Hoodie",
@@ -67,7 +67,7 @@
     "lifestylePath": "/images/products/001-black-hoodie-lifestyle.webp",
     "productAlt": "#001 Black Hoodie product shot",
     "lifestyleAlt": "#001 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-white-hoodie": {
     "title": "#001 White Hoodie",
@@ -81,7 +81,7 @@
     "lifestylePath": "/images/products/001-white-hoodie-lifestyle.webp",
     "productAlt": "#001 White Hoodie product shot",
     "lifestyleAlt": "#001 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-black-tshirt": {
     "title": "#001 Black T-shirt",
@@ -95,7 +95,7 @@
     "lifestylePath": "/images/products/001-black-tshirt-lifestyle.webp",
     "productAlt": "#001 Black T-shirt product shot",
     "lifestyleAlt": "#001 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "001-white-tshirt": {
     "title": "#001 White T-shirt",
@@ -109,7 +109,7 @@
     "lifestylePath": "/images/products/001-white-tshirt-lifestyle.webp",
     "productAlt": "#001 White T-shirt product shot",
     "lifestyleAlt": "#001 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-gold-chain": {
     "title": "#002 Gold Chain",
@@ -123,7 +123,7 @@
     "lifestylePath": "/images/products/002-gold-chain-lifestyle.webp",
     "productAlt": "#002 Gold Chain product shot",
     "lifestyleAlt": "#002 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-silver-chain": {
     "title": "#002 Silver Chain",
@@ -137,7 +137,7 @@
     "lifestylePath": "/images/products/002-silver-chain-lifestyle.webp",
     "productAlt": "#002 Silver Chain product shot",
     "lifestyleAlt": "#002 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-gold-bracelet": {
     "title": "#002 Gold Bracelet",
@@ -151,7 +151,7 @@
     "lifestylePath": "/images/products/002-gold-bracelet-lifestyle.webp",
     "productAlt": "#002 Gold Bracelet product shot",
     "lifestyleAlt": "#002 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-silver-bracelet": {
     "title": "#002 Silver Bracelet",
@@ -165,7 +165,7 @@
     "lifestylePath": "/images/products/002-silver-bracelet-lifestyle.webp",
     "productAlt": "#002 Silver Bracelet product shot",
     "lifestyleAlt": "#002 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-black-hoodie": {
     "title": "#002 Black Hoodie",
@@ -179,7 +179,7 @@
     "lifestylePath": "/images/products/002-black-hoodie-lifestyle.webp",
     "productAlt": "#002 Black Hoodie product shot",
     "lifestyleAlt": "#002 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-white-hoodie": {
     "title": "#002 White Hoodie",
@@ -193,7 +193,7 @@
     "lifestylePath": "/images/products/002-white-hoodie-lifestyle.webp",
     "productAlt": "#002 White Hoodie product shot",
     "lifestyleAlt": "#002 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-black-tshirt": {
     "title": "#002 Black T-shirt",
@@ -207,7 +207,7 @@
     "lifestylePath": "/images/products/002-black-tshirt-lifestyle.webp",
     "productAlt": "#002 Black T-shirt product shot",
     "lifestyleAlt": "#002 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "002-white-tshirt": {
     "title": "#002 White T-shirt",
@@ -221,7 +221,7 @@
     "lifestylePath": "/images/products/002-white-tshirt-lifestyle.webp",
     "productAlt": "#002 White T-shirt product shot",
     "lifestyleAlt": "#002 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-gold-chain": {
     "title": "#003 Gold Chain",
@@ -235,7 +235,7 @@
     "lifestylePath": "/images/products/003-gold-chain-lifestyle.webp",
     "productAlt": "#003 Gold Chain product shot",
     "lifestyleAlt": "#003 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-silver-chain": {
     "title": "#003 Silver Chain",
@@ -249,7 +249,7 @@
     "lifestylePath": "/images/products/003-silver-chain-lifestyle.webp",
     "productAlt": "#003 Silver Chain product shot",
     "lifestyleAlt": "#003 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-gold-bracelet": {
     "title": "#003 Gold Bracelet",
@@ -263,7 +263,7 @@
     "lifestylePath": "/images/products/003-gold-bracelet-lifestyle.webp",
     "productAlt": "#003 Gold Bracelet product shot",
     "lifestyleAlt": "#003 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-silver-bracelet": {
     "title": "#003 Silver Bracelet",
@@ -277,7 +277,7 @@
     "lifestylePath": "/images/products/003-silver-bracelet-lifestyle.webp",
     "productAlt": "#003 Silver Bracelet product shot",
     "lifestyleAlt": "#003 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-black-hoodie": {
     "title": "#003 Black Hoodie",
@@ -291,7 +291,7 @@
     "lifestylePath": "/images/products/003-black-hoodie-lifestyle.webp",
     "productAlt": "#003 Black Hoodie product shot",
     "lifestyleAlt": "#003 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-white-hoodie": {
     "title": "#003 White Hoodie",
@@ -305,7 +305,7 @@
     "lifestylePath": "/images/products/003-white-hoodie-lifestyle.webp",
     "productAlt": "#003 White Hoodie product shot",
     "lifestyleAlt": "#003 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-black-tshirt": {
     "title": "#003 Black T-shirt",
@@ -319,7 +319,7 @@
     "lifestylePath": "/images/products/003-black-tshirt-lifestyle.webp",
     "productAlt": "#003 Black T-shirt product shot",
     "lifestyleAlt": "#003 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "003-white-tshirt": {
     "title": "#003 White T-shirt",
@@ -333,7 +333,7 @@
     "lifestylePath": "/images/products/003-white-tshirt-lifestyle.webp",
     "productAlt": "#003 White T-shirt product shot",
     "lifestyleAlt": "#003 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-gold-chain": {
     "title": "#004 Gold Chain",
@@ -347,7 +347,7 @@
     "lifestylePath": "/images/products/004-gold-chain-lifestyle.webp",
     "productAlt": "#004 Gold Chain product shot",
     "lifestyleAlt": "#004 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-silver-chain": {
     "title": "#004 Silver Chain",
@@ -361,7 +361,7 @@
     "lifestylePath": "/images/products/004-silver-chain-lifestyle.webp",
     "productAlt": "#004 Silver Chain product shot",
     "lifestyleAlt": "#004 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-gold-bracelet": {
     "title": "#004 Gold Bracelet",
@@ -375,7 +375,7 @@
     "lifestylePath": "/images/products/004-gold-bracelet-lifestyle.webp",
     "productAlt": "#004 Gold Bracelet product shot",
     "lifestyleAlt": "#004 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-silver-bracelet": {
     "title": "#004 Silver Bracelet",
@@ -389,7 +389,7 @@
     "lifestylePath": "/images/products/004-silver-bracelet-lifestyle.webp",
     "productAlt": "#004 Silver Bracelet product shot",
     "lifestyleAlt": "#004 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-black-hoodie": {
     "title": "#004 Black Hoodie",
@@ -403,7 +403,7 @@
     "lifestylePath": "/images/products/004-black-hoodie-lifestyle.webp",
     "productAlt": "#004 Black Hoodie product shot",
     "lifestyleAlt": "#004 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-white-hoodie": {
     "title": "#004 White Hoodie",
@@ -417,7 +417,7 @@
     "lifestylePath": "/images/products/004-white-hoodie-lifestyle.webp",
     "productAlt": "#004 White Hoodie product shot",
     "lifestyleAlt": "#004 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-black-tshirt": {
     "title": "#004 Black T-shirt",
@@ -431,7 +431,7 @@
     "lifestylePath": "/images/products/004-black-tshirt-lifestyle.webp",
     "productAlt": "#004 Black T-shirt product shot",
     "lifestyleAlt": "#004 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "004-white-tshirt": {
     "title": "#004 White T-shirt",
@@ -445,7 +445,7 @@
     "lifestylePath": "/images/products/004-white-tshirt-lifestyle.webp",
     "productAlt": "#004 White T-shirt product shot",
     "lifestyleAlt": "#004 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-gold-chain": {
     "title": "#005 Gold Chain",
@@ -459,7 +459,7 @@
     "lifestylePath": "/images/products/005-gold-chain-lifestyle.webp",
     "productAlt": "#005 Gold Chain product shot",
     "lifestyleAlt": "#005 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-silver-chain": {
     "title": "#005 Silver Chain",
@@ -473,7 +473,7 @@
     "lifestylePath": "/images/products/005-silver-chain-lifestyle.webp",
     "productAlt": "#005 Silver Chain product shot",
     "lifestyleAlt": "#005 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-gold-bracelet": {
     "title": "#005 Gold Bracelet",
@@ -487,7 +487,7 @@
     "lifestylePath": "/images/products/005-gold-bracelet-lifestyle.webp",
     "productAlt": "#005 Gold Bracelet product shot",
     "lifestyleAlt": "#005 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-silver-bracelet": {
     "title": "#005 Silver Bracelet",
@@ -501,7 +501,7 @@
     "lifestylePath": "/images/products/005-silver-bracelet-lifestyle.webp",
     "productAlt": "#005 Silver Bracelet product shot",
     "lifestyleAlt": "#005 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-black-hoodie": {
     "title": "#005 Black Hoodie",
@@ -515,7 +515,7 @@
     "lifestylePath": "/images/products/005-black-hoodie-lifestyle.webp",
     "productAlt": "#005 Black Hoodie product shot",
     "lifestyleAlt": "#005 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-white-hoodie": {
     "title": "#005 White Hoodie",
@@ -529,7 +529,7 @@
     "lifestylePath": "/images/products/005-white-hoodie-lifestyle.webp",
     "productAlt": "#005 White Hoodie product shot",
     "lifestyleAlt": "#005 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-black-tshirt": {
     "title": "#005 Black T-shirt",
@@ -543,7 +543,7 @@
     "lifestylePath": "/images/products/005-black-tshirt-lifestyle.webp",
     "productAlt": "#005 Black T-shirt product shot",
     "lifestyleAlt": "#005 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "005-white-tshirt": {
     "title": "#005 White T-shirt",
@@ -557,7 +557,7 @@
     "lifestylePath": "/images/products/005-white-tshirt-lifestyle.webp",
     "productAlt": "#005 White T-shirt product shot",
     "lifestyleAlt": "#005 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-gold-chain": {
     "title": "#006 Gold Chain",
@@ -571,7 +571,7 @@
     "lifestylePath": "/images/products/006-gold-chain-lifestyle.webp",
     "productAlt": "#006 Gold Chain product shot",
     "lifestyleAlt": "#006 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-silver-chain": {
     "title": "#006 Silver Chain",
@@ -585,7 +585,7 @@
     "lifestylePath": "/images/products/006-silver-chain-lifestyle.webp",
     "productAlt": "#006 Silver Chain product shot",
     "lifestyleAlt": "#006 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-gold-bracelet": {
     "title": "#006 Gold Bracelet",
@@ -599,7 +599,7 @@
     "lifestylePath": "/images/products/006-gold-bracelet-lifestyle.webp",
     "productAlt": "#006 Gold Bracelet product shot",
     "lifestyleAlt": "#006 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-silver-bracelet": {
     "title": "#006 Silver Bracelet",
@@ -613,7 +613,7 @@
     "lifestylePath": "/images/products/006-silver-bracelet-lifestyle.webp",
     "productAlt": "#006 Silver Bracelet product shot",
     "lifestyleAlt": "#006 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-black-hoodie": {
     "title": "#006 Black Hoodie",
@@ -627,7 +627,7 @@
     "lifestylePath": "/images/products/006-black-hoodie-lifestyle.webp",
     "productAlt": "#006 Black Hoodie product shot",
     "lifestyleAlt": "#006 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-white-hoodie": {
     "title": "#006 White Hoodie",
@@ -641,7 +641,7 @@
     "lifestylePath": "/images/products/006-white-hoodie-lifestyle.webp",
     "productAlt": "#006 White Hoodie product shot",
     "lifestyleAlt": "#006 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-black-tshirt": {
     "title": "#006 Black T-shirt",
@@ -655,7 +655,7 @@
     "lifestylePath": "/images/products/006-black-tshirt-lifestyle.webp",
     "productAlt": "#006 Black T-shirt product shot",
     "lifestyleAlt": "#006 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "006-white-tshirt": {
     "title": "#006 White T-shirt",
@@ -669,7 +669,7 @@
     "lifestylePath": "/images/products/006-white-tshirt-lifestyle.webp",
     "productAlt": "#006 White T-shirt product shot",
     "lifestyleAlt": "#006 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-gold-chain": {
     "title": "#007 Gold Chain",
@@ -683,7 +683,7 @@
     "lifestylePath": "/images/products/007-gold-chain-lifestyle.webp",
     "productAlt": "#007 Gold Chain product shot",
     "lifestyleAlt": "#007 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-silver-chain": {
     "title": "#007 Silver Chain",
@@ -697,7 +697,7 @@
     "lifestylePath": "/images/products/007-silver-chain-lifestyle.webp",
     "productAlt": "#007 Silver Chain product shot",
     "lifestyleAlt": "#007 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-gold-bracelet": {
     "title": "#007 Gold Bracelet",
@@ -711,7 +711,7 @@
     "lifestylePath": "/images/products/007-gold-bracelet-lifestyle.webp",
     "productAlt": "#007 Gold Bracelet product shot",
     "lifestyleAlt": "#007 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-silver-bracelet": {
     "title": "#007 Silver Bracelet",
@@ -725,7 +725,7 @@
     "lifestylePath": "/images/products/007-silver-bracelet-lifestyle.webp",
     "productAlt": "#007 Silver Bracelet product shot",
     "lifestyleAlt": "#007 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-black-hoodie": {
     "title": "#007 Black Hoodie",
@@ -739,7 +739,7 @@
     "lifestylePath": "/images/products/007-black-hoodie-lifestyle.webp",
     "productAlt": "#007 Black Hoodie product shot",
     "lifestyleAlt": "#007 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-white-hoodie": {
     "title": "#007 White Hoodie",
@@ -753,7 +753,7 @@
     "lifestylePath": "/images/products/007-white-hoodie-lifestyle.webp",
     "productAlt": "#007 White Hoodie product shot",
     "lifestyleAlt": "#007 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-black-tshirt": {
     "title": "#007 Black T-shirt",
@@ -767,7 +767,7 @@
     "lifestylePath": "/images/products/007-black-tshirt-lifestyle.webp",
     "productAlt": "#007 Black T-shirt product shot",
     "lifestyleAlt": "#007 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "007-white-tshirt": {
     "title": "#007 White T-shirt",
@@ -781,7 +781,7 @@
     "lifestylePath": "/images/products/007-white-tshirt-lifestyle.webp",
     "productAlt": "#007 White T-shirt product shot",
     "lifestyleAlt": "#007 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-gold-chain": {
     "title": "#008 Gold Chain",
@@ -795,7 +795,7 @@
     "lifestylePath": "/images/products/008-gold-chain-lifestyle.webp",
     "productAlt": "#008 Gold Chain product shot",
     "lifestyleAlt": "#008 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-silver-chain": {
     "title": "#008 Silver Chain",
@@ -809,7 +809,7 @@
     "lifestylePath": "/images/products/008-silver-chain-lifestyle.webp",
     "productAlt": "#008 Silver Chain product shot",
     "lifestyleAlt": "#008 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-gold-bracelet": {
     "title": "#008 Gold Bracelet",
@@ -823,7 +823,7 @@
     "lifestylePath": "/images/products/008-gold-bracelet-lifestyle.webp",
     "productAlt": "#008 Gold Bracelet product shot",
     "lifestyleAlt": "#008 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-silver-bracelet": {
     "title": "#008 Silver Bracelet",
@@ -837,7 +837,7 @@
     "lifestylePath": "/images/products/008-silver-bracelet-lifestyle.webp",
     "productAlt": "#008 Silver Bracelet product shot",
     "lifestyleAlt": "#008 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-black-hoodie": {
     "title": "#008 Black Hoodie",
@@ -851,7 +851,7 @@
     "lifestylePath": "/images/products/008-black-hoodie-lifestyle.webp",
     "productAlt": "#008 Black Hoodie product shot",
     "lifestyleAlt": "#008 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-white-hoodie": {
     "title": "#008 White Hoodie",
@@ -865,7 +865,7 @@
     "lifestylePath": "/images/products/008-white-hoodie-lifestyle.webp",
     "productAlt": "#008 White Hoodie product shot",
     "lifestyleAlt": "#008 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-black-tshirt": {
     "title": "#008 Black T-shirt",
@@ -879,7 +879,7 @@
     "lifestylePath": "/images/products/008-black-tshirt-lifestyle.webp",
     "productAlt": "#008 Black T-shirt product shot",
     "lifestyleAlt": "#008 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "008-white-tshirt": {
     "title": "#008 White T-shirt",
@@ -893,7 +893,7 @@
     "lifestylePath": "/images/products/008-white-tshirt-lifestyle.webp",
     "productAlt": "#008 White T-shirt product shot",
     "lifestyleAlt": "#008 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-gold-chain": {
     "title": "#009 Gold Chain",
@@ -907,7 +907,7 @@
     "lifestylePath": "/images/products/009-gold-chain-lifestyle.webp",
     "productAlt": "#009 Gold Chain product shot",
     "lifestyleAlt": "#009 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-silver-chain": {
     "title": "#009 Silver Chain",
@@ -921,7 +921,7 @@
     "lifestylePath": "/images/products/009-silver-chain-lifestyle.webp",
     "productAlt": "#009 Silver Chain product shot",
     "lifestyleAlt": "#009 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-gold-bracelet": {
     "title": "#009 Gold Bracelet",
@@ -935,7 +935,7 @@
     "lifestylePath": "/images/products/009-gold-bracelet-lifestyle.webp",
     "productAlt": "#009 Gold Bracelet product shot",
     "lifestyleAlt": "#009 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-silver-bracelet": {
     "title": "#009 Silver Bracelet",
@@ -949,7 +949,7 @@
     "lifestylePath": "/images/products/009-silver-bracelet-lifestyle.webp",
     "productAlt": "#009 Silver Bracelet product shot",
     "lifestyleAlt": "#009 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-black-hoodie": {
     "title": "#009 Black Hoodie",
@@ -963,7 +963,7 @@
     "lifestylePath": "/images/products/009-black-hoodie-lifestyle.webp",
     "productAlt": "#009 Black Hoodie product shot",
     "lifestyleAlt": "#009 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-white-hoodie": {
     "title": "#009 White Hoodie",
@@ -977,7 +977,7 @@
     "lifestylePath": "/images/products/009-white-hoodie-lifestyle.webp",
     "productAlt": "#009 White Hoodie product shot",
     "lifestyleAlt": "#009 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-black-tshirt": {
     "title": "#009 Black T-shirt",
@@ -991,7 +991,7 @@
     "lifestylePath": "/images/products/009-black-tshirt-lifestyle.webp",
     "productAlt": "#009 Black T-shirt product shot",
     "lifestyleAlt": "#009 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "009-white-tshirt": {
     "title": "#009 White T-shirt",
@@ -1005,7 +1005,7 @@
     "lifestylePath": "/images/products/009-white-tshirt-lifestyle.webp",
     "productAlt": "#009 White T-shirt product shot",
     "lifestyleAlt": "#009 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-gold-chain": {
     "title": "#010 Gold Chain",
@@ -1019,7 +1019,7 @@
     "lifestylePath": "/images/products/010-gold-chain-lifestyle.webp",
     "productAlt": "#010 Gold Chain product shot",
     "lifestyleAlt": "#010 Gold Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-silver-chain": {
     "title": "#010 Silver Chain",
@@ -1033,7 +1033,7 @@
     "lifestylePath": "/images/products/010-silver-chain-lifestyle.webp",
     "productAlt": "#010 Silver Chain product shot",
     "lifestyleAlt": "#010 Silver Chain lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-gold-bracelet": {
     "title": "#010 Gold Bracelet",
@@ -1047,7 +1047,7 @@
     "lifestylePath": "/images/products/010-gold-bracelet-lifestyle.webp",
     "productAlt": "#010 Gold Bracelet product shot",
     "lifestyleAlt": "#010 Gold Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-silver-bracelet": {
     "title": "#010 Silver Bracelet",
@@ -1061,7 +1061,7 @@
     "lifestylePath": "/images/products/010-silver-bracelet-lifestyle.webp",
     "productAlt": "#010 Silver Bracelet product shot",
     "lifestyleAlt": "#010 Silver Bracelet lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-black-hoodie": {
     "title": "#010 Black Hoodie",
@@ -1075,7 +1075,7 @@
     "lifestylePath": "/images/products/010-black-hoodie-lifestyle.webp",
     "productAlt": "#010 Black Hoodie product shot",
     "lifestyleAlt": "#010 Black Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-white-hoodie": {
     "title": "#010 White Hoodie",
@@ -1089,7 +1089,7 @@
     "lifestylePath": "/images/products/010-white-hoodie-lifestyle.webp",
     "productAlt": "#010 White Hoodie product shot",
     "lifestyleAlt": "#010 White Hoodie lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-black-tshirt": {
     "title": "#010 Black T-shirt",
@@ -1103,7 +1103,7 @@
     "lifestylePath": "/images/products/010-black-tshirt-lifestyle.webp",
     "productAlt": "#010 Black T-shirt product shot",
     "lifestyleAlt": "#010 Black T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   },
   "010-white-tshirt": {
     "title": "#010 White T-shirt",
@@ -1117,6 +1117,6 @@
     "lifestylePath": "/images/products/010-white-tshirt-lifestyle.webp",
     "productAlt": "#010 White T-shirt product shot",
     "lifestyleAlt": "#010 White T-shirt lifestyle",
-    "status": "optimized"
+    "status": "synced"
   }
 }
