@@ -8,7 +8,8 @@
     "sync:airtable-images": "node scripts/sync-airtable-product-images.js",
     "update:csv-images": "node scripts/update-csv-product-images.js",
     "build:product-image-js": "node scripts/build-product-image-js.js",
-    "verify:images": "node scripts/verify-product-images.js"
+    "verify:images": "node scripts/verify-product-images.js",
+    "sync:store-featured": "node scripts/sync-store-featured-airtable.js"
   },
   "devDependencies": {
     "sharp": "^0.33.5"
