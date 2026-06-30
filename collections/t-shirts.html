@@ -1650,7 +1650,11 @@
       
       // Update title immediately if collection handle is present (before API call)
       if (collectionHandle) {
-        initStaticCarouselImages(collectionHandle);
+        if (typeof applyManifestCarouselImages === 'function') {
+          applyManifestCarouselImages(collectionHandle);
+        } else {
+          initStaticCarouselImages(collectionHandle);
+        }
         const initialTitle = formatCollectionTitle(collectionHandle);
         updateCollectionTitle(initialTitle);
       }

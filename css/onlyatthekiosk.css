@@ -1788,6 +1788,13 @@ h1 {
   display: flex;
 }
 
+.marquee-embed.is--domain {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
 .featured-product_bottom {
   border-bottom-right-radius: 1vw;
   border-bottom-left-radius: 1vw;
