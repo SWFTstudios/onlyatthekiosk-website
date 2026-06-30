@@ -2,192 +2,214 @@
 
 ## Overview
 
-The carousel now supports multiple image sources. This document explains how to configure each option.
+The carousel supports multiple image sources. This document explains how to configure each option.
 
 ## Current Setup
 
-The carousel is currently using **placeholder images** from the local WebP file (`images/kiosk-placeholder-product-img.webp`) for fast loading and testing.
+Each of the **80 catalog products** has **two unique placeholder images** (product packshot + lifestyle) stored locally:
+
+```
+images/products/
+  001-gold-chain-product.webp
+  001-gold-chain-lifestyle.webp
+  ...
+```
+
+- **Manifest:** [`data/product-image-manifest.json`](../data/product-image-manifest.json)
+- **Frontend fallback:** [`js/product-image-manifest.js`](../js/product-image-manifest.js)
+- **Last-resort fallback:** `images/kiosk-placeholder-product-img.webp` (single shared file)
+
+Collection pages load live images from **Airtable** (`Image URLs` field). When Airtable is unavailable, `initStaticCarouselImages()` applies unique images from the manifest per collection.
+
+---
+
+## Product Image Workflow
+
+### 1. Build manifest from CSV
+
+```bash
+npm run build:manifest
+```
+
+Parses [`kiosk-shopify-products.csv`](../kiosk-shopify-products.csv) and writes prompts + paths to `data/product-image-manifest.json`.
+
+### 2. Generate images
+
+```bash
+# All products via OpenAI (uses Cloudflare OPENAI_API_KEY secret)
+node scripts/generate-product-images.js --openai --remote --force
+
+# Local generation (requires OPENAI_API_KEY in .dev.vars or env)
+node scripts/generate-product-images.js --openai --force
+
+# One collection at a time
+node scripts/generate-product-images.js --openai --remote --force --collection chains
+```
+
+Add `OPENAI_API_KEY` to Cloudflare Pages secrets (same place as Airtable credentials). Optional: `OPENAI_IMAGE_MODEL` (default `gpt-image-1`), `IMAGE_SYNC_SECRET` for auth.
+
+After adding the secret and deploying, regenerate all images:
+
+```bash
+node scripts/generate-product-images.js --openai --remote --force
+npm run sync:airtable-images -- --remote
+```
+
+### 3. Optimize (if re-processing raw files)
+
+```bash
+npm run optimize:images
+```
+
+### 4. Sync to Airtable
+
+```bash
+npm run sync:airtable-images
+# Requires AIRTABLE_ACCESS_TOKEN and AIRTABLE_BASE_ID
+```
+
+Writes `Image URLs` JSON per product:
+
+```json
+[
+  "https://onlyatthekiosk.com/images/products/001-gold-chain-product.webp",
+  "https://onlyatthekiosk.com/images/products/001-gold-chain-lifestyle.webp"
+]
+```
+
+### 5. Update Shopify CSV
+
+```bash
+npm run update:csv-images
+```
+
+Sets unique `Image Src` per product and adds lifestyle rows (`Image Position: 2`).
+
+### 6. Regenerate frontend manifest
+
+```bash
+npm run build:product-image-js
+```
+
+### 7. Verify
+
+```bash
+node scripts/verify-product-images.js
+```
+
+---
+
+## Swapping in Real Photography
+
+When real images are ready, replace files **keeping the same filenames**:
+
+1. Drop new photos into `images/products/` as `{handle}-product.webp` and `{handle}-lifestyle.webp`
+2. Run `npm run optimize:images` if needed
+3. If filenames unchanged, **no Airtable or code updates required**
+4. Update manifest status to `"real"` manually or re-run generation scripts
+
+---
 
 ## Image Source Options
 
-### Option 1: Placeholder Service (Current - Fast & Free)
-**Best for:** Testing, demos, development
+### Option 1: Local Product Images (Current — Unique Per Product)
+**Best for:** Development, pre-launch placeholders, Cloudflare Pages hosting
 
 ```javascript
-// In carousel-template.html, line ~1495
-const placeholderImage = '/images/kiosk-placeholder-product-img.webp';
+// js/product-image-manifest.js — auto-generated
+const PRODUCT_IMAGES = {
+  "001-gold-chain": {
+    "product": "/images/products/001-gold-chain-product.webp",
+    "lifestyle": "/images/products/001-gold-chain-lifestyle.webp"
+  }
+};
 ```
 
 **Pros:**
-- ✅ No hosting needed
-- ✅ Fast loading
-- ✅ Free
-- ✅ No file size issues
+- ✅ Unique image per product (not one shared placeholder)
+- ✅ Fast local/CDN delivery
+- ✅ Easy swap when real photos arrive
 
 **Cons:**
-- ❌ Not real product images
-- ❌ Generic placeholder
+- ❌ Not real product photography (until replaced)
 
 ---
 
-### Option 2: Shopify Storefront API (Recommended for Production)
-**Best for:** Real products from your Shopify store
+### Option 2: Airtable Image URLs (Recommended for Live Collections)
+**Best for:** Production collection pages
 
-**Setup:**
-1. Your Shopify Storefront API is already configured
-2. Uncomment `loadCarouselImagesFromShopify()` in the carousel script
-3. Update product handles in `data-product-handle` attributes
+Collection pages fetch products via [`js/airtable.js`](../js/airtable.js). Set the `Image URLs` field to a JSON array:
 
-**Code Location:** `carousel-template.html` line ~1175
-
-```javascript
-// Uncomment this line in the carousel initialization:
-loadCarouselImagesFromShopify();
+```json
+["/images/products/001-gold-chain-product.webp", "/images/products/001-gold-chain-lifestyle.webp"]
 ```
 
-**How it works:**
-- Fetches product images from Shopify Storefront API
-- Uses the `primary_image` from each product
-- Automatically updates carousel images when products change
-
-**Pros:**
-- ✅ Real product images
-- ✅ Automatic updates
-- ✅ CDN-hosted (fast)
-- ✅ Already integrated
-
-**Cons:**
-- ⚠️ Requires API calls (slight delay on first load)
+First image = carousel thumbnail + drawer main. Second = drawer gallery.
 
 ---
 
-### Option 3: Supabase Database
-**Best for:** Custom image URLs, Airtable-synced images
+### Option 3: Shopify Storefront API
+**Best for:** `carousel-template.html` and Shopify-native product data
 
 **Setup:**
-1. Images are stored in Supabase `products` table (`primary_image` field)
-2. Uncomment and configure Supabase credentials
-3. Uncomment `loadCarouselImagesFromSupabase()` function
+1. Import updated CSV or upload images in Shopify Admin
+2. Product images served from Shopify CDN automatically
 
-**Code Location:** `carousel-template.html` line ~1185
-
-```javascript
-// 1. Add your Supabase credentials:
-const SUPABASE_URL = 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = 'your-anon-key';
-
-// 2. Uncomment this line:
-loadCarouselImagesFromSupabase();
-```
-
-**How it works:**
-- Queries Supabase REST API for product images
-- Uses `primary_image` URL from database
-- Can sync from Airtable (via Edge Function)
-
-**Pros:**
-- ✅ Full control over image URLs
-- ✅ Can use any CDN or hosting
-- ✅ Syncs with Airtable
-- ✅ Fast queries
-
-**Cons:**
-- ⚠️ Requires Supabase setup
-- ⚠️ Need to manage image URLs
+See [`docs/SHOPIFY_CSV_IMPORT_GUIDE.md`](SHOPIFY_CSV_IMPORT_GUIDE.md).
 
 ---
 
 ### Option 4: CDN/Image Hosting Service
-**Best for:** Production with optimized images
+**Best for:** Production with optimized delivery at scale
 
-**Services:**
-- **Cloudinary** (recommended)
-- **Imgix**
-- **ImageKit**
-- **Your own CDN**
-
-**Setup:**
 ```javascript
-// In getPlaceholderProduct() function:
 const placeholderImage = 'https://res.cloudinary.com/your-cloud/image/upload/w_800,h_800,c_fill/product-placeholder.jpg';
 ```
 
-**Pros:**
-- ✅ Optimized images (automatic compression)
-- ✅ Fast global CDN
-- ✅ Image transformations
-- ✅ Best performance
-
-**Cons:**
-- ⚠️ May require paid plan
-- ⚠️ Need to upload images
-
 ---
 
-### Option 5: Local Hosted Images (Not Recommended)
-**Best for:** Small, optimized images only
-
-**Current Issue:** Your placeholder image is 6.5MB, which is too large.
-
-**If you want to use local images:**
-1. Optimize the image to <500KB
-2. Use tools like TinyPNG or ImageOptim
-3. Update the path in `getPlaceholderProduct()`
+### Option 5: Legacy Single Placeholder
+**Best for:** Last-resort fallback only
 
 ```javascript
 const placeholderImage = '/images/kiosk-placeholder-product-img.webp';
 ```
+
+Used only when no product-specific image is found.
 
 ---
 
 ## Recommended Setup for Production
 
-1. **For Real Products:** Use Shopify Storefront API (Option 2)
-   - Already configured
-   - Just uncomment `loadCarouselImagesFromShopify()`
-
-2. **For Placeholders:** Use placeholder service (Option 1)
-   - Fast and free
-   - Good for testing
-
-3. **For Custom Images:** Use Supabase (Option 3)
-   - Full control
-   - Syncs with Airtable
-
-## Quick Switch Guide
-
-### Switch to Shopify Images:
-1. Open `carousel-template.html`
-2. Find line ~1175 (after carousel initialization)
-3. Uncomment: `loadCarouselImagesFromShopify();`
-4. Save and deploy
-
-### Switch to Supabase Images:
-1. Open `carousel-template.html`
-2. Find line ~1300 (Supabase config)
-3. Add your Supabase URL and key
-4. Find line ~1185
-5. Uncomment `loadCarouselImagesFromSupabase();`
-6. Save and deploy
+1. **Live collections:** Airtable `Image URLs` pointing to `/images/products/{handle}-*.webp`
+2. **Offline fallback:** `js/product-image-manifest.js` (auto-generated)
+3. **Shopify import:** Updated CSV with unique image URLs per product
+4. **Real photos:** Replace WebP files in place when ready
 
 ## Image Optimization Tips
 
 - **Max file size:** 500KB per image
-- **Dimensions:** 800x800px or 1200x1200px
-- **Format:** WebP (best) or JPEG
-- **Use CDN:** Always use a CDN for production
+- **Dimensions:** 1200×1200px
+- **Format:** WebP (quality ~80)
+- **Use CDN:** Cloudflare Pages serves `/images/products/` globally
 
 ## Troubleshooting
 
 **Images not showing?**
 1. Check browser console for errors
-2. Verify image URLs are accessible
-3. Check CORS settings if using external URLs
-4. Verify API credentials (Shopify/Supabase)
+2. Verify files exist in `images/products/`
+3. Run `node scripts/verify-product-images.js`
+4. Check Airtable `Image URLs` field is valid JSON
+5. Verify API credentials (Airtable) in Cloudflare Pages env vars
+
+**All carousel images still identical?**
+1. Confirm Airtable records have distinct `Image URLs`
+2. Check `initStaticCarouselImages(collectionHandle)` runs on page load
+3. Regenerate JS manifest: `npm run build:product-image-js`
 
 **Slow loading?**
-1. Use CDN-hosted images
-2. Optimize image file sizes
-3. Use `loading="lazy"` for below-fold images
-4. Consider image preloading for critical images
+1. Images are already optimized WebP (~8KB each)
+2. Use `loading="lazy"` for below-fold carousel items (already set)
+3. Consider Cloudflare image optimization for production
+
 

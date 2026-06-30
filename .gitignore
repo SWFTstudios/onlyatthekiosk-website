@@ -32,6 +32,9 @@ yarn-error.log*
 *.temp
 .cache/
 
+# Generated product image raw files
+images/products/raw/
+
 # Secrets and tokens (should never be committed)
 *_SECRET*
 *_TOKEN*

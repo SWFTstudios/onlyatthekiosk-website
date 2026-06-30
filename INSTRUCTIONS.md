@@ -65,15 +65,19 @@ This project creates a completely custom frontend and user experience while leve
 **Important**: Components are shared across all pages. When you modify a component on one page, the change should automatically apply to all pages that use it.
 
 #### Components List:
-- **Navigation Bar**: The fullscreen navigation overlay (`navbar`) is a shared component. Changes made to `css/navigation.css` or the navigation HTML structure in one file should be reflected across all pages (index.html, store.html, carousel-template.html, kiosk-styleguide.html).
+- **Navigation Bar**: Fixed underlay navigation (Osmo-style page slide). Single source of truth:
+  - `partials/underlay-nav.html` — nav HTML template
+  - `partials/nav-config.json` — link definitions and active-page matching
+  - `css/underlay-nav.css` — nav styles
+  - `js/underlay-nav.js` — GSAP animation controller + theme toggle
 
 **Component Implementation Guidelines**:
-1. **CSS Components**: Store component styles in `css/navigation.css` or `css/components.css`
-2. **HTML Components**: Use the same HTML structure across all pages for shared components
-3. **JavaScript Components**: Component logic should be in shared files (e.g., `js/navigation.js`)
-4. **Single Source of Truth**: When making changes to components, update the shared CSS/JS files, not individual page styles
+1. **CSS Components**: Store component styles in `css/underlay-nav.css` or `css/components.css`
+2. **HTML Components**: Edit `partials/underlay-nav.html` only — never edit nav HTML in individual pages
+3. **JavaScript Components**: Component logic lives in `js/underlay-nav.js`
+4. **Build step**: Run `node scripts/build-nav.js` (or `./build.sh`) after editing the partial or config. Cloudflare Pages runs this automatically on deploy.
 
-**Example**: If you change the navigation menu on index.html, make the same change to all other pages that include the navigation. Better yet, create a shared navigation snippet that can be included across pages.
+**Example**: To change a nav link label, edit `partials/nav-config.json`, then run `node scripts/build-nav.js`. The script injects nav HTML between `<!-- NAV:BEGIN -->` / `<!-- NAV:END -->` markers in all 19 production pages.
 
 ---
 
@@ -100,9 +104,10 @@ This project creates a completely custom frontend and user experience while leve
 ### Supporting Files
 ```
 /
-├── images/                 # Image assets
-├── fonts/                  # Font files (GeneralSans, SuisseIntl)
-├── docs/                   # Documentation
+├── images/                 # Image assets (see docs/IMAGE_SOURCES.md)
+│   └── products/           # Per-product placeholder images ({handle}-product.webp, {handle}-lifestyle.webp)
+├── data/                   # Product image manifest (product-image-manifest.json)
+├── scripts/                # Build, generate, sync, and verify product image scripts
 └── webflow-exports/        # Reference designs from Webflow
 ```
 
@@ -116,7 +121,7 @@ This project creates a completely custom frontend and user experience while leve
 ├── css
 │   ├── components.css
 │   ├── media.css
-│   ├── navigation.css
+│   ├── underlay-nav.css
 │   ├── normalize.css
 │   ├── onlyatthekiosk.css
 │   └── webflow.css
@@ -200,7 +205,7 @@ This project creates a completely custom frontend and user experience while leve
 │   ├── email-signup.js
 │   ├── lenis.js
 │   ├── media.js
-│   ├── navigation.js
+│   ├── underlay-nav.js
 │   ├── onlyatthekiosk.js
 │   └── webflow.js
 ├── kiosk-styleguide.html
@@ -273,7 +278,20 @@ This project creates a completely custom frontend and user experience while leve
         └── videos
 ```
 
-**Note**: The `images/` directory contains many image assets (product images, promotional images, icons, etc.). See `docs/IMAGE_SOURCES.md` for details on image sources and organization.
+**Note**: The `images/` directory contains product assets, promotional images, icons, etc. Each catalog product has unique placeholder images in `images/products/`. See [`docs/IMAGE_SOURCES.md`](docs/IMAGE_SOURCES.md) for the full generation, sync, and swap workflow.
+
+### Product Placeholder Images
+
+```bash
+npm run build:manifest          # Build manifest from CSV
+npm run generate:images -- --openai --remote --force  # Regenerate via ChatGPT (needs OPENAI_API_KEY in Cloudflare)
+npm run build:product-image-js  # Regenerate frontend fallback manifest
+npm run sync:airtable-images -- --remote            # Push Image URLs to Airtable
+npm run update:csv-images       # Update Shopify CSV with unique image URLs
+node scripts/verify-product-images.js  # Verify all 160 images exist
+```
+
+Replace real photography later by swapping files in `images/products/` with the same filenames — no code changes needed.
 
 ---
 
