@@ -1,0 +1,53 @@
+{
+  "heroCategories": [
+    {
+      "label": "Hoodies",
+      "href": "collections/hoodies.html",
+      "image": "/images/store/hero-hoodies.webp",
+      "lifestyleHandle": "001-black-hoodie"
+    },
+    {
+      "label": "Chains",
+      "href": "collections/chains.html",
+      "image": "/images/store/hero-chains.webp",
+      "lifestyleHandle": "001-gold-chain"
+    },
+    {
+      "label": "Bracelets",
+      "href": "collections/bracelets.html",
+      "image": "/images/store/hero-bracelets.webp",
+      "lifestyleHandle": "001-gold-bracelet"
+    }
+  ],
+  "featuredSections": {
+    "Chains & Bracelets": {
+      "handles": [
+        "001-gold-chain",
+        "001-silver-chain",
+        "001-gold-bracelet",
+        "002-gold-chain"
+      ],
+      "fallbackPrices": {
+        "001-gold-chain": 79.99,
+        "001-silver-chain": 69.99,
+        "001-gold-bracelet": 59.99,
+        "002-gold-chain": 79.99
+      }
+    },
+    "T-Shirts & Hoodies": {
+      "handles": [
+        "001-black-hoodie",
+        "001-white-hoodie",
+        "001-black-tshirt",
+        "001-white-tshirt"
+      ],
+      "fallbackPrices": {
+        "001-black-hoodie": 89.99,
+        "001-white-hoodie": 89.99,
+        "001-black-tshirt": 39.99,
+        "001-white-tshirt": 39.99
+      }
+    }
+  },
+  "currency": "USD"
+}

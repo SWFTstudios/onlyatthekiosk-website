@@ -229,6 +229,33 @@ class AirtableClient {
   }
 
   /**
+   * Get featured products for a store page section.
+   * @param {string} categoryDisplay - e.g. "Chains & Bracelets"
+   * @param {number} maxRecords - Maximum products to return
+   * @returns {Promise<Array>}
+   */
+  async getFeaturedProducts(categoryDisplay, maxRecords = 4) {
+    try {
+      const formula = `AND({Featured}, {Category Display} = "${categoryDisplay}")`;
+      const records = await this.fetchAllRecords(this.productsTable, {
+        filterByFormula: formula,
+      });
+      const products = this.transformProducts(records);
+      if (products.length > 0) {
+        console.log(`✅ Loaded ${products.length} featured products for "${categoryDisplay}"`);
+        return products.slice(0, maxRecords);
+      }
+    } catch (error) {
+      console.warn(`Featured filter failed for "${categoryDisplay}":`, error.message);
+    }
+
+    const allProducts = await this.getProducts({ activeOnly: true });
+    return allProducts
+      .filter((p) => p.featured && p.categoryDisplay === categoryDisplay)
+      .slice(0, maxRecords);
+  }
+
+  /**
    * Get collection data (title, product count)
    * @param {string} collectionHandle - Collection name
    * @returns {Promise<object>} - Collection data
@@ -350,6 +377,8 @@ class AirtableClient {
       },
       variants: variants,
       collection: fields.Collection || this.inferCollectionFromHandle(handle),
+      categoryDisplay: fields['Category Display'] || '',
+      featured: fields.Featured === true,
       careInstructions: fields['Care Instructions'] || fields['Care guide (product.metafields.descriptors.care_guide)'] || '',
       buyButtonId: fields['Shopify Buy Button ID'] || '',
       shopifyProductId: fields['Shopify Product ID'] || '',
