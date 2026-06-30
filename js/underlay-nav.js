@@ -247,9 +247,38 @@
     });
   }
 
+  function initScrollDetection() {
+    const navHeader = document.querySelector('.underlay-nav__header');
+    if (!navHeader) return;
+
+    let scrollTimeout;
+    let isScrolled = false;
+
+    function handleScroll() {
+      clearTimeout(scrollTimeout);
+      
+      scrollTimeout = setTimeout(() => {
+        const scrollPosition = window.scrollY || window.pageYOffset;
+        const shouldBeScrolled = scrollPosition > 0;
+
+        if (shouldBeScrolled !== isScrolled) {
+          isScrolled = shouldBeScrolled;
+          navHeader.classList.toggle('is-scrolled', isScrolled);
+        }
+      }, 10);
+    }
+
+    // Check initial scroll position
+    handleScroll();
+
+    // Listen for scroll events with passive flag for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  }
+
   function init() {
     initThemeToggle();
     initFixedUnderlayNavigation();
+    initScrollDetection();
   }
 
   if (document.readyState === 'loading') {

@@ -23,7 +23,7 @@
 }
 
 [data-main].is-interior {
-  padding-top: var(--nav-height);
+  padding-top: 0;
 }
 
 [data-main].is-home {
@@ -43,16 +43,30 @@ body[data-menu-status="open"] .underlay-nav__menu {
 }
 
 .underlay-nav__header {
-  z-index: 100;
+  z-index: 999;
   color: var(--text-primary-light, #000000);
   position: fixed;
   inset: 0 auto auto 0;
   width: 100%;
   pointer-events: none;
+  transition: background-color 0.3s ease;
 }
 
 html[data-theme="dark"] .underlay-nav__header {
   color: var(--text-primary-dark, #ffffff);
+}
+
+/* Glassmorphic background on scroll */
+.underlay-nav__header.is-scrolled {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark"] .underlay-nav__header.is-scrolled {
+  background-color: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .underlay-nav__bar,
