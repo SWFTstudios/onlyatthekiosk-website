@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html data-wf-page="691f50493657ee2c133612d0" data-wf-site="68cc5218804d49fba2fc73a1">
+<head>
+  <meta charset="utf-8">
+  <title>Order Confirmed — Only at The Kiosk</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta name="robots" content="noindex">
+  <link href="css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="css/components.css" rel="stylesheet" type="text/css">
+  <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
+  <link href="css/navigation.css" rel="stylesheet" type="text/css">
+  <link href="css/webflow.css" rel="stylesheet" type="text/css">
+  <link href="images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
+  <link href="images/webclip.jpg" rel="apple-touch-icon">
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  <style>
+    .success-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;
+      text-align:center;font-family:inherit}
+    .success-card{max-width:520px}
+    .success-mark{width:84px;height:84px;border-radius:999px;margin:0 auto 1.75rem;display:flex;
+      align-items:center;justify-content:center;background:#1db954;color:#fff;font-size:2.5rem;
+      animation:pop .4s ease}
+    @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+    .success-card h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:0 0 .75rem;letter-spacing:.02em}
+    .success-card p{opacity:.8;line-height:1.6;margin:0 0 .5rem}
+    .order-id{display:inline-block;margin:1rem 0;padding:.5rem 1rem;border:1px dashed currentColor;
+      border-radius:8px;font-weight:700;letter-spacing:.08em}
+    .success-actions{margin-top:2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+    .success-actions a{display:inline-block;padding:.85rem 1.6rem;border-radius:8px;text-decoration:none;
+      font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:.85rem}
+    .btn-fill{background:#000;color:#fff}
+    .btn-line{border:1px solid currentColor}
+    [data-theme="dark"] .btn-fill{background:#fff;color:#000}
+  </style>
+</head>
+<body>
+  <div class="success-wrap">
+    <div class="success-card">
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <h1>You're all set.</h1>
+      <p>Thanks for shopping <strong>Only at The Kiosk</strong>. Your payment went through and your order is locked in.</p>
+      <div class="order-id" id="order-ref" style="display:none"></div>
+      <p>A receipt and confirmation are on the way to your email. We'll let you know when it ships.</p>
+      <div class="success-actions">
+        <a href="store.html" class="btn-fill">Keep Shopping</a>
+        <a href="index.html" class="btn-line">Back Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/cart.js" type="text/javascript"></script>
+  <script>
+    // Payment succeeded — empty the local cart so it doesn't linger.
+    (function () {
+      try { if (window.cart) window.cart.clear(); } catch (e) {}
+
+      var params = new URLSearchParams(window.location.search);
+      var sessionId = params.get('session_id');
+      if (sessionId) {
+        // Show a short, friendly reference derived from the Stripe session id.
+        var ref = 'KIOSK-' + sessionId.replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase();
+        var el = document.getElementById('order-ref');
+        el.textContent = 'Order ' + ref;
+        el.style.display = 'inline-block';
+      }
+    })();
+  </script>
+</body>
+</html>

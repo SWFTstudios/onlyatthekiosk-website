@@ -1,112 +1,63 @@
 /**
- * Checkout Flow
- * 
- * Handles redirecting to Shopify checkout and processing checkout completion.
+ * Checkout Flow (Stripe)
+ *
+ * Sends the local cart to /api/checkout, which creates a Stripe Checkout
+ * Session and returns its hosted URL. We then redirect the shopper to Stripe.
  */
 
 class CheckoutManager {
-  constructor() {
-    this.checkoutUrl = null;
-  }
-
   /**
-   * Get checkout URL from cart
-   * @returns {Promise<string>} - Checkout URL
+   * Create a Stripe Checkout Session for the current cart and redirect to it.
    */
-  async getCheckoutUrl() {
+  async redirectToCheckout() {
+    if (!window.cart || window.cart.getCount() === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
     try {
-      if (!window.cart) {
-        throw new Error('Cart manager not loaded');
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(window.cart.toCheckoutPayload()),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        const msg = data.details || data.error || 'Checkout is unavailable right now.';
+        throw new Error(msg);
       }
 
-      const cartId = window.cart.cartId;
-      if (!cartId) {
-        throw new Error('No cart found. Please add items to cart first.');
-      }
-
-      // Get cart to retrieve checkout URL
-      const cart = await window.cart.getCart();
-      if (!cart || !cart.checkoutUrl) {
-        throw new Error('Checkout URL not available');
-      }
-
-      this.checkoutUrl = cart.checkoutUrl;
-      return this.checkoutUrl;
+      // Off to Stripe's hosted checkout.
+      window.location.href = data.url;
     } catch (error) {
-      console.error('Error getting checkout URL:', error);
-      throw error;
+      console.error('Checkout error:', error);
+      alert('Could not start checkout: ' + error.message);
     }
   }
 
   /**
-   * Redirect to Shopify checkout
-   * @param {boolean} newWindow - Open checkout in new window (default: false)
-   */
-  async redirectToCheckout(newWindow = false) {
-    try {
-      const checkoutUrl = await this.getCheckoutUrl();
-      
-      if (newWindow) {
-        window.open(checkoutUrl, '_blank');
-      } else {
-        window.location.href = checkoutUrl;
-      }
-    } catch (error) {
-      console.error('Error redirecting to checkout:', error);
-      alert('Failed to proceed to checkout: ' + error.message);
-    }
-  }
-
-  /**
-   * Handle checkout completion (called after returning from Shopify checkout)
-   * This can be used to clear cart, show confirmation, etc.
-   */
-  handleCheckoutComplete() {
-    // Clear cart after successful checkout
-    if (window.cart) {
-      window.cart.clearCart();
-    }
-
-    // Dispatch event for other components to listen
-    window.dispatchEvent(new CustomEvent('checkoutComplete', {
-      detail: {
-        timestamp: new Date().toISOString()
-      }
-    }));
-  }
-
-  /**
-   * Check if we're returning from checkout
-   * This checks URL parameters that Shopify might add
+   * If we've returned from a cancelled checkout, leave the cart intact.
+   * The cart is cleared on the success page instead.
    */
   checkReturnFromCheckout() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const checkoutStatus = urlParams.get('checkout');
-    
-    if (checkoutStatus === 'success' || checkoutStatus === 'complete') {
-      this.handleCheckoutComplete();
-      return true;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'cancelled') {
+      // Nothing to do — cart is preserved so the shopper can try again.
+      return 'cancelled';
     }
-    
-    return false;
+    return null;
   }
 }
 
-// Create and export singleton instance
 const checkout = new CheckoutManager();
+window.checkout = checkout;
 
-// Check for return from checkout on page load
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
-    checkout.checkReturnFromCheckout();
-  });
+  window.addEventListener('DOMContentLoaded', () => checkout.checkReturnFromCheckout());
 }
 
-// Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = checkout;
 }
-
-// Make available globally
-window.checkout = checkout;
-
