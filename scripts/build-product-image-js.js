@@ -124,8 +124,8 @@ function applyManifestCarouselImages(collectionKey) {
   if (!collectionKey || !COLLECTION_HANDLES[collectionKey]) return;
 
   const handles = COLLECTION_HANDLES[collectionKey];
-  const carouselItems = document.querySelectorAll('.carousel_item');
-  const swiperSlides = document.querySelectorAll('.swiper-slide');
+  const carouselItems = document.querySelectorAll('.carousel_component .carousel_item');
+  const swiperSlides = document.querySelectorAll('.carousel_component .swiper .swiper-slide');
 
   handles.forEach((handle, index) => {
     const entry = PRODUCT_IMAGES[handle];
