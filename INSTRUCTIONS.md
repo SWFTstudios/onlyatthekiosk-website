@@ -83,10 +83,34 @@ This project creates a completely custom frontend and user experience while leve
 
 Collection pages and `carousel-template.html` share the 3D carousel via:
 
-- `css/carousel-3d.css` — carousel, drawer, and touch-layer styles
-- `js/carousel-3d.js` — load-first init, full-viewport swipe, Swiper + GSAP sync
+- `css/carousel-3d.css` — carousel, drawer, title-stack, and drag-layer styles
+- `js/carousel-3d.js` — load-first init, drag-to-spin ring controller, GSAP-only (no Swiper)
 
 Configure per page with `window.KioskCarousel3DConfig` (`assetBase`, `collectionHandle`). Re-apply asset links after HTML edits with `node scripts/patch-collection-carousel.js`.
+
+**Interaction model** — the 3D ring is the single source of truth:
+
+- Drag/swipe horizontally anywhere on the carousel to spin the ring 1:1; release applies momentum, then the ring snaps so the active card lands front-facing (tilt and rotation both rest at 0 for the front card, which gets `.is-active` scale/shadow lift).
+- Tap the front card (or its "View" button) to open the product drawer; tap a side card to spin it to the front. Arrows, keyboard (arrow keys / Enter) and mousewheel drive the same ring.
+- Product titles are a GSAP crossfade follower of the ring (the legacy `.swiper-slide` class names are kept, but Swiper is no longer loaded).
+- `prefers-reduced-motion` skips the intro and shortens settle tweens.
+
+**Motion spec** — all parameters live in the `MOTION` object at the top of `js/carousel-3d.js` (exposed as `window.KioskCarousel3D.MOTION`):
+
+| Group | Key parameters | Values |
+|-------|----------------|--------|
+| `intro` | duration / ease | 1.5s, `power2.inOut` (skipped after first view per session) |
+| `drag` | tap threshold | < 8px movement and < 300ms = tap |
+| `inertia` | projection / settle ease | 0.22s velocity carry, max 3-card fling, `CustomEase(0.22, 1.15, 0.32, 1)` landing (slight overshoot) |
+| `step` | arrows/keys/wheel | 0.65s per card, 350ms wheel lockout |
+| `tilt` | velocity-based X tilt | up to 6°, rests at 0° so the card faces the customer |
+| `title` | crossfade | 0.28s, 14px directional travel |
+
+**Visual debug aids** (development only):
+
+- `?debug=motion` — fixed HUD showing live rotation, active index, velocity (°/s), snap target, drag/settle state, and FPS (turns orange under 50fps); buttons to replay the intro, step next/prev, and load **GSDevTools** (CDN, debug-only) to scrub the intro timeline like an animator.
+- `?debug=borders` — container border overlay (see `docs/CONTAINER_BORDERS_CHEATSHEET.md`).
+- `window.kioskCarousel3DController` — console access to `state`, `stepBy(n)`, `goToIndex(i)`, `settleTo(deg)`.
 
 ---
 

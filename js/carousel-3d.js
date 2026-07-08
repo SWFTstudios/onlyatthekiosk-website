@@ -1,12 +1,95 @@
 /**
  * KIOSK 3D Collection Carousel
- * Full-viewport swipe, load-first init, Swiper + GSAP sync
+ *
+ * Interaction model:
+ *   - The 3D ring is the single source of truth (state.rotation, degrees).
+ *   - Drag/swipe horizontally anywhere on the carousel to spin the ring 1:1.
+ *   - On release, momentum carries the ring, then it snaps to the nearest
+ *     card so the active card always lands front-facing the customer.
+ *   - Tap the front card to open the product view; tap a side card to bring
+ *     it to the front. Arrows, keyboard and mousewheel drive the same ring.
+ *   - Product titles crossfade as a follower of the ring (no Swiper).
+ *
+ * Debugging (visual aids for tuning motion):
+ *   - ?debug=motion  → live HUD (rotation, velocity, active index, FPS,
+ *     snap target) + GSDevTools scrubber for the intro timeline.
+ *   - ?debug=borders → container border overlay (see INSTRUCTIONS.md).
  */
 (function () {
   'use strict';
 
   const INTRO_SEEN_KEY = 'kiosk-carousel-seen';
-  const INTRO_DURATION = 1.5;
+  const REDUCED_MOTION =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ------------------------------------------------------------------ *
+   * MOTION SPEC — every duration/ease/threshold in one place.
+   * Tune these like an animator: all values are plain numbers/strings.
+   * ------------------------------------------------------------------ */
+  const MOTION = {
+    intro: {
+      duration: REDUCED_MOTION ? 0 : 1.5,   // s — first-visit ring build-in
+      fromRotate: 100,                      // deg — ring starts wound up
+      fromTilt: -90,                        // deg — ring starts flat (top view)
+      ease: 'power2.inOut',
+      fadeDuration: 0.4,                    // s — [fade-up] elements
+    },
+    drag: {
+      // Dragging one card-width of pixels rotates the ring by one card.
+      sensitivity: 1.0,                     // multiplier on deg-per-px
+      tapMaxMovement: 8,                    // px — under this = tap, not drag
+      tapMaxDuration: 300,                  // ms — under this = tap, not drag
+      velocitySampleWindow: 100,            // ms — window for release velocity
+    },
+    inertia: {
+      projection: 0.22,                     // s — velocity carry (deg = v * this)
+      maxFlingCards: 3,                     // clamp momentum to N cards per fling
+      minDuration: 0.45,                    // s — settle tween floor
+      maxDuration: 1.1,                     // s — settle tween ceiling
+      durationPerDeg: 0.006,                // s per degree of travel
+      // Slight overshoot so the card "lands" with weight (easeOutBack-lite).
+      settleEase: { id: 'kioskLand', bezier: '0.22, 1.15, 0.32, 1' },
+      settleEaseFallback: 'power3.out',
+    },
+    step: {
+      // Arrow / keyboard / wheel: exactly one card per action.
+      duration: REDUCED_MOTION ? 0.2 : 0.65, // s
+      wheelThreshold: 30,                    // accumulated deltaY before a step
+      wheelLockout: 350,                     // ms between wheel steps
+    },
+    tilt: {
+      // Velocity-based X tilt while spinning — adds physicality, rests at 0
+      // so the landed card faces the customer dead-on.
+      max: 6,                                // deg (applied negative)
+      velocityRef: 600,                      // deg/s that maps to full tilt
+      duration: 0.45,                        // s — tilt easing
+      ease: 'power2.out',
+    },
+    title: {
+      duration: 0.28,                        // s — crossfade per card change
+      travel: 14,                            // px — vertical slide distance
+      ease: 'power2.out',
+    },
+  };
+
+  let settleEase = MOTION.inertia.settleEaseFallback;
+
+  function registerEases() {
+    if (typeof gsap === 'undefined') return;
+    if (typeof CustomEase !== 'undefined') {
+      gsap.registerPlugin(CustomEase);
+      try {
+        settleEase = CustomEase.create(MOTION.inertia.settleEase.id, MOTION.inertia.settleEase.bezier);
+      } catch (e) {
+        settleEase = MOTION.inertia.settleEaseFallback;
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Config / helpers
+   * ------------------------------------------------------------------ */
 
   function getAssetBase() {
     if (window.KioskCarousel3DConfig && window.KioskCarousel3DConfig.assetBase !== undefined) {
@@ -46,6 +129,10 @@
     });
   }
 
+  /* ------------------------------------------------------------------ *
+   * 3D layout
+   * ------------------------------------------------------------------ */
+
   function compute3DLayout(wrapEl, productCount) {
     const $wrap = $(wrapEl);
     const $items = $wrap.find('.carousel_item');
@@ -67,6 +154,7 @@
       });
       const img = $(this).find('.carousel_img');
       if (img.length) {
+        img.attr('decoding', 'async');
         img.on('load', function () {
           $(this).css({ opacity: 1, visibility: 'visible' });
         }).on('error', function () {
@@ -84,9 +172,9 @@
   function buildCarouselDOM(products, assetBase) {
     const placeholder = `${assetBase}images/kiosk-placeholder-product-img.webp`;
     const $list = $('.carousel_list');
-    const $wrapper = $('.swiper-wrapper');
+    const $titles = $('.carousel-titles_wrapper, .swiper-wrapper');
     $list.empty();
-    $wrapper.empty();
+    $titles.empty();
 
     products.forEach((product, index) => {
       const imageUrl =
@@ -95,13 +183,13 @@
           : placeholder;
 
       $list.append(`
-        <div class="carousel_item" data-product-index="${index}">
-          <img src="${imageUrl}" alt="${product.title}" class="carousel_img" loading="${index < 3 ? 'eager' : 'lazy'}">
+        <div class="carousel_item" data-product-index="${index}" data-product-handle="${product.handle}">
+          <img src="${imageUrl}" alt="${product.title}" class="carousel_img" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async">
           <div class="carousel_ratio"></div>
         </div>
       `);
 
-      $wrapper.append(`
+      $titles.append(`
         <div class="swiper-slide" data-product-handle="${product.handle}">
           <h2>${product.title}</h2>
           <a href="#" class="button view-details-btn">View</a>
@@ -133,6 +221,361 @@
     }
   }
 
+  /* ------------------------------------------------------------------ *
+   * Ring controller — drag-to-spin, inertia, snap, front-facing landing
+   * ------------------------------------------------------------------ */
+
+  let drawerOpenFn = null; // set by initDrawer()
+  let controller = null;
+
+  function createRingController(componentEl, wrapEl, rotateAmount) {
+    const count = $(wrapEl).find('.carousel_item').length;
+    if (!count) return null;
+
+    const items = $(wrapEl).find('.carousel_item').toArray();
+    const slides = () => $(componentEl).find('.swiper-slide');
+
+    const state = {
+      rotation: 0,   // deg, continuous (unbounded)
+      tilt: 0,       // deg, X tilt (rests at 0 = front-facing)
+      velocity: 0,   // deg/s, live during drag/inertia
+      activeIndex: 0,
+      snapTarget: 0, // deg, last computed snap destination
+      dragging: false,
+      settling: false,
+    };
+
+    const setRotate = gsap.quickSetter(wrapEl, '--3d-carousel-rotate', 'deg');
+    const setTilt = gsap.quickSetter(wrapEl, '--3d-carousel-rotate-x', 'deg');
+    const wrapIndex = gsap.utils.wrap(0, count);
+    const snapToCard = gsap.utils.snap(rotateAmount);
+
+    let degPerPx = rotateAmount / Math.max(items[0].offsetWidth || 300, 1);
+
+    function measure() {
+      const w = items[0] ? items[0].offsetWidth : 0;
+      degPerPx = (rotateAmount / Math.max(w || 300, 1)) * MOTION.drag.sensitivity;
+    }
+
+    function render() {
+      setRotate(state.rotation);
+      setTilt(state.tilt);
+      const idx = wrapIndex(Math.round(-state.rotation / rotateAmount));
+      if (idx !== state.activeIndex) {
+        const direction = deltaDirection(state.activeIndex, idx);
+        state.activeIndex = idx;
+        applyActiveCard(idx);
+        crossfadeTitle(idx, direction);
+      }
+    }
+
+    function deltaDirection(fromIdx, toIdx) {
+      // Shortest ring direction: +1 next (rotation decreasing), -1 prev.
+      const diff = wrapIndex(toIdx - fromIdx);
+      return diff <= count / 2 ? 1 : -1;
+    }
+
+    function applyActiveCard(idx) {
+      items.forEach((el, i) => el.classList.toggle('is-active', i === idx));
+    }
+
+    function crossfadeTitle(idx, direction) {
+      const $slides = slides();
+      if (!$slides.length) return;
+      const dir = direction >= 0 ? 1 : -1;
+      $slides.each(function (i) {
+        if (i === idx) return;
+        if (this.classList.contains('is-active-title')) {
+          const el = this;
+          gsap.to(el, {
+            autoAlpha: 0,
+            y: -MOTION.title.travel * dir,
+            duration: MOTION.title.duration,
+            ease: MOTION.title.ease,
+            overwrite: 'auto',
+            onComplete: () => el.classList.remove('is-active-title'),
+          });
+        }
+      });
+      const incoming = $slides.get(idx);
+      if (!incoming) return;
+      incoming.classList.add('is-active-title');
+      gsap.fromTo(
+        incoming,
+        { autoAlpha: 0, y: MOTION.title.travel * dir },
+        { autoAlpha: 1, y: 0, duration: MOTION.title.duration, ease: MOTION.title.ease, overwrite: 'auto' }
+      );
+    }
+
+    function killTweens() {
+      gsap.killTweensOf(state, 'rotation');
+    }
+
+    function tiltTo(value) {
+      gsap.to(state, {
+        tilt: value,
+        duration: MOTION.tilt.duration,
+        ease: MOTION.tilt.ease,
+        overwrite: 'auto',
+        onUpdate: render,
+      });
+    }
+
+    function settleTo(targetRotation, durationOverride) {
+      state.snapTarget = targetRotation;
+      state.settling = true;
+      const travel = Math.abs(targetRotation - state.rotation);
+      const duration =
+        durationOverride !== undefined
+          ? durationOverride
+          : gsap.utils.clamp(
+              MOTION.inertia.minDuration,
+              MOTION.inertia.maxDuration,
+              MOTION.inertia.minDuration + travel * MOTION.inertia.durationPerDeg
+            );
+      killTweens();
+      gsap.to(state, {
+        rotation: targetRotation,
+        duration: REDUCED_MOTION ? Math.min(duration, 0.2) : duration,
+        ease: settleEase,
+        overwrite: 'auto',
+        onUpdate: render,
+        onComplete: () => {
+          state.settling = false;
+          state.velocity = 0;
+        },
+      });
+      tiltTo(0);
+    }
+
+    function stepBy(cards) {
+      // Continuous index nearest to current rotation, then offset.
+      const k = Math.round(-state.rotation / rotateAmount);
+      settleTo(-(k + cards) * rotateAmount, MOTION.step.duration);
+    }
+
+    function goToIndex(idx) {
+      const k = Math.round(-state.rotation / rotateAmount);
+      const current = wrapIndex(k);
+      let diff = wrapIndex(idx - current);
+      if (diff > count / 2) diff -= count; // take the short way around
+      stepBy(diff);
+    }
+
+    /* ---- pointer drag ---- */
+
+    const touchEl = ensureTouchLayer(componentEl);
+    const samples = [];
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let startTime = 0;
+    let totalMovement = 0;
+
+    function trackVelocity(x) {
+      const now = performance.now();
+      samples.push({ t: now, x });
+      while (samples.length > 1 && now - samples[0].t > MOTION.drag.velocitySampleWindow) {
+        samples.shift();
+      }
+    }
+
+    function releaseVelocity() {
+      if (samples.length < 2) return 0;
+      const first = samples[0];
+      const last = samples[samples.length - 1];
+      const dt = (last.t - first.t) / 1000;
+      if (dt <= 0) return 0;
+      return ((last.x - first.x) / dt) * degPerPx; // deg/s
+    }
+
+    function onPointerDown(e) {
+      if (pointerId !== null) return;
+      pointerId = e.pointerId;
+      state.dragging = true;
+      startX = lastX = e.clientX;
+      startY = e.clientY;
+      startTime = performance.now();
+      totalMovement = 0;
+      samples.length = 0;
+      trackVelocity(e.clientX);
+      killTweens();
+      touchEl.classList.add('is-grabbing');
+      if (window.lenis && typeof window.lenis.stop === 'function') window.lenis.stop();
+      if (touchEl.setPointerCapture) {
+        try { touchEl.setPointerCapture(e.pointerId); } catch (err) { /* no-op */ }
+      }
+    }
+
+    function onPointerMove(e) {
+      if (e.pointerId !== pointerId) return;
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      totalMovement += Math.abs(dx);
+      trackVelocity(e.clientX);
+
+      state.rotation += dx * degPerPx;
+      state.velocity = releaseVelocity();
+      // Velocity-based tilt: physical while moving, rests flat on landing.
+      const t = gsap.utils.clamp(0, 1, Math.abs(state.velocity) / MOTION.tilt.velocityRef);
+      state.tilt = -MOTION.tilt.max * t;
+      render();
+    }
+
+    function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+      state.dragging = false;
+      touchEl.classList.remove('is-grabbing');
+      if (window.lenis && typeof window.lenis.start === 'function') window.lenis.start();
+
+      const elapsed = performance.now() - startTime;
+      const isTap =
+        totalMovement < MOTION.drag.tapMaxMovement && elapsed < MOTION.drag.tapMaxDuration;
+
+      if (isTap) {
+        tiltTo(0);
+        handleTap(e.clientX, e.clientY);
+        return;
+      }
+
+      // Vertical flick fallback (legacy gesture): step one card.
+      const dyTotal = e.clientY - startY;
+      const dxTotal = e.clientX - startX;
+      if (Math.abs(dyTotal) > Math.abs(dxTotal) && Math.abs(dyTotal) > 40) {
+        stepBy(dyTotal < 0 ? 1 : -1);
+        return;
+      }
+
+      // Momentum + snap so the card always lands front-facing.
+      const v = releaseVelocity();
+      state.velocity = v;
+      let projected = state.rotation + v * MOTION.inertia.projection;
+      const maxFling = MOTION.inertia.maxFlingCards * rotateAmount;
+      projected = gsap.utils.clamp(state.rotation - maxFling, state.rotation + maxFling, projected);
+      settleTo(snapToCard(projected));
+    }
+
+    function onPointerCancel(e) {
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+      state.dragging = false;
+      touchEl.classList.remove('is-grabbing');
+      if (window.lenis && typeof window.lenis.start === 'function') window.lenis.start();
+      settleTo(snapToCard(state.rotation));
+    }
+
+    /* ---- tap → product ---- */
+
+    function handleTap(x, y) {
+      const rect = wrapEl.getBoundingClientRect();
+      const margin = 48;
+      if (y < rect.top - margin || y > rect.bottom + margin) return;
+
+      const itemW = items[0] ? items[0].offsetWidth : 0;
+      const centerX = rect.left + rect.width / 2;
+      const dx = x - centerX;
+
+      if (Math.abs(dx) <= itemW * 0.5) {
+        openActiveProduct();
+      } else if (dx > 0) {
+        stepBy(1); // card visually on the right = next
+      } else {
+        stepBy(-1);
+      }
+    }
+
+    function openActiveProduct() {
+      const $slides = slides();
+      const handle =
+        $($slides.get(state.activeIndex)).data('product-handle') ||
+        $(items[state.activeIndex]).data('product-handle');
+      if (handle && drawerOpenFn) drawerOpenFn(String(handle));
+    }
+
+    touchEl.addEventListener('pointerdown', onPointerDown);
+    touchEl.addEventListener('pointermove', onPointerMove);
+    touchEl.addEventListener('pointerup', onPointerUp);
+    touchEl.addEventListener('pointercancel', onPointerCancel);
+
+    /* ---- arrows ---- */
+
+    const nextEl = componentEl.querySelector('[carousel="next"]');
+    const prevEl = componentEl.querySelector('[carousel="prev"]');
+    if (nextEl) nextEl.addEventListener('click', (e) => { e.preventDefault(); stepBy(1); });
+    if (prevEl) prevEl.addEventListener('click', (e) => { e.preventDefault(); stepBy(-1); });
+
+    /* ---- keyboard ---- */
+
+    function onKeydown(e) {
+      if ($('#product-drawer').hasClass('open')) return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); stepBy(1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); stepBy(-1); }
+      else if (e.key === 'Enter' && document.activeElement === document.body) { openActiveProduct(); }
+    }
+    document.addEventListener('keydown', onKeydown);
+
+    /* ---- mousewheel ---- */
+
+    let wheelAccum = 0;
+    let wheelLockedUntil = 0;
+    function onWheel(e) {
+      if ($('#product-drawer').hasClass('open')) return;
+      e.preventDefault();
+      const now = performance.now();
+      if (now < wheelLockedUntil) return;
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      wheelAccum += delta;
+      if (Math.abs(wheelAccum) >= MOTION.step.wheelThreshold) {
+        stepBy(wheelAccum > 0 ? 1 : -1);
+        wheelAccum = 0;
+        wheelLockedUntil = now + MOTION.step.wheelLockout;
+      }
+    }
+    componentEl.addEventListener('wheel', onWheel, { passive: false });
+
+    /* ---- resize ---- */
+
+    let resizeTimer = null;
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        compute3DLayout(wrapEl, count);
+        measure();
+        render();
+      }, 150);
+    }
+    window.addEventListener('resize', onResize);
+
+    /* ---- init ---- */
+
+    measure();
+    applyActiveCard(0);
+    // Show first title immediately (no animation on init).
+    const $initSlides = slides();
+    $initSlides.each(function (i) {
+      this.classList.toggle('is-active-title', i === 0);
+      gsap.set(this, { autoAlpha: i === 0 ? 1 : 0, y: 0 });
+    });
+    render();
+
+    function destroy() {
+      killTweens();
+      touchEl.removeEventListener('pointerdown', onPointerDown);
+      touchEl.removeEventListener('pointermove', onPointerMove);
+      touchEl.removeEventListener('pointerup', onPointerUp);
+      touchEl.removeEventListener('pointercancel', onPointerCancel);
+      componentEl.removeEventListener('wheel', onWheel);
+      document.removeEventListener('keydown', onKeydown);
+      window.removeEventListener('resize', onResize);
+    }
+
+    return { state, stepBy, goToIndex, openActiveProduct, settleTo, render, measure, destroy, rotateAmount, count };
+  }
+
   function ensureTouchLayer(componentEl) {
     const $component = $(componentEl);
     if ($component.find('.carousel-3d__touch').length) return $component.find('.carousel-3d__touch')[0];
@@ -143,46 +586,14 @@
     return touch;
   }
 
-  function bindFullAreaTouch(touchEl, swiper) {
-    let startY = 0;
-    let startX = 0;
-    let tracking = false;
+  /* ------------------------------------------------------------------ *
+   * Intro
+   * ------------------------------------------------------------------ */
 
-    touchEl.addEventListener(
-      'touchstart',
-      (e) => {
-        if (e.target.closest('.view-details-btn, .carousel_arrow_link, .swiper-slide a, .swiper-slide button')) return;
-        startY = e.touches[0].clientY;
-        startX = e.touches[0].clientX;
-        tracking = true;
-        if (window.lenis && typeof window.lenis.stop === 'function') window.lenis.stop();
-      },
-      { passive: true }
-    );
-
-    touchEl.addEventListener(
-      'touchend',
-      (e) => {
-        if (!tracking) return;
-        tracking = false;
-        const endY = e.changedTouches[0].clientY;
-        const endX = e.changedTouches[0].clientX;
-        const deltaY = endY - startY;
-        const deltaX = endX - startX;
-
-        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 40) {
-          if (deltaY < 0) swiper.slideNext();
-          else swiper.slidePrev();
-        }
-
-        if (window.lenis && typeof window.lenis.start === 'function') window.lenis.start();
-      },
-      { passive: true }
-    );
-  }
+  let introTimeline = null;
 
   function playIntro(wrapEl, onComplete) {
-    const skipIntro = sessionStorage.getItem(INTRO_SEEN_KEY) === '1';
+    const skipIntro = REDUCED_MOTION || sessionStorage.getItem(INTRO_SEEN_KEY) === '1';
 
     if (typeof gsap === 'undefined' || !wrapEl) {
       onComplete();
@@ -190,27 +601,32 @@
     }
 
     if (skipIntro) {
-      gsap.set(wrapEl, { opacity: 1, '--3d-carousel-rotate': 0, '--3d-carousel-rotate-x': -4 });
+      gsap.set(wrapEl, { opacity: 1, '--3d-carousel-rotate': '0deg', '--3d-carousel-rotate-x': '0deg' });
       gsap.set('[fade-up]', { opacity: 1 });
       onComplete();
       return;
     }
 
-    const tl = gsap.timeline({
+    introTimeline = gsap.timeline({
       onComplete: () => {
         sessionStorage.setItem(INTRO_SEEN_KEY, '1');
         onComplete();
       },
     });
 
-    tl.to(wrapEl, { opacity: 1, duration: 0.25 });
-    tl.fromTo(
+    introTimeline.to(wrapEl, { opacity: 1, duration: 0.25 });
+    introTimeline.fromTo(
       wrapEl,
-      { '--3d-carousel-rotate': 100, '--3d-carousel-rotate-x': -90 },
-      { '--3d-carousel-rotate': 0, '--3d-carousel-rotate-x': -4, duration: INTRO_DURATION, ease: 'power2.inOut' },
+      { '--3d-carousel-rotate': `${MOTION.intro.fromRotate}deg`, '--3d-carousel-rotate-x': `${MOTION.intro.fromTilt}deg` },
+      {
+        '--3d-carousel-rotate': '0deg',
+        '--3d-carousel-rotate-x': '0deg',
+        duration: MOTION.intro.duration,
+        ease: MOTION.intro.ease,
+      },
       '<'
     );
-    tl.to('[fade-up]', { opacity: 1 }, '>-0.2');
+    introTimeline.to('[fade-up]', { opacity: 1, duration: MOTION.intro.fadeDuration }, '>-0.2');
   }
 
   function animateCollectionTitle() {
@@ -221,90 +637,15 @@
     gsap.to(el, {
       top: '6rem',
       yPercent: 0,
-      duration: 1.2,
+      duration: REDUCED_MOTION ? 0 : 1.2,
       ease: 'power2.inOut',
-      delay: 1,
+      delay: REDUCED_MOTION ? 0 : 1,
     });
   }
 
-  function initSwiper(componentEl, wrapEl, rotateAmount) {
-    const $component = $(componentEl);
-    const swiperEl = $component.find('.swiper')[0];
-    const nextEl = $component.find('[carousel="next"]')[0];
-    const prevEl = $component.find('[carousel="prev"]')[0];
-    const slides = $component.find('.swiper-slide');
-
-    if (!swiperEl || slides.length === 0) {
-      console.warn('No swiper slides — skipping init');
-      return null;
-    }
-
-    if (window.kioskCarouselSwiper) {
-      window.kioskCarouselSwiper.destroy(true, true);
-    }
-
-    const tl = gsap.timeline({ paused: true });
-    tl.fromTo(
-      wrapEl,
-      { '--3d-carousel-rotate': 0 },
-      { '--3d-carousel-rotate': -(360 - rotateAmount), duration: 30, ease: 'none' }
-    );
-
-    const progress = { value: 0 };
-    const useLoop = slides.length > 2;
-
-    const swiper = new Swiper(swiperEl, {
-      effect: 'creative',
-      creativeEffect: {
-        prev: { translate: [0, '-100%', 0], scale: 0.5, opacity: 0 },
-        next: { translate: [0, '100%', 0], scale: 0.5, opacity: 0 },
-      },
-      grabCursor: true,
-      simulateTouch: true,
-      allowTouchMove: true,
-      touchRatio: 1,
-      touchAngle: 45,
-      threshold: 10,
-      longSwipesRatio: 0.3,
-      slidesPerView: 1,
-      spaceBetween: 0,
-      speed: 450,
-      loop: useLoop,
-      resistance: true,
-      resistanceRatio: 0.85,
-      keyboard: { enabled: true, onlyInViewport: true },
-      mousewheel: {
-        enabled: true,
-        eventsTarget: '[carousel="component"]',
-        sensitivity: 1,
-        forceToAxis: true,
-      },
-      navigation: {
-        nextEl,
-        prevEl,
-        disabledClass: 'swiper-button-disabled',
-      },
-      touchEventsTarget: 'container',
-      preventClicks: true,
-      preventClicksPropagation: true,
-    });
-
-    swiper.on('progress', (e) => {
-      gsap.to(progress, {
-        value: e.progress,
-        onUpdate: () => {
-          tl.progress(progress.value);
-        },
-      });
-    });
-
-    const touchEl = ensureTouchLayer(componentEl);
-    bindFullAreaTouch(touchEl, swiper);
-
-    window.kioskCarouselSwiper = swiper;
-    window.kioskCarouselRotationTl = tl;
-    return swiper;
-  }
+  /* ------------------------------------------------------------------ *
+   * Product drawer
+   * ------------------------------------------------------------------ */
 
   function initDrawer() {
     const $drawer = $('#product-drawer');
@@ -423,6 +764,8 @@
         });
     }
 
+    drawerOpenFn = openDrawer;
+
     function closeDrawer() {
       $drawer.removeClass('open');
       $('body').css('overflow', '');
@@ -433,7 +776,7 @@
       e.preventDefault();
       e.stopPropagation();
       const handle = $(this).closest('.swiper-slide').data('product-handle');
-      if (handle) openDrawer(handle);
+      if (handle) openDrawer(String(handle));
     });
 
     $('#drawer-close-btn, #drawer-close-overlay').on('click', closeDrawer);
@@ -474,6 +817,10 @@
     });
   }
 
+  /* ------------------------------------------------------------------ *
+   * Debug tooling
+   * ------------------------------------------------------------------ */
+
   function initDebugBorders() {
     window.toggleDebugBorders = function toggleDebugBorders() {
       document.documentElement.classList.toggle('debug-borders');
@@ -482,10 +829,117 @@
     if (window.location.search.includes('debug=borders')) window.toggleDebugBorders();
   }
 
+  function initMotionHUD() {
+    if (!window.location.search.includes('debug=motion')) return;
+
+    const hud = document.createElement('div');
+    hud.className = 'carousel-3d__hud';
+    hud.innerHTML = `
+      <div class="carousel-3d__hud-title">MOTION DEBUG</div>
+      <div class="carousel-3d__hud-row"><span>rotation</span><b data-hud="rotation">0</b></div>
+      <div class="carousel-3d__hud-row"><span>active</span><b data-hud="active">0</b></div>
+      <div class="carousel-3d__hud-row"><span>velocity</span><b data-hud="velocity">0</b></div>
+      <div class="carousel-3d__hud-row"><span>snap target</span><b data-hud="snap">0</b></div>
+      <div class="carousel-3d__hud-row"><span>state</span><b data-hud="state">idle</b></div>
+      <div class="carousel-3d__hud-row"><span>fps</span><b data-hud="fps">60</b></div>
+      <div class="carousel-3d__hud-actions">
+        <button type="button" data-hud-action="replay-intro">Replay intro</button>
+        <button type="button" data-hud-action="next">Next</button>
+        <button type="button" data-hud-action="prev">Prev</button>
+        <button type="button" data-hud-action="devtools">GSDevTools</button>
+      </div>
+    `;
+    document.body.appendChild(hud);
+
+    const els = {
+      rotation: hud.querySelector('[data-hud="rotation"]'),
+      active: hud.querySelector('[data-hud="active"]'),
+      velocity: hud.querySelector('[data-hud="velocity"]'),
+      snap: hud.querySelector('[data-hud="snap"]'),
+      state: hud.querySelector('[data-hud="state"]'),
+      fps: hud.querySelector('[data-hud="fps"]'),
+    };
+
+    let frames = 0;
+    let lastFpsTime = performance.now();
+    let fps = 60;
+
+    gsap.ticker.add(() => {
+      frames += 1;
+      const now = performance.now();
+      if (now - lastFpsTime >= 500) {
+        fps = Math.round((frames * 1000) / (now - lastFpsTime));
+        frames = 0;
+        lastFpsTime = now;
+      }
+      if (!controller) return;
+      const s = controller.state;
+      els.rotation.textContent = `${s.rotation.toFixed(1)}°`;
+      els.active.textContent = `${s.activeIndex + 1} / ${controller.count}`;
+      els.velocity.textContent = `${Math.round(s.velocity)}°/s`;
+      els.snap.textContent = `${s.snapTarget.toFixed(1)}°`;
+      els.state.textContent = s.dragging ? 'dragging' : s.settling ? 'settling' : 'idle';
+      els.fps.textContent = String(fps);
+      els.fps.style.color = fps < 50 ? '#ff6600' : '';
+    });
+
+    hud.addEventListener('click', (e) => {
+      const action = e.target.getAttribute && e.target.getAttribute('data-hud-action');
+      if (!action) return;
+      if (action === 'replay-intro') {
+        sessionStorage.removeItem(INTRO_SEEN_KEY);
+        const wrap = document.querySelector("[carousel='wrap']");
+        if (wrap) {
+          gsap.set(wrap, { opacity: 0 });
+          playIntro(wrap, () => { if (controller) controller.render(); });
+        }
+      } else if (action === 'next' && controller) {
+        controller.stepBy(1);
+      } else if (action === 'prev' && controller) {
+        controller.stepBy(-1);
+      } else if (action === 'devtools') {
+        loadGSDevTools();
+      }
+    });
+  }
+
+  function loadGSDevTools() {
+    if (window.GSDevTools) {
+      attachGSDevTools();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/GSDevTools.min.js';
+    script.onload = attachGSDevTools;
+    script.onerror = () => console.warn('GSDevTools failed to load');
+    document.body.appendChild(script);
+  }
+
+  function attachGSDevTools() {
+    if (!window.GSDevTools) return;
+    gsap.registerPlugin(window.GSDevTools);
+    if (!introTimeline) {
+      // Rebuild the intro so there is a timeline to scrub.
+      sessionStorage.removeItem(INTRO_SEEN_KEY);
+      const wrap = document.querySelector("[carousel='wrap']");
+      if (wrap) {
+        gsap.set(wrap, { opacity: 0 });
+        playIntro(wrap, () => { if (controller) controller.render(); });
+      }
+    }
+    if (introTimeline) window.GSDevTools.create({ animation: introTimeline });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Boot
+   * ------------------------------------------------------------------ */
+
   async function initCarousel() {
     const component = document.querySelector('[carousel="component"]');
     const wrap = document.querySelector("[carousel='wrap']");
     if (!component || !wrap) return;
+
+    registerEases();
 
     const handle = getCollectionHandle();
     const assetBase = getAssetBase();
@@ -514,7 +968,9 @@
     const rotateAmount = compute3DLayout(wrap, productCount);
 
     playIntro(wrap, () => {
-      initSwiper(component, wrap, rotateAmount);
+      if (controller) controller.destroy();
+      controller = createRingController(component, wrap, rotateAmount);
+      window.kioskCarousel3DController = controller;
     });
   }
 
@@ -525,9 +981,16 @@
       if (products && products.length) buildCarouselDOM(products, assetBase);
       const wrap = document.querySelector("[carousel='wrap']");
       const component = document.querySelector('[carousel="component"]');
+      if (!wrap || !component) return;
       const rotateAmount = compute3DLayout(wrap, $('.carousel_item').length);
-      initSwiper(component, wrap, rotateAmount);
+      if (controller) controller.destroy();
+      controller = createRingController(component, wrap, rotateAmount);
+      window.kioskCarousel3DController = controller;
     },
+    get controller() {
+      return controller;
+    },
+    MOTION,
   };
 
   function boot() {
@@ -542,7 +1005,10 @@
     });
 
     if (typeof $ !== 'undefined') {
-      $(initCarousel);
+      $(function () {
+        initCarousel();
+        initMotionHUD();
+      });
     } else {
       document.addEventListener('DOMContentLoaded', initCarousel);
     }

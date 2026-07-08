@@ -210,7 +210,9 @@
       z-index: 0;
     }
 
-    /* Swiper Container for Titles */
+    /* Title stack (GSAP crossfade follower of the 3D ring).
+       Class names kept from the old Swiper markup, but Swiper is no
+       longer used — slides are absolutely stacked and crossfaded. */
     .swiper {
       width: 100%;
       max-width: 600px;
@@ -218,18 +220,18 @@
       max-height: 180px;
       margin-bottom: 1rem;
       box-sizing: border-box;
-      overflow: visible; /* Allow content to be fully visible */
-      /* Enable touch gestures for swiper */
-      touch-action: pan-y;
+      overflow: visible;
       position: relative;
       z-index: 20; /* Just below product drawer (10001) but above carousel */
     }
-    
-    /* Swiper Wrapper - ensure content is visible */
+
     .swiper-wrapper {
       overflow: visible !important;
       position: relative;
       z-index: 20;
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
     .swiper-slide {
@@ -239,14 +241,24 @@
       align-items: center;
       text-align: center;
       padding: 1.5rem 2rem;
-      position: relative;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 20;
       box-sizing: border-box;
+      /* Hidden by default; the active title is revealed by GSAP */
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
       /* Prevent text selection during swipe */
       user-select: none;
       -webkit-user-select: none;
-      /* Ensure content is fully visible */
       overflow: visible;
+    }
+
+    .swiper-slide.is-active-title {
+      pointer-events: auto;
     }
 
     .swiper-slide h2 {
@@ -971,18 +983,91 @@
     }
 
     
-/* Full-viewport touch layer for mobile swipe */
+/* Full-area drag layer: horizontal drag spins the ring, tap opens/focuses
+   a card. touch-action none so Pointer Events receive every move. */
 .carousel-3d__touch {
   position: absolute;
   inset: 0;
   z-index: 8;
-  touch-action: pan-y;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
   cursor: grab;
 }
 
-.carousel-3d__touch:active {
+.carousel-3d__touch.is-grabbing {
   cursor: grabbing;
+}
+
+/* Active (front-facing) card state — lands facing the customer */
+.carousel_item .carousel_img {
+  transition: box-shadow 0.35s ease, filter 0.35s ease, transform 0.35s ease;
+  transform: scale(0.97);
+  filter: brightness(0.92);
+}
+
+.carousel_item.is-active .carousel_img {
+  transform: scale(1.04);
+  filter: brightness(1);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* Motion debug HUD (?debug=motion) */
+.carousel-3d__hud {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 99999;
+  min-width: 200px;
+  padding: 0.75rem 0.9rem;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  pointer-events: auto;
+}
+
+.carousel-3d__hud-title {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+  color: #aaa;
+}
+
+.carousel-3d__hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.carousel-3d__hud-row b {
+  font-weight: 600;
+}
+
+.carousel-3d__hud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.carousel-3d__hud-actions button {
+  padding: 0.25rem 0.5rem;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.carousel-3d__hud-actions button:hover {
+  background: #333;
 }
 
 /* Z-index: page content behind nav when menu open */
