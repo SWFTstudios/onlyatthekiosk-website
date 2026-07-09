@@ -86,11 +86,12 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      min-height: 100vh;
-      min-height: 100svh;
-      overflow-x: hidden; /* Prevent horizontal scroll */
-      overflow-y: auto; /* Allow vertical scrolling */
-      position: relative; /* Allow normal document flow */
+      height: 100%;
+      height: 100svh;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      touch-action: none;
       font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background-color: var(--bg-primary);
       color: var(--text-primary);
@@ -98,9 +99,12 @@
       overscroll-behavior: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      /* Allow touch scrolling */
-      touch-action: pan-y pan-x;
-      -webkit-overflow-scrolling: touch;
+    }
+
+    main[data-main]:has([carousel="component"]) {
+      overflow: hidden;
+      height: 100svh;
+      max-height: 100svh;
     }
 
     /* Collection Title Styles */
@@ -173,12 +177,13 @@
       align-items: center;
       padding: 1.5rem 1rem;
       box-sizing: border-box;
-      overflow: visible; /* Allow 3D carousel items to extend beyond bounds */
+      overflow: hidden;
       background-color: var(--bg-primary);
       color: var(--text-primary);
       transition: background-color 0.3s ease, color 0.3s ease;
-      /* Allow touch gestures for swiping and scrolling */
-      touch-action: pan-y pan-x;
+      height: 100svh;
+      max-height: 100svh;
+      touch-action: none;
       /* Keep container centered */
       margin: 0;
     }
@@ -223,7 +228,9 @@
       justify-content: center;
       perspective-origin: center center;
       box-sizing: border-box;
-      overflow: visible; /* Allow 3D items to extend beyond bounds */
+      overflow: visible;
+      z-index: 1;
+      pointer-events: none;
       /* Allow touch gestures - Swiper handles its own touch events */
       touch-action: pan-y pan-x;
       -webkit-user-select: none;
@@ -367,24 +374,25 @@
       z-index: 0;
     }
 
-    /* Swiper Container for Titles */
+    /* Swiper Container — full-viewport vertical touch layer */
     .swiper {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      max-width: 600px;
-      height: 180px;
-      max-height: 180px;
-      margin-bottom: 1rem;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
       box-sizing: border-box;
-      overflow: visible; /* Allow content to be fully visible */
-      /* Enable touch gestures for swiper */
+      overflow: hidden;
       touch-action: pan-y;
-      position: relative;
-      z-index: 10000; /* Just below product drawer (10001) but above carousel */
+      z-index: 6;
+      pointer-events: auto;
     }
     
     /* Swiper Wrapper - ensure content is visible */
     .swiper-wrapper {
-      overflow: visible !important;
+      overflow: hidden !important;
       position: relative;
       z-index: 10000;
     }
@@ -392,10 +400,10 @@
     .swiper-slide {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
       text-align: center;
-      padding: 1.5rem 2rem;
+      padding: 1.5rem 2rem 6rem;
       position: relative;
       z-index: 10000;
       box-sizing: border-box;
@@ -430,12 +438,6 @@
 
     /* Tablet */
     @media screen and (max-width: 991px) {
-      .swiper {
-        height: 150px;
-        max-height: 150px;
-        margin-bottom: 0.75rem;
-      }
-      
       .swiper-slide {
         padding: 1rem 1.5rem;
       }
@@ -447,12 +449,6 @@
 
     /* Mobile */
     @media screen and (max-width: 767px) {
-      .swiper {
-        height: 130px;
-        max-height: 130px;
-        margin-bottom: 0.75rem;
-      }
-
       .swiper-slide {
         padding: 0.75rem 1rem;
       }
@@ -465,12 +461,6 @@
 
     /* Small Mobile */
     @media screen and (max-width: 479px) {
-      .swiper {
-        height: 120px;
-        max-height: 120px;
-        margin-bottom: 0.5rem;
-      }
-
       .swiper-slide {
         padding: 0.5rem 0.75rem;
       }
@@ -538,13 +528,17 @@
       }
     }
 
-    /* Navigation Arrows */
+    /* Navigation Arrows — vertical up/down */
     .carousel_arrow_wrap {
       display: flex;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.75rem;
       pointer-events: none;
-      position: relative;
-      z-index: 9999; /* Highest z-index to appear above everything */
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10000;
     }
 
     .carousel_arrow_link {
@@ -605,11 +599,11 @@
       }
 
       .carousel_arrow_link::before {
-        border-width: 6px 10px 6px 0;
+        border-width: 0 6px 10px 6px;
       }
 
       .carousel_arrow_link.is-right::before {
-        border-width: 6px 0 6px 10px;
+        border-width: 10px 6px 0 6px;
       }
     }
 
@@ -629,35 +623,34 @@
       width: 0;
       height: 0;
       border-style: solid;
-      border-width: 8px 12px 8px 0;
-      border-color: transparent var(--text-primary-light, #000) transparent transparent;
+      border-width: 0 8px 12px 8px;
+      border-color: transparent transparent var(--text-primary-light, #000) transparent;
       display: block;
       transition: border-color 0.3s ease;
     }
 
     /* Day mode (light) - black arrow */
     [data-theme="light"] .carousel_arrow_link::before {
-      border-color: transparent var(--text-primary-light, #000) transparent transparent;
+      border-color: transparent transparent var(--text-primary-light, #000) transparent;
     }
 
     /* Night mode (dark) - white arrow */
     [data-theme="dark"] .carousel_arrow_link::before {
-      border-color: transparent var(--text-primary-dark, #fff) transparent transparent;
+      border-color: transparent transparent var(--text-primary-dark, #fff) transparent;
     }
 
     .carousel_arrow_link.is-right::before {
-      border-width: 8px 0 8px 12px;
-      border-color: transparent transparent transparent var(--text-primary-light, #000);
-    }
+      border-width: 12px 8px 0 8px;
+      border-color: var(--text-primary-light, #000) transparent transparent transparent;
 
     /* Day mode (light) - black arrow */
     [data-theme="light"] .carousel_arrow_link.is-right::before {
-      border-color: transparent transparent transparent var(--text-primary-light, #000);
+      border-color: var(--text-primary-light, #000) transparent transparent transparent;
     }
 
     /* Night mode (dark) - white arrow */
     [data-theme="dark"] .carousel_arrow_link.is-right::before {
-      border-color: transparent transparent transparent var(--text-primary-dark, #fff);
+      border-color: var(--text-primary-dark, #fff) transparent transparent transparent;
     }
 
     /* Disabled State */
@@ -2027,9 +2020,16 @@
           
           // Mark Swiper as initialized
           window.swiperInitialized = true;
+
+          if (window.lenis && typeof window.lenis.stop === 'function') {
+            window.lenis.stop();
+          }
+          document.documentElement.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
           
           // Initialize Swiper with mobile-friendly touch gestures
           const swiper = new Swiper(swiperEl[0], {
+            direction: 'vertical',
             effect: "creative",
             creativeEffect: {
               prev: {
@@ -2046,11 +2046,11 @@
             // Touch and swipe settings for mobile
             grabCursor: true,
             touchRatio: 1,
-            touchAngle: 45,
+            touchAngle: 90,
             simulateTouch: true,
             allowTouchMove: true,
-            touchStartPreventDefault: false,
-            touchMoveStopPropagation: false,
+            touchStartPreventDefault: true,
+            touchMoveStopPropagation: true,
             // Swipe settings
             slidesPerView: 1,
             spaceBetween: 0,
@@ -2063,6 +2063,7 @@
             mousewheel: {
               enabled: true,
               eventsTarget: "[carousel='component']",
+              releaseOnEdges: false,
               sensitivity: 1,
               forceToAxis: true
             },
