@@ -313,7 +313,7 @@
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
-      pointer-events: none;
+      pointer-events: auto;
       position: relative;
       overflow: visible; /* Allow 3D items to extend beyond bounds */
     }
@@ -330,7 +330,9 @@
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       overflow: visible; /* Ensure content isn't clipped */
     }
 
@@ -387,7 +389,7 @@
       overflow: hidden;
       touch-action: pan-y;
       z-index: 6;
-      pointer-events: auto;
+      pointer-events: none;
     }
     
     /* Swiper Wrapper - ensure content is visible */
@@ -425,6 +427,8 @@
       overflow: visible; /* Don't clip text */
       text-overflow: clip; /* Show full text */
       transition: color 0.3s ease;
+      pointer-events: auto;
+      cursor: pointer;
     }
     
     /* Product title: orange in light mode */
@@ -1742,7 +1746,7 @@
         products.forEach((product, index) => {
           // Create carousel item (3D image)
           const carouselItem = $(`
-            <div class="carousel_item" data-product-index="${index}">
+            <div class="carousel_item" data-product-index="${index}" data-product-handle="${product.handle}">
               <img src="${product.images && product.images.edges && product.images.edges.length > 0 ? product.images.edges[0].node.url : '/images/kiosk-placeholder-product-img.webp'}" 
                    alt="${product.title}" 
                    class="carousel_img" 
@@ -2073,12 +2077,44 @@
             // Touch events
             touchEventsTarget: 'container',
             // Prevent clicks during swipe
-            preventClicks: true,
-            preventClicksPropagation: true,
+            preventClicks: false,
+            preventClicksPropagation: false,
             // Resistance when reaching edges
             resistance: true,
             resistanceRatio: 0.85
           });
+
+          // Vertical swipe on carousel component (swiper overlay passes through touches)
+          const componentEl = $("[carousel='component']")[0];
+          if (componentEl) {
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let touchMoved = false;
+
+            componentEl.addEventListener('touchstart', (e) => {
+              if (e.target.closest('.view-details-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              touchStartY = e.touches[0].clientY;
+              touchStartX = e.touches[0].clientX;
+              touchMoved = false;
+            }, { passive: true });
+
+            componentEl.addEventListener('touchmove', (e) => {
+              const dy = Math.abs(e.touches[0].clientY - touchStartY);
+              const dx = Math.abs(e.touches[0].clientX - touchStartX);
+              if (dy > 12 || dx > 12) touchMoved = true;
+            }, { passive: true });
+
+            componentEl.addEventListener('touchend', (e) => {
+              if (e.target.closest('.view-details-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              const dy = e.changedTouches[0].clientY - touchStartY;
+              const dx = e.changedTouches[0].clientX - touchStartX;
+              if (touchMoved && Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) {
+                if (dy < 0) swiper.slideNext();
+                else swiper.slidePrev();
+              }
+            }, { passive: true });
+          }
+
           
           // Sync Swiper progress with 3D rotation
           swiper.on("progress", function (e) {
@@ -2157,9 +2193,7 @@
       const drawer = $('#product-drawer');
       const drawerOverlay = $('#drawer-close-overlay');
       const drawerCloseBtn = $('#drawer-close-btn');
-      const viewDetailsBtns = $('.view-details-btn');
-      
-      // Shopify Storefront API Configuration
+            // Shopify Storefront API Configuration
       // Fetch product from Shopify using the Shopify client
       // The Shopify client uses the /api/shopify proxy function to keep tokens server-side
       async function fetchProduct(handle) {
@@ -2392,6 +2426,19 @@
       let currentProductData = null;
       let currentProductHandle = null;
 
+      
+      function resolveProductHandle($el) {
+        const direct = $el.data('product-handle');
+        if (direct) return direct;
+        let index = $el.data('product-index');
+        if (index === undefined || index === '') {
+          index = $el.index();
+        }
+        const slide = $('.swiper-slide').eq(index);
+        if (slide.length) return slide.data('product-handle');
+        return null;
+      }
+
       // Open drawer
       function openDrawer(productHandle) {
         currentProductHandle = productHandle;
@@ -2441,16 +2488,33 @@
         }
       }
 
-      // Event handlers
-      viewDetailsBtns.on('click', function(e) {
+      // Event handlers — delegation supports dynamically loaded products
+      $(document).on('click', '.view-details-btn', function(e) {
         e.preventDefault();
-        const slide = $(this).closest('.swiper-slide');
-        const productHandle = slide.data('product-handle');
-        
+        e.stopPropagation();
+        const productHandle = resolveProductHandle($(this).closest('.swiper-slide'));
         if (productHandle) {
           openDrawer(productHandle);
         } else {
-          alert('Product handle not found. Please add data-product-handle attribute.');
+          console.warn('Product handle not found for View button');
+        }
+      });
+
+      // Product card area — open the active (front-facing) slide's product
+      $(document).on('click', '[carousel="wrap"], .carousel_list, .carousel_item', function(e) {
+        if ($(e.target).closest('.view-details-btn, .carousel_arrow_link').length) return;
+        const activeSlide = $('.swiper-slide.swiper-slide-active');
+        const productHandle = resolveProductHandle(activeSlide);
+        if (productHandle) {
+          openDrawer(productHandle);
+        }
+      });
+
+      $(document).on('click', '.swiper-slide h2', function(e) {
+        e.preventDefault();
+        const productHandle = resolveProductHandle($(this).closest('.swiper-slide'));
+        if (productHandle) {
+          openDrawer(productHandle);
         }
       });
 
