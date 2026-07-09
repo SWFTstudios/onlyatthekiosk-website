@@ -920,6 +920,7 @@ body {
   height: 100svh;
   display: flex;
   position: relative;
+  overflow: visible;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -930,22 +931,17 @@ body {
   letter-spacing: .05em;
   text-transform: uppercase;
   transform-style: preserve-3d;
-  font-size: clamp(1.25rem, 6vw, 4rem);
+  font-size: 4rem;
   font-weight: 900;
   line-height: .8;
   position: relative;
   transform: translate3d(0, 0, 1px);
   transition: color 0.3s ease;
-  max-width: 100%;
-  text-wrap: balance;
-  text-align: center;
 }
 
 ._3d-text---wrap {
-  max-width: 100%;
-  padding: 0 1rem;
-  box-sizing: border-box;
-  overflow-x: clip;
+  perspective: 1200px;
+  overflow: visible;
 }
 
 ._3d-text.x-rotate-b {
