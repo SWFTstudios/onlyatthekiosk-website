@@ -921,6 +921,8 @@ body {
   display: flex;
   position: relative;
   overflow: visible;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -935,13 +937,30 @@ body {
   font-weight: 900;
   line-height: .8;
   position: relative;
-  transform: translate3d(0, 0, 1px);
+  transform: translate3d(0, 0, 2px);
   transition: color 0.3s ease;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 ._3d-text---wrap {
-  perspective: 1200px;
+  transform-style: preserve-3d;
   overflow: visible;
+}
+
+._3d-text > .text-block-2:first-child {
+  position: relative;
+  z-index: 2;
+  transform: translate3d(0, 0, 1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+._3d-text.x-rotate-b,
+._3d-text.x-rotate-k,
+._3d-text.x-bg {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 ._3d-text.x-rotate-b {
