@@ -405,7 +405,7 @@
       justify-content: flex-end;
       align-items: center;
       text-align: center;
-      padding: 1.5rem 2rem 5.5rem; /* room for fixed View button */
+      padding: 1.5rem 2rem calc(6.5rem + env(safe-area-inset-bottom, 0px)); /* room for fixed View button */
       position: relative;
       z-index: 10000;
       box-sizing: border-box;
@@ -429,6 +429,10 @@
       transition: color 0.3s ease;
       pointer-events: auto;
       cursor: pointer;
+    }
+
+    .swiper-slide {
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
     }
     
     /* Product title: orange in light mode */
@@ -539,8 +543,8 @@
       left: 50%;
       bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
       transform: translateX(-50%);
-      z-index: 10001;
-      pointer-events: auto;
+      z-index: 10005;
+      pointer-events: auto !important;
       padding: 0.75rem 2rem;
       background-color: transparent;
       color: var(--text-primary);
@@ -563,6 +567,8 @@
       text-wrap: balance;
       max-width: calc(100vw - 2rem);
       touch-action: manipulation;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .carousel-view-btn:hover {
@@ -1548,10 +1554,10 @@
       <a carousel="prev" href="#" class="carousel_arrow_link"></a>
       <a carousel="next" href="#" class="carousel_arrow_link is-right"></a>
     </div>
-  
-    <!-- Fixed View button — opens drawer for active product -->
-    <a href="#" id="carousel-view-btn" class="button carousel-view-btn" aria-label="View product details">View</a>
   </div>
+
+  <!-- Fixed View button — opens drawer for active product -->
+  <button type="button" id="carousel-view-btn" class="button carousel-view-btn" data-lenis-prevent aria-label="View product details">View</button>
 
   <!-- Product Drawer -->
   <div class="products_collection-drawer" id="product-drawer">
@@ -2534,6 +2540,7 @@
             $('#drawer-error').show().find('div').text('Failed to load product details. Please try again.');
           });
       }
+      window.openProductDrawer = openDrawer;
 
       // Close drawer
       function closeDrawer() {
@@ -2548,17 +2555,56 @@
       }
 
       // Event handlers — fixed View button opens active product drawer
-      $('#carousel-view-btn').on('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+      function getActiveProductHandle() {
         const activeSlide = $('.swiper-slide.swiper-slide-active');
-        const productHandle = resolveProductHandle(activeSlide);
+        if (activeSlide.length) {
+          const handle = resolveProductHandle(activeSlide);
+          if (handle) return handle;
+        }
+        if (window.collectionSwiper && typeof window.collectionSwiper.activeIndex === 'number') {
+          const slide = $('.swiper-slide').eq(window.collectionSwiper.activeIndex);
+          const handle = resolveProductHandle(slide);
+          if (handle) return handle;
+        }
+        return $('#carousel-view-btn').attr('data-product-handle') || null;
+      }
+
+      function activateViewButton(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const productHandle = getActiveProductHandle();
         if (productHandle) {
           openDrawer(productHandle);
         } else {
           console.warn('Product handle not found for active slide');
         }
+      }
+
+      let viewBtnTouchTs = 0;
+      $(document).on('touchend', '#carousel-view-btn', function(e) {
+        viewBtnTouchTs = Date.now();
+        activateViewButton(e);
       });
+      $(document).on('click', '#carousel-view-btn', function(e) {
+        if (Date.now() - viewBtnTouchTs < 600) return;
+        activateViewButton(e);
+      });
+
+      // Native fallback for iOS Safari when jQuery click synthesis fails
+      document.addEventListener('touchend', function(e) {
+        const btn = e.target && e.target.closest ? e.target.closest('#carousel-view-btn') : null;
+        if (!btn) return;
+        if (Date.now() - viewBtnTouchTs < 50) return;
+        viewBtnTouchTs = Date.now();
+        e.preventDefault();
+        const productHandle = btn.getAttribute('data-product-handle')
+          || (window.collectionSwiper && $('.swiper-slide').eq(window.collectionSwiper.activeIndex).data('product-handle'));
+        if (productHandle && typeof window.openProductDrawer === 'function') {
+          window.openProductDrawer(productHandle);
+        }
+      }, { passive: false, capture: true });
 
       // Product card area — open the active (front-facing) slide's product
       $(document).on('click', '[carousel="wrap"], .carousel_list, .carousel_item', function(e) {
