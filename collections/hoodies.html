@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title id="page-title">Hoodies - KIOSK</title>
   <meta name="description" content="Browse KIOSK hoodies. Everyday warmth, limited runs.">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes" name="viewport">
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" name="viewport">
   
   <!-- Swiper CSS (kept for carousel) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
@@ -87,6 +87,7 @@
       padding: 0;
       width: 100%;
       min-height: 100vh;
+      min-height: 100svh;
       overflow-x: hidden; /* Prevent horizontal scroll */
       overflow-y: auto; /* Allow vertical scrolling */
       position: relative; /* Allow normal document flow */
@@ -114,7 +115,7 @@
     }
     
     .collection-title-text {
-      font-size: 4rem;
+      font-size: clamp(1.75rem, 8vw, 4rem);
       font-weight: 700;
       color: var(--text-primary);
       text-align: center;
@@ -123,7 +124,8 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
       transition: color 0.3s ease;
-      white-space: nowrap;
+      text-wrap: balance;
+      max-width: 90vw;
     }
     
     /* Product title: orange in light mode */
@@ -164,6 +166,7 @@
       position: relative;
       width: 100%;
       min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -409,7 +412,8 @@
       margin-bottom: 0.75rem;
       color: var(--text-primary);
       line-height: 1.2;
-      white-space: nowrap; /* Prevent text wrapping */
+      text-wrap: balance;
+      max-width: 90vw; /* Prevent text wrapping */
       overflow: visible; /* Don't clip text */
       text-overflow: clip; /* Show full text */
       transition: color 0.3s ease;
@@ -499,7 +503,8 @@
       /* Touch-friendly button size */
       min-height: 44px;
       min-width: 44px;
-      white-space: nowrap;
+      text-wrap: balance;
+      max-width: 90vw;
     }
 
     .swiper-slide .button:hover,
@@ -874,7 +879,7 @@
     .products_drawer-more-collection {
       grid-column-gap: 1rem;
       grid-row-gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
       display: grid;
     }
 
@@ -1870,13 +1875,13 @@
       $(document).on('drawerOpen', function() {
         drawerOpen = true;
         // Lock scroll only when drawer is open
-        document.body.style.overflow = 'hidden';
+        if (window.KioskScrollLock) window.KioskScrollLock.lock();
       });
       
       $(document).on('drawerClose', function() {
         drawerOpen = false;
         // Re-enable scroll when drawer closes
-        document.body.style.overflow = '';
+        if (window.KioskScrollLock) window.KioskScrollLock.unlock();
       });
     });
     
@@ -2393,7 +2398,7 @@
         currentProductData = null; // Reset
         
         drawer.addClass('open');
-        $('body').css('overflow', 'hidden'); // Lock body scroll
+        if (window.KioskScrollLock) window.KioskScrollLock.lock();
         $(document).trigger('drawerOpen'); // Trigger event for scroll lock
         
         // Also trigger the native event
@@ -2427,7 +2432,7 @@
       // Close drawer
       function closeDrawer() {
         drawer.removeClass('open');
-        $('body').css('overflow', ''); // Unlock body scroll
+        if (window.KioskScrollLock) window.KioskScrollLock.unlock();
         $(document).trigger('drawerClose'); // Trigger event for scroll unlock
         
         // Also trigger the native event

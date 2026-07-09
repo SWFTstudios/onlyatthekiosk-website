@@ -1,6 +1,9 @@
 # Local dev secrets
 .dev.vars
 
+# Dependencies
+node_modules/
+
 # Large screenshot audit outputs (regenerate with npm run audit:mobile-screenshots)
 artifacts/screenshots/before/
 artifacts/screenshots/after/
