@@ -5,6 +5,9 @@
 (function () {
   'use strict';
 
+  const PREFIX = 'drawer';
+  const detail = () => window.KioskProductDetail;
+
   let isOpen = false;
   let tl = null;
   let enterEndTime = 0;
@@ -28,179 +31,13 @@
     return -width;
   }
 
-  function findCachedProduct(handle) {
-    return getProducts().find((p) => p.handle === handle) || null;
-  }
-
-  function formatPrice(product) {
-    const price = product.priceRange?.minVariantPrice;
-    if (!price) return '';
-    if (window.airtable && typeof window.airtable.formatPrice === 'function') {
-      return window.airtable.formatPrice(price.amount, price.currencyCode || 'USD');
-    }
-    return `${price.amount} ${price.currencyCode || ''}`.trim();
-  }
-
-  function getImages(product) {
-    if (product.images?.edges?.length) {
-      return product.images.edges.map(({ node }) => node);
-    }
-    if (Array.isArray(product.images)) {
-      return product.images;
-    }
-    return [];
-  }
-
-  function isAvailable(product) {
-    if (product.variants?.edges?.length) {
-      return product.variants.edges.some(({ node }) => node.availableForSale !== false);
-    }
-    if (Array.isArray(product.variants) && product.variants.length) {
-      return product.variants.some((v) => v.availableForSale !== false && v.available !== false);
-    }
-    return product.active !== false;
-  }
-
-  function setText(id, text) {
-    const el = $(id);
-    if (el) el.textContent = text || '';
-  }
-
-  function setHtml(id, html) {
-    const el = $(id);
-    if (el) el.innerHTML = html || '';
-  }
-
-  function resetAccordions() {
-    document.querySelectorAll('.products_description-item').forEach((item) => {
-      item.classList.remove('active');
-      const answer = item.querySelector('.products_description-answer');
-      if (answer) answer.style.display = 'none';
-    });
-    const descItem = document.querySelector('.products_description-item');
-    if (descItem) {
-      descItem.classList.add('active');
-      const answer = descItem.querySelector('.products_description-answer');
-      if (answer) answer.style.display = 'block';
-    }
-  }
-
-  function populateDrawer(product) {
-    currentProduct = product;
-    setText('drawer-product-title', product.title);
-    setText('drawer-product-price', formatPrice(product));
-
-    const images = getImages(product);
-    const mainImg = $('drawer-main-image');
-    if (mainImg && images.length) {
-      mainImg.src = images[0].url;
-      mainImg.alt = images[0].altText || product.title;
-    }
-
-    const gallery = $('drawer-gallery');
-    if (gallery) {
-      gallery.innerHTML = '';
-      images.slice(1).forEach((image) => {
-        const item = document.createElement('div');
-        item.className = 'products_drawer-more-item';
-        const img = document.createElement('img');
-        img.className = 'products_drawer-more-image';
-        img.loading = 'lazy';
-        img.src = image.url;
-        img.alt = image.altText || product.title;
-        img.addEventListener('click', () => {
-          if (mainImg) {
-            mainImg.src = image.url;
-            mainImg.alt = image.altText || product.title;
-          }
-        });
-        item.appendChild(img);
-        gallery.appendChild(item);
-      });
-    }
-
-    const description = product.descriptionHtml || product.description;
-    setHtml('drawer-description', description || '<p>No description available.</p>');
-
-    const care = product.careInstructions
-      || product.metafields?.find?.((m) => m.key === 'care_instructions')?.value;
-    setHtml('drawer-care-instructions', care || '<p>Hand wash cold. Lay flat to dry. Do not bleach.</p>');
-
-    const delivery = product.delivery
-      || product.metafields?.find?.((m) => m.key === 'delivery')?.value
-      || '<p>Standard shipping 5–7 business days. Free EU shipping on qualifying orders. Track your order at checkout.</p>';
-    setHtml('drawer-delivery', delivery);
-
-    const outOfStock = $('drawer-out-of-stock');
-    const addBtn = $('drawer-add-to-cart');
-    const available = isAvailable(product);
-    if (outOfStock) outOfStock.style.display = available ? 'none' : 'block';
-    if (addBtn) addBtn.disabled = !available;
-
-    const err = $('drawer-error');
-    if (err) err.style.display = 'none';
-
-    const qty = $('drawer-quantity');
-    if (qty) qty.value = '1';
-
-    resetAccordions();
-  }
-
-  function populatePlaceholderDrawer(data) {
-    currentProduct = null;
-    setText('drawer-product-title', data.title);
-    setText('drawer-product-price', `${data.price.amount} ${data.price.currencyCode}`);
-
-    const mainImg = $('drawer-main-image');
-    if (mainImg) {
-      mainImg.src = data.mainImage;
-      mainImg.alt = data.title;
-    }
-
-    const gallery = $('drawer-gallery');
-    if (gallery) {
-      gallery.innerHTML = '';
-      (data.gallery || []).forEach((url, index) => {
-        const item = document.createElement('div');
-        item.className = 'products_drawer-more-item';
-        const img = document.createElement('img');
-        img.className = 'products_drawer-more-image';
-        img.loading = 'lazy';
-        img.src = url;
-        img.alt = `${data.title} - Image ${index + 2}`;
-        img.addEventListener('click', () => {
-          if (mainImg) {
-            mainImg.src = url;
-            mainImg.alt = `${data.title} - Image ${index + 2}`;
-          }
-        });
-        item.appendChild(img);
-        gallery.appendChild(item);
-      });
-    }
-
-    setHtml('drawer-description', data.description || '');
-    setHtml('drawer-care-instructions', data.careInstructions || '');
-    setHtml('drawer-delivery', data.delivery || '<p>Shipping details provided at checkout.</p>');
-
-    const outOfStock = $('drawer-out-of-stock');
-    const addBtn = $('drawer-add-to-cart');
-    if (outOfStock) outOfStock.style.display = 'none';
-    if (addBtn) addBtn.disabled = false;
-
-    const err = $('drawer-error');
-    if (err) err.style.display = 'none';
-
-    resetAccordions();
-  }
-
   function showLoading(show) {
     if (loadingEl) loadingEl.classList.toggle('is-visible', show);
     if (contentEl) contentEl.classList.toggle('is-loading', show);
   }
 
   function showError(message) {
-    const err = $('drawer-error');
+    const err = detail().getEl(PREFIX, 'error');
     if (err) {
       err.style.display = 'block';
       const inner = err.querySelector('div');
@@ -208,53 +45,20 @@
     }
   }
 
-  async function fetchProduct(handle) {
-    const cached = findCachedProduct(handle);
-    if (cached) return cached;
-
-    if (window.airtable) {
-      try {
-        const product = await window.airtable.getProductByHandle(handle);
-        if (product) return product;
-      } catch (error) {
-        console.warn(`Airtable fetch failed for "${handle}", trying placeholder`, error);
-      }
-    }
-
-    if (typeof getPlaceholder === 'function') {
-      const placeholder = getPlaceholder(handle);
-      if (placeholder) return placeholderToProduct(placeholder, handle);
-    }
-
-    throw new Error(`Product "${handle}" not found`);
+  function populateDrawer(product) {
+    currentProduct = product;
+    const root = drawerEl;
+    detail().populate(PREFIX, product, { root });
+    detail().bindAccordions(root);
   }
 
-  function placeholderToProduct(data, handle) {
-    const images = [data.mainImage, ...(data.gallery || [])].filter(Boolean);
-    return {
-      title: data.title || 'Product',
-      handle: handle || '',
-      description: data.description || '',
-      descriptionHtml: data.description || '',
-      careInstructions: data.careInstructions || '',
-      delivery: data.delivery || '',
-      priceRange: {
-        minVariantPrice: {
-          amount: data.price?.amount || '0',
-          currencyCode: data.price?.currencyCode || 'USD',
-        },
-      },
-      images: {
-        edges: images.map((url, index) => ({
-          node: {
-            url,
-            altText: index === 0 ? data.title : `${data.title} ${index + 1}`,
-          },
-        })),
-      },
-      variants: { edges: [{ node: { availableForSale: true } }] },
-      active: true,
-    };
+  function populatePlaceholderDrawer(data, handle) {
+    currentProduct = null;
+    populateDrawer(detail().placeholderToProduct(data, handle));
+  }
+
+  async function fetchProduct(handle) {
+    return detail().fetchProduct(handle, { getProducts, getPlaceholder });
   }
 
   function pauseLenis() {
@@ -351,12 +155,12 @@
     pauseLenis();
 
     if (productHandle.startsWith('product-handle-') && typeof getPlaceholder === 'function') {
-      populateDrawer(placeholderToProduct(getPlaceholder(productHandle), productHandle));
+      populatePlaceholderDrawer(getPlaceholder(productHandle), productHandle);
       animateOpen();
       return;
     }
 
-    const cached = findCachedProduct(productHandle);
+    const cached = getProducts().find((p) => p.handle === productHandle);
     if (cached) {
       populateDrawer(cached);
       showLoading(false);
@@ -364,11 +168,10 @@
       return;
     }
 
-    // Use manifest placeholder immediately when offline / no Airtable
     if (typeof getPlaceholder === 'function') {
       const placeholder = getPlaceholder(productHandle);
       if (placeholder && placeholder.title && placeholder.title !== 'Product') {
-        populateDrawer(placeholderToProduct(placeholder, productHandle));
+        populateDrawer(detail().placeholderToProduct(placeholder, productHandle));
         showLoading(false);
         animateOpen();
         return;
@@ -389,7 +192,7 @@
         if (typeof getPlaceholder === 'function') {
           const placeholder = getPlaceholder(productHandle);
           if (placeholder) {
-            populateDrawer(placeholderToProduct(placeholder, productHandle));
+            populateDrawer(detail().placeholderToProduct(placeholder, productHandle));
             showLoading(false);
             return;
           }
@@ -483,53 +286,18 @@
       if (e.key === 'Escape' && isOpen) closeDrawer();
     });
 
-    document.querySelectorAll('.products_description-question').forEach((question) => {
-      question.addEventListener('click', () => {
-        const item = question.closest('.products_description-item');
-        if (!item) return;
-        const wasActive = item.classList.contains('active');
-        document.querySelectorAll('.products_description-item').forEach((i) => {
-          i.classList.remove('active');
-          const answer = i.querySelector('.products_description-answer');
-          if (answer) answer.style.display = 'none';
-        });
-        if (!wasActive) {
-          item.classList.add('active');
-          const answer = item.querySelector('.products_description-answer');
-          if (answer) answer.style.display = 'block';
-        }
-      });
-    });
+    detail().bindAccordions(drawerEl);
 
-    const addBtn = $('drawer-add-to-cart');
-    if (addBtn) {
-      addBtn.addEventListener('click', async () => {
-        addBtn.disabled = true;
-        const original = addBtn.textContent;
-        addBtn.textContent = 'Adding...';
-        try {
-          let product = currentProduct;
-          if (!product && currentHandle) {
-            product = await fetchProduct(currentHandle);
-            currentProduct = product;
-          }
-          if (!product) throw new Error('No product loaded');
-          console.log('Add to cart:', product.title);
-          addBtn.textContent = 'Added!';
-          setTimeout(() => {
-            addBtn.textContent = original;
-            addBtn.disabled = !isAvailable(product);
-          }, 2000);
-        } catch (err) {
-          console.error(err);
-          addBtn.textContent = 'Error';
-          setTimeout(() => {
-            addBtn.textContent = original;
-            addBtn.disabled = false;
-          }, 2000);
-        }
-      });
-    }
+    const addBtn = detail().getEl(PREFIX, 'add-to-cart');
+    const qtyEl = detail().getEl(PREFIX, 'quantity');
+    detail().bindAddToCart(addBtn, async () => {
+      if (currentProduct) return currentProduct;
+      if (currentHandle) {
+        currentProduct = await fetchProduct(currentHandle);
+        return currentProduct;
+      }
+      return null;
+    }, { quantityEl: qtyEl });
 
     window.addEventListener('resize', () => {
       if (isOpen && tl) {
@@ -542,6 +310,11 @@
   function init(options = {}) {
     if (typeof gsap === 'undefined') {
       console.warn('GSAP not loaded — product drawer animation disabled');
+    }
+
+    if (!window.KioskProductDetail) {
+      console.warn('KioskProductDetail not loaded — product drawer disabled');
+      return;
     }
 
     drawerEl = $('product-drawer');

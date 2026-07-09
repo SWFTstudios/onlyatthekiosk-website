@@ -20,6 +20,10 @@
     }).format(num);
   }
 
+  function productHref(handle) {
+    return `/products/${handle}`;
+  }
+
   function collectionHref(product) {
     const handle = product.handle || '';
     if (handle.includes('-hoodie')) return 'collections/hoodies.html';
@@ -111,7 +115,7 @@
 
   function renderFeaturedCard(product, index) {
     const images = getImagePair(product, product.handle);
-    const href = collectionHref(product);
+    const href = productHref(product.handle);
     const priceText = formatPrice(product.price);
     const spinnerHtml = index === 0
       ? `<img loading="lazy" src="/images/buy-spinner.svg" alt="" class="buy-spinner_first">

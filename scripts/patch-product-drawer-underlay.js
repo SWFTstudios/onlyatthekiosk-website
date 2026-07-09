@@ -34,6 +34,7 @@ const DRAWER_BLOCK = `  <!-- Product Drawer Overlay -->
         <div class="products_drawer-title" data-drawer-reveal>
           <h3 id="drawer-product-title"></h3>
           <h3 id="drawer-product-price"></h3>
+          <a class="product-detail__full-link" id="drawer-full-link" href="#" hidden>Full details →</a>
         </div>
 
         <div class="products_drawer-content" data-drawer-reveal>
