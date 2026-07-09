@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Product — KIOSK</title>
+  <meta name="description" content="Shop KIOSK essentials — limited-run wardrobe staples, chains, and curated finds.">
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" name="viewport">
+  <link href="css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="css/components.css" rel="stylesheet" type="text/css">
+  <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
+  <link href="css/underlay-nav.css" rel="stylesheet" type="text/css">
+  <link href="css/product-detail.css" rel="stylesheet" type="text/css">
+  <link href="css/webflow.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
+  <script type="text/javascript">!function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);</script>
+  <link href="images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
+  <link href="images/webclip.jpg" rel="apple-touch-icon">
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body class="body">
+  <!-- NAV:BEGIN -->
+<div class="underlay-nav">
+  <header class="underlay-nav__header">
+    <div class="underlay-nav__bar">
+      <div class="underlay-nav__container">
+        <a href="index.html" class="underlay-nav__logo brand-wrapper">
+          <span class="special-k">K</span>IOSK
+        </a>
+        <div class="underlay-nav__actions">
+          <button class="underlay-nav__theme-toggle navbar-theme-toggle" aria-label="Toggle theme" type="button">
+            <span class="navbar-theme-toggle-slider">
+              <svg class="navbar-theme-icon sun" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                <path d="M8 1V3M8 13V15M15 8H13M3 8H1M13.657 2.343L12.243 3.757M3.757 12.243L2.343 13.657M13.657 13.657L12.243 12.243M3.757 3.757L2.343 2.343" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <svg class="navbar-theme-icon moon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M13.5 8C13.5 11.5899 10.5899 14.5 7 14.5C5.5 14.5 4.1 14 3 13.1C3.3 12.9 3.6 12.6 3.8 12.3C4.1 12.4 4.4 12.5 4.7 12.5C7.26142 12.5 9.5 10.2614 9.5 7.7C9.5 5.13858 7.26142 3 4.7 3C4.4 3 4.1 3.1 3.8 3.2C3.6 2.9 3.3 2.6 3 2.4C4.1 1.5 5.5 1 7 1C10.5899 1 13.5 3.91015 13.5 7.5V8Z" fill="currentColor"/>
+              </svg>
+            </span>
+          </button>
+          <button data-underlay-nav-toggle type="button" aria-expanded="false" aria-label="open menu" class="underlay-nav__toggle">
+            <span class="underlay-nav__toggle-text">
+              <span class="underlay-nav__toggle-label">Menu</span>
+              <span class="underlay-nav__toggle-label">Close</span>
+            </span>
+            <span class="underlay-nav__toggle-icon" aria-hidden="true">
+              <span class="underlay-nav__toggle-bar"></span>
+              <span class="underlay-nav__toggle-bar"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <nav data-underlay-nav-menu class="underlay-nav__menu" aria-label="Main navigation">
+    <div class="underlay-nav__inner">
+      <ul class="underlay-nav__list underlay-nav__list--primary">
+        <li data-reveal-l><a href="index.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Home</span></a></li>
+        <li data-reveal-l><a href="store.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Shop</span></a></li>
+        <li data-reveal-l><a href="media.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Media</span></a></li>
+      </ul>
+      <ul class="underlay-nav__list underlay-nav__list--categories">
+        <li data-reveal-l><a href="collections/t-shirts.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Essential Tees</span></a></li>
+        <li data-reveal-l><a href="collections/hoodies.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Hoodies</span></a></li>
+        <li data-reveal-l><a href="collections/chains.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Chains</span></a></li>
+        <li data-reveal-l><a href="collections/bracelets.html" class="underlay-nav__link-large"><span class="underlay-nav__link-label">Bracelets</span></a></li>
+      </ul>
+      <div class="underlay-nav__bottom">
+        <div class="underlay-nav__bottom-col">
+          <div data-reveal-s><span class="underlay-nav__link-small is--faded">Socials</span></div>
+          <ul class="underlay-nav__list is--small">
+            <li data-reveal-s><a href="https://www.instagram.com/onlyatthekiosk" class="underlay-nav__link-small" rel="noopener noreferrer" target="_blank">Instagram</a></li>
+            <li data-reveal-s><a href="https://www.facebook.com/onlyatthekiosk" class="underlay-nav__link-small" rel="noopener noreferrer" target="_blank">Facebook</a></li>
+            <li data-reveal-s><a href="https://www.linkedin.com/company/onlyatthekiosk" class="underlay-nav__link-small" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+        <div class="underlay-nav__bottom-col">
+          <div data-reveal-s><span class="underlay-nav__link-small is--faded">Quick Links</span></div>
+          <ul class="underlay-nav__list is--small">
+            <li data-reveal-s><a href="about.html" class="underlay-nav__link-small">About</a></li>
+            <li data-reveal-s><a href="contact.html" class="underlay-nav__link-small">Contact</a></li>
+            <li data-reveal-s><a href="faq.html" class="underlay-nav__link-small">FAQ</a></li>
+            <li data-reveal-s><a href="members.html" class="underlay-nav__link-small">KIOSK Members</a></li>
+          </ul>
+        </div>
+        <div class="underlay-nav__bottom-border" aria-hidden="true"></div>
+      </div>
+    </div>
+  </nav>
+  <div data-underlay-nav-overlay class="underlay-nav__overlay" aria-hidden="true">
+    <div class="underlay-nav__dark"></div>
+    <div class="underlay-nav__borders">
+      <div class="underlay-nav__border-row">
+        <div class="underlay-nav__border"></div>
+        <div class="underlay-nav__corner"></div>
+      </div>
+      <div class="underlay-nav__border-row">
+        <div class="underlay-nav__corner is--bottom"></div>
+        <div class="underlay-nav__border"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- NAV:END -->
+
+  <!-- MAIN:BEGIN -->
+  <main data-main class="product-page is-interior">
+    <div class="product-page__inner">
+      <nav class="product-page__breadcrumb" id="pdp-breadcrumb" aria-label="Breadcrumb">
+        <a href="store.html">Shop</a>
+      </nav>
+
+      <div class="product-detail__loading" id="pdp-loading">
+        <div class="product-drawer__spinner"></div>
+        <p>Loading product...</p>
+      </div>
+
+      <div class="product-detail__error" id="pdp-not-found" hidden>
+        <p id="pdp-not-found-message">Product not found.</p>
+        <a href="store.html" class="button-secondary" style="width: auto; display: inline-flex;">Back to Shop</a>
+      </div>
+
+      <div class="product-detail__layout" id="pdp-content" hidden>
+        <div class="product-detail__gallery">
+          <div class="swiper product-detail__swiper" id="pdp-gallery-swiper">
+            <div class="swiper-wrapper" id="pdp-gallery-slides"></div>
+            <div class="swiper-pagination"></div>
+          </div>
+          <img src="" alt="" class="products_drawer-main-image" id="pdp-main-image" hidden>
+          <div class="product-detail__thumbs" id="pdp-gallery-thumbs"></div>
+        </div>
+
+        <div class="product-detail__info">
+          <header class="product-detail__header">
+            <h1 id="pdp-product-title"></h1>
+            <p class="product-detail__price" id="pdp-product-price"></p>
+          </header>
+
+          <div class="products_text-top product-detail__actions-inline">
+            <div class="products_quantity-wrapper">
+              <div class="margin-bottom margin-xsmall">
+                <h4 class="uppercase">qty</h4>
+              </div>
+              <input type="number" pattern="^[0-9]+$" inputmode="numeric" id="pdp-quantity" name="quantity" min="1" class="products_quantity" value="1" aria-label="Quantity">
+            </div>
+            <button id="pdp-add-to-cart" class="button-secondary" type="button">Add to Cart</button>
+            <div style="display:none" class="products_out-of-stock" id="pdp-out-of-stock">
+              <div>Sold out.</div>
+            </div>
+            <div style="display:none" class="products_error" id="pdp-error">
+              <div>Error loading product details.</div>
+            </div>
+          </div>
+
+          <div class="products_text-bottom">
+            <div class="margin-bottom margin-medium">
+              <h4 class="uppercase">product info</h4>
+            </div>
+
+            <div class="products_description-item">
+              <div class="products_description-question" role="button" tabindex="0" aria-expanded="true">
+                <div class="products_description-left">
+                  <span class="products_description-icon" aria-hidden="true">📄</span>
+                  <p>Description</p>
+                </div>
+                <span class="product_description-plus" aria-hidden="true">+</span>
+              </div>
+              <div class="products_description-answer">
+                <div class="paragraph" id="pdp-description"></div>
+              </div>
+            </div>
+
+            <div class="products_description-item">
+              <div class="products_description-question" role="button" tabindex="0" aria-expanded="false">
+                <div class="products_description-left">
+                  <span class="products_description-icon" aria-hidden="true">ℹ️</span>
+                  <p>Care Instructions</p>
+                </div>
+                <span class="product_description-plus" aria-hidden="true">+</span>
+              </div>
+              <div class="products_description-answer" style="display:none;">
+                <div class="paragraph" id="pdp-care-instructions"></div>
+              </div>
+            </div>
+
+            <div class="products_description-item">
+              <div class="products_description-question" role="button" tabindex="0" aria-expanded="false">
+                <div class="products_description-left">
+                  <span class="products_description-icon" aria-hidden="true">🚚</span>
+                  <p>Delivery</p>
+                </div>
+                <span class="product_description-plus" aria-hidden="true">+</span>
+              </div>
+              <div class="products_description-answer" style="display:none;">
+                <p id="pdp-delivery"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-detail__sticky-bar" id="pdp-sticky-bar" hidden>
+      <span class="product-detail__sticky-price" id="pdp-sticky-price"></span>
+      <button id="pdp-sticky-add-to-cart" class="button-secondary" type="button">Add to Cart</button>
+    </div>
+  </main>
+  <!-- MAIN:END -->
+
+  <footer class="footer">
+    <div class="footer-column">
+      <h3 class="footer-heading">Help</h3>
+      <a href="contact.html" class="footer-link">Contact Us</a>
+      <a href="shipping-returns.html" class="footer-link">Shipping Returns</a>
+      <a href="privacy-cookies.html" class="footer-link">Privacy &amp; Cookies</a>
+      <a href="terms-conditions.html" class="footer-link">Terms &amp; Conditions</a>
+      <a href="faq.html" class="footer-link">FAQ</a>
+      <a href="do-not-sell.html" class="footer-link">Do not sell my personal information</a>
+    </div>
+    <div class="footer-column">
+      <h3 class="footer-heading">KIOSK<br></h3>
+      <a href="about.html" class="footer-link">About Us</a>
+      <a href="shop-tshirts-hoodies.html" class="footer-link">Shop Essentials &amp; Hoodies</a>
+      <a href="shop-bracelets-chains.html" class="footer-link">Shop Chains &amp; Accessories</a>
+      <a href="members.html" class="footer-link">KIOSK Members</a>
+    </div>
+    <div class="footer-column">
+      <h3 class="footer-heading">Social</h3>
+      <a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer" class="footer-link">Instagram</a>
+      <a href="https://www.facebook.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer" class="footer-link">Facebook</a>
+      <a href="https://www.linkedin.com/company/onlyatthekiosk" target="_blank" rel="noopener noreferrer" class="footer-link">Linkedin</a>
+    </div>
+    <div class="footer-column is-newsletter">
+      <h4 class="footer-heading">Stay in the loop</h4>
+      <div class="newsletter-block w-form">
+        <form id="newsletter" name="wf-form-Newsletter-Form" data-name="Newsletter Form" method="get" class="newsletter-form"><input class="newsletter-email w-input" maxlength="256" name="email" data-name="Email" placeholder="Your email" type="email" required=""><input type="submit" data-wait="Please wait..." class="btn btn-primary newsletter-submit w-button" value="Subscribe"></form>
+      </div>
+    </div>
+    <div class="footer-logo"><img src="images/KiosK-BOX-Logo-NO-BG.jpg" loading="lazy" alt="KIOSK"></div>
+    <a href="media.html" class="btn btn-accent footer-button w-button">MEDIA</a>
+  </footer>
+
+  <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=68cc5218804d49fba2fc73a1" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  <script src="js/webflow.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
+  <script src="js/config.js" type="text/javascript"></script>
+  <script src="js/product-image-manifest.js" type="text/javascript"></script>
+  <script src="js/airtable.js" type="text/javascript"></script>
+  <script src="js/cart.js" type="text/javascript"></script>
+  <script src="js/product-detail.js" type="text/javascript"></script>
+  <script src="js/product-page.js" type="text/javascript"></script>
+  <script src="js/underlay-nav.js" type="text/javascript"></script>
+</body>
+</html>
