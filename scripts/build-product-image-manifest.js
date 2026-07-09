@@ -34,6 +34,10 @@ function parseProductsFromCsv(csvContent) {
 
 function buildManifestEntry(handle, title) {
   const prompts = buildPrompts(handle, title);
+  const heroFilename = `${handle}-hero.webp`;
+  const detail1 = `${handle}-detail-1.webp`;
+  const detail2 = `${handle}-detail-2.webp`;
+  const detail3 = `${handle}-detail-3.webp`;
   const productFilename = `${handle}-product.webp`;
   const lifestyleFilename = `${handle}-lifestyle.webp`;
 
@@ -45,10 +49,15 @@ function buildManifestEntry(handle, title) {
     collection: prompts.collection,
     productPrompt: prompts.productPrompt,
     lifestylePrompt: prompts.lifestylePrompt,
+    heroPath: `/images/products/${heroFilename}`,
+    detail1Path: `/images/products/${detail1}`,
+    detail2Path: `/images/products/${detail2}`,
+    detail3Path: `/images/products/${detail3}`,
     productPath: `/images/products/${productFilename}`,
     lifestylePath: `/images/products/${lifestyleFilename}`,
     productAlt: `${title} product shot`,
     lifestyleAlt: `${title} lifestyle`,
+    heroAlt: `${title} lifestyle hero`,
     status: 'pending',
   };
 }

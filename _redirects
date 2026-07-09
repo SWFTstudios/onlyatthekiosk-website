@@ -1,0 +1,4 @@
+/products/:handle  /product.html  200
+/collections/hoodies.html  /collections/tops.html?type=hoodie  302
+/collections/t-shirts.html  /collections/tops.html?type=tee  302
+/shop-tshirts-hoodies.html  /collections/tops.html  302

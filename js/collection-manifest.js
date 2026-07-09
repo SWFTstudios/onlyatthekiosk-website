@@ -6,7 +6,7 @@
   function getCollectionKeyFromPath() {
     const parts = window.location.pathname.split('/');
     const page = parts[parts.length - 1].replace('.html', '');
-    const valid = ['chains', 'bracelets', 'hoodies', 't-shirts'];
+    const valid = ['chains', 'bracelets', 'hoodies', 't-shirts', 'tops'];
     return valid.includes(page) ? page : null;
   }
 

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title id="page-title">{{TITLE}} — KIOSK</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes" name="viewport">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <link href="../css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="../css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
+  <link href="../css/underlay-nav.css" rel="stylesheet" type="text/css">
+  <link href="../css/collection.css" rel="stylesheet" type="text/css">
+  <link href="../css/webflow.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.15/dist/lenis.css">
+  <link href="../images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
+  <script>
+    (function() {
+      try {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <!-- NAV:BEGIN -->
+  <!-- NAV:END -->
+
+  <div class="collection-page" data-collection="{{HANDLE}}" data-view="carousel">
+    <div id="collection-title" class="collection-title">
+      <h1 class="collection-title-text">{{TITLE}}</h1>
+    </div>
+
+    <div id="collection-toolbar-host"></div>
+
+    <div id="collection-list" class="collection-list" role="list" aria-label="Product list"></div>
+
+    <div carousel="component" class="carousel_component">
+      <div carousel="wrap" class="carousel_wrap">
+        <div class="carousel_list">
+          {{CAROUSEL_ITEMS}}
+        </div>
+      </div>
+      <div fade-up="" class="swiper">
+        <div class="swiper-wrapper">
+          {{SWIPER_SLIDES}}
+        </div>
+      </div>
+      <div fade-up="" class="carousel_arrow_wrap">
+        <a carousel="prev" href="#" class="carousel_arrow_link" aria-label="Previous product"></a>
+        <a carousel="next" href="#" class="carousel_arrow_link is-right" aria-label="Next product"></a>
+      </div>
+    </div>
+
+    <div class="products_collection-drawer" id="product-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-product-title">
+      <div class="products_drawer-close" id="drawer-close-overlay"></div>
+      <div class="products_drawer-wrapper">
+        <button class="products_drawer-close-icon" id="drawer-close-btn" aria-label="Close drawer" type="button">×</button>
+        <div class="products_drawer-title">
+          <h3 id="drawer-product-title"></h3>
+          <h3 id="drawer-product-price"></h3>
+        </div>
+        <div class="products_drawer-content">
+          <div class="products_drawer-images">
+            <img src="" loading="lazy" alt="" class="products_drawer-main-image" id="drawer-main-image">
+            <div class="products_drawer-more-collection" id="drawer-gallery"></div>
+          </div>
+          <div class="products_drawer-text">
+            <div class="products_text-top">
+              <div id="drawer-size-container"></div>
+              <div class="products_quantity-wrapper">
+                <div class="margin-bottom margin-xsmall"><h4 class="uppercase">qty</h4></div>
+                <input type="number" id="drawer-quantity" name="quantity" min="1" class="products_quantity" value="1" inputmode="numeric">
+              </div>
+              <button id="drawer-add-to-cart" class="button-secondary" type="button">Add to Cart</button>
+              <a href="#" id="drawer-full-details" class="drawer-full-details">View full details</a>
+              <div style="display:none" class="products_out-of-stock" id="drawer-out-of-stock"><div>Sold out.</div></div>
+              <div style="display:none" class="products_error" id="drawer-error"><div>Error loading product details.</div></div>
+            </div>
+            <div class="products_text-bottom">
+              <div class="margin-bottom margin-medium"><h4 class="uppercase">product info</h4></div>
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left"><span class="products_description-icon">📄</span><p>Description</p></div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;"><div class="paragraph" id="drawer-description"></div></div>
+              </div>
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left"><span class="products_description-icon">ℹ️</span><p>Care Instructions</p></div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;"><div class="paragraph" id="drawer-care-instructions"></div></div>
+              </div>
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left"><span class="products_description-icon">🚚</span><p>Delivery</p></div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;"><p id="drawer-delivery"></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-loading" id="drawer-loading" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p>Loading product details...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.3.15/dist/lenis.min.js"></script>
+  <script src="../js/webflow.js"></script>
+  <script src="../js/lenis.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/product-image-manifest.js"></script>
+  <script src="../js/collection-manifest.js"></script>
+  <script src="../js/airtable.js"></script>
+  <script src="../js/shopify.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/collection-config.js"></script>
+  <script src="../js/product-catalog-data.js"></script>
+  <script src="../js/product-catalog.js"></script>
+  <script src="../js/collection-carousel.js"></script>
+  <script src="../js/collection-list.js"></script>
+  <script src="../js/collection-view.js"></script>
+  <script src="../js/product-drawer.js"></script>
+  <script src="../js/collection-page.js"></script>
+  <script src="../js/underlay-nav.js"></script>
+</body>
+</html>

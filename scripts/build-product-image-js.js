@@ -14,8 +14,13 @@ const OUT_PATH = path.join(ROOT, 'js', 'product-image-manifest.js');
 
 function buildCollectionHandles(manifest) {
   const collections = {};
+  const JEWELRY_MAX = 6;
 
   for (const [handle, entry] of Object.entries(manifest)) {
+    const num = parseInt(entry.number, 10);
+    if ((entry.collection === 'chains' || entry.collection === 'bracelets') && num > JEWELRY_MAX) {
+      continue;
+    }
     const col = entry.collection;
     if (!collections[col]) collections[col] = [];
     collections[col].push({ handle, number: entry.number, variant: entry.variant });
@@ -29,6 +34,10 @@ function buildCollectionHandles(manifest) {
     collections[col] = collections[col].map((item) => item.handle);
   }
 
+  if (collections.hoodies && collections['t-shirts']) {
+    collections.tops = [...collections.hoodies, ...collections['t-shirts']];
+  }
+
   return collections;
 }
 
@@ -39,11 +48,16 @@ function main() {
 
   for (const [handle, entry] of Object.entries(manifest)) {
     images[handle] = {
-      product: entry.productPath,
-      lifestyle: entry.lifestylePath,
+      product: entry.productPath || entry.heroPath,
+      lifestyle: entry.lifestylePath || entry.heroPath,
+      hero: entry.heroPath || entry.lifestylePath || entry.productPath,
+      detail1: entry.detail1Path || entry.productPath,
+      detail2: entry.detail2Path || entry.lifestylePath,
+      detail3: entry.detail3Path || entry.productPath,
       title: entry.title,
       productAlt: entry.productAlt,
       lifestyleAlt: entry.lifestyleAlt,
+      heroAlt: entry.heroAlt || entry.lifestyleAlt,
     };
   }
 
@@ -110,8 +124,13 @@ function getProductImagesByHandle(handle) {
   return {
     product: entry.product,
     lifestyle: entry.lifestyle,
+    hero: entry.hero || entry.lifestyle || entry.product,
+    detail1: entry.detail1 || entry.product,
+    detail2: entry.detail2 || entry.lifestyle,
+    detail3: entry.detail3 || entry.product,
     productAlt: entry.productAlt,
     lifestyleAlt: entry.lifestyleAlt,
+    heroAlt: entry.heroAlt || entry.lifestyleAlt,
     title: entry.title,
   };
 }

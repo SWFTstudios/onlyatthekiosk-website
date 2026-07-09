@@ -22,13 +22,13 @@
 
   function collectionHref(product) {
     const handle = product.handle || '';
-    if (handle.includes('-hoodie')) return 'collections/hoodies.html';
-    if (handle.includes('-tshirt')) return 'collections/t-shirts.html';
+    if (handle.includes('-hoodie') || handle.includes('-tshirt')) return 'collections/tops.html';
     if (handle.includes('-bracelet')) return 'collections/bracelets.html';
     if (handle.includes('-chain')) return 'collections/chains.html';
     const collection = (product.collection || '').toLowerCase();
-    if (collection.includes('hoodie')) return 'collections/hoodies.html';
-    if (collection.includes('t-shirt') || collection.includes('tshirt')) return 'collections/t-shirts.html';
+    if (collection.includes('hoodie') || collection.includes('t-shirt') || collection.includes('tshirt')) {
+      return 'collections/tops.html';
+    }
     if (collection.includes('bracelet')) return 'collections/bracelets.html';
     if (collection.includes('chain')) return 'collections/chains.html';
     return 'store.html';
