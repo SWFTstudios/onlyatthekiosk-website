@@ -405,7 +405,7 @@
       justify-content: flex-end;
       align-items: center;
       text-align: center;
-      padding: 1.5rem 2rem 6rem;
+      padding: 1.5rem 2rem 5.5rem; /* room for fixed View button */
       position: relative;
       z-index: 10000;
       box-sizing: border-box;
@@ -532,7 +532,64 @@
       }
     }
 
-    /* Navigation Arrows — vertical up/down */
+    
+    /* Fixed View button at bottom of screen */
+    .carousel-view-btn {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      z-index: 10001;
+      pointer-events: auto;
+      padding: 0.75rem 2rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--text-primary);
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 44px;
+      min-width: 120px;
+      text-wrap: balance;
+      max-width: calc(100vw - 2rem);
+      touch-action: manipulation;
+    }
+
+    .carousel-view-btn:hover {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
+      transform: translateX(-50%) scale(1.02);
+    }
+
+    .carousel-view-btn:active {
+      transform: translateX(-50%) scale(0.98);
+    }
+
+    @media screen and (max-width: 767px) {
+      .carousel-view-btn {
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        padding: 0.625rem 1.75rem;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Per-slide View buttons replaced by fixed button */
+    .swiper-slide .view-details-btn {
+      display: none !important;
+    }
+
+/* Navigation Arrows — vertical up/down */
     .carousel_arrow_wrap {
       display: flex;
       flex-direction: column;
@@ -1437,67 +1494,51 @@
         <!-- Add data-product-handle attribute with your Shopify product handle -->
         <div class="swiper-slide" data-product-handle="product-handle-1">
           <h2>Product 001</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-2">
           <h2>Product 002</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-3">
           <h2>Product 003</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-4">
           <h2>Product 004</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-5">
           <h2>Product 005</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-6">
           <h2>Product 006</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-7">
           <h2>Product 007</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-8">
           <h2>Product 008</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-9">
           <h2>Product 009</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-10">
           <h2>Product 010</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-11">
           <h2>Product 011</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-12">
           <h2>Product 012</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-13">
           <h2>Product 013</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-14">
           <h2>Product 014</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-15">
           <h2>Product 015</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-16">
           <h2>Product 016</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
       </div>
     </div>
@@ -1507,6 +1548,9 @@
       <a carousel="prev" href="#" class="carousel_arrow_link"></a>
       <a carousel="next" href="#" class="carousel_arrow_link is-right"></a>
     </div>
+  
+    <!-- Fixed View button — opens drawer for active product -->
+    <a href="#" id="carousel-view-btn" class="button carousel-view-btn" aria-label="View product details">View</a>
   </div>
 
   <!-- Product Drawer -->
@@ -1768,7 +1812,6 @@
           const swiperSlide = $(`
             <div class="swiper-slide" data-product-handle="${product.handle}">
               <h2>${product.title}</h2>
-              <a href="#" class="button view-details-btn">View</a>
             </div>
           `);
           swiperWrapper.append(swiperSlide);
@@ -2091,6 +2134,7 @@
             resistance: true,
             resistanceRatio: 0.85
           });
+          window.collectionSwiper = swiper;
 
           // Vertical swipe on carousel component (swiper overlay passes through touches)
           const componentEl = $("[carousel='component']")[0];
@@ -2100,7 +2144,7 @@
             let touchMoved = false;
 
             componentEl.addEventListener('touchstart', (e) => {
-              if (e.target.closest('.view-details-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              if (e.target.closest('.carousel-view-btn, .carousel_arrow_link, .products_collection-drawer')) return;
               touchStartY = e.touches[0].clientY;
               touchStartX = e.touches[0].clientX;
               touchMoved = false;
@@ -2113,7 +2157,7 @@
             }, { passive: true });
 
             componentEl.addEventListener('touchend', (e) => {
-              if (e.target.closest('.view-details-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              if (e.target.closest('.carousel-view-btn, .carousel_arrow_link, .products_collection-drawer')) return;
               const dy = e.changedTouches[0].clientY - touchStartY;
               const dx = e.changedTouches[0].clientX - touchStartX;
               if (touchMoved && Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) {
@@ -2124,6 +2168,21 @@
           }
 
           
+          
+          function updateFixedViewButton() {
+            const activeSlide = swiperEl.find('.swiper-slide').eq(swiper.activeIndex);
+            const handle = activeSlide.data('product-handle') || '';
+            const title = activeSlide.find('h2').text().trim();
+            const btn = $('#carousel-view-btn');
+            if (btn.length) {
+              btn.attr('data-product-handle', handle);
+              btn.attr('aria-label', title ? 'View ' + title : 'View product details');
+            }
+          }
+
+          updateFixedViewButton();
+          swiper.on('slideChange', updateFixedViewButton);
+
           // Sync Swiper progress with 3D rotation
           swiper.on("progress", function (e) {
             gsap.to(progress, {
@@ -2488,25 +2547,37 @@
         }
       }
 
-      // Event handlers — delegation supports dynamically loaded products
-      $(document).on('click', '.view-details-btn', function(e) {
+      // Event handlers — fixed View button opens active product drawer
+      $('#carousel-view-btn').on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        const productHandle = resolveProductHandle($(this).closest('.swiper-slide'));
+        const activeSlide = $('.swiper-slide.swiper-slide-active');
+        const productHandle = resolveProductHandle(activeSlide);
         if (productHandle) {
           openDrawer(productHandle);
         } else {
-          console.warn('Product handle not found for View button');
+          console.warn('Product handle not found for active slide');
         }
       });
 
       // Product card area — open the active (front-facing) slide's product
       $(document).on('click', '[carousel="wrap"], .carousel_list, .carousel_item', function(e) {
-        if ($(e.target).closest('.view-details-btn, .carousel_arrow_link').length) return;
+        if ($(e.target).closest('.carousel-view-btn, .carousel_arrow_link').length) return;
         const activeSlide = $('.swiper-slide.swiper-slide-active');
         const productHandle = resolveProductHandle(activeSlide);
         if (productHandle) {
           openDrawer(productHandle);
+        }
+      });
+
+      $(document).on('productsLoaded', function() {
+        if (window.collectionSwiper && typeof window.collectionSwiper.activeIndex === 'number') {
+          const activeSlide = $('.swiper-slide').eq(window.collectionSwiper.activeIndex);
+          const handle = activeSlide.data('product-handle') || '';
+          const title = activeSlide.find('h2').text().trim();
+          const btn = $('#carousel-view-btn');
+          btn.attr('data-product-handle', handle);
+          btn.attr('aria-label', title ? 'View ' + title : 'View product details');
         }
       });
 
