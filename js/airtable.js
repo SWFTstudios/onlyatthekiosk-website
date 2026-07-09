@@ -181,9 +181,16 @@ class AirtableClient {
    * @returns {Promise<Array>} - Array of products in collection
    */
   async getProductsByCollection(collectionHandle, maxRecords = 50) {
-    // Normalize collection name (handle to title)
+    if (collectionHandle === 'tops') {
+      const [hoodies, tees] = await Promise.all([
+        this.getProductsByCollection('hoodies', maxRecords),
+        this.getProductsByCollection('t-shirts', maxRecords),
+      ]);
+      return [...hoodies, ...tees];
+    }
+
     const collectionTitle = this.normalizeCollectionName(collectionHandle);
-    
+
     return this.getProducts({
       collection: collectionTitle,
       activeOnly: true,
@@ -261,9 +268,18 @@ class AirtableClient {
    * @returns {Promise<object>} - Collection data
    */
   async getCollection(collectionHandle) {
+    if (collectionHandle === 'tops') {
+      const products = await this.getProductsByCollection('tops');
+      return {
+        title: 'Tops',
+        handle: 'tops',
+        products: { edges: products.map((node) => ({ node })) },
+      };
+    }
+
     const collectionTitle = this.normalizeCollectionName(collectionHandle);
     const products = await this.getProductsByCollection(collectionHandle);
-    
+
     return {
       title: collectionTitle,
       handle: collectionHandle,
@@ -334,6 +350,17 @@ class AirtableClient {
           });
         }
       }
+      ['detail1', 'detail2', 'detail3'].forEach((key, i) => {
+        const url = manifestImages?.[key];
+        if (url && !images.some((img) => img.url === url)) {
+          images.push({
+            url,
+            altText: `${fields.Title} detail ${i + 1}`,
+            width: 800,
+            height: 800
+          });
+        }
+      });
     }
     
     // Parse variants
@@ -352,7 +379,7 @@ class AirtableClient {
     const price = fields['Variant Price'] ?? fields.Price ?? 0;
     const priceAmount = typeof price === 'number' ? price.toString() : price;
     
-    return {
+    const product = {
       id: record.id,
       productId: fields['Product ID'] || '',
       title: fields.Title || '',
@@ -385,6 +412,19 @@ class AirtableClient {
       active: fields.Active !== false,
       sortOrder: fields['Sort Order'] || this.extractSortOrder(handle)
     };
+
+    if (window.PRODUCT_CATALOG?.[handle]) {
+      const entry = window.PRODUCT_CATALOG[handle];
+      if (!product.descriptionHtml && entry.descriptionHtml) product.descriptionHtml = entry.descriptionHtml;
+      if (!product.careInstructions && entry.careHtml) product.careInstructions = entry.careHtml;
+      product.tagline = entry.tagline;
+      product.deliveryHtml = entry.deliveryHtml;
+      product.sizeGuideHtml = entry.sizeGuideHtml;
+      product.material = entry.material;
+      product.catalogSizes = entry.sizes;
+    }
+
+    return product;
   }
 
   /**

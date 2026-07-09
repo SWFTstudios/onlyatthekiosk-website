@@ -7,11 +7,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #001. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #001 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/001-gold-chain-hero.webp",
+    "detail1Path": "/images/products/001-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/001-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/001-gold-chain-detail-3.webp",
     "productPath": "/images/products/001-gold-chain-product.webp",
     "lifestylePath": "/images/products/001-gold-chain-lifestyle.webp",
     "productAlt": "#001 Gold Chain product shot",
     "lifestyleAlt": "#001 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "001-silver-chain": {
     "title": "#001 Silver Chain",
@@ -21,11 +26,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #001. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #001 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/001-silver-chain-hero.webp",
+    "detail1Path": "/images/products/001-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/001-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/001-silver-chain-detail-3.webp",
     "productPath": "/images/products/001-silver-chain-product.webp",
     "lifestylePath": "/images/products/001-silver-chain-lifestyle.webp",
     "productAlt": "#001 Silver Chain product shot",
     "lifestyleAlt": "#001 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "001-gold-bracelet": {
     "title": "#001 Gold Bracelet",
@@ -35,11 +45,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #001. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #001 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/001-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/001-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/001-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/001-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/001-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/001-gold-bracelet-lifestyle.webp",
     "productAlt": "#001 Gold Bracelet product shot",
     "lifestyleAlt": "#001 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "001-silver-bracelet": {
     "title": "#001 Silver Bracelet",
@@ -49,11 +64,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #001. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #001 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/001-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/001-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/001-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/001-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/001-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/001-silver-bracelet-lifestyle.webp",
     "productAlt": "#001 Silver Bracelet product shot",
     "lifestyleAlt": "#001 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "001-black-hoodie": {
     "title": "#001 Black Hoodie",
@@ -63,11 +83,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #001. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #001, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/001-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/001-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/001-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/001-black-hoodie-detail-3.webp",
     "productPath": "/images/products/001-black-hoodie-product.webp",
     "lifestylePath": "/images/products/001-black-hoodie-lifestyle.webp",
     "productAlt": "#001 Black Hoodie product shot",
     "lifestyleAlt": "#001 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "001-white-hoodie": {
     "title": "#001 White Hoodie",
@@ -77,11 +102,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #001. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #001, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/001-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/001-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/001-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/001-white-hoodie-detail-3.webp",
     "productPath": "/images/products/001-white-hoodie-product.webp",
     "lifestylePath": "/images/products/001-white-hoodie-lifestyle.webp",
     "productAlt": "#001 White Hoodie product shot",
     "lifestyleAlt": "#001 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "001-black-tshirt": {
     "title": "#001 Black T-shirt",
@@ -91,11 +121,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #001. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #001 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/001-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/001-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/001-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/001-black-tshirt-detail-3.webp",
     "productPath": "/images/products/001-black-tshirt-product.webp",
     "lifestylePath": "/images/products/001-black-tshirt-lifestyle.webp",
     "productAlt": "#001 Black T-shirt product shot",
     "lifestyleAlt": "#001 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "001-white-tshirt": {
     "title": "#001 White T-shirt",
@@ -105,11 +140,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #001. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #001 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/001-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/001-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/001-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/001-white-tshirt-detail-3.webp",
     "productPath": "/images/products/001-white-tshirt-product.webp",
     "lifestylePath": "/images/products/001-white-tshirt-lifestyle.webp",
     "productAlt": "#001 White T-shirt product shot",
     "lifestyleAlt": "#001 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#001 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "002-gold-chain": {
     "title": "#002 Gold Chain",
@@ -119,11 +159,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #002. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #002 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/002-gold-chain-hero.webp",
+    "detail1Path": "/images/products/002-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/002-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/002-gold-chain-detail-3.webp",
     "productPath": "/images/products/002-gold-chain-product.webp",
     "lifestylePath": "/images/products/002-gold-chain-lifestyle.webp",
     "productAlt": "#002 Gold Chain product shot",
     "lifestyleAlt": "#002 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "002-silver-chain": {
     "title": "#002 Silver Chain",
@@ -133,11 +178,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #002. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #002 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/002-silver-chain-hero.webp",
+    "detail1Path": "/images/products/002-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/002-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/002-silver-chain-detail-3.webp",
     "productPath": "/images/products/002-silver-chain-product.webp",
     "lifestylePath": "/images/products/002-silver-chain-lifestyle.webp",
     "productAlt": "#002 Silver Chain product shot",
     "lifestyleAlt": "#002 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "002-gold-bracelet": {
     "title": "#002 Gold Bracelet",
@@ -147,11 +197,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #002. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #002 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/002-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/002-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/002-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/002-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/002-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/002-gold-bracelet-lifestyle.webp",
     "productAlt": "#002 Gold Bracelet product shot",
     "lifestyleAlt": "#002 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "002-silver-bracelet": {
     "title": "#002 Silver Bracelet",
@@ -161,11 +216,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #002. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #002 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/002-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/002-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/002-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/002-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/002-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/002-silver-bracelet-lifestyle.webp",
     "productAlt": "#002 Silver Bracelet product shot",
     "lifestyleAlt": "#002 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "002-black-hoodie": {
     "title": "#002 Black Hoodie",
@@ -175,11 +235,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #002. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #002, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/002-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/002-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/002-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/002-black-hoodie-detail-3.webp",
     "productPath": "/images/products/002-black-hoodie-product.webp",
     "lifestylePath": "/images/products/002-black-hoodie-lifestyle.webp",
     "productAlt": "#002 Black Hoodie product shot",
     "lifestyleAlt": "#002 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "002-white-hoodie": {
     "title": "#002 White Hoodie",
@@ -189,11 +254,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #002. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #002, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/002-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/002-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/002-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/002-white-hoodie-detail-3.webp",
     "productPath": "/images/products/002-white-hoodie-product.webp",
     "lifestylePath": "/images/products/002-white-hoodie-lifestyle.webp",
     "productAlt": "#002 White Hoodie product shot",
     "lifestyleAlt": "#002 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "002-black-tshirt": {
     "title": "#002 Black T-shirt",
@@ -203,11 +273,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #002. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #002 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/002-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/002-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/002-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/002-black-tshirt-detail-3.webp",
     "productPath": "/images/products/002-black-tshirt-product.webp",
     "lifestylePath": "/images/products/002-black-tshirt-lifestyle.webp",
     "productAlt": "#002 Black T-shirt product shot",
     "lifestyleAlt": "#002 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "002-white-tshirt": {
     "title": "#002 White T-shirt",
@@ -217,11 +292,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #002. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #002 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/002-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/002-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/002-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/002-white-tshirt-detail-3.webp",
     "productPath": "/images/products/002-white-tshirt-product.webp",
     "lifestylePath": "/images/products/002-white-tshirt-lifestyle.webp",
     "productAlt": "#002 White T-shirt product shot",
     "lifestyleAlt": "#002 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#002 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "003-gold-chain": {
     "title": "#003 Gold Chain",
@@ -231,11 +311,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #003. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #003 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/003-gold-chain-hero.webp",
+    "detail1Path": "/images/products/003-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/003-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/003-gold-chain-detail-3.webp",
     "productPath": "/images/products/003-gold-chain-product.webp",
     "lifestylePath": "/images/products/003-gold-chain-lifestyle.webp",
     "productAlt": "#003 Gold Chain product shot",
     "lifestyleAlt": "#003 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "003-silver-chain": {
     "title": "#003 Silver Chain",
@@ -245,11 +330,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #003. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #003 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/003-silver-chain-hero.webp",
+    "detail1Path": "/images/products/003-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/003-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/003-silver-chain-detail-3.webp",
     "productPath": "/images/products/003-silver-chain-product.webp",
     "lifestylePath": "/images/products/003-silver-chain-lifestyle.webp",
     "productAlt": "#003 Silver Chain product shot",
     "lifestyleAlt": "#003 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "003-gold-bracelet": {
     "title": "#003 Gold Bracelet",
@@ -259,11 +349,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #003. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #003 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/003-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/003-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/003-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/003-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/003-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/003-gold-bracelet-lifestyle.webp",
     "productAlt": "#003 Gold Bracelet product shot",
     "lifestyleAlt": "#003 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "003-silver-bracelet": {
     "title": "#003 Silver Bracelet",
@@ -273,11 +368,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #003. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #003 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/003-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/003-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/003-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/003-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/003-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/003-silver-bracelet-lifestyle.webp",
     "productAlt": "#003 Silver Bracelet product shot",
     "lifestyleAlt": "#003 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "003-black-hoodie": {
     "title": "#003 Black Hoodie",
@@ -287,11 +387,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #003. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #003, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/003-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/003-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/003-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/003-black-hoodie-detail-3.webp",
     "productPath": "/images/products/003-black-hoodie-product.webp",
     "lifestylePath": "/images/products/003-black-hoodie-lifestyle.webp",
     "productAlt": "#003 Black Hoodie product shot",
     "lifestyleAlt": "#003 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "003-white-hoodie": {
     "title": "#003 White Hoodie",
@@ -301,11 +406,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #003. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #003, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/003-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/003-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/003-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/003-white-hoodie-detail-3.webp",
     "productPath": "/images/products/003-white-hoodie-product.webp",
     "lifestylePath": "/images/products/003-white-hoodie-lifestyle.webp",
     "productAlt": "#003 White Hoodie product shot",
     "lifestyleAlt": "#003 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "003-black-tshirt": {
     "title": "#003 Black T-shirt",
@@ -315,11 +425,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #003. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #003 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/003-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/003-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/003-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/003-black-tshirt-detail-3.webp",
     "productPath": "/images/products/003-black-tshirt-product.webp",
     "lifestylePath": "/images/products/003-black-tshirt-lifestyle.webp",
     "productAlt": "#003 Black T-shirt product shot",
     "lifestyleAlt": "#003 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "003-white-tshirt": {
     "title": "#003 White T-shirt",
@@ -329,11 +444,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #003. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #003 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/003-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/003-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/003-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/003-white-tshirt-detail-3.webp",
     "productPath": "/images/products/003-white-tshirt-product.webp",
     "lifestylePath": "/images/products/003-white-tshirt-lifestyle.webp",
     "productAlt": "#003 White T-shirt product shot",
     "lifestyleAlt": "#003 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#003 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "004-gold-chain": {
     "title": "#004 Gold Chain",
@@ -343,11 +463,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #004. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #004 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/004-gold-chain-hero.webp",
+    "detail1Path": "/images/products/004-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/004-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/004-gold-chain-detail-3.webp",
     "productPath": "/images/products/004-gold-chain-product.webp",
     "lifestylePath": "/images/products/004-gold-chain-lifestyle.webp",
     "productAlt": "#004 Gold Chain product shot",
     "lifestyleAlt": "#004 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "004-silver-chain": {
     "title": "#004 Silver Chain",
@@ -357,11 +482,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #004. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #004 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/004-silver-chain-hero.webp",
+    "detail1Path": "/images/products/004-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/004-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/004-silver-chain-detail-3.webp",
     "productPath": "/images/products/004-silver-chain-product.webp",
     "lifestylePath": "/images/products/004-silver-chain-lifestyle.webp",
     "productAlt": "#004 Silver Chain product shot",
     "lifestyleAlt": "#004 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "004-gold-bracelet": {
     "title": "#004 Gold Bracelet",
@@ -371,11 +501,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #004. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #004 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/004-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/004-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/004-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/004-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/004-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/004-gold-bracelet-lifestyle.webp",
     "productAlt": "#004 Gold Bracelet product shot",
     "lifestyleAlt": "#004 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "004-silver-bracelet": {
     "title": "#004 Silver Bracelet",
@@ -385,11 +520,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #004. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #004 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/004-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/004-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/004-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/004-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/004-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/004-silver-bracelet-lifestyle.webp",
     "productAlt": "#004 Silver Bracelet product shot",
     "lifestyleAlt": "#004 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "004-black-hoodie": {
     "title": "#004 Black Hoodie",
@@ -399,11 +539,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #004. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #004, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/004-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/004-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/004-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/004-black-hoodie-detail-3.webp",
     "productPath": "/images/products/004-black-hoodie-product.webp",
     "lifestylePath": "/images/products/004-black-hoodie-lifestyle.webp",
     "productAlt": "#004 Black Hoodie product shot",
     "lifestyleAlt": "#004 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "004-white-hoodie": {
     "title": "#004 White Hoodie",
@@ -413,11 +558,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #004. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #004, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/004-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/004-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/004-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/004-white-hoodie-detail-3.webp",
     "productPath": "/images/products/004-white-hoodie-product.webp",
     "lifestylePath": "/images/products/004-white-hoodie-lifestyle.webp",
     "productAlt": "#004 White Hoodie product shot",
     "lifestyleAlt": "#004 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "004-black-tshirt": {
     "title": "#004 Black T-shirt",
@@ -427,11 +577,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #004. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #004 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/004-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/004-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/004-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/004-black-tshirt-detail-3.webp",
     "productPath": "/images/products/004-black-tshirt-product.webp",
     "lifestylePath": "/images/products/004-black-tshirt-lifestyle.webp",
     "productAlt": "#004 Black T-shirt product shot",
     "lifestyleAlt": "#004 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "004-white-tshirt": {
     "title": "#004 White T-shirt",
@@ -441,11 +596,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #004. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #004 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/004-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/004-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/004-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/004-white-tshirt-detail-3.webp",
     "productPath": "/images/products/004-white-tshirt-product.webp",
     "lifestylePath": "/images/products/004-white-tshirt-lifestyle.webp",
     "productAlt": "#004 White T-shirt product shot",
     "lifestyleAlt": "#004 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#004 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "005-gold-chain": {
     "title": "#005 Gold Chain",
@@ -455,11 +615,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #005. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #005 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/005-gold-chain-hero.webp",
+    "detail1Path": "/images/products/005-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/005-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/005-gold-chain-detail-3.webp",
     "productPath": "/images/products/005-gold-chain-product.webp",
     "lifestylePath": "/images/products/005-gold-chain-lifestyle.webp",
     "productAlt": "#005 Gold Chain product shot",
     "lifestyleAlt": "#005 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "005-silver-chain": {
     "title": "#005 Silver Chain",
@@ -469,11 +634,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #005. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #005 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/005-silver-chain-hero.webp",
+    "detail1Path": "/images/products/005-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/005-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/005-silver-chain-detail-3.webp",
     "productPath": "/images/products/005-silver-chain-product.webp",
     "lifestylePath": "/images/products/005-silver-chain-lifestyle.webp",
     "productAlt": "#005 Silver Chain product shot",
     "lifestyleAlt": "#005 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "005-gold-bracelet": {
     "title": "#005 Gold Bracelet",
@@ -483,11 +653,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #005. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #005 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/005-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/005-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/005-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/005-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/005-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/005-gold-bracelet-lifestyle.webp",
     "productAlt": "#005 Gold Bracelet product shot",
     "lifestyleAlt": "#005 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "005-silver-bracelet": {
     "title": "#005 Silver Bracelet",
@@ -497,11 +672,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #005. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #005 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/005-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/005-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/005-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/005-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/005-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/005-silver-bracelet-lifestyle.webp",
     "productAlt": "#005 Silver Bracelet product shot",
     "lifestyleAlt": "#005 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "005-black-hoodie": {
     "title": "#005 Black Hoodie",
@@ -511,11 +691,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #005. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #005, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/005-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/005-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/005-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/005-black-hoodie-detail-3.webp",
     "productPath": "/images/products/005-black-hoodie-product.webp",
     "lifestylePath": "/images/products/005-black-hoodie-lifestyle.webp",
     "productAlt": "#005 Black Hoodie product shot",
     "lifestyleAlt": "#005 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "005-white-hoodie": {
     "title": "#005 White Hoodie",
@@ -525,11 +710,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #005. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #005, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/005-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/005-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/005-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/005-white-hoodie-detail-3.webp",
     "productPath": "/images/products/005-white-hoodie-product.webp",
     "lifestylePath": "/images/products/005-white-hoodie-lifestyle.webp",
     "productAlt": "#005 White Hoodie product shot",
     "lifestyleAlt": "#005 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "005-black-tshirt": {
     "title": "#005 Black T-shirt",
@@ -539,11 +729,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #005. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #005 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/005-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/005-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/005-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/005-black-tshirt-detail-3.webp",
     "productPath": "/images/products/005-black-tshirt-product.webp",
     "lifestylePath": "/images/products/005-black-tshirt-lifestyle.webp",
     "productAlt": "#005 Black T-shirt product shot",
     "lifestyleAlt": "#005 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "005-white-tshirt": {
     "title": "#005 White T-shirt",
@@ -553,11 +748,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #005. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #005 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/005-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/005-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/005-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/005-white-tshirt-detail-3.webp",
     "productPath": "/images/products/005-white-tshirt-product.webp",
     "lifestylePath": "/images/products/005-white-tshirt-lifestyle.webp",
     "productAlt": "#005 White T-shirt product shot",
     "lifestyleAlt": "#005 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#005 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "006-gold-chain": {
     "title": "#006 Gold Chain",
@@ -567,11 +767,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #006. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #006 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/006-gold-chain-hero.webp",
+    "detail1Path": "/images/products/006-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/006-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/006-gold-chain-detail-3.webp",
     "productPath": "/images/products/006-gold-chain-product.webp",
     "lifestylePath": "/images/products/006-gold-chain-lifestyle.webp",
     "productAlt": "#006 Gold Chain product shot",
     "lifestyleAlt": "#006 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "006-silver-chain": {
     "title": "#006 Silver Chain",
@@ -581,11 +786,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #006. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #006 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/006-silver-chain-hero.webp",
+    "detail1Path": "/images/products/006-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/006-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/006-silver-chain-detail-3.webp",
     "productPath": "/images/products/006-silver-chain-product.webp",
     "lifestylePath": "/images/products/006-silver-chain-lifestyle.webp",
     "productAlt": "#006 Silver Chain product shot",
     "lifestyleAlt": "#006 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "006-gold-bracelet": {
     "title": "#006 Gold Bracelet",
@@ -595,11 +805,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #006. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #006 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/006-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/006-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/006-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/006-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/006-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/006-gold-bracelet-lifestyle.webp",
     "productAlt": "#006 Gold Bracelet product shot",
     "lifestyleAlt": "#006 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "006-silver-bracelet": {
     "title": "#006 Silver Bracelet",
@@ -609,11 +824,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #006. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #006 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/006-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/006-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/006-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/006-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/006-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/006-silver-bracelet-lifestyle.webp",
     "productAlt": "#006 Silver Bracelet product shot",
     "lifestyleAlt": "#006 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "006-black-hoodie": {
     "title": "#006 Black Hoodie",
@@ -623,11 +843,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #006. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #006, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/006-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/006-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/006-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/006-black-hoodie-detail-3.webp",
     "productPath": "/images/products/006-black-hoodie-product.webp",
     "lifestylePath": "/images/products/006-black-hoodie-lifestyle.webp",
     "productAlt": "#006 Black Hoodie product shot",
     "lifestyleAlt": "#006 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "006-white-hoodie": {
     "title": "#006 White Hoodie",
@@ -637,11 +862,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #006. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #006, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/006-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/006-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/006-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/006-white-hoodie-detail-3.webp",
     "productPath": "/images/products/006-white-hoodie-product.webp",
     "lifestylePath": "/images/products/006-white-hoodie-lifestyle.webp",
     "productAlt": "#006 White Hoodie product shot",
     "lifestyleAlt": "#006 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "006-black-tshirt": {
     "title": "#006 Black T-shirt",
@@ -651,11 +881,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #006. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #006 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/006-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/006-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/006-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/006-black-tshirt-detail-3.webp",
     "productPath": "/images/products/006-black-tshirt-product.webp",
     "lifestylePath": "/images/products/006-black-tshirt-lifestyle.webp",
     "productAlt": "#006 Black T-shirt product shot",
     "lifestyleAlt": "#006 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "006-white-tshirt": {
     "title": "#006 White T-shirt",
@@ -665,11 +900,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #006. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #006 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/006-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/006-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/006-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/006-white-tshirt-detail-3.webp",
     "productPath": "/images/products/006-white-tshirt-product.webp",
     "lifestylePath": "/images/products/006-white-tshirt-lifestyle.webp",
     "productAlt": "#006 White T-shirt product shot",
     "lifestyleAlt": "#006 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#006 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "007-gold-chain": {
     "title": "#007 Gold Chain",
@@ -679,11 +919,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #007. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #007 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/007-gold-chain-hero.webp",
+    "detail1Path": "/images/products/007-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/007-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/007-gold-chain-detail-3.webp",
     "productPath": "/images/products/007-gold-chain-product.webp",
     "lifestylePath": "/images/products/007-gold-chain-lifestyle.webp",
     "productAlt": "#007 Gold Chain product shot",
     "lifestyleAlt": "#007 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "007-silver-chain": {
     "title": "#007 Silver Chain",
@@ -693,11 +938,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #007. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #007 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/007-silver-chain-hero.webp",
+    "detail1Path": "/images/products/007-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/007-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/007-silver-chain-detail-3.webp",
     "productPath": "/images/products/007-silver-chain-product.webp",
     "lifestylePath": "/images/products/007-silver-chain-lifestyle.webp",
     "productAlt": "#007 Silver Chain product shot",
     "lifestyleAlt": "#007 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "007-gold-bracelet": {
     "title": "#007 Gold Bracelet",
@@ -707,11 +957,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #007. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #007 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/007-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/007-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/007-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/007-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/007-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/007-gold-bracelet-lifestyle.webp",
     "productAlt": "#007 Gold Bracelet product shot",
     "lifestyleAlt": "#007 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "007-silver-bracelet": {
     "title": "#007 Silver Bracelet",
@@ -721,11 +976,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #007. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #007 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/007-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/007-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/007-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/007-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/007-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/007-silver-bracelet-lifestyle.webp",
     "productAlt": "#007 Silver Bracelet product shot",
     "lifestyleAlt": "#007 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "007-black-hoodie": {
     "title": "#007 Black Hoodie",
@@ -735,11 +995,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #007. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #007, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/007-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/007-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/007-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/007-black-hoodie-detail-3.webp",
     "productPath": "/images/products/007-black-hoodie-product.webp",
     "lifestylePath": "/images/products/007-black-hoodie-lifestyle.webp",
     "productAlt": "#007 Black Hoodie product shot",
     "lifestyleAlt": "#007 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "007-white-hoodie": {
     "title": "#007 White Hoodie",
@@ -749,11 +1014,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #007. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #007, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/007-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/007-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/007-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/007-white-hoodie-detail-3.webp",
     "productPath": "/images/products/007-white-hoodie-product.webp",
     "lifestylePath": "/images/products/007-white-hoodie-lifestyle.webp",
     "productAlt": "#007 White Hoodie product shot",
     "lifestyleAlt": "#007 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "007-black-tshirt": {
     "title": "#007 Black T-shirt",
@@ -763,11 +1033,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #007. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #007 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/007-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/007-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/007-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/007-black-tshirt-detail-3.webp",
     "productPath": "/images/products/007-black-tshirt-product.webp",
     "lifestylePath": "/images/products/007-black-tshirt-lifestyle.webp",
     "productAlt": "#007 Black T-shirt product shot",
     "lifestyleAlt": "#007 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "007-white-tshirt": {
     "title": "#007 White T-shirt",
@@ -777,11 +1052,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #007. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #007 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/007-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/007-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/007-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/007-white-tshirt-detail-3.webp",
     "productPath": "/images/products/007-white-tshirt-product.webp",
     "lifestylePath": "/images/products/007-white-tshirt-lifestyle.webp",
     "productAlt": "#007 White T-shirt product shot",
     "lifestyleAlt": "#007 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#007 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "008-gold-chain": {
     "title": "#008 Gold Chain",
@@ -791,11 +1071,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #008. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #008 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/008-gold-chain-hero.webp",
+    "detail1Path": "/images/products/008-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/008-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/008-gold-chain-detail-3.webp",
     "productPath": "/images/products/008-gold-chain-product.webp",
     "lifestylePath": "/images/products/008-gold-chain-lifestyle.webp",
     "productAlt": "#008 Gold Chain product shot",
     "lifestyleAlt": "#008 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "008-silver-chain": {
     "title": "#008 Silver Chain",
@@ -805,11 +1090,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #008. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #008 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/008-silver-chain-hero.webp",
+    "detail1Path": "/images/products/008-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/008-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/008-silver-chain-detail-3.webp",
     "productPath": "/images/products/008-silver-chain-product.webp",
     "lifestylePath": "/images/products/008-silver-chain-lifestyle.webp",
     "productAlt": "#008 Silver Chain product shot",
     "lifestyleAlt": "#008 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "008-gold-bracelet": {
     "title": "#008 Gold Bracelet",
@@ -819,11 +1109,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #008. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #008 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/008-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/008-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/008-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/008-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/008-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/008-gold-bracelet-lifestyle.webp",
     "productAlt": "#008 Gold Bracelet product shot",
     "lifestyleAlt": "#008 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "008-silver-bracelet": {
     "title": "#008 Silver Bracelet",
@@ -833,11 +1128,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #008. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #008 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/008-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/008-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/008-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/008-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/008-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/008-silver-bracelet-lifestyle.webp",
     "productAlt": "#008 Silver Bracelet product shot",
     "lifestyleAlt": "#008 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "008-black-hoodie": {
     "title": "#008 Black Hoodie",
@@ -847,11 +1147,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #008. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #008, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/008-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/008-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/008-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/008-black-hoodie-detail-3.webp",
     "productPath": "/images/products/008-black-hoodie-product.webp",
     "lifestylePath": "/images/products/008-black-hoodie-lifestyle.webp",
     "productAlt": "#008 Black Hoodie product shot",
     "lifestyleAlt": "#008 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "008-white-hoodie": {
     "title": "#008 White Hoodie",
@@ -861,11 +1166,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #008. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #008, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/008-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/008-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/008-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/008-white-hoodie-detail-3.webp",
     "productPath": "/images/products/008-white-hoodie-product.webp",
     "lifestylePath": "/images/products/008-white-hoodie-lifestyle.webp",
     "productAlt": "#008 White Hoodie product shot",
     "lifestyleAlt": "#008 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "008-black-tshirt": {
     "title": "#008 Black T-shirt",
@@ -875,11 +1185,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #008. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #008 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/008-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/008-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/008-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/008-black-tshirt-detail-3.webp",
     "productPath": "/images/products/008-black-tshirt-product.webp",
     "lifestylePath": "/images/products/008-black-tshirt-lifestyle.webp",
     "productAlt": "#008 Black T-shirt product shot",
     "lifestyleAlt": "#008 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "008-white-tshirt": {
     "title": "#008 White T-shirt",
@@ -889,11 +1204,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #008. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #008 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/008-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/008-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/008-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/008-white-tshirt-detail-3.webp",
     "productPath": "/images/products/008-white-tshirt-product.webp",
     "lifestylePath": "/images/products/008-white-tshirt-lifestyle.webp",
     "productAlt": "#008 White T-shirt product shot",
     "lifestyleAlt": "#008 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#008 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "009-gold-chain": {
     "title": "#009 Gold Chain",
@@ -903,11 +1223,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #009. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #009 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/009-gold-chain-hero.webp",
+    "detail1Path": "/images/products/009-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/009-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/009-gold-chain-detail-3.webp",
     "productPath": "/images/products/009-gold-chain-product.webp",
     "lifestylePath": "/images/products/009-gold-chain-lifestyle.webp",
     "productAlt": "#009 Gold Chain product shot",
     "lifestyleAlt": "#009 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "009-silver-chain": {
     "title": "#009 Silver Chain",
@@ -917,11 +1242,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #009. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #009 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/009-silver-chain-hero.webp",
+    "detail1Path": "/images/products/009-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/009-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/009-silver-chain-detail-3.webp",
     "productPath": "/images/products/009-silver-chain-product.webp",
     "lifestylePath": "/images/products/009-silver-chain-lifestyle.webp",
     "productAlt": "#009 Silver Chain product shot",
     "lifestyleAlt": "#009 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "009-gold-bracelet": {
     "title": "#009 Gold Bracelet",
@@ -931,11 +1261,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #009. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #009 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/009-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/009-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/009-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/009-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/009-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/009-gold-bracelet-lifestyle.webp",
     "productAlt": "#009 Gold Bracelet product shot",
     "lifestyleAlt": "#009 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "009-silver-bracelet": {
     "title": "#009 Silver Bracelet",
@@ -945,11 +1280,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #009. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #009 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/009-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/009-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/009-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/009-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/009-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/009-silver-bracelet-lifestyle.webp",
     "productAlt": "#009 Silver Bracelet product shot",
     "lifestyleAlt": "#009 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "009-black-hoodie": {
     "title": "#009 Black Hoodie",
@@ -959,11 +1299,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #009. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #009, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/009-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/009-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/009-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/009-black-hoodie-detail-3.webp",
     "productPath": "/images/products/009-black-hoodie-product.webp",
     "lifestylePath": "/images/products/009-black-hoodie-lifestyle.webp",
     "productAlt": "#009 Black Hoodie product shot",
     "lifestyleAlt": "#009 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "009-white-hoodie": {
     "title": "#009 White Hoodie",
@@ -973,11 +1318,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #009. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #009, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/009-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/009-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/009-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/009-white-hoodie-detail-3.webp",
     "productPath": "/images/products/009-white-hoodie-product.webp",
     "lifestylePath": "/images/products/009-white-hoodie-lifestyle.webp",
     "productAlt": "#009 White Hoodie product shot",
     "lifestyleAlt": "#009 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "009-black-tshirt": {
     "title": "#009 Black T-shirt",
@@ -987,11 +1337,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #009. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #009 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/009-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/009-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/009-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/009-black-tshirt-detail-3.webp",
     "productPath": "/images/products/009-black-tshirt-product.webp",
     "lifestylePath": "/images/products/009-black-tshirt-lifestyle.webp",
     "productAlt": "#009 Black T-shirt product shot",
     "lifestyleAlt": "#009 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "009-white-tshirt": {
     "title": "#009 White T-shirt",
@@ -1001,11 +1356,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #009. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #009 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/009-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/009-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/009-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/009-white-tshirt-detail-3.webp",
     "productPath": "/images/products/009-white-tshirt-product.webp",
     "lifestylePath": "/images/products/009-white-tshirt-lifestyle.webp",
     "productAlt": "#009 White T-shirt product shot",
     "lifestyleAlt": "#009 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#009 White T-shirt lifestyle hero",
+    "status": "pending"
   },
   "010-gold-chain": {
     "title": "#010 Gold Chain",
@@ -1015,11 +1375,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a gold chain necklace, design #010. warm gold metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold chain necklace design #010 worn on chest. Urban night setting, high contrast black and white with subtle gold metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/010-gold-chain-hero.webp",
+    "detail1Path": "/images/products/010-gold-chain-detail-1.webp",
+    "detail2Path": "/images/products/010-gold-chain-detail-2.webp",
+    "detail3Path": "/images/products/010-gold-chain-detail-3.webp",
     "productPath": "/images/products/010-gold-chain-product.webp",
     "lifestylePath": "/images/products/010-gold-chain-lifestyle.webp",
     "productAlt": "#010 Gold Chain product shot",
     "lifestyleAlt": "#010 Gold Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Gold Chain lifestyle hero",
+    "status": "pending"
   },
   "010-silver-chain": {
     "title": "#010 Silver Chain",
@@ -1029,11 +1394,16 @@
     "collection": "chains",
     "productPrompt": "Minimal editorial product photograph of a silver chain necklace, design #010. cool silver metallic finish. Centered on pure black seamless background, soft rim lighting, photorealistic, no logos, no text. Monochrome palette with accurate metallic accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver chain necklace design #010 worn on chest. Urban night setting, high contrast black and white with subtle silver metallic accent. Candid street style, photorealistic, no logos, no text. Moody atmosphere, square crop.",
+    "heroPath": "/images/products/010-silver-chain-hero.webp",
+    "detail1Path": "/images/products/010-silver-chain-detail-1.webp",
+    "detail2Path": "/images/products/010-silver-chain-detail-2.webp",
+    "detail3Path": "/images/products/010-silver-chain-detail-3.webp",
     "productPath": "/images/products/010-silver-chain-product.webp",
     "lifestylePath": "/images/products/010-silver-chain-lifestyle.webp",
     "productAlt": "#010 Silver Chain product shot",
     "lifestyleAlt": "#010 Silver Chain lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Silver Chain lifestyle hero",
+    "status": "pending"
   },
   "010-gold-bracelet": {
     "title": "#010 Gold Bracelet",
@@ -1043,11 +1413,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a gold bracelet, design #010. warm gold metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, gold bracelet design #010 on wrist during street movement. Skate or urban court setting, black and white with subtle gold accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/010-gold-bracelet-hero.webp",
+    "detail1Path": "/images/products/010-gold-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/010-gold-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/010-gold-bracelet-detail-3.webp",
     "productPath": "/images/products/010-gold-bracelet-product.webp",
     "lifestylePath": "/images/products/010-gold-bracelet-lifestyle.webp",
     "productAlt": "#010 Gold Bracelet product shot",
     "lifestyleAlt": "#010 Gold Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Gold Bracelet lifestyle hero",
+    "status": "pending"
   },
   "010-silver-bracelet": {
     "title": "#010 Silver Bracelet",
@@ -1057,11 +1432,16 @@
     "collection": "bracelets",
     "productPrompt": "Minimal editorial product photograph of a silver bracelet, design #010. cool silver metallic finish. Flat-lay on neutral grey surface, soft shadows, photorealistic, no logos, no text. Monochrome palette with accurate material accent. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, silver bracelet design #010 on wrist during street movement. Skate or urban court setting, black and white with subtle silver accent. Dynamic crop, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/010-silver-bracelet-hero.webp",
+    "detail1Path": "/images/products/010-silver-bracelet-detail-1.webp",
+    "detail2Path": "/images/products/010-silver-bracelet-detail-2.webp",
+    "detail3Path": "/images/products/010-silver-bracelet-detail-3.webp",
     "productPath": "/images/products/010-silver-bracelet-product.webp",
     "lifestylePath": "/images/products/010-silver-bracelet-lifestyle.webp",
     "productAlt": "#010 Silver Bracelet product shot",
     "lifestyleAlt": "#010 Silver Bracelet lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Silver Bracelet lifestyle hero",
+    "status": "pending"
   },
   "010-black-hoodie": {
     "title": "#010 Black Hoodie",
@@ -1071,11 +1451,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a black hoodie, design #010. deep matte black. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing black hoodie design #010, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/010-black-hoodie-hero.webp",
+    "detail1Path": "/images/products/010-black-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/010-black-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/010-black-hoodie-detail-3.webp",
     "productPath": "/images/products/010-black-hoodie-product.webp",
     "lifestylePath": "/images/products/010-black-hoodie-lifestyle.webp",
     "productAlt": "#010 Black Hoodie product shot",
     "lifestyleAlt": "#010 Black Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Black Hoodie lifestyle hero",
+    "status": "pending"
   },
   "010-white-hoodie": {
     "title": "#010 White Hoodie",
@@ -1085,11 +1470,16 @@
     "collection": "hoodies",
     "productPrompt": "Minimal editorial product photograph of a white hoodie, design #010. clean off-white. Front-facing fold on hanger, dark grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, person wearing white hoodie design #010, hood up, in motion on gritty city street. High contrast monochrome, photorealistic, no logos, no text. Raw streetwear energy, square crop.",
+    "heroPath": "/images/products/010-white-hoodie-hero.webp",
+    "detail1Path": "/images/products/010-white-hoodie-detail-1.webp",
+    "detail2Path": "/images/products/010-white-hoodie-detail-2.webp",
+    "detail3Path": "/images/products/010-white-hoodie-detail-3.webp",
     "productPath": "/images/products/010-white-hoodie-product.webp",
     "lifestylePath": "/images/products/010-white-hoodie-lifestyle.webp",
     "productAlt": "#010 White Hoodie product shot",
     "lifestyleAlt": "#010 White Hoodie lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 White Hoodie lifestyle hero",
+    "status": "pending"
   },
   "010-black-tshirt": {
     "title": "#010 Black T-shirt",
@@ -1099,11 +1489,16 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a black t-shirt, design #010. deep matte black. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, black t-shirt design #010 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/010-black-tshirt-hero.webp",
+    "detail1Path": "/images/products/010-black-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/010-black-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/010-black-tshirt-detail-3.webp",
     "productPath": "/images/products/010-black-tshirt-product.webp",
     "lifestylePath": "/images/products/010-black-tshirt-lifestyle.webp",
     "productAlt": "#010 Black T-shirt product shot",
     "lifestyleAlt": "#010 Black T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 Black T-shirt lifestyle hero",
+    "status": "pending"
   },
   "010-white-tshirt": {
     "title": "#010 White T-shirt",
@@ -1113,10 +1508,15 @@
     "collection": "t-shirts",
     "productPrompt": "Minimal editorial product photograph of a white t-shirt, design #010. clean off-white. Ghost mannequin flat presentation, light grey background, photorealistic, no logos, no text. Monochrome streetwear aesthetic. Studio packshot, square crop.",
     "lifestylePrompt": "Editorial lifestyle photograph, white t-shirt design #010 in layered streetwear context. Candid movement, urban environment, black and white palette, photorealistic, no logos, no text. Square crop.",
+    "heroPath": "/images/products/010-white-tshirt-hero.webp",
+    "detail1Path": "/images/products/010-white-tshirt-detail-1.webp",
+    "detail2Path": "/images/products/010-white-tshirt-detail-2.webp",
+    "detail3Path": "/images/products/010-white-tshirt-detail-3.webp",
     "productPath": "/images/products/010-white-tshirt-product.webp",
     "lifestylePath": "/images/products/010-white-tshirt-lifestyle.webp",
     "productAlt": "#010 White T-shirt product shot",
     "lifestyleAlt": "#010 White T-shirt lifestyle",
-    "status": "synced"
+    "heroAlt": "#010 White T-shirt lifestyle hero",
+    "status": "pending"
   }
 }

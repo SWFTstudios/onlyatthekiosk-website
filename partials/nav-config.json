@@ -5,8 +5,7 @@
     { "label": "Media", "path": "media.html", "match": ["media.html"] }
   ],
   "categories": [
-    { "label": "Essential Tees", "path": "collections/t-shirts.html", "match": ["collections/t-shirts.html"] },
-    { "label": "Hoodies", "path": "collections/hoodies.html", "match": ["collections/hoodies.html"] },
+    { "label": "Tops", "path": "collections/tops.html", "match": ["collections/tops.html", "collections/hoodies.html", "collections/t-shirts.html"] },
     { "label": "Chains", "path": "collections/chains.html", "match": ["collections/chains.html"] },
     { "label": "Bracelets", "path": "collections/bracelets.html", "match": ["collections/bracelets.html"] }
   ],

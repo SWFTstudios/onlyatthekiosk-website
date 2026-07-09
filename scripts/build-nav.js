@@ -104,28 +104,40 @@ const PAGES = [
     transformMain: true,
   },
   {
+    file: 'product.html',
+    base: '',
+    mainClass: 'is-interior',
+    wrapStart: '<main data-main',
+  },
+  {
+    file: 'collections/tops.html',
+    base: '../',
+    mainClass: 'is-interior',
+    wrapStart: '<div class="collection-page"',
+  },
+  {
     file: 'collections/t-shirts.html',
     base: '../',
     mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
+    wrapStart: '<div class="collection-page"',
   },
   {
     file: 'collections/hoodies.html',
     base: '../',
     mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
+    wrapStart: '<div class="collection-page"',
   },
   {
     file: 'collections/chains.html',
     base: '../',
     mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
+    wrapStart: '<div class="collection-page"',
   },
   {
     file: 'collections/bracelets.html',
     base: '../',
     mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
+    wrapStart: '<div class="collection-page"',
   },
 ];
 

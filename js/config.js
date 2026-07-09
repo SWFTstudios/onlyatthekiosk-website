@@ -41,8 +41,8 @@ window.STORE_CONFIG = {
   currency: 'USD',
   heroCategories: [
     {
-      label: 'Hoodies',
-      href: 'collections/hoodies.html',
+      label: 'Tops',
+      href: 'collections/tops.html',
       image: '/images/store/hero-hoodies.webp',
       lifestyleHandle: '001-black-hoodie',
     },
@@ -69,7 +69,7 @@ window.STORE_CONFIG = {
         '002-gold-chain': 79.99,
       },
     },
-    'T-Shirts & Hoodies': {
+    'Tops': {
       handles: ['001-black-hoodie', '001-white-hoodie', '001-black-tshirt', '001-white-tshirt'],
       fallbackPrices: {
         '001-black-hoodie': 89.99,
