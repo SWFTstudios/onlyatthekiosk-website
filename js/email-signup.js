@@ -2,6 +2,51 @@
 (function() {
   'use strict';
 
+  /* Minimal scroll lock if underlay-nav hasn't loaded yet */
+  if (!window.KioskScrollLock) {
+    let lockCount = 0;
+    let scrollY = 0;
+    window.KioskScrollLock = {
+      lock() {
+        if (lockCount === 0) {
+          scrollY = window.scrollY || window.pageYOffset || 0;
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${scrollY}px`;
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+        }
+        lockCount += 1;
+      },
+      unlock() {
+        if (lockCount <= 0) return;
+        lockCount -= 1;
+        if (lockCount === 0) {
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          window.scrollTo(0, scrollY);
+        }
+      },
+    };
+  }
+
+  function pauseLenis() {
+    if (window.lenis && typeof window.lenis.stop === 'function') {
+      window.lenis.stop();
+    }
+  }
+
+  function resumeLenis() {
+    if (window.lenis && typeof window.lenis.start === 'function') {
+      window.lenis.start();
+    }
+  }
+
   // Get DOM elements
   const notifyBtn = document.getElementById('notify-me-btn');
   const modal = document.getElementById('email-modal');
@@ -14,15 +59,20 @@
 
   // Open modal function
   function openModal() {
+    if (window.KioskNav && window.KioskNav.isOpen && window.KioskNav.isOpen()) {
+      window.KioskNav.closeMenu();
+    }
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    window.KioskScrollLock.lock();
+    pauseLenis();
     emailInput.focus();
   }
 
   // Close modal function
   function closeModal() {
     modal.style.display = 'none';
-    document.body.style.overflow = ''; // Restore scrolling
+    window.KioskScrollLock.unlock();
+    resumeLenis();
     form.reset();
     messageDiv.className = 'form-message';
     messageDiv.textContent = '';

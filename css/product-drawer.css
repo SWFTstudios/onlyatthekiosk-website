@@ -1,0 +1,171 @@
+/* ========================================
+   KIOSK Product Drawer — underlay reveal
+   Main slides left to reveal drawer panel
+   ======================================== */
+
+:root {
+  --drawer-width: min(600px, 50vw);
+}
+
+@media screen and (max-width: 991px) {
+  :root {
+    --drawer-width: 85vw;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  :root {
+    --drawer-width: 100vw;
+  }
+}
+
+/* Drawer panel sits beneath main content on the right */
+.product-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: var(--drawer-width);
+  z-index: 5;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.product-drawer.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.product-drawer__panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-left: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+  padding: 0 1.5rem 3rem;
+  will-change: transform, opacity;
+}
+
+@media screen and (max-width: 767px) {
+  .product-drawer__panel {
+    padding: 0 1rem 2rem;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .product-drawer__panel {
+    padding: 0 0.75rem 1.5rem;
+  }
+}
+
+/* Overlay slides with main — dims visible page area */
+.product-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.product-drawer-overlay__dark {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+}
+
+html[data-theme="dark"] .product-drawer-overlay__dark {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+body[data-drawer-status="open"] {
+  overflow: hidden;
+}
+
+body[data-drawer-status="open"] [data-main] {
+  overflow: hidden;
+}
+
+body[data-drawer-status="open"] .product-drawer {
+  z-index: 10006;
+  pointer-events: auto;
+}
+
+body[data-drawer-status="open"] .products_drawer-close-icon {
+  z-index: 10010 !important;
+}
+
+/* Legacy class compatibility inside panel */
+.products_drawer-wrapper.product-drawer__panel {
+  width: 100%;
+  max-width: none;
+  animation: none;
+  position: absolute;
+  inset: 0;
+}
+
+.products_collection-drawer.product-drawer {
+  display: block;
+  background: none;
+}
+
+.products_collection-drawer.product-drawer.open {
+  display: block;
+}
+
+.products_drawer-close {
+  display: none;
+}
+
+.product-drawer__loading {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  z-index: 2;
+}
+
+.product-drawer__loading.is-visible {
+  display: flex;
+}
+
+.product-drawer__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(128, 128, 128, 0.25);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: product-drawer-spin 0.8s linear infinite;
+}
+
+@keyframes product-drawer-spin {
+  to { transform: rotate(360deg); }
+}
+
+.product-drawer__content {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.product-drawer__content.is-loading {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Reveal animation targets */
+.product-drawer [data-drawer-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.product-drawer.is-animated [data-drawer-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+}

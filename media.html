@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Media - KIOSK</title>
-  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" name="viewport">
   <meta name="description" content="Explore KIOSK media — drops, locations, and behind-the-scenes.">
   
   <!-- Stylesheets -->
   <link href="css/normalize.css" rel="stylesheet" type="text/css">
   <link href="css/webflow.css" rel="stylesheet" type="text/css">
-  <link href="css/media-original.css" rel="stylesheet" type="text/css">
+  <link href="css/media.css" rel="stylesheet" type="text/css">
   <link href="css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
   <link href="css/underlay-nav.css" rel="stylesheet" type="text/css">
   
@@ -37,8 +37,10 @@
     .old-main {
       width: 100%;
       min-height: 100vh;
+      min-height: 100svh;
       position: relative;
       background-color: #000;
+      overflow-x: hidden;
     }
   </style>
 </head>

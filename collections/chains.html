@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title id="page-title">Chains - KIOSK</title>
   <meta name="description" content="Browse KIOSK chains. Where the brand started.">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes" name="viewport">
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" name="viewport">
   
   <!-- Swiper CSS (kept for carousel) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
@@ -13,6 +13,7 @@
   <link href="../css/normalize.css" rel="stylesheet" type="text/css">
   <link href="../css/onlyatthekiosk.css" rel="stylesheet" type="text/css">
   <link href="../css/underlay-nav.css" rel="stylesheet" type="text/css">
+  <link href="../css/product-drawer.css" rel="stylesheet" type="text/css">
   
   <!-- Navigation CSS -->
   <link href="../css/webflow.css" rel="stylesheet" type="text/css">
@@ -86,10 +87,12 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden; /* Prevent horizontal scroll */
-      overflow-y: auto; /* Allow vertical scrolling */
-      position: relative; /* Allow normal document flow */
+      height: 100%;
+      height: 100svh;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      touch-action: none;
       font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background-color: var(--bg-primary);
       color: var(--text-primary);
@@ -97,9 +100,12 @@
       overscroll-behavior: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      /* Allow touch scrolling */
-      touch-action: pan-y pan-x;
-      -webkit-overflow-scrolling: touch;
+    }
+
+    main[data-main]:has([carousel="component"]) {
+      overflow: hidden;
+      height: 100svh;
+      max-height: 100svh;
     }
 
     /* Collection Title Styles */
@@ -114,7 +120,7 @@
     }
     
     .collection-title-text {
-      font-size: 4rem;
+      font-size: clamp(1.75rem, 8vw, 4rem);
       font-weight: 700;
       color: var(--text-primary);
       text-align: center;
@@ -123,7 +129,8 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
       transition: color 0.3s ease;
-      white-space: nowrap;
+      text-wrap: balance;
+      max-width: 90vw;
     }
     
     /* Product title: orange in light mode */
@@ -164,18 +171,20 @@
       position: relative;
       width: 100%;
       min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 1.5rem 1rem;
       box-sizing: border-box;
-      overflow: visible; /* Allow 3D carousel items to extend beyond bounds */
+      overflow: hidden;
       background-color: var(--bg-primary);
       color: var(--text-primary);
       transition: background-color 0.3s ease, color 0.3s ease;
-      /* Allow touch gestures for swiping and scrolling */
-      touch-action: pan-y pan-x;
+      height: 100svh;
+      max-height: 100svh;
+      touch-action: none;
       /* Keep container centered */
       margin: 0;
     }
@@ -220,7 +229,9 @@
       justify-content: center;
       perspective-origin: center center;
       box-sizing: border-box;
-      overflow: visible; /* Allow 3D items to extend beyond bounds */
+      overflow: visible;
+      z-index: 1;
+      pointer-events: none;
       /* Allow touch gestures - Swiper handles its own touch events */
       touch-action: pan-y pan-x;
       -webkit-user-select: none;
@@ -303,7 +314,7 @@
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
-      pointer-events: none;
+      pointer-events: auto;
       position: relative;
       overflow: visible; /* Allow 3D items to extend beyond bounds */
     }
@@ -320,7 +331,9 @@
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       overflow: visible; /* Ensure content isn't clipped */
     }
 
@@ -364,24 +377,25 @@
       z-index: 0;
     }
 
-    /* Swiper Container for Titles */
+    /* Swiper Container — full-viewport vertical touch layer */
     .swiper {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      max-width: 600px;
-      height: 180px;
-      max-height: 180px;
-      margin-bottom: 1rem;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
       box-sizing: border-box;
-      overflow: visible; /* Allow content to be fully visible */
-      /* Enable touch gestures for swiper */
+      overflow: hidden;
       touch-action: pan-y;
-      position: relative;
-      z-index: 10000; /* Just below product drawer (10001) but above carousel */
+      z-index: 6;
+      pointer-events: none;
     }
     
     /* Swiper Wrapper - ensure content is visible */
     .swiper-wrapper {
-      overflow: visible !important;
+      overflow: hidden !important;
       position: relative;
       z-index: 10000;
     }
@@ -389,10 +403,10 @@
     .swiper-slide {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
       text-align: center;
-      padding: 1.5rem 2rem;
+      padding: 1.5rem 2rem calc(6.5rem + env(safe-area-inset-bottom, 0px)); /* room for fixed View button */
       position: relative;
       z-index: 10000;
       box-sizing: border-box;
@@ -409,10 +423,17 @@
       margin-bottom: 0.75rem;
       color: var(--text-primary);
       line-height: 1.2;
-      white-space: nowrap; /* Prevent text wrapping */
+      text-wrap: balance;
+      max-width: 90vw; /* Prevent text wrapping */
       overflow: visible; /* Don't clip text */
       text-overflow: clip; /* Show full text */
       transition: color 0.3s ease;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .swiper-slide {
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
     }
     
     /* Product title: orange in light mode */
@@ -426,12 +447,6 @@
 
     /* Tablet */
     @media screen and (max-width: 991px) {
-      .swiper {
-        height: 150px;
-        max-height: 150px;
-        margin-bottom: 0.75rem;
-      }
-      
       .swiper-slide {
         padding: 1rem 1.5rem;
       }
@@ -443,12 +458,6 @@
 
     /* Mobile */
     @media screen and (max-width: 767px) {
-      .swiper {
-        height: 130px;
-        max-height: 130px;
-        margin-bottom: 0.75rem;
-      }
-
       .swiper-slide {
         padding: 0.75rem 1rem;
       }
@@ -461,12 +470,6 @@
 
     /* Small Mobile */
     @media screen and (max-width: 479px) {
-      .swiper {
-        height: 120px;
-        max-height: 120px;
-        margin-bottom: 0.5rem;
-      }
-
       .swiper-slide {
         padding: 0.5rem 0.75rem;
       }
@@ -499,7 +502,8 @@
       /* Touch-friendly button size */
       min-height: 44px;
       min-width: 44px;
-      white-space: nowrap;
+      text-wrap: balance;
+      max-width: 90vw;
     }
 
     .swiper-slide .button:hover,
@@ -533,13 +537,76 @@
       }
     }
 
-    /* Navigation Arrows */
+    
+    /* Fixed View button at bottom of screen */
+    .carousel-view-btn {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      z-index: 10005;
+      pointer-events: auto !important;
+      padding: 0.75rem 2rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--text-primary);
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Generalsans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 44px;
+      min-width: 120px;
+      text-wrap: balance;
+      max-width: calc(100vw - 2rem);
+      touch-action: manipulation;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .carousel-view-btn:hover {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
+      transform: translateX(-50%) scale(1.02);
+    }
+
+    .carousel-view-btn:active {
+      transform: translateX(-50%) scale(0.98);
+    }
+
+    @media screen and (max-width: 767px) {
+      .carousel-view-btn {
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        padding: 0.625rem 1.75rem;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Per-slide View buttons replaced by fixed button */
+    .swiper-slide .view-details-btn {
+      display: none !important;
+    }
+
+/* Navigation Arrows — vertical up/down */
     .carousel_arrow_wrap {
       display: flex;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.75rem;
       pointer-events: none;
-      position: relative;
-      z-index: 9999; /* Highest z-index to appear above everything */
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10000;
     }
 
     .carousel_arrow_link {
@@ -600,11 +667,11 @@
       }
 
       .carousel_arrow_link::before {
-        border-width: 6px 10px 6px 0;
+        border-width: 0 6px 10px 6px;
       }
 
       .carousel_arrow_link.is-right::before {
-        border-width: 6px 0 6px 10px;
+        border-width: 10px 6px 0 6px;
       }
     }
 
@@ -624,35 +691,34 @@
       width: 0;
       height: 0;
       border-style: solid;
-      border-width: 8px 12px 8px 0;
-      border-color: transparent var(--text-primary-light, #000) transparent transparent;
+      border-width: 0 8px 12px 8px;
+      border-color: transparent transparent var(--text-primary-light, #000) transparent;
       display: block;
       transition: border-color 0.3s ease;
     }
 
     /* Day mode (light) - black arrow */
     [data-theme="light"] .carousel_arrow_link::before {
-      border-color: transparent var(--text-primary-light, #000) transparent transparent;
+      border-color: transparent transparent var(--text-primary-light, #000) transparent;
     }
 
     /* Night mode (dark) - white arrow */
     [data-theme="dark"] .carousel_arrow_link::before {
-      border-color: transparent var(--text-primary-dark, #fff) transparent transparent;
+      border-color: transparent transparent var(--text-primary-dark, #fff) transparent;
     }
 
     .carousel_arrow_link.is-right::before {
-      border-width: 8px 0 8px 12px;
-      border-color: transparent transparent transparent var(--text-primary-light, #000);
-    }
+      border-width: 12px 8px 0 8px;
+      border-color: var(--text-primary-light, #000) transparent transparent transparent;
 
     /* Day mode (light) - black arrow */
     [data-theme="light"] .carousel_arrow_link.is-right::before {
-      border-color: transparent transparent transparent var(--text-primary-light, #000);
+      border-color: var(--text-primary-light, #000) transparent transparent transparent;
     }
 
     /* Night mode (dark) - white arrow */
     [data-theme="dark"] .carousel_arrow_link.is-right::before {
-      border-color: transparent transparent transparent var(--text-primary-dark, #fff);
+      border-color: var(--text-primary-dark, #fff) transparent transparent transparent;
     }
 
     /* Disabled State */
@@ -874,7 +940,7 @@
     .products_drawer-more-collection {
       grid-column-gap: 1rem;
       grid-row-gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
       display: grid;
     }
 
@@ -1346,6 +1412,101 @@
 </div>
 
   <!-- NAV:END -->
+  <!-- Product Drawer Overlay -->
+  <div data-product-drawer-overlay class="product-drawer-overlay" aria-hidden="true">
+    <div class="product-drawer-overlay__dark" id="drawer-close-overlay" aria-hidden="true"></div>
+  </div>
+
+  <!-- Product Drawer Panel (underlay — revealed when main slides left) -->
+  <aside id="product-drawer" class="products_collection-drawer product-drawer" aria-hidden="true" aria-label="Product details">
+    <div class="products_drawer-wrapper product-drawer__panel">
+      <button class="products_drawer-close-icon" id="drawer-close-btn" aria-label="Close drawer">×</button>
+
+      <div class="product-drawer__loading" id="drawer-loading">
+        <div class="product-drawer__spinner"></div>
+        <p>Loading product details...</p>
+      </div>
+
+      <div class="product-drawer__content">
+        <div class="products_drawer-title" data-drawer-reveal>
+          <h3 id="drawer-product-title"></h3>
+          <h3 id="drawer-product-price"></h3>
+        </div>
+
+        <div class="products_drawer-content" data-drawer-reveal>
+          <div class="products_drawer-images">
+            <img src="" loading="lazy" alt="Product image" class="products_drawer-main-image" id="drawer-main-image">
+            <div class="products_drawer-more-collection" id="drawer-gallery"></div>
+          </div>
+
+          <div class="products_drawer-text">
+            <div class="products_text-top">
+              <div class="products_quantity-wrapper">
+                <div class="margin-bottom margin-xsmall">
+                  <h4 class="uppercase">qty</h4>
+                </div>
+                <input type="number" pattern="^[0-9]+$" inputmode="numeric" id="drawer-quantity" name="quantity" min="1" class="products_quantity" value="1">
+              </div>
+              <button id="drawer-add-to-cart" class="button-secondary">Add to Cart</button>
+              <div style="display:none" class="products_out-of-stock" id="drawer-out-of-stock">
+                <div>Sold out.</div>
+              </div>
+              <div style="display:none" class="products_error" id="drawer-error">
+                <div>Error loading product details.</div>
+              </div>
+            </div>
+
+            <div class="products_text-bottom">
+              <div class="margin-bottom margin-medium">
+                <h4 class="uppercase">product info</h4>
+              </div>
+
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left">
+                    <span class="products_description-icon">📄</span>
+                    <p>Description</p>
+                  </div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;">
+                  <div class="paragraph" id="drawer-description"></div>
+                </div>
+              </div>
+
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left">
+                    <span class="products_description-icon">ℹ️</span>
+                    <p>Care Instructions</p>
+                  </div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;">
+                  <div class="paragraph" id="drawer-care-instructions"></div>
+                </div>
+              </div>
+
+              <div class="products_description-item">
+                <div class="products_description-question">
+                  <div class="products_description-left">
+                    <span class="products_description-icon">🚚</span>
+                    <p>Delivery</p>
+                  </div>
+                  <span class="product_description-plus">+</span>
+                </div>
+                <div class="products_description-answer" style="display:none;">
+                  <p id="drawer-delivery"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+
   
   <!-- MAIN:BEGIN -->
   <main data-main class="is-interior">
@@ -1435,67 +1596,51 @@
         <!-- Add data-product-handle attribute with your Shopify product handle -->
         <div class="swiper-slide" data-product-handle="product-handle-1">
           <h2>Product 001</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-2">
           <h2>Product 002</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-3">
           <h2>Product 003</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-4">
           <h2>Product 004</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-5">
           <h2>Product 005</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-6">
           <h2>Product 006</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-7">
           <h2>Product 007</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-8">
           <h2>Product 008</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-9">
           <h2>Product 009</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-10">
           <h2>Product 010</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-11">
           <h2>Product 011</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-12">
           <h2>Product 012</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-13">
           <h2>Product 013</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-14">
           <h2>Product 014</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-15">
           <h2>Product 015</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
         <div class="swiper-slide" data-product-handle="product-handle-16">
           <h2>Product 016</h2>
-          <a href="#" class="button view-details-btn">View</a>
         </div>
       </div>
     </div>
@@ -1507,102 +1652,8 @@
     </div>
   </div>
 
-  <!-- Product Drawer -->
-  <div class="products_collection-drawer" id="product-drawer">
-    <div class="products_drawer-close" id="drawer-close-overlay"></div>
-    <div class="products_drawer-wrapper">
-      <button class="products_drawer-close-icon" id="drawer-close-btn" aria-label="Close drawer">×</button>
-      
-      <div class="products_drawer-title">
-        <h3 id="drawer-product-title"></h3>
-        <h3 id="drawer-product-price"></h3>
-      </div>
-      
-      <div class="products_drawer-content">
-        <!-- Images Section -->
-        <div class="products_drawer-images">
-          <img src="" loading="lazy" alt="Product image" class="products_drawer-main-image" id="drawer-main-image">
-          <div class="products_drawer-more-collection" id="drawer-gallery">
-            <!-- Gallery images will be populated dynamically -->
-          </div>
-        </div>
-        
-        <!-- Product Details Section -->
-        <div class="products_drawer-text">
-          <div class="products_text-top">
-            <div class="products_quantity-wrapper">
-              <div class="margin-bottom margin-xsmall">
-                <h4 class="uppercase">qty</h4>
-              </div>
-              <input type="number" pattern="^[0-9]+$" inputmode="numeric" id="drawer-quantity" name="quantity" min="1" class="products_quantity" value="1">
-            </div>
-            <button id="drawer-add-to-cart" class="button-secondary">Add to Cart</button>
-            <div style="display:none" class="products_out-of-stock" id="drawer-out-of-stock">
-              <div>Sold out.</div>
-            </div>
-            <div style="display:none" class="products_error" id="drawer-error">
-              <div>Error loading product details.</div>
-            </div>
-          </div>
-          
-          <div class="products_text-bottom">
-            <div class="margin-bottom margin-medium">
-              <h4 class="uppercase">product info</h4>
-            </div>
-            
-            <!-- Description Section -->
-            <div class="products_description-item">
-              <div class="products_description-question">
-                <div class="products_description-left">
-                  <span class="products_description-icon">📄</span>
-                  <p>Description</p>
-                </div>
-                <span class="product_description-plus">+</span>
-              </div>
-              <div class="products_description-answer" style="display:none;">
-                <div class="paragraph" id="drawer-description"></div>
-              </div>
-            </div>
-            
-            <!-- Care Instructions Section -->
-            <div class="products_description-item">
-              <div class="products_description-question">
-                <div class="products_description-left">
-                  <span class="products_description-icon">ℹ️</span>
-                  <p>Care Instructions</p>
-                </div>
-                <span class="product_description-plus">+</span>
-              </div>
-              <div class="products_description-answer" style="display:none;">
-                <div class="paragraph" id="drawer-care-instructions"></div>
-              </div>
-            </div>
-            
-            <!-- Delivery Section -->
-            <div class="products_description-item">
-              <div class="products_description-question">
-                <div class="products_description-left">
-                  <span class="products_description-icon">🚚</span>
-                  <p>Delivery</p>
-                </div>
-                <span class="product_description-plus">+</span>
-              </div>
-              <div class="products_description-answer" style="display:none;">
-                <p id="drawer-delivery"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Loading Spinner -->
-    <div class="drawer-loading" id="drawer-loading" style="display:none;">
-      <div class="loading-spinner"></div>
-      <p>Loading product details...</p>
-    </div>
-  </div>
-
+  <!-- Fixed View button — opens drawer for active product -->
+  <button type="button" id="carousel-view-btn" class="button carousel-view-btn" data-lenis-prevent aria-label="View product details">View</button>
   <!-- Scripts -->
   <!-- jQuery -->
   </main>
@@ -1693,6 +1744,7 @@
           if (collection && collection.products && collection.products.edges && collection.products.edges.length > 0) {
             collectionData = collection;
             collectionProducts = collection.products.edges.map(edge => edge.node);
+            window.collectionProducts = collectionProducts;
             
             console.log(`✅ Loaded ${collectionProducts.length} products from Airtable`);
             console.log(`📦 Collection: "${collection.title || handle}"`);
@@ -1748,7 +1800,7 @@
         products.forEach((product, index) => {
           // Create carousel item (3D image)
           const carouselItem = $(`
-            <div class="carousel_item" data-product-index="${index}">
+            <div class="carousel_item" data-product-index="${index}" data-product-handle="${product.handle}">
               <img src="${product.images && product.images.edges && product.images.edges.length > 0 ? product.images.edges[0].node.url : '/images/kiosk-placeholder-product-img.webp'}" 
                    alt="${product.title}" 
                    class="carousel_img" 
@@ -1762,7 +1814,6 @@
           const swiperSlide = $(`
             <div class="swiper-slide" data-product-handle="${product.handle}">
               <h2>${product.title}</h2>
-              <a href="#" class="button view-details-btn">View</a>
             </div>
           `);
           swiperWrapper.append(swiperSlide);
@@ -1865,14 +1916,44 @@
       $(document).on('drawerOpen', function() {
         drawerOpen = true;
         // Lock scroll only when drawer is open
-        document.body.style.overflow = 'hidden';
+        if (window.KioskScrollLock) window.KioskScrollLock.lock();
       });
       
       $(document).on('drawerClose', function() {
         drawerOpen = false;
         // Re-enable scroll when drawer closes
-        document.body.style.overflow = '';
+        if (window.KioskScrollLock) window.KioskScrollLock.unlock();
       });
+
+      function getPlaceholderProduct(productHandle) {
+        const collectionKey = typeof collectionHandle !== 'undefined' ? collectionHandle : null;
+        if (typeof getProductPlaceholder === 'function') {
+          return getProductPlaceholder(productHandle, collectionKey);
+        }
+        const fallback = '/images/kiosk-placeholder-product-img.webp';
+        return {
+          title: 'Product',
+          price: { amount: '299.00', currencyCode: 'SEK' },
+          mainImage: fallback,
+          gallery: [fallback],
+          description: '<p>Product — an essential piece from KIOSK.</p>',
+          careInstructions: '<p>Hand wash recommended in cold water.</p>'
+        };
+      }
+
+      function initProductDrawer() {
+        if (!window.KioskProductDrawer) return;
+        window.KioskProductDrawer.init({
+          getProducts: () => window.collectionProducts || [],
+          getPlaceholder: (handle) => getPlaceholderProduct(handle),
+        });
+      }
+
+      if (window.KioskProductDrawer) {
+        initProductDrawer();
+      } else {
+        window.addEventListener('load', initProductDrawer);
+      }
     });
     
     $(document).ready(function() {
@@ -2022,9 +2103,16 @@
           
           // Mark Swiper as initialized
           window.swiperInitialized = true;
+
+          if (window.lenis && typeof window.lenis.stop === 'function') {
+            window.lenis.stop();
+          }
+          document.documentElement.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
           
           // Initialize Swiper with mobile-friendly touch gestures
           const swiper = new Swiper(swiperEl[0], {
+            direction: 'vertical',
             effect: "creative",
             creativeEffect: {
               prev: {
@@ -2041,11 +2129,11 @@
             // Touch and swipe settings for mobile
             grabCursor: true,
             touchRatio: 1,
-            touchAngle: 45,
+            touchAngle: 90,
             simulateTouch: true,
             allowTouchMove: true,
-            touchStartPreventDefault: false,
-            touchMoveStopPropagation: false,
+            touchStartPreventDefault: true,
+            touchMoveStopPropagation: true,
             // Swipe settings
             slidesPerView: 1,
             spaceBetween: 0,
@@ -2058,6 +2146,7 @@
             mousewheel: {
               enabled: true,
               eventsTarget: "[carousel='component']",
+              releaseOnEdges: false,
               sensitivity: 1,
               forceToAxis: true
             },
@@ -2071,13 +2160,61 @@
             // Touch events
             touchEventsTarget: 'container',
             // Prevent clicks during swipe
-            preventClicks: true,
-            preventClicksPropagation: true,
+            preventClicks: false,
+            preventClicksPropagation: false,
             // Resistance when reaching edges
             resistance: true,
             resistanceRatio: 0.85
           });
+          window.collectionSwiper = swiper;
+
+          // Vertical swipe on carousel component (swiper overlay passes through touches)
+          const componentEl = $("[carousel='component']")[0];
+          if (componentEl) {
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let touchMoved = false;
+
+            componentEl.addEventListener('touchstart', (e) => {
+              if (e.target.closest('.carousel-view-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              touchStartY = e.touches[0].clientY;
+              touchStartX = e.touches[0].clientX;
+              touchMoved = false;
+            }, { passive: true });
+
+            componentEl.addEventListener('touchmove', (e) => {
+              const dy = Math.abs(e.touches[0].clientY - touchStartY);
+              const dx = Math.abs(e.touches[0].clientX - touchStartX);
+              if (dy > 12 || dx > 12) touchMoved = true;
+            }, { passive: true });
+
+            componentEl.addEventListener('touchend', (e) => {
+              if (e.target.closest('.carousel-view-btn, .carousel_arrow_link, .products_collection-drawer')) return;
+              const dy = e.changedTouches[0].clientY - touchStartY;
+              const dx = e.changedTouches[0].clientX - touchStartX;
+              if (touchMoved && Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) {
+                if (dy < 0) swiper.slideNext();
+                else swiper.slidePrev();
+              }
+            }, { passive: true });
+          }
+
           
+          
+          function updateFixedViewButton() {
+            const activeSlide = swiperEl.find('.swiper-slide').eq(swiper.activeIndex);
+            const handle = activeSlide.data('product-handle') || '';
+            const title = activeSlide.find('h2').text().trim();
+            const btn = $('#carousel-view-btn');
+            if (btn.length) {
+              btn.attr('data-product-handle', handle);
+              btn.attr('aria-label', title ? 'View ' + title : 'View product details');
+            }
+          }
+
+          updateFixedViewButton();
+          swiper.on('slideChange', updateFixedViewButton);
+
           // Sync Swiper progress with 3D rotation
           swiper.on("progress", function (e) {
             gsap.to(progress, {
@@ -2150,397 +2287,10 @@
       }
     });
 
-    // Product Drawer Functionality
-    $(document).ready(function() {
-      const drawer = $('#product-drawer');
-      const drawerOverlay = $('#drawer-close-overlay');
-      const drawerCloseBtn = $('#drawer-close-btn');
-      const viewDetailsBtns = $('.view-details-btn');
-      
-      // Airtable API Configuration
-      // Fetch product from Airtable using the Airtable client
-      // The Airtable client uses the /api/airtable proxy function to keep tokens server-side
-      async function fetchProduct(handle) {
-        try {
-          if (!window.airtable) {
-            throw new Error('Airtable client not loaded. Please ensure js/airtable.js is loaded.');
-          }
-          
-          console.log(`📊 Fetching product from Airtable: "${handle}"`);
-          
-          // Fetch from Airtable
-          const product = await window.airtable.getProductByHandle(handle);
-          
-          if (!product) {
-            throw new Error(`Product with handle "${handle}" not found in Airtable`);
-          }
-          
-          console.log(`✅ Product loaded from Airtable: "${product.title}"`);
-          console.log(`💰 Price: ${product.priceRange?.minVariantPrice?.amount || 'N/A'} ${product.priceRange?.minVariantPrice?.currencyCode || ''}`);
-          console.log(`🖼️ Images: ${product.images?.edges?.length || 0}`);
-          
-          return product;
-        } catch (error) {
-          console.error('❌ Error fetching product from Airtable:', error);
-          console.error('💡 Verify:');
-          console.error('   1. Product handle is correct');
-          console.error('   2. Product exists in Airtable Products table');
-          console.error('   3. AIRTABLE_ACCESS_TOKEN is configured');
-          console.error('   4. AIRTABLE_BASE_ID is configured');
-          throw error;
-        }
-      }
-
-      // Populate drawer with product data
-      function populateDrawer(product) {
-        // Product title and price
-        $('#drawer-product-title').text(product.title);
-        const price = product.priceRange.minVariantPrice;
-        const formattedPrice = window.airtable ? window.airtable.formatPrice(price.amount, price.currencyCode) : `${price.amount} ${price.currencyCode}`;
-        $('#drawer-product-price').text(formattedPrice);
-
-        // Main image
-        if (product.images.edges.length > 0) {
-          const mainImage = product.images.edges[0].node;
-          $('#drawer-main-image').attr('src', mainImage.url).attr('alt', mainImage.altText || product.title);
-          
-          // Gallery images
-          const gallery = $('#drawer-gallery');
-          gallery.empty();
-          
-          if (product.images.edges.length > 1) {
-            product.images.edges.slice(1).forEach(({ node: image }) => {
-              const galleryItem = $('<div class="products_drawer-more-item"></div>');
-              const galleryImg = $('<img class="products_drawer-more-image" loading="lazy">');
-              galleryImg.attr('src', image.url).attr('alt', image.altText || product.title);
-              galleryItem.append(galleryImg);
-              galleryItem.on('click', () => {
-                $('#drawer-main-image').attr('src', image.url).attr('alt', image.altText || product.title);
-              });
-              gallery.append(galleryItem);
-            });
-          }
-        }
-
-        // Description
-        if (product.descriptionHtml) {
-          $('#drawer-description').html(product.descriptionHtml);
-        } else if (product.description) {
-          $('#drawer-description').text(product.description);
-        } else {
-          $('#drawer-description').text('No description available.');
-        }
-
-        // Care instructions (from Airtable)
-        const careInstructions = product.careInstructions || null;
-        if (careInstructions) {
-          $('#drawer-care-instructions').html(careInstructions);
-        } else {
-          $('#drawer-care-instructions').html('<p>Care instructions not available.</p>');
-        }
-
-        // Delivery information (standard message, can be customized per product in Airtable if needed)
-        $('#drawer-delivery').html(`
-          <p><strong>Shipping Information:</strong></p>
-          <p>Standard shipping: 5-7 business days<br>
-          Express shipping: 2-3 business days<br>
-          Free shipping on orders over $100<br>
-          International shipping available</p>
-        `);
-
-        // Stock status
-        const isAvailable = product.variants.edges[0]?.node.availableForSale || false;
-        if (!isAvailable) {
-          $('#drawer-out-of-stock').show();
-          $('#drawer-add-to-cart').prop('disabled', true);
-        } else {
-          $('#drawer-out-of-stock').hide();
-          $('#drawer-add-to-cart').prop('disabled', false);
-        }
-
-        // Hide error if previously shown
-        $('#drawer-error').hide();
-      }
-
-      // Fetch image from Supabase (optional - if you store image URLs in Supabase)
-      async function fetchImageFromSupabase(productHandle) {
-        try {
-          // Uncomment and configure if using Supabase
-          /*
-          const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?handle=eq.${productHandle}&select=primary_image`,
-            {
-              headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-              }
-            }
-          );
-          const data = await response.json();
-          if (data && data.length > 0 && data[0].primary_image) {
-            return data[0].primary_image;
-          }
-          */
-          return null;
-        } catch (error) {
-          console.error('Error fetching image from Supabase:', error);
-          return null;
-        }
-      }
-      function initStaticCarouselImages(collectionKey) {
-        if (typeof applyManifestCarouselImages === 'function') {
-          applyManifestCarouselImages(collectionKey);
-          return;
-        }
-        if (typeof COLLECTION_HANDLES === 'undefined' || typeof PRODUCT_IMAGES === 'undefined') return;
-        const handles = COLLECTION_HANDLES[collectionKey] || [];
-        $('.carousel_item').each(function (i) {
-          const handle = handles[i];
-          if (!handle || !PRODUCT_IMAGES[handle]) return;
-          const entry = PRODUCT_IMAGES[handle];
-          $(this).find('.carousel_img')
-            .attr('src', entry.product)
-            .attr('alt', entry.productAlt);
-        });
-      }
-
-
-
-      // Placeholder product data for template products
-      // Each product handle corresponds to a carousel slide
-      function getPlaceholderProduct(productHandle) {
-        const collectionKey = typeof collectionHandle !== 'undefined' ? collectionHandle : null;
-        if (typeof getProductPlaceholder === 'function') {
-          return getProductPlaceholder(productHandle, collectionKey);
-        }
-        const fallback = '/images/kiosk-placeholder-product-img.webp';
-        return {
-          title: 'Product',
-          price: { amount: '299.00', currencyCode: 'SEK' },
-          mainImage: fallback,
-          gallery: [fallback],
-          description: '<p>Product — an essential piece from KIOSK.</p>',
-          careInstructions: '<p><strong>Care Instructions:</strong></p><ul><li>Hand wash recommended in cold water</li></ul>'
-        };
-      }
-      // Populate drawer with placeholder data
-      function populatePlaceholderDrawer(placeholderData) {
-        // Product title and price
-        $('#drawer-product-title').text(placeholderData.title);
-        $('#drawer-product-price').text(`${placeholderData.price.amount} ${placeholderData.price.currencyCode}`);
-
-        // Main image
-        $('#drawer-main-image').attr('src', placeholderData.mainImage).attr('alt', placeholderData.title);
-        
-        // Gallery images
-        const gallery = $('#drawer-gallery');
-        gallery.empty();
-        
-        if (placeholderData.gallery && placeholderData.gallery.length > 0) {
-          placeholderData.gallery.forEach((imageUrl, index) => {
-            const galleryItem = $('<div class="products_drawer-more-item"></div>');
-            const galleryImg = $('<img class="products_drawer-more-image" loading="lazy">');
-            galleryImg.attr('src', imageUrl).attr('alt', `${placeholderData.title} - Image ${index + 2}`);
-            galleryItem.append(galleryImg);
-            galleryItem.on('click', () => {
-              $('#drawer-main-image').attr('src', imageUrl).attr('alt', `${placeholderData.title} - Image ${index + 2}`);
-            });
-            gallery.append(galleryItem);
-          });
-        }
-
-        // Description
-        if (placeholderData.description) {
-          $('#drawer-description').html(placeholderData.description);
-        }
-
-        // Care instructions
-        if (placeholderData.careInstructions) {
-          $('#drawer-care-instructions').html(placeholderData.careInstructions);
-        }
-
-        // Delivery (default for all)
-        $('#drawer-delivery').html(`
-          <strong>Delivery Information:</strong><br>
-          Standard shipping: 5-7 business days<br>
-          Express shipping: 2-3 business days<br>
-          Free shipping on orders over $100<br>
-          International shipping available<br>
-          Track your order through our shipping partner
-        `);
-
-        // Hide error and out of stock
-        $('#drawer-error').hide();
-        $('#drawer-out-of-stock').hide();
-        $('#drawer-add-to-cart').prop('disabled', false);
-      }
-
-      // Store current product data for add to cart
-      let currentProductData = null;
-      let currentProductHandle = null;
-
-      // Open drawer
-      function openDrawer(productHandle) {
-        currentProductHandle = productHandle;
-        currentProductData = null; // Reset
-        
-        drawer.addClass('open');
-        $('body').css('overflow', 'hidden'); // Lock body scroll
-        $(document).trigger('drawerOpen'); // Trigger event for scroll lock
-        
-        // Also trigger the native event
-        if (typeof window.CustomEvent !== 'undefined') {
-          document.dispatchEvent(new CustomEvent('drawerOpen'));
-        }
-
-        // Check if it's a placeholder handle
-        if (productHandle && productHandle.startsWith('product-handle-')) {
-          // Show placeholder data immediately
-          const placeholderData = getPlaceholderProduct(productHandle);
-          populatePlaceholderDrawer(placeholderData);
-          return;
-        }
-
-        // Otherwise, fetch from Airtable
-        $('#drawer-loading').show();
-        fetchProduct(productHandle)
-          .then(product => {
-            currentProductData = product; // Store for add to cart
-            populateDrawer(product);
-            $('#drawer-loading').hide();
-          })
-          .catch(error => {
-            console.error('Error loading product:', error);
-            $('#drawer-loading').hide();
-            $('#drawer-error').show().find('div').text('Failed to load product details. Please try again.');
-          });
-      }
-
-      // Close drawer
-      function closeDrawer() {
-        drawer.removeClass('open');
-        $('body').css('overflow', ''); // Unlock body scroll
-        $(document).trigger('drawerClose'); // Trigger event for scroll unlock
-        
-        // Also trigger the native event
-        if (typeof window.CustomEvent !== 'undefined') {
-          document.dispatchEvent(new CustomEvent('drawerClose'));
-        }
-      }
-
-      // Event handlers
-      viewDetailsBtns.on('click', function(e) {
-        e.preventDefault();
-        const slide = $(this).closest('.swiper-slide');
-        const productHandle = slide.data('product-handle');
-        
-        if (productHandle) {
-          openDrawer(productHandle);
-        } else {
-          alert('Product handle not found. Please add data-product-handle attribute.');
-        }
-      });
-
-      drawerCloseBtn.on('click', closeDrawer);
-      drawerOverlay.on('click', closeDrawer);
-
-      // Close drawer on ESC key
-      $(document).on('keydown', function(e) {
-        if (e.key === 'Escape' && drawer.hasClass('open')) {
-          closeDrawer();
-        }
-      });
-
-      // Accordion functionality for description sections
-      $('.products_description-question').on('click', function() {
-        const item = $(this).closest('.products_description-item');
-        const isActive = item.hasClass('active');
-        
-        // Close all items
-        $('.products_description-item').removeClass('active');
-        
-        // Open clicked item if it wasn't active
-        if (!isActive) {
-          item.addClass('active');
-        }
-      });
-
-      // Add to cart button - integrate with Shopify cart
-      $('#drawer-add-to-cart').on('click', async function() {
-        const button = $(this);
-        const originalText = button.text();
-        
-        // Disable button during request
-        button.prop('disabled', true).text('Adding...');
-        
-        try {
-          // Use stored product data if available, otherwise fetch
-          let product = currentProductData;
-          
-          if (!product && currentProductHandle) {
-            product = await fetchProduct(currentProductHandle);
-            currentProductData = product;
-          }
-          
-          if (!product) {
-            throw new Error('Product data not available');
-          }
-          
-          if (!product.variants || !product.variants.edges || product.variants.edges.length === 0) {
-            throw new Error('No variants available for this product');
-          }
-          
-          // Get first available variant
-          const firstVariant = product.variants.edges[0].node;
-          if (!firstVariant.availableForSale) {
-            throw new Error('This product is currently out of stock');
-          }
-          
-          // Add to cart using cart manager
-          if (!window.cart) {
-            throw new Error('Cart manager not loaded. Please ensure js/cart.js is loaded.');
-          }
-          
-          await window.cart.addItem(firstVariant.id, 1);
-          
-          // Show success message
-          button.text('Added!').removeClass('btn-primary').addClass('btn-success');
-          setTimeout(() => {
-            button.text(originalText).removeClass('btn-success').addClass('btn-primary');
-          }, 2000);
-          
-        } catch (error) {
-          console.error('Error adding to cart:', error);
-          alert('Failed to add item to cart: ' + error.message);
-          button.text(originalText);
-        } finally {
-          button.prop('disabled', false);
-        }
-      });
-
-      // ========================================
-      // Development Mode Toggle for Container Borders
-      // ========================================
-      function toggleDebugBorders() {
-        document.documentElement.classList.toggle('debug-borders');
-        const isEnabled = document.documentElement.classList.contains('debug-borders');
-        console.log('Debug borders:', isEnabled ? 'ON' : 'OFF');
-        console.log('All container divs and wrappers now have colored 2px borders for debugging.');
-        console.log('See docs/CONTAINER_BORDERS_CHEATSHEET.md for color reference.');
-        return isEnabled;
-      }
-
-      // Auto-enable if URL parameter is present
-      if (window.location.search.includes('debug=borders')) {
-        toggleDebugBorders();
-      }
-
-      // Make function globally available
-      window.toggleDebugBorders = toggleDebugBorders;
-    });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
+  <script src="../js/product-drawer.js" type="text/javascript"></script>
   <script src="../js/underlay-nav.js" type="text/javascript"></script>
 </body>
 </html>
