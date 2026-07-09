@@ -9,9 +9,11 @@
     "update:csv-images": "node scripts/update-csv-product-images.js",
     "build:product-image-js": "node scripts/build-product-image-js.js",
     "verify:images": "node scripts/verify-product-images.js",
-    "sync:store-featured": "node scripts/sync-store-featured-airtable.js"
+    "sync:store-featured": "node scripts/sync-store-featured-airtable.js",
+    "audit:mobile-screenshots": "node scripts/mobile-screenshot-audit.js"
   },
   "devDependencies": {
+    "playwright": "^1.61.1",
     "sharp": "^0.33.5"
   }
 }
