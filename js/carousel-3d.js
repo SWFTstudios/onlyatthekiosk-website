@@ -45,8 +45,14 @@
     return window.innerWidth < MOTION.mobileBreakpoint;
   }
 
-  function getRadius() {
-    return isMobile() ? MOTION.radius.mobile : MOTION.radius.desktop;
+  function getRadius(count) {
+    const base = isMobile() ? MOTION.radius.mobile : MOTION.radius.desktop;
+    const n = Math.max(count || 1, 1);
+    // Widen the cylinder as card count grows so faces don't intersect
+    // (classic: half-width / tan(π/n)). Floor at OSAS baseline.
+    const cardW = isMobile() ? 220 : 256;
+    const fitted = cardW / 2 / Math.tan(Math.PI / n) + (isMobile() ? 40 : 80);
+    return Math.max(base, fitted);
   }
 
   function getPerspective() {
@@ -266,7 +272,7 @@
     function cardPose(index) {
       const angle = step * index + state.G;
       const rad = (angle * Math.PI) / 180;
-      const R = getRadius();
+      const R = getRadius(count);
       return {
         x: Math.sin(rad) * R,
         z: Math.cos(rad) * R,
@@ -322,7 +328,8 @@
         }
         el.style.transform = `translate(-50%, -50%) translateX(${x}px) translateZ(${z}px) rotateY(${rotationY}deg) scale(${scale})`;
         el.style.transformOrigin = 'center center';
-        el.style.zIndex = i === state.activeIndex ? 10 : 1;
+        el.style.zIndex = i === state.activeIndex ? 10 : backFacing ? 0 : 1;
+        el.style.visibility = backFacing ? 'hidden' : 'visible';
         el.classList.toggle('is-active', i === state.activeIndex);
 
         const img = el.querySelector('.carousel_img');
@@ -600,7 +607,7 @@
       // Fallback: tap center band flips active
       const rect = wrapEl.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
-      if (Math.abs(x - cx) < getRadius() * 0.55) {
+      if (Math.abs(x - cx) < getRadius(count) * 0.55) {
         toggleFlip(state.activeIndex);
       }
     }
