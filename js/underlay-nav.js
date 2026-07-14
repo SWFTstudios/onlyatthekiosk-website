@@ -6,6 +6,43 @@
 (function () {
   'use strict';
 
+  /* iOS-safe scroll lock (shared with email modal and product drawer) */
+  if (!window.KioskScrollLock) {
+    let lockCount = 0;
+    let scrollY = 0;
+
+    window.KioskScrollLock = {
+      lock() {
+        if (lockCount === 0) {
+          scrollY = window.scrollY || window.pageYOffset || 0;
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${scrollY}px`;
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+        }
+        lockCount += 1;
+      },
+      unlock() {
+        if (lockCount <= 0) return;
+        lockCount -= 1;
+        if (lockCount === 0) {
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          window.scrollTo(0, scrollY);
+        }
+      },
+      isLocked() {
+        return lockCount > 0;
+      },
+    };
+  }
+
   function initThemeToggle() {
     const html = document.documentElement;
     const themeToggle = document.querySelector('.underlay-nav__theme-toggle');
@@ -188,7 +225,18 @@
 
     function setMenuStatus(open) {
       document.body.setAttribute('data-menu-status', open ? 'open' : '');
+      if (open) {
+        window.KioskScrollLock.lock();
+      } else {
+        window.KioskScrollLock.unlock();
+      }
     }
+
+    function closeMenu() {
+      if (isOpen) toggle();
+    }
+
+    window.KioskNav = { closeMenu, isOpen: () => isOpen };
 
     function toggle() {
       isOpen = !isOpen;
@@ -234,6 +282,10 @@
       });
     });
 
+    document.addEventListener('drawerOpen', () => {
+      if (isOpen) closeMenu();
+    });
+
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -247,9 +299,38 @@
     });
   }
 
+  function initScrollDetection() {
+    const navHeader = document.querySelector('.underlay-nav__header');
+    if (!navHeader) return;
+
+    let scrollTimeout;
+    let isScrolled = false;
+
+    function handleScroll() {
+      clearTimeout(scrollTimeout);
+      
+      scrollTimeout = setTimeout(() => {
+        const scrollPosition = window.scrollY || window.pageYOffset;
+        const shouldBeScrolled = scrollPosition > 0;
+
+        if (shouldBeScrolled !== isScrolled) {
+          isScrolled = shouldBeScrolled;
+          navHeader.classList.toggle('is-scrolled', isScrolled);
+        }
+      }, 10);
+    }
+
+    // Check initial scroll position
+    handleScroll();
+
+    // Listen for scroll events with passive flag for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  }
+
   function init() {
     initThemeToggle();
     initFixedUnderlayNavigation();
+    initScrollDetection();
   }
 
   if (document.readyState === 'loading') {

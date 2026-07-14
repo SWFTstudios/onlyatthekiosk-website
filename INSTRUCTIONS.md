@@ -132,9 +132,10 @@ Configure per page with `window.KioskCarousel3DConfig` (`assetBase`, `collection
 ### Supporting Files
 ```
 /
-├── images/                 # Image assets
-├── fonts/                  # Font files (GeneralSans, SuisseIntl)
-├── docs/                   # Documentation
+├── images/                 # Image assets (see docs/IMAGE_SOURCES.md)
+│   └── products/           # Per-product placeholder images ({handle}-product.webp, {handle}-lifestyle.webp)
+├── data/                   # Product image manifest (product-image-manifest.json)
+├── scripts/                # Build, generate, sync, and verify product image scripts
 └── webflow-exports/        # Reference designs from Webflow
 ```
 
@@ -305,7 +306,20 @@ Configure per page with `window.KioskCarousel3DConfig` (`assetBase`, `collection
         └── videos
 ```
 
-**Note**: The `images/` directory contains many image assets (product images, promotional images, icons, etc.). See `docs/IMAGE_SOURCES.md` for details on image sources and organization.
+**Note**: The `images/` directory contains product assets, promotional images, icons, etc. Each catalog product has unique placeholder images in `images/products/`. See [`docs/IMAGE_SOURCES.md`](docs/IMAGE_SOURCES.md) for the full generation, sync, and swap workflow.
+
+### Product Placeholder Images
+
+```bash
+npm run build:manifest          # Build manifest from CSV
+npm run generate:images -- --openai --remote --force  # Regenerate via ChatGPT (needs OPENAI_API_KEY in Cloudflare)
+npm run build:product-image-js  # Regenerate frontend fallback manifest
+npm run sync:airtable-images -- --remote            # Push Image URLs to Airtable
+npm run update:csv-images       # Update Shopify CSV with unique image URLs
+node scripts/verify-product-images.js  # Verify all 160 images exist
+```
+
+Replace real photography later by swapping files in `images/products/` with the same filenames — no code changes needed.
 
 ---
 

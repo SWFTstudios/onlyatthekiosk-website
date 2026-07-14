@@ -31,14 +31,16 @@
       smooth: true, // Enable smooth scrolling
       smoothTouch: false, // Disable smooth touch on mobile (can cause issues)
       touchMultiplier: 2, // Touch scroll sensitivity
-      autoRaf: true, // Auto requestAnimationFrame
-      // Prevent smooth scroll on drawer and carousel images
+      autoRaf: !isCarouselPage, // Carousel pages use GSAP ticker only
+      // Prevent smooth scroll on drawer and carousel
       prevent: (node) => {
         return node.closest && (
           node.closest('.products_collection-drawer') ||
           node.closest('.products_drawer-wrapper') ||
+          node.closest('[carousel="component"]') ||
           node.closest('.carousel_list') ||
           node.closest('.carousel_item') ||
+          node.closest('.swiper') ||
           node.hasAttribute('data-lenis-prevent')
         );
       },
@@ -108,6 +110,13 @@
 
     // Make lenis instance globally available for debugging
     window.lenis = lenis;
+
+    // Collection carousel pages: lock page scroll so only vertical carousel moves
+    if (isCarouselPage) {
+      lenis.stop();
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    }
 
     // Log scroll events (optional, can be removed in production)
     // lenis.on('scroll', (e) => {

@@ -714,7 +714,8 @@ h1 {
 
 .main-wrapper {
   flex-flow: column;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   display: flex;
 }
 
@@ -770,9 +771,10 @@ h1 {
 .utility-page-wrap {
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  width: 100%;
   max-width: 100%;
   height: 100vh;
+  height: 100svh;
   max-height: 100%;
   display: flex;
 }
@@ -794,6 +796,12 @@ h1 {
   transform-style: preserve-3d;
   display: inline-block;
   transform: scaleX(-1); /* Mirror horizontally for backwards K */
+}
+
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 .body {
@@ -909,8 +917,12 @@ h1 {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  height: 100svh;
   display: flex;
   position: relative;
+  overflow: visible;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -925,8 +937,30 @@ h1 {
   font-weight: 900;
   line-height: .8;
   position: relative;
-  transform: translate3d(0, 0, 1px);
+  transform: translate3d(0, 0, 2px);
   transition: color 0.3s ease;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+._3d-text---wrap {
+  transform-style: preserve-3d;
+  overflow: visible;
+}
+
+._3d-text > .text-block-2:first-child {
+  position: relative;
+  z-index: 2;
+  transform: translate3d(0, 0, 1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+._3d-text.x-rotate-b,
+._3d-text.x-rotate-k,
+._3d-text.x-bg {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 ._3d-text.x-rotate-b {
@@ -1788,6 +1822,13 @@ h1 {
   display: flex;
 }
 
+.marquee-embed.is--domain {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
 .featured-product_bottom {
   border-bottom-right-radius: 1vw;
   border-bottom-left-radius: 1vw;
@@ -2389,17 +2430,30 @@ h1 {
   .home_grid-right {
     width: 100%;
     display: flex;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-left: 20px;
+    gap: 16px;
+    padding-right: 20px;
+    mask-image: linear-gradient(to right, #000 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 90%, transparent 100%);
   }
 
   .home_grid-right.is--contact {
     flex-direction: column;
     margin-right: 0;
+    mask-image: none;
+    -webkit-mask-image: none;
+    scroll-snap-type: none;
   }
 
   .featured-product {
     border-bottom-width: 0;
     min-width: 300px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
   }
 
   .featured-section {
@@ -2419,6 +2473,8 @@ h1 {
     margin-bottom: 8px;
     margin-right: 16px;
     overflow: hidden;
+    scroll-snap-align: start;
+    flex-shrink: 0;
   }
 
   .home-company_image {
@@ -2491,7 +2547,13 @@ h1 {
     margin-right: 0;
     padding-bottom: 2vw;
     display: flex;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-left: 20px;
+    gap: 16px;
+    padding-right: 20px;
   }
 
   .hero_products-view {
@@ -3121,21 +3183,24 @@ h1 {
 
 .email-modal-close {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1;
   color: #ffffff;
   cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.2s ease;
+  touch-action: manipulation;
 }
 
 .email-modal-close:hover {
@@ -3288,21 +3353,24 @@ h1 {
 
 .email-modal-close {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1;
   color: #ffffff;
   cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.2s ease;
+  touch-action: manipulation;
 }
 
 .email-modal-close:hover {
@@ -3574,31 +3642,32 @@ h1 {
   color: #ffffff !important;
 }
 
-/* Desktop-specific accent button styling */
-@media screen and (min-width: 992px) {
-  #notify-me-btn.btn-accent,
-  #notify-me-btn.btn-accent.w-button {
-    background-color: #FF6600 !important;
-    color: #ffffff !important;
-    border-color: #FF6600 !important;
-    border: 1px solid #FF6600 !important;
-    padding: 0.75rem 1.5rem !important;
-    border-radius: 50px !important;
-    font-weight: 500 !important;
-    font-size: 0.875rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    display: inline-block !important;
-    text-decoration: none !important;
-    transition: all 0.3s ease !important;
-  }
-  
-  #notify-me-btn.btn-accent:hover,
-  #notify-me-btn.btn-accent.w-button:hover {
-    background-color: #FB9F89 !important;
-    border-color: #FB9F89 !important;
-    color: #ffffff !important;
-  }
+/* Accent button styling — mobile-first, enhanced on desktop */
+#notify-me-btn.btn-accent,
+#notify-me-btn.btn-accent.w-button {
+  background-color: #FF6600 !important;
+  color: #ffffff !important;
+  border-color: #FF6600 !important;
+  border: 1px solid #FF6600 !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+#notify-me-btn.btn-accent:hover,
+#notify-me-btn.btn-accent.w-button:hover {
+  background-color: #FB9F89 !important;
+  border-color: #FB9F89 !important;
+  color: #ffffff !important;
 }
 
 /* Unified Typography Classes */
@@ -3647,6 +3716,12 @@ h1 {
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
+  }
+
+  .main-wrapper.is-interior > .container,
+  .main-wrapper.is-interior > div[class*="container"] {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
   }
 }
 

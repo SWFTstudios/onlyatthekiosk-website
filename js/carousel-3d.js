@@ -808,13 +808,39 @@
     });
   }
 
+  function openViaSharedDrawer(handle) {
+    if (window.KioskProductDrawer && typeof window.KioskProductDrawer.open === 'function') {
+      window.KioskProductDrawer.open(String(handle));
+      return true;
+    }
+    if (typeof window.openProductDrawer === 'function') {
+      window.openProductDrawer(String(handle));
+      return true;
+    }
+    return false;
+  }
+
   /* ------------------------------------------------------------------ *
-   * Product drawer
+   * Product drawer — prefer shared KioskProductDrawer (from main).
    * ------------------------------------------------------------------ */
 
   function initDrawer() {
     const $drawer = $('#product-drawer');
     if (!$drawer.length) return;
+
+    // Shared underlay drawer owns open/close/ATC when present.
+    if (window.KioskProductDrawer) {
+      drawerOpenFn = (handle) => openViaSharedDrawer(handle);
+      $('#carousel-view-btn').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!controller) return;
+        const el = document.querySelectorAll('.carousel_item')[controller.state.activeIndex];
+        const handle = el && el.getAttribute('data-product-handle');
+        if (handle) openViaSharedDrawer(handle);
+      });
+      return;
+    }
 
     let currentProductData = null;
     let currentProductHandle = null;
@@ -906,6 +932,7 @@
     }
 
     function openDrawer(handle) {
+      if (openViaSharedDrawer(handle)) return;
       currentProductHandle = handle;
       currentProductData = null;
       $drawer.addClass('open');
@@ -1103,8 +1130,19 @@
 
     if (products && products.length > 0) {
       buildCarouselDOM(products, assetBase);
+      window.collectionProducts = products;
     } else {
       ensurePlaceholderFlipCards(assetBase);
+    }
+
+    if (window.KioskProductDrawer && typeof window.KioskProductDrawer.init === 'function') {
+      try {
+        window.KioskProductDrawer.init({
+          getProducts: () => window.collectionProducts || [],
+        });
+      } catch (err) {
+        console.warn('KioskProductDrawer.init failed:', err);
+      }
     }
 
     if (!$('.carousel_item').length) {
