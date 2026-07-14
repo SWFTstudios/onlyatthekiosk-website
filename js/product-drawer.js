@@ -221,6 +221,14 @@
   }
 
   function getActiveProductHandle() {
+    // Prefer OSAS carousel controller (shared module) when present
+    if (window.kioskCarousel3DController) {
+      const c = window.kioskCarousel3DController;
+      const items = document.querySelectorAll('.carousel_item');
+      const el = items[c.state && typeof c.state.activeIndex === 'number' ? c.state.activeIndex : 0];
+      const handle = el && el.getAttribute('data-product-handle');
+      if (handle) return handle;
+    }
     const activeSlide = document.querySelector('.swiper-slide-active');
     if (activeSlide) {
       const handle = resolveProductHandle(activeSlide);
@@ -259,14 +267,18 @@
       });
     }
 
-    document.addEventListener('click', (e) => {
-      const wrap = e.target.closest('[carousel="wrap"], .carousel_list, .carousel_item');
-      if (!wrap) return;
-      if (e.target.closest('.carousel-view-btn, .carousel_arrow_link')) return;
-      e.preventDefault();
-      const handle = getActiveProductHandle();
-      if (handle) openDrawer(handle);
-    });
+    // Do not open drawer on raw card clicks when the OSAS flip controller is
+    // active — cards flip on tap; View (fixed button or flip back) opens drawer.
+    if (!window.KioskCarousel3D) {
+      document.addEventListener('click', (e) => {
+        const wrap = e.target.closest('[carousel="wrap"], .carousel_list, .carousel_item');
+        if (!wrap) return;
+        if (e.target.closest('.carousel-view-btn, .carousel_arrow_link, .view-details-btn')) return;
+        e.preventDefault();
+        const handle = getActiveProductHandle();
+        if (handle) openDrawer(handle);
+      });
+    }
 
     document.addEventListener('click', (e) => {
       const title = e.target.closest('.swiper-slide h2');
