@@ -81,36 +81,31 @@ This project creates a completely custom frontend and user experience while leve
 
 #### 3D Collection Carousel
 
-Collection pages and `carousel-template.html` share the 3D carousel via:
+Collection pages and `carousel-template.html` share an Of Skin And Souls–style 3D cylinder via:
 
-- `css/carousel-3d.css` — carousel, drawer, title-stack, and drag-layer styles
-- `js/carousel-3d.js` — load-first init, drag-to-spin ring controller, GSAP-only (no Swiper)
+- `css/carousel-3d.css` — stage, flip cards, drawer, depth cues
+- `js/carousel-3d.js` — per-card sin/cos placement, velocity drag, inertia, flip, autoplay
 
 Configure per page with `window.KioskCarousel3DConfig` (`assetBase`, `collectionHandle`). Re-apply asset links after HTML edits with `node scripts/patch-collection-carousel.js`.
 
-**Interaction model** — the 3D ring is the single source of truth:
+**Interaction model** (matches [ofskinandsouls.com](https://www.ofskinandsouls.com/fr)):
 
-- Drag/swipe horizontally anywhere on the carousel to spin the ring 1:1; release applies momentum, then the ring snaps so the active card lands front-facing (tilt and rotation both rest at 0 for the front card, which gets `.is-active` scale/shadow lift).
-- Tap the front card (or its "View" button) to open the product drawer; tap a side card to spin it to the front. Arrows, keyboard (arrow keys / Enter) and mousewheel drive the same ring.
-- Product titles are a GSAP crossfade follower of the ring (the legacy `.swiper-slide` class names are kept, but Swiper is no longer loaded).
-- `prefers-reduced-motion` skips the intro and shortens settle tweens.
+- Each card is placed with `x = sin(θ)·R`, `z = cos(θ)·R`, `rotateY(θ)` so the active card lands front-facing (`θ ≈ 0`). Radius 380px desktop / 320 mobile; perspective 1400 / 1000.
+- **Desktop (≥768):** drag builds velocity; each frame `G += velocity`; release → inertia (`v *= 0.9`) then snap to nearest `360/n`.
+- **Mobile:** discrete swipe (`|dx| > 50` in `<500ms`) steps ±1; short tap flips the front card.
+- **Flip cards:** front = product image; back = title, price, View → product drawer. Only one flip open at a time.
+- **Autoplay** every **4s**; pauses 10s after any interaction.
+- Depth cues: back hemisphere brightness 0.15, neighbors 0.85, front 1; slight motion blur while spinning; desktop hover scale 1.15.
+- Arrows, keyboard, and mousewheel step through the same controller.
+- `prefers-reduced-motion` skips intro and disables autoplay.
 
-**Motion spec** — all parameters live in the `MOTION` object at the top of `js/carousel-3d.js` (exposed as `window.KioskCarousel3D.MOTION`):
+**Motion knobs** live in `MOTION` at the top of `js/carousel-3d.js` (`window.KioskCarousel3D.MOTION`).
 
-| Group | Key parameters | Values |
-|-------|----------------|--------|
-| `intro` | duration / ease | 1.5s, `power2.inOut` (skipped after first view per session) |
-| `drag` | tap threshold | < 8px movement and < 300ms = tap |
-| `inertia` | projection / settle ease | 0.22s velocity carry, max 3-card fling, `CustomEase(0.22, 1.15, 0.32, 1)` landing (slight overshoot) |
-| `step` | arrows/keys/wheel | 0.65s per card, 350ms wheel lockout |
-| `tilt` | velocity-based X tilt | up to 6°, rests at 0° so the card faces the customer |
-| `title` | crossfade | 0.28s, 14px directional travel |
+**Visual debug aids:**
 
-**Visual debug aids** (development only):
-
-- `?debug=motion` — fixed HUD showing live rotation, active index, velocity (°/s), snap target, drag/settle state, and FPS (turns orange under 50fps); buttons to replay the intro, step next/prev, and load **GSDevTools** (CDN, debug-only) to scrub the intro timeline like an animator.
-- `?debug=borders` — container border overlay (see `docs/CONTAINER_BORDERS_CHEATSHEET.md`).
-- `window.kioskCarousel3DController` — console access to `state`, `stepBy(n)`, `goToIndex(i)`, `settleTo(deg)`.
+- `?debug=motion` — HUD with `G`, active index, velocity, inertia, snap target, autoplay state, FPS; Next / Prev / Flip / GSDevTools.
+- `?debug=borders` — container border overlay.
+- `window.kioskCarousel3DController` — `state`, `stepBy(n)`, `goToIndex(i)`, `toggleFlip(i)`.
 
 ---
 

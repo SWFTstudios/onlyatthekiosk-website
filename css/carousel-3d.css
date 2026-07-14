@@ -1,214 +1,257 @@
-/* KIOSK 3D Collection Carousel — shared styles */
+/* KIOSK 3D Collection Carousel — OSAS-style cylinder + flip cards */
 
 /* Fade-up elements start hidden */
-    [fade-up], [carousel="wrap"] { 
-      opacity: 0;
-    }
+[fade-up], [carousel="wrap"] {
+  opacity: 0;
+}
 
-    /* 3D Carousel Container */
-    [carousel="component"] {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem 1rem;
-      box-sizing: border-box;
-      overflow: visible; /* Allow 3D carousel items to extend beyond bounds */
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      /* Allow touch gestures for swiping and scrolling */
-      touch-action: pan-y pan-x;
-      /* Keep container centered */
-      margin: 0;
-    }
+/* 3D Carousel Container */
+[carousel="component"] {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+  overflow: visible;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  touch-action: none;
+  margin: 0;
+  z-index: 1;
+}
 
-    /* Tablet - Adjust padding */
-    @media screen and (max-width: 991px) {
-      [carousel="component"] {
-        padding: 0.75rem;
-      }
-    }
+@media screen and (max-width: 991px) {
+  [carousel="component"] {
+    padding: 0.75rem;
+  }
+}
 
-    /* Mobile - Minimal padding */
-    @media screen and (max-width: 767px) {
-      [carousel="component"] {
-        padding: 0.5rem;
-        height: 100svh; /* Small viewport height for mobile */
-      }
-    }
+@media screen and (max-width: 767px) {
+  [carousel="component"] {
+    padding: 0.5rem;
+    height: 100svh;
+  }
+}
 
-    @media screen and (max-width: 479px) {
-      [carousel="component"] {
-        padding: 0.25rem;
-      }
-    }
+/* 3D stage — perspective set by JS (1400 / 1000) */
+[carousel="wrap"] {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 56vh;
+  max-height: 560px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective-origin: center center;
+  box-sizing: border-box;
+  overflow: visible;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-    /* 3D Carousel Wrapper */
-    [carousel="wrap"] {
-      will-change: contents;
-      --3d-carousel-item-width: 40vw;
-      --3d-carousel-gap: 7vw;
-      --3d-carousel-rotate: 0deg;
-      --3d-carousel-rotate-x: 0deg;
-      --3d-carousel-z: 0px;
-      position: relative;
-      width: 100%;
-      max-width: 100%;
-      height: 50vh;
-      max-height: 50vh;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      perspective-origin: center center;
-      box-sizing: border-box;
-      overflow: visible; /* Allow 3D items to extend beyond bounds */
-      /* Allow touch gestures - Swiper handles its own touch events */
-      touch-action: pan-y pan-x;
-      -webkit-user-select: none;
-      user-select: none;
-      /* Keep carousel centered */
-      left: 0;
-      right: 0;
-      margin-left: auto;
-      margin-right: auto;
-    }
+@media screen and (max-width: 991px) {
+  [carousel="wrap"] {
+    height: 50vh;
+    max-height: 480px;
+  }
+}
 
-    /* Tablet Responsive */
-    @media screen and (max-width: 991px) {
-      [carousel="wrap"] {
-        --3d-carousel-item-width: 70vw;
-        --3d-carousel-gap: 6vw;
-        height: 45vh;
-        max-height: 45vh;
-        margin-bottom: 1.25rem;
-      }
-    }
+@media screen and (max-width: 767px) {
+  [carousel="wrap"] {
+    height: 48vh;
+    max-height: 440px;
+    margin-bottom: 1rem;
+  }
+}
 
-    /* Mobile - Smaller carousel items */
-    @media screen and (max-width: 767px) {
-      [carousel="wrap"] {
-        --3d-carousel-item-width: 80vw;
-        --3d-carousel-gap: 5vw;
-        height: 40vh;
-        max-height: 40vh;
-        margin-bottom: 1rem;
-      }
-    }
+/* Card list is the preserve-3d scene (no parent rotateY) */
+.carousel_list {
+  list-style: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  pointer-events: none; /* cards re-enable; touch layer owns gestures */
+}
 
-    /* Small Mobile */
-    @media screen and (max-width: 479px) {
-      [carousel="wrap"] {
-        --3d-carousel-item-width: 85vw;
-        --3d-carousel-gap: 4vw;
-        height: 35vh;
-        max-height: 35vh;
-        margin-bottom: 0.75rem;
-      }
-    }
+/* Per-card absolute position; transform written by JS each frame */
+.carousel_item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 256px;
+  height: 320px;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  pointer-events: auto;
+  will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-    /* 3D Transform Container */
-    [carousel="wrap"] > div {
-      transform-style: preserve-3d;
-      transform: translate3d(0px, 0px, var(--3d-carousel-z)) rotateX(var(--3d-carousel-rotate-x)) rotateY(var(--3d-carousel-rotate));
-      width: 100%;
-      height: 100%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform-origin: center center;
-      /* Allow touch interactions - Swiper handles its own */
-      touch-action: pan-y pan-x;
-      -webkit-user-select: none;
-      user-select: none;
-      /* Ensure container stays centered */
-      margin-left: auto;
-      margin-right: auto;
-      /* Allow 3D items to extend beyond bounds */
-      overflow: visible;
-    }
+@media screen and (max-width: 991px) {
+  .carousel_item {
+    width: 224px;
+    height: 280px;
+  }
+}
 
-    /* Individual Item Container */
-    [carousel="wrap"] > div > div {
-      width: var(--3d-carousel-item-width);
-      position: absolute;
-      transform-origin: center center;
-    }
+@media screen and (max-width: 767px) {
+  .carousel_item {
+    width: 260px;
+    height: 325px;
+  }
+}
 
-    /* Carousel List */
-    .carousel_list {
-      list-style: none;
-      width: 100%;
-      height: 100%;
-      /* Prevent touch events from moving the carousel */
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-      pointer-events: none;
-      position: relative;
-      overflow: visible; /* Allow 3D items to extend beyond bounds */
-    }
+@media screen and (max-width: 479px) {
+  .carousel_item {
+    width: 220px;
+    height: 275px;
+  }
+}
 
-    /* Carousel Item */
-    .carousel_item {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform-origin: center center;
-      top: 0;
-      left: 0;
-      /* Prevent touch events from moving the carousel */
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-      pointer-events: none;
-      overflow: visible; /* Ensure content isn't clipped */
-    }
+/* Flip card shell */
+.carousel_card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  transform-style: preserve-3d;
+  transition: transform 0.7s ease-in-out;
+  border-radius: 12px;
+  background: transparent;
+}
 
-    /* Carousel Image */
-    .carousel_img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      /* Prevent image drag and touch interactions on mobile */
-      -webkit-user-drag: none;
-      user-select: none;
-      pointer-events: none;
-      touch-action: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
-      /* Ensure image is visible */
-      opacity: 1;
-      visibility: visible;
-      /* Ensure image renders */
-      will-change: transform;
-    }
+.carousel_item.is-flipped .carousel_card {
+  transform: rotateY(180deg);
+}
 
-    @media screen and (max-width: 479px) {
-      .carousel_img {
-        border-radius: 8px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-      }
-    }
+.carousel_card__face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background-color: var(--bg-secondary, #111);
+}
 
-    /* Carousel Ratio (for aspect ratio) */
-    .carousel_ratio {
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      position: relative;
-      z-index: 0;
-    }
+.carousel_card__face--front {
+  transform: rotateY(0deg);
+}
+
+.carousel_card__face--back {
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary, #000);
+  border: 1px solid var(--border, #333);
+  color: var(--text-primary, #fff);
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+[data-theme="light"] .carousel_card__face--back {
+  background-color: #fff;
+  border-color: #ddd;
+  color: #000;
+}
+
+.carousel_card__back-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.carousel_card__title {
+  font-family: 'Suisseintl', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.carousel_card__price {
+  font-family: 'Generalsans Variable', sans-serif;
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.75;
+}
+
+.carousel_card__face--back .view-details-btn,
+.carousel_card__face--back .button {
+  padding: 0.7rem 1.4rem;
+  background-color: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  font-family: 'Generalsans Variable', sans-serif;
+}
+
+.carousel_card__face--back .view-details-btn:hover,
+.carousel_card__face--back .button:hover {
+  background-color: var(--text-primary, #fff);
+  color: var(--bg-primary, #000);
+  transform: scale(1.02);
+}
+
+[data-theme="light"] .carousel_card__face--back .view-details-btn:hover,
+[data-theme="light"] .carousel_card__face--back .button:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.carousel_img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: filter;
+  transition: filter 0.3s ease;
+}
+
+.carousel_item.is-active .carousel_img {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+.carousel_ratio {
+  display: none;
+}
 
     /* Title stack (GSAP crossfade follower of the 3D ring).
        Class names kept from the old Swiper markup, but Swiper is no
@@ -983,34 +1026,25 @@
     }
 
     
-/* Full-area drag layer: horizontal drag spins the ring, tap opens/focuses
-   a card. touch-action none so Pointer Events receive every move. */
+/* Full-area drag layer — gesture cue only; wrap owns pointer events */
 .carousel-3d__touch {
   position: absolute;
   inset: 0;
   z-index: 8;
+  pointer-events: none;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
-  cursor: grab;
 }
 
-.carousel-3d__touch.is-grabbing {
+[carousel="wrap"].is-grabbing {
   cursor: grabbing;
 }
 
-/* Active (front-facing) card state — lands facing the customer */
-.carousel_item .carousel_img {
-  transition: box-shadow 0.35s ease, filter 0.35s ease, transform 0.35s ease;
-  transform: scale(0.97);
-  filter: brightness(0.92);
-}
-
-.carousel_item.is-active .carousel_img {
-  transform: scale(1.04);
-  filter: brightness(1);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+/* Hide legacy title strip (titles live on flip-card backs) */
+[carousel="component"] > .swiper {
+  display: none !important;
 }
 
 /* Motion debug HUD (?debug=motion) */
