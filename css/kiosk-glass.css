@@ -1539,6 +1539,10 @@ body.k::after {
 .k-bts__card li span { color: var(--ink-3); }
 .k-bts__gear li { justify-content: flex-start; }
 .k-bts__gear li::before { content: '—'; color: var(--ink-4); }
+.k-bts__label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 400; margin: 8px 0 14px; }
+.k-bts__clip { margin: 0; }
+.k-bts__clip figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 10px 4px 0; font-size: 13px; }
+.k-bts__clip figcaption span { white-space: nowrap; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
 
 /* Interview */
 .k-qa { display: grid; gap: 0; border-top: 1px solid var(--line); }

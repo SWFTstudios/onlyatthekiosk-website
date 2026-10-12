@@ -110,6 +110,11 @@ window.KIOSK_CONTENT = {
         ],
         notes: 'Stills edited in Lightroom Classic. Video captured on Osmo Pocket 3, drone and 360 — the cut is “Real Slummy”.',
         frames: [],
+        // Raw Osmo Pocket 3 proxy clips from the shoot folder, muted loops.
+        clips: [
+          { src: 'images/garage/andy-q50/bts/raw-0040.mp4', webm: 'images/garage/andy-q50/bts/raw-0040.webm', poster: 'images/garage/andy-q50/bts/raw-0040.webp', caption: 'On the spillway bridge', meta: 'Osmo Pocket 3 · 12:52 · raw' },
+          { src: 'images/garage/andy-q50/bts/raw-0067.mp4', webm: 'images/garage/andy-q50/bts/raw-0067.webm', poster: 'images/garage/andy-q50/bts/raw-0067.webp', caption: 'Low pass in the lot', meta: 'Osmo Pocket 3 · 13:46 · raw' },
+        ],
       },
       timeline: [
         { year: 'Nov 2025', label: 'Shot in the Hudson Valley' },
@@ -133,6 +138,17 @@ window.KIOSK_CONTENT = {
         { src: 'images/garage/andy-q50/10.webp', caption: 'Face-on', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
         { src: 'images/garage/andy-q50/11.webp', caption: 'Face-on, warm', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
         { src: 'images/garage/andy-q50/12.webp', caption: 'Below the spillway', meta: 'A7C II · 50mm · 1/1250 · f/1.8 · ISO 100' },
+        { src: 'images/garage/andy-q50/13.webp', caption: 'Bridge roller, cables overhead', meta: 'A7C II · 39mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/14.webp', caption: 'Coming off the bridge', meta: 'A7C II · 35mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/15.webp', caption: 'Rear roller, sound wall', meta: 'A7C II · 38mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/16.webp', caption: 'Rear roller, low sun', meta: 'A7C II · 32mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/17.webp', caption: 'Parkway, guardrail', meta: 'A7C II · 41mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/18.webp', caption: 'Parkway, open road', meta: 'A7C II · 36mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/19.webp', caption: 'Parkway pan, wide', meta: 'A7C II · 28mm · 1/50 · f/9 · ISO 100' },
+        { src: 'images/garage/andy-q50/20.webp', caption: 'Parkway pan, tree line', meta: 'A7C II · 54mm · 1/50 · f/9 · ISO 100' },
+        { src: 'images/garage/andy-q50/21.webp', caption: 'Parkway, river bend', meta: 'A7C II · 48mm · 1/50 · f/9 · ISO 100' },
+        { src: 'images/garage/andy-q50/22.webp', caption: 'Side profile, gold calipers', meta: 'A7C II · 55mm · 1/50 · f/9 · ISO 100' },
+        { src: 'images/garage/andy-q50/23.webp', caption: 'Rear three-quarter on the grass', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
       ],
       video: '',
       // Google Drive preview of "Andy Q50 Real Slummy3.mp4". Plays once the file is

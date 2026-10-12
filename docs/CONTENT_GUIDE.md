@@ -104,7 +104,18 @@ bts: {
   conditions: [ { label: 'Call time', value: '00:30' }, { label: 'Weather', value: '14°C · clear' } ],
   notes: 'Shot entirely under existing street light…',
   frames: [ 'images/garage/r32-wangan/bts-01.webp' ],
+  // Raw / behind-the-scenes clips: short muted loops (a few seconds, no audio, ~1 MB max)
+  clips: [
+    { src: 'images/garage/r32-wangan/bts/raw-01.mp4', webm: 'images/garage/r32-wangan/bts/raw-01.webm',
+      poster: 'images/garage/r32-wangan/bts/raw-01.webp', caption: 'Setting up the rig', meta: 'Osmo Pocket 3 · raw' },
+  ],
 }
+```
+Clips autoplay muted on loop. When the visitor has reduced motion turned on, they show controls instead. Encode them like this:
+```bash
+ffmpeg -i clip.MP4 -an -vf "scale=960:-2,fps=24" -c:v libx264 -crf 28 -pix_fmt yuv420p -movflags +faststart raw-01.mp4
+ffmpeg -i raw-01.mp4 -c:v libvpx-vp9 -b:v 0 -crf 38 raw-01.webm
+ffmpeg -ss 1 -i raw-01.mp4 -frames:v 1 raw-01.webp
 ```
 
 ### Interview and timeline
