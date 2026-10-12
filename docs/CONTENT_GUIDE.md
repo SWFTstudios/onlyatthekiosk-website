@@ -18,13 +18,19 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
 
 ## 1. Add a story (film, photo story or interview)
 
+The first three stories are real shoots from Google Drive › *RollerReels Video Files*: `andy-q50`, `moses-r1m` and `lunar-new-year-meet`. Copy one of them to start a new story.
+
+**Films from Google Drive:** set `embed` to `https://drive.google.com/file/d/<FILE_ID>/preview`. It only plays for visitors once the Drive file is shared as **Anyone with the link → Viewer**. For the best playback, upload to YouTube or Vimeo and use that embed URL instead.
+
+**Gallery captions:** put the camera settings in `meta`, e.g. `'A7C II · 28mm · 1/50 · f/8 · ISO 100'`. They show under each slide.
+
 1. Create a folder for the media: `images/garage/<slug>/`. Use short, lowercase slugs like `r32-wangan` or `cb750-brooklyn`.
 2. Export images as **WebP**, about 2400 px on the long edge for covers and slides, and about 1200 px for behind-the-scenes frames.
 3. Copy an existing object in `features` and edit it.
 
 ```js
 {
-  slug: 'r32-wangan',            // URL: story.html?s=r32-wangan
+  slug: 'andy-q50',              // URL: story.html?s=andy-q50
   type: 'car',                   // 'car' | 'motorcycle'
   format: 'film',                // 'film' | 'gallery' | 'interview'  (garage filter + label)
   year: 1991, make: 'Nissan', model: 'Skyline GT-R', code: 'R32',  // code = giant hero text
@@ -39,7 +45,8 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
   tone: 'sodium',                // placeholder colour while media is missing
 
   // MEDIA
-  image: 'images/garage/r32-wangan/cover.webp',
+  image: 'images/garage/andy-q50/01.webp',
+  focus: '62% 78%',              // where to centre the cover when it's cropped (CSS object-position)
   poster: 'images/garage/r32-wangan/poster.webp',
   video: 'videos/garage/r32-wangan.mp4',               // self-hosted, or…
   embed: 'https://www.youtube.com/embed/VIDEO_ID',     // …YouTube / Vimeo player URL

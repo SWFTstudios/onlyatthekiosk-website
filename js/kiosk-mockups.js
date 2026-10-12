@@ -50,8 +50,15 @@
 
     issue: (ink) => `
       <text x="0" y="-6" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="22" letter-spacing="-.6" fill="${ink}">ISSUE 01</text>
-      <text x="0" y="16" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="17" fill="${ink}">Night Shift</text>
+      <text x="0" y="16" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="17" fill="${ink}">Hudson Line</text>
       ${star(-38, 10, 3.5, ink)}${star(38, 10, 3.5, ink)}`,
+
+    hudson: (ink) => `
+      <text x="0" y="-17" text-anchor="middle" font-family="${SANS}" font-size="6" letter-spacing="2.4" fill="${ink}" opacity=".75">NEW YORK — NEW JERSEY</text>
+      <text x="0" y="7" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="24" letter-spacing="-.8" fill="${ink}">HUDSON</text>
+      <rect x="-40" y="14" width="80" height=".9" fill="${ink}" opacity=".6"/>
+      <text x="-40" y="25" font-family="${SANS}" font-size="6" letter-spacing="1.4" fill="${ink}">ISSUE 01</text>
+      <text x="40" y="25" text-anchor="end" font-family="${SERIF}" font-style="italic" font-size="9" fill="${ink}">line</text>`,
 
     arch: (ink, bg, id) => `
       <defs><path id="arc${id}" d="M-42,6 A42,42 0 0 1 42,6"/></defs>
@@ -263,8 +270,8 @@
         graphic = `<clipPath id="dk${id}"><rect x="176" y="30" width="96" height="420" rx="48"/></clipPath><g clip-path="url(#dk${id})">${graphic}<rect x="176" y="180" width="96" height="120" fill="${c.garment}"/></g>
           <text transform="translate(224 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="34" letter-spacing="-1" fill="${c.ink}">KIOSK</text>`;
       } else {
-        graphic = `<text transform="translate(232 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="58" letter-spacing="-2" fill="${c.ink}">${esc(spec.deckText || 'WANGAN')}</text>
-          <text transform="translate(198 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SERIF}" font-style="italic" font-size="16" fill="${c.ink}">${esc(spec.deckSub || 'night shift — issue 01')}</text>
+        graphic = `<text transform="translate(232 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="58" letter-spacing="-2" fill="${c.ink}">${esc(spec.deckText || 'KIOSK')}</text>
+          <text transform="translate(198 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SERIF}" font-style="italic" font-size="16" fill="${c.ink}">${esc(spec.deckSub || 'issue 01')}</text>
           <circle cx="224" cy="96" r="14" fill="${c.ink}"/><text x="224.5" y="104" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="22" fill="${c.garment}">K</text>`;
       }
       return `${shadow(id, 240, 462, 110, 10)}
@@ -293,7 +300,7 @@
       return `${shadow(id, 200, 430, 150, 12)}
         ${sticker(140, 170, -10, `<circle r="70" fill="#fff"/><circle r="62" fill="${c.ink}"/><text x="2" y="22" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="68" fill="${c.garment}">K</text>`)}
         ${sticker(250, 230, 9, `<rect x="-92" y="-38" width="184" height="76" rx="18" fill="#fff"/><rect x="-84" y="-30" width="168" height="60" rx="12" fill="${c.garment}"/><text y="12" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="34" letter-spacing="-1.4" fill="${c.ink}">KIOSK</text>`)}
-        ${sticker(170, 330, -4, `<rect x="-86" y="-36" width="172" height="72" rx="10" fill="#fff"/><rect x="-78" y="-28" width="156" height="56" rx="6" fill="#141414"/>${print('wangan', '#f2f0eb', '#141414', 0, 2, 120, id)}`)}
+        ${sticker(170, 330, -4, `<rect x="-86" y="-36" width="172" height="72" rx="10" fill="#fff"/><rect x="-78" y="-28" width="156" height="56" rx="6" fill="#141414"/>${print('hudson', '#f2f0eb', '#141414', 0, 2, 120, id)}`)}
         ${sticker(300, 360, 14, `<circle r="44" fill="#fff"/><circle r="37" fill="#e8892b"/>${star(0, 0, 20, '#141414')}`)}`;
     },
 

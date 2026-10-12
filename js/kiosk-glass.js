@@ -54,14 +54,21 @@
 
   /* ------------------------------------------------------------ data */
 
-  const features = (C.features || []).slice().sort((a, b) => String(b.published).localeCompare(String(a.published)));
+  // Lead story first, then newest shoot first
+  const features = (C.features || []).slice().sort((a, b) => {
+    const lead = (C.issue || {}).lead;
+    if (a.slug === lead) return -1;
+    if (b.slug === lead) return 1;
+    return String(b.published).localeCompare(String(a.published));
+  });
   const featureBySlug = (slug) => features.find((f) => f.slug === slug);
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
   const storyHref = (f) => `story.html?s=${encodeURIComponent(f.slug)}`;
-  const featureName = (f) => `${f.year} ${f.make} ${f.model}`;
+  const featureName = (f) => [f.year, f.make, f.model].filter(Boolean).join(' ');
+  const place = (f) => [f.city, f.country].filter(Boolean).join(', ');
   const typeLabel = (t) => (t === 'motorcycle' ? 'Motorcycle' : 'Car');
   const formatLabel = (f) => ({ film: 'Film', gallery: 'Photo story', interview: 'Interview' }[f.format] || 'Story');
   const price = (p) => {
@@ -104,12 +111,12 @@
    * tonal "plate" with the subject's code as a ghost watermark.
    */
   function media(opts) {
-    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style } = opts;
+    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style, focus } = opts;
     let inner;
     if (video) {
       inner = `<video src="${esc(video)}" ${poster ? `poster="${esc(poster)}"` : ''} muted loop playsinline autoplay preload="metadata"></video>`;
     } else if (image) {
-      inner = `<img src="${esc(image)}" alt="${esc(alt || '')}" loading="${eager ? 'eager' : 'lazy'}" decoding="async">`;
+      inner = `<img src="${esc(image)}" alt="${esc(alt || '')}" loading="${eager ? 'eager' : 'lazy'}" decoding="async"${focus ? ` style="object-position:${esc(focus)}"` : ''}>`;
     } else {
       const style = swatch ? ` style="--a:${esc(swatch)};--c:${esc(swatch)}66"` : '';
       inner = `<div class="plate plate--${esc(tone || 'graphite')}"${style} role="img" aria-label="${esc(alt || mark || '')}">${mark ? `<span class="plate__mark">${esc(mark)}</span>` : ''}${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}</div>`;
@@ -118,7 +125,7 @@
   }
 
   const featureMedia = (f, extra = {}) => media({
-    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f),
+    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus,
     meta: extra.meta !== undefined ? extra.meta : `${f.city} · ${f.coords || ''}`,
     ...extra,
   });
@@ -414,7 +421,7 @@
   /* ---------------------------------------------------------- cards */
 
   function featureCard(f) {
-    const meta = [f.city, f.runtime || formatLabel(f)].filter(Boolean);
+    const meta = [f.city || f.location, f.runtime || formatLabel(f)].filter(Boolean);
     return `
       <article class="k-card" data-reveal>
         <a href="${storyHref(f)}" aria-label="${esc(featureName(f))} — ${esc(f.title || '')}">
@@ -425,8 +432,8 @@
           <button class="k-save" type="button" data-save="${esc(f.slug)}" aria-pressed="${saved.has(f.slug)}" aria-label="Save ${esc(featureName(f))}">${icon.heart}</button>
         </div>
         <a class="k-card__caption k-glass k-glass--dark" href="${storyHref(f)}" tabindex="-1">
-          <h3 class="k-card__title">${esc(f.make)} ${esc(f.model)}</h3>
-          <p class="k-card__sub">${esc(f.year)} · ${esc(typeLabel(f.type))} · ${esc(f.shotOn)}</p>
+          <h3 class="k-card__title">${esc([f.make, f.model].filter(Boolean).join(' '))}</h3>
+          <p class="k-card__sub">${[f.year, typeLabel(f.type), f.shotOn].filter(Boolean).map(esc).join(' · ')}</p>
           ${f.palette && f.palette.length ? `<div class="k-palette-strip k-mt-s" aria-hidden="true">${f.palette.map((c) => `<i style="--swatch:${esc(c.hex)}"></i>`).join('')}</div>` : ''}
           <div class="k-card__meta"><span>${esc(meta[0] || '')}</span><span>${esc(meta[1] || '')}</span></div>
         </a>
@@ -557,8 +564,8 @@
       <button class="k-row" type="button" data-film="${esc(f.slug)}" style="width:100%;text-align:left">
         <span class="k-row__num">${pad(i + 1)}</span>
         <span>
-          <span class="k-row__title" style="display:block">${esc(f.title || f.model)} <span class="k-serif" style="opacity:.55">— ${esc(f.make)} ${esc(f.code)}</span></span>
-          <span class="k-row__sub" style="display:block">${esc(f.city)}, ${esc(f.country)} · ${esc(f.shotOn)}</span>
+          <span class="k-row__title" style="display:block">${esc(f.title || f.model)}${f.make ? ` <span class="k-serif" style="opacity:.55">— ${esc(f.make)} ${esc(f.code)}</span>` : ''}</span>
+          <span class="k-row__sub" style="display:block">${[place(f), f.shotOn].filter(Boolean).map(esc).join(' · ')}</span>
         </span>
         <span class="k-row__end"><span class="k-row__meta">${esc(f.runtime || '—')}</span><span class="k-arrow k-arrow--ring">${icon.right}</span></span>
         <span class="k-row__thumb" aria-hidden="true">${featureMedia(f, { meta: '' })}</span>
@@ -774,21 +781,21 @@
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
     fill('hero-dek', esc(issue.dek || ''));
     fill('hero-stats', `
-      <div><dt>Now showing</dt><dd>${esc(lead.year)} ${esc(lead.make)} ${esc(lead.code)}</dd></div>
-      <div><dt>Location</dt><dd>${esc(lead.location)}, ${esc(lead.city)}</dd></div>
+      <div><dt>Now showing</dt><dd>${esc(lead.title)} · ${esc([lead.make, lead.code].filter(Boolean).join(' '))}</dd></div>
+      <div><dt>Location</dt><dd>${esc(place(lead) || lead.location)}</dd></div>
       <div><dt>Shot on</dt><dd>${esc(lead.shotOn)}</dd></div>
-      <div><dt>Soundtrack</dt><dd>${esc((mixBySlug(lead.soundtrack) || {}).title || 'KIOSK Radio')}</dd></div>`);
+      <div><dt>Owner</dt><dd>${esc((lead.owner || {}).name || '—')}</dd></div>`);
     fill('hero-aside', `
       <a class="k-feature-card k-glass k-glass--dark" href="${storyHref(lead)}">
-        <p class="k-feature-card__title">${esc(lead.make)} ${esc(lead.model)}</p>
-        <p class="k-feature-card__sub">${esc(formatLabel(lead))} · ${esc(lead.city)} · ${esc(lead.runtime || '')}</p>
+        <p class="k-feature-card__title">${esc(featureName(lead))}</p>
+        <p class="k-feature-card__sub">${[formatLabel(lead), place(lead), lead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
         ${featureMedia(lead, { meta: '' })}
       </a>
       <a class="k-bar" href="garage.html">Enter the Garage<span class="k-arrow">${icon.arrow}</span></a>`);
     fill('hero-watch', `
       <button class="k-watch" type="button" data-film="${esc(lead.slug)}">
         <span class="k-watch__thumb">${featureMedia(lead, { meta: '', mark: '', cls: 'k-media--clean', style: 'position:absolute;inset:0' })}<span class="k-play">${icon.play}</span></span>
-        <span><b>Watch film</b><small>${esc(lead.title || '')} · ${esc(lead.runtime || '')}</small></span>
+        <span><b>Watch film</b><small>${[lead.title, lead.runtime].filter(Boolean).map(esc).join(' · ')}</small></span>
       </button>`);
 
     // Garage rail with type filter
@@ -823,7 +830,7 @@
         ${featureMedia(filmLead, { meta: '' })}
         <div class="k-films__lead-over">
           <div class="k-glass k-glass--dark">
-            <p class="k-eyebrow">Featured film · ${esc(filmLead.runtime)}</p>
+            <p class="k-eyebrow">${[`Featured film`, filmLead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
             <p class="k-h3 k-mt-s">${esc(filmLead.title)}</p>
             <p class="k-small k-mt-s">${esc(filmLead.excerpt || filmLead.tagline)}</p>
           </div>
@@ -860,9 +867,9 @@
       saved: params.get('saved') === '1',
     };
 
-    const eras = Array.from(new Set(features.map((f) => f.era))).sort();
+    const eras = Array.from(new Set(features.map((f) => f.era).filter(Boolean))).sort();
     const seasons = ['spring', 'summer', 'fall', 'winter'].filter((s) => features.some((f) => f.season === s));
-    const cities = Array.from(new Set(features.map((f) => f.city))).sort();
+    const cities = Array.from(new Set(features.map((f) => f.city).filter(Boolean))).sort();
 
     const filters = mount('filters');
     filters.innerHTML = `
@@ -888,19 +895,19 @@
           ${[['all', 'Everything'], ['film', 'Films'], ['gallery', 'Photo stories'], ['interview', 'Interviews']].map(([v, l]) => `<button class="k-chip" type="button" data-v="${v}" aria-pressed="${state.format === v}">${l}</button>`).join('')}
         </div>
       </div>
-      <div class="k-filter">
+      ${eras.length ? `<div class="k-filter">
         <span class="k-filter__label">Era</span>
         <div class="k-chips" data-group="era">
           ${eras.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.eras.has(v)}">${esc(v)}<span class="k-count">${features.filter((f) => f.era === v).length}</span></button>`).join('')}
         </div>
-      </div>
+      </div>` : ''}
       <div class="k-filter">
         <span class="k-filter__label">Season</span>
         <div class="k-chips" data-group="season">
           ${seasons.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.seasons.has(v)}" style="text-transform:capitalize">${esc(v)}</button>`).join('')}
         </div>
       </div>
-      <div class="k-filter">
+      <div class="k-filter"${cities.length ? '' : ' hidden'}>
         <span class="k-filter__label">Location</span>
         <div class="k-chips" data-group="city">
           ${cities.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.city === v}">${esc(v)}</button>`).join('')}
@@ -1031,11 +1038,11 @@
       <div class="k-story-hero__frame">
         <div class="k-story-hero__bg">${featureMedia(f, { meta: '', mark: '', eager: true, cls: 'k-media--clean', style: 'position:absolute;inset:0' })}</div>
         <div class="k-story-hero__head">
-          <p class="k-eyebrow"><b>${esc(f.year)} ${esc(f.make)}</b> · ${esc(formatLabel(f))}</p>
+          <p class="k-eyebrow">${[f.year, f.make].filter(Boolean).length ? `<b>${esc([f.year, f.make].filter(Boolean).join(' '))}</b> · ` : ''}${esc(formatLabel(f))}</p>
           <h1 class="k-story-hero__code">${esc(f.code)}</h1>
-          <p class="k-story-hero__tagline">${esc(f.model)} — <span class="k-serif">${esc(f.tagline)}</span></p>
+          <p class="k-story-hero__tagline">${f.make ? `${esc(f.model)} — ` : ''}<span class="k-serif">${esc(f.tagline)}</span></p>
           <div class="k-story-hero__tags">
-            <span class="k-tag">${esc(f.city)}, ${esc(f.country)}</span>
+            ${place(f) ? `<span class="k-tag">${esc(place(f))}</span>` : ''}
             ${f.runtime ? `<span class="k-tag">${esc(f.runtime)}</span>` : ''}
             ${f.season ? `<span class="k-tag" style="text-transform:capitalize">${esc(f.season)}</span>` : ''}
             ${(f.vibes || []).slice(0, 3).map((v) => `<span class="k-tag" style="text-transform:capitalize">${esc(v.replace(/-/g, ' '))}</span>`).join('')}
@@ -1046,13 +1053,13 @@
           ${f.palette && f.palette.length ? `<div class="k-palette-strip k-mt-m" aria-hidden="true">${f.palette.map((c) => `<i style="--swatch:${esc(c.hex)}"></i>`).join('')}</div>` : ''}
         </div>
         <div class="k-story-hero__side">
-          <div class="k-story-hero__thumbs">
+          ${frames.length || (f.palette || []).length ? `<div class="k-story-hero__thumbs">
             ${[0, 1, 2].map((i) => {
               const fr = frames[i];
               const sw = (f.palette || [])[i];
               return `<button type="button" data-goto-slide="${i}" aria-label="View frame ${i + 1}">${media({ image: fr && fr.src, tone: f.tone, swatch: !fr && sw ? sw.hex : '', meta: fr ? '' : `${pad(i + 1)} · ${sw ? sw.name : 'Frame'}`, alt: (fr && fr.caption) || `${featureName(f)} frame ${i + 1}` })}</button>`;
             }).join('')}
-          </div>
+          </div>` : ''}
           ${hasFilm ? `<button class="k-bar" type="button" data-film="${esc(f.slug)}" style="width:100%;text-align:left">Watch the film<span class="k-arrow">${icon.play}</span></button>` : ''}
           <a class="k-bar" href="#look">Shop the look<span class="k-arrow">${icon.arrow}</span></a>
         </div>
@@ -1065,14 +1072,14 @@
     fill('story-aside', `
       <dl class="k-meta-list k-glass">
         <div><dt>Subject</dt><dd>${esc(featureName(f))}</dd></div>
-        <div><dt>Owner</dt><dd>${esc((f.owner || {}).name || '—')}</dd></div>
-        <div><dt>Location</dt><dd>${esc(f.location)}</dd></div>
-        <div><dt>City</dt><dd>${esc(f.city)}, ${esc(f.country)}</dd></div>
+        ${(f.owner || {}).name ? `<div><dt>Owner</dt><dd>${esc(f.owner.name)}</dd></div>` : ''}
+        ${f.location ? `<div><dt>Location</dt><dd>${esc(f.location)}</dd></div>` : ''}
+        ${place(f) ? `<div><dt>Area</dt><dd>${esc(place(f))}</dd></div>` : ''}
         ${f.coords ? `<div><dt>Coordinates</dt><dd class="k-mono">${esc(f.coords)}</dd></div>` : ''}
-        <div><dt>Shot on</dt><dd>${esc(f.shotOn)}</dd></div>
-        <div><dt>Lens</dt><dd>${esc(f.lens)}</dd></div>
+        ${f.shotOn ? `<div><dt>Shot on</dt><dd>${esc(f.shotOn)}</dd></div>` : ''}
+        ${f.lens ? `<div><dt>Lens</dt><dd>${esc(f.lens)}</dd></div>` : ''}
         ${f.runtime ? `<div><dt>Runtime</dt><dd>${esc(f.runtime)}</dd></div>` : ''}
-        <div><dt>Published</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>
+        <div><dt>Shot</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>
       </dl>
       ${soundtrack ? `<button class="k-bar" type="button" data-mix-play="${esc(soundtrack.slug)}" style="width:100%;text-align:left"><span>Soundtrack<small>${esc(soundtrack.title)} ${esc(soundtrack.volume)} · KIOSK Radio</small></span><span class="k-arrow" data-ico>${icon.play}</span></button>` : ''}
       ${lut ? `<a class="k-bar" href="vault.html?c=luts#${esc(lut.id)}"><span>Graded with<small>${esc(lut.title)} · ${esc(price(lut))}</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
@@ -1108,6 +1115,7 @@
 
     // SLIDESHOW
     const palette = f.palette || [];
+    if (!frames.length && !palette.length) hideSection('gallery');
     const slides = frames.length ? frames : Array.from({ length: Math.max(3, Math.min(palette.length, 6)) }, (_, i) => ({
       src: '',
       caption: (palette[i] && `${palette[i].name} — ${palette[i].note || ''}`) || `Frame ${pad(i + 1)}`,
@@ -1322,8 +1330,8 @@
   /** The shop "wall": hero tiles of a few signature mockups. */
   function wallHtml() {
     const pick = [
-      ['hoodie-garage', 0, 'Hoodie'], ['deck-wangan', 0, 'Deck', true], ['cap-kmark', 2, 'Cap'],
-      ['tee-wangan', 1, 'Tee'], ['beanie-night', 0, 'Beanie'],
+      ['hoodie-garage', 0, 'Hoodie'], ['deck-hudson', 0, 'Deck', true], ['cap-kmark', 2, 'Cap'],
+      ['tee-hudson', 1, 'Tee'], ['beanie-night', 0, 'Beanie'],
     ];
     return pick.map(([id, cw, label, tall]) => {
       const p = productById(id);
