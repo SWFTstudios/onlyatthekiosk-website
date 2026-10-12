@@ -12,13 +12,8 @@ const PARTIAL_PATH = path.join(ROOT, 'partials', 'underlay-nav.html');
 const CONFIG_PATH = path.join(ROOT, 'partials', 'nav-config.json');
 
 const PAGES = [
-  {
-    file: 'index.html',
-    base: '',
-    mainClass: 'is-home',
-    wrapStart: '<!-- SEO Copy -->',
-    wrapEnd: '<div data-w-id="5844fa33',
-  },
+  // index.html, garage.html, story.html, radio.html and vault.html use the
+  // KIOSK Glass chrome rendered by js/kiosk-glass.js — not this partial.
   {
     file: 'store.html',
     base: '',

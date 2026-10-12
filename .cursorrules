@@ -70,6 +70,12 @@ This is a custom frontend e-commerce website with Shopify as the backend. The go
 
 ## Design Guidelines
 
+> KIOSK Glass pages (`index.html`, `garage.html`, `story.html`, `radio.html`, `vault.html`) use
+> `css/kiosk-glass.css`: graphite/bone/glass, General Sans + Instrument Serif (italic accents),
+> and a single signal orange (`--signal`) reserved for "live"/"now playing" states. Content for
+> those pages lives in `js/kiosk-content.js` — see `docs/CONTENT_GUIDE.md`. The rules below
+> still apply to the legacy Webflow-derived pages.
+
 ### Colors
 - Background: `#000000` (black)
 - Text: `#ffffff` (white)
