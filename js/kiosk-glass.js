@@ -64,14 +64,32 @@
   const featureName = (f) => `${f.year} ${f.make} ${f.model}`;
   const typeLabel = (t) => (t === 'motorcycle' ? 'Motorcycle' : 'Car');
   const formatLabel = (f) => ({ film: 'Film', gallery: 'Photo story', interview: 'Interview' }[f.format] || 'Story');
-  const price = (p) => (p.price == null ? 'Shop' : `$${Number(p.price).toFixed(0)}`);
-
-  const productHref = (p) => {
-    if (p.status !== 'available') return '';
-    if (p.href) return p.href;
-    if (p.shopifyHandle) return `/products/${encodeURIComponent(p.shopifyHandle)}`;
-    return '';
+  const price = (p) => {
+    if (p.price == null) return 'Shop';
+    const n = Number(p.price);
+    return `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
   };
+
+  const productHref = (p, cw) => {
+    if (p.status !== 'available') return '';
+    const way = (p.colorways || [])[cw || 0];
+    const handle = (way && way.shopifyHandle) || p.shopifyHandle;
+    if (handle) return `/products/${encodeURIComponent(handle)}`;
+    return p.href || '';
+  };
+
+  /** Product visual: real photo when present, otherwise a vector mockup. */
+  function productVisual(p, cw = 0) {
+    if (p.image) return `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async">`;
+    const way = (p.colorways || [])[cw] || {};
+    return window.KioskMockup ? window.KioskMockup.render(p.mockup || { type: 'tee' }, way) : '';
+  }
+
+  /** Stories that feature a product (pinned, graded with, film or soundtrack). */
+  function storiesFor(p) {
+    return features.filter((f) => (f.products || []).includes(p.id) || f.gradedWith === p.id || f.filmProduct === p.id
+      || ((mixBySlug(f.soundtrack) || {}).product === p.id));
+  }
 
   function hash(str) {
     let h = 2166136261;
@@ -111,8 +129,7 @@
     { id: 'garage', label: 'Garage', href: 'garage.html' },
     { id: 'films', label: 'Films', href: 'garage.html?format=film' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
-    { id: 'vault', label: 'Vault', href: 'vault.html' },
-    { id: 'supply', label: 'Supply', href: 'store.html' },
+    { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
   function currentNav() {
@@ -134,7 +151,7 @@
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
           <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span>Radio</a>
-          <a class="k-nav__shop" href="vault.html">Shop</a>
+          <button class="k-nav__shop" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join</button>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
       </div>`;
@@ -184,8 +201,8 @@
             <p class="k-eyebrow">Only at the KIOSK</p>
             <p class="k-lede k-mt-s">A travel, streetwear and automotive journal. Cars, motorcycles, the people behind them — shot on location, scored in phonk.</p>
           </div>
-          <div><h4>Watch</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li></ul></div>
-          <div><h4>Listen + Shop</h4><ul><li><a href="radio.html">KIOSK Radio</a></li><li><a href="vault.html">The Vault</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Supply</a></li></ul></div>
+          <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=mixes">Phonk mixes</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -290,8 +307,9 @@
           <p class="k-eyebrow">Notify me</p>
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
-        <p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p>
-        <p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>
+        ${id === 'dispatch'
+          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, phonk mixes and Supply drops — one email per release.</p>`
+          : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
         <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
           <input id="k-notify-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required data-autofocus>
@@ -416,26 +434,122 @@
   }
 
   function productCard(p, opts = {}) {
-    const href = productHref(p);
+    const cw = Math.min(opts.colorway || 0, Math.max((p.colorways || []).length - 1, 0));
+    const ways = p.colorways || [];
     const isDigital = ['mixes', 'films', 'luts'].includes(p.category);
-    const action = href
-      ? `<a class="k-btn k-btn--solid" href="${esc(href)}">${p.price == null ? 'Shop collection' : 'Buy'}</a>`
-      : `<button class="k-btn" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">Notify me</button>`;
-    const preview = p.category === 'mixes'
-      ? (() => { const mix = (C.mixes || []).find((m) => m.product === p.id); return mix ? `<button class="k-btn k-btn--icon" type="button" data-mix-play="${esc(mix.slug)}" aria-label="Preview ${esc(mix.title)}"><span data-ico>${icon.play}</span></button>` : ''; })()
-      : '';
+    const badge = p.badge
+      ? `<span class="k-badge${p.badge === 'Issue 01' ? ' k-badge--sticker' : p.badge === 'Digital' || p.badge === 'Classic' ? ' k-badge--soft' : ''}">${esc(p.badge)}</span>` : '';
+    const status = p.status === 'available' ? '' : `<span class="k-shop-card__status">${isDigital ? 'Dropping soon' : 'Coming soon'}</span>`;
     return `
-      <article class="k-product" data-reveal>
-        ${media({ image: p.image, tone: p.tone, alt: p.title })}
-        ${!p.image ? `<span class="k-product__cover-title" aria-hidden="true">${esc(p.title.split('—')[0].trim())}</span>` : ''}
-        <span class="k-product__cat k-tag">${esc(categoryLabel(p.category))}${isDigital ? ' · Digital' : ''}</span>
-        <div class="k-product__caption">
-          <div class="k-product__row"><h3 class="k-product__title">${esc(p.title)}</h3><span class="k-product__price">${esc(price(p))}</span></div>
-          <p class="k-product__detail">${esc(p.detail || '')}</p>
-          ${opts.reasons && opts.reasons.length ? `<div class="k-look-reasons">${opts.reasons.map((r) => `<span>${esc(r)}</span>`).join('')}</div>` : ''}
-          <div class="k-product__cta">${action}${preview}</div>
+      <article class="k-shop-card" id="${esc(p.id)}" data-product="${esc(p.id)}" data-cw="${cw}" data-reveal>
+        <div class="k-shop-card__tile" data-quickview="${esc(p.id)}">
+          ${badge}${status}
+          <div class="k-shop-card__img">${productVisual(p, cw)}</div>
+          <button class="k-shop-card__quick" type="button" data-quickview="${esc(p.id)}">Quick view</button>
+        </div>
+        <div class="k-shop-card__info">
+          <div class="k-shop-card__row">
+            <h3 class="k-shop-card__title"><button type="button" data-quickview="${esc(p.id)}" style="text-align:left">${esc(p.title)}</button></h3>
+            <span class="k-shop-card__price">${esc(price(p))}</span>
+          </div>
+          <p class="k-shop-card__sub">${esc(categoryLabel(p.category))}${ways.length > 1 ? ` · ${ways.length} colours` : ''}</p>
+          ${ways.length > 1 ? `<div class="k-dots" role="group" aria-label="Colourways">${ways.map((w, i) => `<button class="k-dot" type="button" style="--sw:${esc(w.garment)}" data-dot="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}<span class="k-dots__name">${esc(ways[cw].name)}</span></div>` : ''}
+          ${opts.reasons && opts.reasons.length ? `<div class="k-match">${opts.reasons.map((r) => `<span>${esc(r)}</span>`).join('')}</div>` : ''}
         </div>
       </article>`;
+  }
+
+  function swapColorway(card, i) {
+    const p = productById(card.dataset.product);
+    if (!p || !(p.colorways || [])[i]) return;
+    card.dataset.cw = String(i);
+    const img = $('.k-shop-card__img', card);
+    img.classList.add('is-swapping');
+    setTimeout(() => { img.innerHTML = productVisual(p, i); img.classList.remove('is-swapping'); }, 150);
+    $$('[data-dot]', card).forEach((d) => d.setAttribute('aria-pressed', String(Number(d.dataset.dot) === i)));
+    const name = $('.k-dots__name', card);
+    if (name) name.textContent = p.colorways[i].name;
+  }
+
+  function openQuickView(id, cw = 0) {
+    const p = productById(id);
+    if (!p) return;
+    const ways = p.colorways || [];
+    const sizes = p.sizes || [];
+    const seen = storiesFor(p);
+    const mix = p.category === 'mixes' ? (C.mixes || []).find((m) => m.product === p.id) : null;
+    const state = { cw, size: sizes.length === 1 ? sizes[0] : '' };
+
+    openLightbox(`
+      <div class="k-qv k-light" data-qv="${esc(p.id)}">
+        <div class="k-qv__media">
+          <div data-qv-img style="width:100%;height:100%;display:grid;place-items:center">${productVisual(p, cw)}</div>
+          ${p.badge ? `<span class="k-badge${p.badge === 'Issue 01' ? ' k-badge--sticker' : ''}" style="top:16px;left:16px">${esc(p.badge)}</span>` : ''}
+          ${ways.length > 1 ? `<div class="k-qv__thumbs">${ways.map((w, i) => `<button type="button" data-qv-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}">${productVisual(p, i)}</button>`).join('')}</div>` : ''}
+        </div>
+        <div class="k-qv__body">
+          <div class="k-qv__head">
+            <div>
+              <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.status === 'available' ? '' : ' · Coming soon'}</p>
+              <h2 class="k-qv__title k-mt-s">${esc(p.title)}</h2>
+            </div>
+            <button class="k-qv__close" type="button" data-close aria-label="Close">${icon.close}</button>
+          </div>
+          <p class="k-qv__price">${esc(price(p))}</p>
+          ${ways.length ? `<div><p class="k-qv__label"><span>Colour</span><span data-qv-cwname>${esc((ways[cw] || {}).name || '')}</span></p>
+            <div class="k-dots">${ways.map((w, i) => `<button class="k-dot k-dot--lg" type="button" style="--sw:${esc(w.garment)}" data-qv-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</div></div>` : ''}
+          ${sizes.length ? `<div><p class="k-qv__label"><span>Size</span><span data-qv-sizename>${esc(state.size || 'Select a size')}</span></p>
+            <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-qv-size="${esc(z)}" aria-pressed="${z === state.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
+          <div class="k-qv__cta" data-qv-cta></div>
+          <p class="k-form-msg" data-qv-msg aria-live="polite"></p>
+          <dl class="k-qv__list">
+            ${p.detail ? `<div><dt>Details</dt><dd>${esc(p.detail)}</dd></div>` : ''}
+            <div><dt>Delivery</dt><dd>${['mixes', 'films', 'luts'].includes(p.category) ? 'Digital download' : 'Shipped'}</dd></div>
+          </dl>
+          ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
+        </div>
+      </div>`, p.title);
+
+    const root = $('.k-qv');
+    const renderCta = () => {
+      const href = productHref(p, state.cw);
+      const cta = $('[data-qv-cta]', root);
+      const needsSize = sizes.length > 1 && !state.size;
+      if (href) {
+        cta.innerHTML = `<a class="k-btn k-btn--solid" href="${esc(href)}" data-qv-buy>${p.price == null ? 'Shop collection' : `Buy — ${esc(price(p))}`}</a>`;
+      } else {
+        cta.innerHTML = `<button class="k-btn k-btn--solid" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">Notify me when it drops</button>`;
+      }
+      if (mix) cta.innerHTML += `<button class="k-btn" type="button" data-mix-play="${esc(mix.slug)}"><span data-ico style="display:inline-grid">${icon.play}</span> Preview the mix</button>`;
+      const buy = $('[data-qv-buy]', cta);
+      if (buy && needsSize) {
+        buy.addEventListener('click', (e) => {
+          e.preventDefault();
+          $('[data-qv-msg]', root).textContent = 'Pick a size first.';
+        });
+      }
+    };
+    root.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-qv-cw]');
+      if (c) {
+        state.cw = Number(c.dataset.qvCw);
+        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw);
+        $$('[data-qv-cw]', root).forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.qvCw) === state.cw)));
+        const nm = $('[data-qv-cwname]', root);
+        if (nm) nm.textContent = ways[state.cw].name;
+        renderCta();
+        return;
+      }
+      const z = e.target.closest('[data-qv-size]');
+      if (z) {
+        state.size = z.dataset.qvSize;
+        $$('[data-qv-size]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === z)));
+        $('[data-qv-sizename]', root).textContent = state.size;
+        $('[data-qv-msg]', root).textContent = '';
+        renderCta();
+      }
+    });
+    renderCta();
   }
 
   function filmRow(f, i) {
@@ -521,6 +635,12 @@
    * Rank products against a story's season, vibes and colour guide.
    * Products pinned in f.products always lead.
    */
+  /** Index of the first colourway whose name is in the story's palette (else 0). */
+  function matchColorway(p, colors) {
+    const i = (p.colorways || []).findIndex((w) => colors.has(String(w.name).toLowerCase()));
+    return i < 0 ? 0 : i;
+  }
+
   function shopTheLook(f, limit = 4) {
     const pinned = (f.products || []).map(productById).filter(Boolean);
     const vibes = new Set((f.vibes || []).map((v) => v.toLowerCase()));
@@ -532,10 +652,11 @@
         let score = 0;
         if (f.season && (p.seasons || []).includes(f.season)) { score += 2; reasons.push(f.season); }
         (p.vibes || []).forEach((v) => { if (vibes.has(v.toLowerCase())) { score += 2; reasons.push(v); } });
-        (p.colors || []).forEach((c) => { if (colors.has(c.toLowerCase())) { score += 3; reasons.push(c); } });
+        const named = (p.colors || []).concat((p.colorways || []).map((w) => w.name));
+        Array.from(new Set(named)).forEach((c) => { if (colors.has(c.toLowerCase())) { score += 3; reasons.push(c); } });
         if (p.id === f.gradedWith) { score += 4; reasons.unshift('graded with'); }
         if (mixBySlug(f.soundtrack) && mixBySlug(f.soundtrack).product === p.id) { score += 4; reasons.unshift('soundtrack'); }
-        return { p, score, reasons: Array.from(new Set(reasons)).slice(0, 3) };
+        return { p, score, reasons: Array.from(new Set(reasons)).slice(0, 3), colorway: matchColorway(p, colors) };
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score);
@@ -544,7 +665,9 @@
       const reasons = ['picked'];
       if (p.id === f.gradedWith) reasons.push('graded with');
       if (p.id === f.filmProduct) reasons.push('this film');
-      return { p, reasons };
+      const cw = matchColorway(p, colors);
+      if (cw > 0 || (p.colorways && p.colorways[0] && colors.has(p.colorways[0].name.toLowerCase()))) reasons.push(p.colorways[cw].name);
+      return { p, reasons, colorway: cw };
     });
     return pinnedOut.concat(scored).slice(0, limit);
   }
@@ -604,6 +727,14 @@
 
   function bindGlobal() {
     document.addEventListener('click', (e) => {
+      const dot = e.target.closest('[data-dot]');
+      if (dot) { const card = dot.closest('[data-product]'); if (card) swapColorway(card, Number(dot.dataset.dot)); return; }
+      const qv = e.target.closest('[data-quickview]');
+      if (qv) {
+        const card = qv.closest('[data-product]');
+        openQuickView(qv.dataset.quickview, card ? Number(card.dataset.cw || 0) : 0);
+        return;
+      }
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save, save); return; }
       const film = e.target.closest('[data-film]');
@@ -705,13 +836,14 @@
     const radio = fill('radio', radioBlock((C.mixes || [])[0] && C.mixes[0].slug));
     bindRadio(radio);
 
-    // Vault preview — one per category, digital first
-    const picks = [];
-    (C.categories || []).forEach((c) => {
-      const p = (C.products || []).find((x) => x.category === c.id);
-      if (p) picks.push(p);
-    });
+    // Shop preview — the newest physical drop
+    const picks = (C.products || [])
+      .filter((p) => !['mixes', 'films', 'luts'].includes(p.category))
+      .slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')))
+      .slice(0, 8);
     fill('vault', picks.map((p) => productCard(p)).join(''));
+    const wall = mount('home-wall');
+    if (wall) wall.innerHTML = wallHtml();
   }
 
   /* ----------------------------------------------------------- garage */
@@ -1016,7 +1148,7 @@
     // SHOP THE LOOK
     const look = shopTheLook(f, 4);
     if (look.length) {
-      fill('story-look', look.map(({ p, reasons }) => productCard(p, { reasons })).join(''));
+      fill('story-look', look.map(({ p, reasons, colorway }) => productCard(p, { reasons, colorway })).join(''));
       fill('story-look-why', `Matched to this story’s ${[f.season, ...(f.vibes || []).slice(0, 2)].filter(Boolean).map(esc).join(', ')} mood and colour guide.`);
     } else hideSection('look');
 
@@ -1187,33 +1319,76 @@
 
   /* ------------------------------------------------------------ vault */
 
+  /** The shop "wall": hero tiles of a few signature mockups. */
+  function wallHtml() {
+    const pick = [
+      ['hoodie-garage', 0, 'Hoodie'], ['deck-wangan', 0, 'Deck', true], ['cap-kmark', 2, 'Cap'],
+      ['tee-wangan', 1, 'Tee'], ['beanie-night', 0, 'Beanie'],
+    ];
+    return pick.map(([id, cw, label, tall]) => {
+      const p = productById(id);
+      if (!p) return '';
+      return `<button class="k-wall__item${tall ? ' k-wall__item--tall' : ''}" type="button" data-quickview="${esc(id)}" aria-label="${esc(p.title)}">${productVisual(p, cw)}<span>${esc(label)}</span></button>`;
+    }).join('');
+  }
+
   function pageVault() {
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
+    let sort = params.get('sort') || 'featured';
     const cats = C.categories || [];
+    const all = C.products || [];
     const chips = mount('vault-cats');
     const grid = mount('vault-grid');
-    const count = (id) => (C.products || []).filter((p) => id === 'all' || p.category === id).length;
+    const count = (id) => all.filter((p) => id === 'all' || p.category === id).length;
 
-    chips.innerHTML = [{ id: 'all', label: 'Everything' }].concat(cats)
+    fill('shop-wall', wallHtml());
+
+    // Category tiles use the first product of each category as the icon
+    fill('shop-cats', cats.map((c) => {
+      const p = all.find((x) => x.category === c.id);
+      return `<button class="k-cat" type="button" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">${p ? productVisual(p, 0) : ''}<b>${esc(c.label)}</b><small>${count(c.id)}</small></button>`;
+    }).join(''));
+
+    chips.innerHTML = [{ id: 'all', label: 'All' }].concat(cats)
       .map((c) => `<button class="k-chip" type="button" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">${esc(c.label)}<span class="k-count">${count(c.id)}</span></button>`).join('');
 
+    const sortSel = mount('vault-sort');
+    if (sortSel) sortSel.value = sort;
+
+    const order = (list) => {
+      const l = list.slice();
+      if (sort === 'new') l.sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')));
+      if (sort === 'price-asc') l.sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
+      if (sort === 'price-desc') l.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
+      return l;
+    };
+
     const render = () => {
-      const list = (C.products || []).filter((p) => cat === 'all' || p.category === cat);
-      grid.innerHTML = list.map((p) => productCard(p).replace('<article class="k-product"', `<article class="k-product" id="${esc(p.id)}"`)).join('');
+      const list = order(all.filter((p) => cat === 'all' || p.category === cat));
+      grid.innerHTML = list.map((p) => productCard(p)).join('');
+      const n = mount('vault-count');
+      if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
       reveal(grid);
-      const p = new URLSearchParams(location.search);
-      if (cat === 'all') p.delete('c'); else p.set('c', cat);
-      const qs = p.toString();
+      const q = new URLSearchParams(location.search);
+      if (cat === 'all') q.delete('c'); else q.set('c', cat);
+      if (sort === 'featured') q.delete('sort'); else q.set('sort', sort);
+      const qs = q.toString();
       history.replaceState(null, '', (qs ? `?${qs}` : location.pathname) + location.hash);
     };
-    chips.addEventListener('click', (e) => {
+    const setCat = (id) => {
+      cat = id;
+      $$('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat || (cat === 'all' && x.dataset.cat === 'all'))));
+      render();
+    };
+    document.addEventListener('click', (e) => {
       const b = e.target.closest('[data-cat]');
       if (!b) return;
-      cat = b.dataset.cat;
-      $$('[data-cat]', chips).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      render();
+      const next = b.classList.contains('k-cat') && cat === b.dataset.cat ? 'all' : b.dataset.cat;
+      setCat(next);
+      if (b.classList.contains('k-cat')) mount('vault-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); });
     render();
     if (location.hash) {
       const target = document.getElementById(location.hash.slice(1));

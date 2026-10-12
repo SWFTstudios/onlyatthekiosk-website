@@ -24,17 +24,10 @@
       ]
     },
     {
-      "label": "Vault",
+      "label": "Shop",
       "path": "vault.html",
       "match": [
         "vault.html"
-      ]
-    },
-    {
-      "label": "Supply",
-      "path": "store.html",
-      "match": [
-        "store.html"
       ]
     }
   ],

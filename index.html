@@ -5,7 +5,7 @@
   <title>KIOSK — Cars, Motorcycles, Phonk &amp; Film</title>
   <meta name="description" content="KIOSK is a travel, streetwear and automotive journal. Cinematic films and photo stories of cars, motorcycles and their owners — scored in phonk. Shop mixes, films, LUT packs and apparel.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0b0c">
+  <meta name="theme-color" content="#fbfaf8">
   <link rel="canonical" href="https://onlyatthekiosk.com/">
 
   <meta property="og:type" content="website">
@@ -223,20 +223,27 @@
       </div>
     </section>
 
-    <!-- 06 / VAULT ---------------------------------------------------- -->
+    <!-- 06 / SHOP -------------------------------------------------- -->
     <section class="k-section" id="vault" aria-labelledby="vault-title">
       <div class="k-wrap">
-        <div class="k-section-head">
+        <div class="k-shop-hero" style="margin-bottom:clamp(32px,5vw,64px)">
           <div>
-            <p class="k-eyebrow">06 / The Vault</p>
-            <h2 class="k-h2 k-stagger" id="vault-title" data-reveal>
-              <span>Mixes, films,</span>
-              <span>grades &amp; <em class="k-serif">supply.</em></span>
-            </h2>
+            <p class="k-eyebrow">06 / KIOSK Supply</p>
+            <h2 class="k-shop-hero__title k-mt-m" id="vault-title">Supply<br><em>&amp; co.</em></h2>
+            <p class="k-lede k-mt-m">Streetwear and skate cut from the shoots, in colourways pulled from the cars.</p>
+            <div class="k-row-flex k-mt-m">
+              <a class="k-btn k-btn--solid" href="vault.html">Shop everything</a>
+              <a class="k-btn" href="vault.html?c=skate">Skate</a>
+              <a class="k-btn" href="vault.html?c=mixes">Mixes</a>
+            </div>
           </div>
-          <a class="k-btn k-btn--solid" href="vault.html">Shop everything</a>
+          <div class="k-wall" data-mount="home-wall" aria-label="Featured products"></div>
         </div>
-        <div class="k-products" data-mount="vault"></div>
+        <div class="k-toolbar" style="border-bottom:0;margin-bottom:8px">
+          <p class="k-eyebrow">New in</p>
+          <a class="k-small" href="vault.html?sort=new" style="text-decoration:underline;text-underline-offset:3px">View all</a>
+        </div>
+        <div class="k-shop-grid" data-mount="vault"></div>
       </div>
     </section>
 
@@ -272,6 +279,7 @@
   </main>
 
   <script src="js/kiosk-content.js"></script>
+  <script src="js/kiosk-mockups.js"></script>
   <script src="js/kiosk-glass.js"></script>
 </body>
 </html>

@@ -132,7 +132,7 @@ window.KIOSK_CONTENT = {
       soundtrack: 'wangan-drift-vol1',
       gradedWith: 'lut-sodium-night',
       filmProduct: 'film-r32-wangan',
-      products: ['film-r32-wangan', 'lut-sodium-night', 'app-hoodies'],
+      products: ['film-r32-wangan', 'lut-sodium-night', 'tee-wangan'],
     },
     {
       slug: 'cb750-brooklyn',
@@ -210,7 +210,7 @@ window.KIOSK_CONTENT = {
       soundtrack: 'cafe-racer-tapes',
       gradedWith: 'lut-vintage-stock',
       filmProduct: '',
-      products: ['lut-vintage-stock'],
+      products: ['crew-cafe', 'lut-vintage-stock'],
     },
     {
       slug: '911-lisbon',
@@ -593,112 +593,323 @@ window.KIOSK_CONTENT = {
   ],
 
   /* ----------------------------------------------------------
-   * STORE — Vault (digital) + Supply (physical)
+   * SHOP — KIOSK Supply (skateshop) + digital goods
+   *
+   * Every product renders a vector mockup from `mockup` until you
+   * set `image` to a real product photo.
+   *
+   * colorways: each one is { name, garment, ink, shopifyHandle? }.
+   *   Name colourways after story palette colours ("Sodium",
+   *   "Midnight Purple") and "Shop the look" will match them and
+   *   preselect that colourway on the story page.
    *
    * status:
-   *   'available' → links to /products/<shopifyHandle> (Shopify)
-   *                  or to `href` when given.
-   *   'soon'      → "Notify me" (joins the Dispatch list)
+   *   'available' → Buy (links to /products/<shopifyHandle> of the
+   *                  selected colourway, or `href`)
+   *   'soon'      → Notify me (joins the Dispatch list)
    *
-   * seasons / vibes / colors drive "Shop the look" matching on
-   * story pages. Use the same words you use on stories.
+   * badge: short label on the tile — 'New', 'Issue 01', 'Classic'…
+   * seasons / vibes / colors: extra tags for "Shop the look".
    * -------------------------------------------------------- */
   categories: [
+    { id: 'apparel', label: 'Apparel', kind: 'physical' },
+    { id: 'headwear', label: 'Headwear', kind: 'physical' },
+    { id: 'skate', label: 'Skate', kind: 'physical' },
+    { id: 'accessories', label: 'Accessories', kind: 'physical' },
     { id: 'mixes', label: 'Phonk Mixes', kind: 'digital' },
     { id: 'films', label: 'Films', kind: 'digital' },
     { id: 'luts', label: 'LUT Packs', kind: 'digital' },
-    { id: 'accessories', label: 'Accessories', kind: 'physical' },
-    { id: 'apparel', label: 'Apparel', kind: 'physical' },
   ],
 
   products: [
+    /* ---- Apparel ---- */
     {
-      id: 'mix-wangan-drift-vol1', category: 'mixes', title: 'Wangan Drift — Vol. 01',
-      detail: '42 min · WAV + MP3 · Stems for 2 tracks', price: 12, tone: 'sodium',
+      id: 'tee-wangan', category: 'apparel', title: 'Wangan Line Tee', price: 42, badge: 'Issue 01', added: '2026-10-01',
+      detail: 'Heavyweight cotton · boxy fit · screen print',
+      mockup: { type: 'tee', print: 'wangan' },
+      colorways: [
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+        { name: 'Midnight Purple', garment: '#2b1d3a', ink: '#e8892b' },
+        { name: 'Grand Prix White', garment: '#ece9e1', ink: '#141414' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall', 'winter'], vibes: ['night', 'jdm', 'moody', 'neon'], colors: ['Sodium', 'Midnight Purple'],
+      seasons: ['fall', 'summer'], vibes: ['night', 'jdm', 'neon'], colors: [],
     },
     {
-      id: 'mix-midnight-garage-vol2', category: 'mixes', title: 'Midnight Garage — Vol. 02',
-      detail: '38 min · WAV + MP3', price: 12, tone: 'graphite',
+      id: 'ls-sodium', category: 'apparel', title: 'Sodium Night Longsleeve', price: 55, badge: 'New', added: '2026-10-01',
+      detail: 'Midweight cotton · sleeve hit · screen print',
+      mockup: { type: 'longsleeve', print: 'issue', sleevePrint: 'SODIUM NIGHT' },
+      colorways: [
+        { name: 'Sodium', garment: '#e8892b', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#e8892b' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['winter', 'fall'], vibes: ['night', 'urban', 'moody'], colors: [],
+      seasons: ['fall', 'winter'], vibes: ['night', 'moody', 'urban'], colors: [],
     },
     {
-      id: 'mix-cafe-racer-tapes', category: 'mixes', title: 'Café Racer Tapes — Vol. 03',
-      detail: '35 min · WAV + MP3', price: 12, tone: 'ember',
+      id: 'hoodie-garage', category: 'apparel', title: 'Midnight Garage Hoodie', price: 98, badge: 'New', added: '2026-09-28',
+      detail: 'Brushed fleece · kangaroo pocket · arch print',
+      mockup: { type: 'hoodie', print: 'arch' },
+      colorways: [
+        { name: 'Plattenbau', garment: '#a7a39a', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+        { name: 'Lake Green', garment: '#3d5747', ink: '#ece9e1' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall', 'spring'], vibes: ['vintage', 'workshop', 'craft', 'golden-hour'], colors: ['Candy Brown', 'Brass'],
+      seasons: ['fall', 'winter'], vibes: ['night', 'urban', 'workshop'], colors: [],
     },
     {
-      id: 'film-r32-wangan', category: 'films', title: 'R32 — Wangan Nights',
-      detail: '4K ProRes download · Director’s cut · 04:12', price: 15, tone: 'sodium',
+      id: 'crew-cafe', category: 'apparel', title: 'Café Racer Club Crewneck', price: 85, badge: 'New', added: '2026-09-20',
+      detail: 'Loopback fleece · rib trims',
+      mockup: { type: 'crew', print: 'cafe' },
+      colorways: [
+        { name: 'Oxblood', garment: '#4a1416', ink: '#e9dcc4' },
+        { name: 'Stone', garment: '#c8bfae', ink: '#4a1416' },
+        { name: 'Candy Brown', garment: '#5a2e1b', ink: '#e9dcc4' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall'], vibes: ['night', 'neon', 'jdm'], colors: ['Midnight Purple', 'Sodium'],
+      seasons: ['fall', 'winter', 'spring'], vibes: ['vintage', 'craft', 'workshop', 'heritage'], colors: [],
     },
     {
-      id: 'film-issue-01-anthology', category: 'films', title: 'Issue 01 — Anthology',
-      detail: 'All Issue 01 films · 4K · 33 min', price: 39, tone: 'chrome',
+      id: 'tee-phonk', category: 'apparel', title: 'KIOSK Radio Tee', price: 42, badge: '', added: '2026-09-12',
+      detail: 'Heavyweight cotton · regular fit',
+      mockup: { type: 'tee', print: 'phonk' },
+      colorways: [
+        { name: 'Grand Prix White', garment: '#ece9e1', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+        { name: 'Ice', garment: '#cfe3f2', ink: '#1d3f8f' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: [], vibes: [], colors: [],
+      seasons: ['summer', 'spring'], vibes: ['urban', 'clean', 'neon'], colors: [],
     },
     {
-      id: 'lut-sodium-night', category: 'luts', title: 'Sodium Night',
-      detail: '12 LUTs · .cube · S-Log3 / Rec.709', price: 29, tone: 'sodium',
-      status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall', 'winter'], vibes: ['night', 'neon', 'moody', 'urban'], colors: ['Sodium', 'Midnight Purple', 'Bayshore Teal'],
+      id: 'ess-hoodie', category: 'apparel', title: 'Essential Hoodie #001', price: 89.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'The original KIOSK hoodie',
+      mockup: { type: 'hoodie', print: 'kmark', printW: 56 },
+      colorways: [
+        { name: 'Black', garment: '#141414', ink: '#f2f0eb', shopifyHandle: '001-black-hoodie' },
+        { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-hoodie' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'available', shopifyHandle: '001-black-hoodie', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['clean', 'urban', 'night'], colors: ['Asphalt', 'Blue Black'],
     },
     {
-      id: 'lut-desert-chrome', category: 'luts', title: 'Desert Chrome',
-      detail: '10 LUTs · .cube · S-Log3 / Rec.709', price: 29, tone: 'desert',
+      id: 'ess-tee', category: 'apparel', title: 'Essential Tee #001', price: 39.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'The original KIOSK tee',
+      mockup: { type: 'tee', print: 'wordmark' },
+      colorways: [
+        { name: 'Black', garment: '#141414', ink: '#f2f0eb', shopifyHandle: '001-black-tshirt' },
+        { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-tshirt' },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'available', shopifyHandle: '001-black-tshirt', href: '', image: '',
+      seasons: ['summer', 'spring'], vibes: ['clean', 'urban', 'daylight'], colors: ['Asphalt', 'Grand Prix White'],
+    },
+
+    /* ---- Headwear ---- */
+    {
+      id: 'cap-kmark', category: 'headwear', title: 'K Mark 6-Panel Cap', price: 38, badge: 'New', added: '2026-09-25',
+      detail: 'Unstructured cotton twill · strapback',
+      mockup: { type: 'cap', print: 'kmark' },
+      colorways: [
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+        { name: 'Stone', garment: '#c8bfae', ink: '#141414' },
+        { name: 'Interlagos', garment: '#1d3f8f', ink: '#f2f0eb' },
+      ],
+      sizes: ['One size'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['summer', 'spring'], vibes: ['golden-hour', 'coastal', 'warm', 'daylight'], colors: ['Golden Hour'],
+      seasons: ['summer', 'spring'], vibes: ['clean', 'daylight', 'urban'], colors: [],
     },
     {
-      id: 'lut-vintage-stock', category: 'luts', title: 'Vintage Stock',
-      detail: '8 film emulations · .cube', price: 24, tone: 'ember',
+      id: 'beanie-night', category: 'headwear', title: 'Night Shift Beanie', price: 32, badge: '', added: '2026-09-18',
+      detail: 'Rib knit · woven patch',
+      mockup: { type: 'beanie', print: 'wordmark' },
+      colorways: [
+        { name: 'Sodium', garment: '#e8892b', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+        { name: 'Plattenbau', garment: '#a7a39a', ink: '#141414' },
+      ],
+      sizes: ['One size'],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall', 'winter', 'spring'], vibes: ['vintage', 'film-grain', 'heritage', 'craft'], colors: ['Portra Skin'],
+      seasons: ['fall', 'winter'], vibes: ['night', 'moody', 'urban'], colors: [],
+    },
+
+    /* ---- Skate ---- */
+    {
+      id: 'deck-wangan', category: 'skate', title: 'Wangan Deck', price: 70, badge: 'Issue 01', added: '2026-10-01',
+      detail: '7-ply maple · medium concave',
+      mockup: { type: 'deck', print: 'wangan', deckText: 'WANGAN', deckSub: 'night shift — issue 01' },
+      colorways: [
+        { name: 'Midnight Purple', garment: '#2b1d3a', ink: '#e8892b' },
+        { name: 'Sodium', garment: '#e8892b', ink: '#141414' },
+        { name: 'Stone', garment: '#c8bfae', ink: '#2b1d3a' },
+      ],
+      sizes: ['8.0"', '8.25"', '8.5"'],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall'], vibes: ['night', 'jdm', 'neon'], colors: [],
     },
     {
-      id: 'acc-keytag', category: 'accessories', title: 'Garage Key Tag',
-      detail: 'Anodised aluminium · laser-etched', price: 18, tone: 'chrome',
+      id: 'deck-checker', category: 'skate', title: 'Checker Deck', price: 65, badge: '', added: '2026-09-10',
+      detail: '7-ply maple · medium concave',
+      mockup: { type: 'deck', print: 'checker' },
+      colorways: [
+        { name: 'Grand Prix White', garment: '#ece9e1', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#ece9e1' },
+      ],
+      sizes: ['8.0"', '8.25"', '8.5"'],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['summer', 'spring'], vibes: ['clean', 'urban', 'vintage'], colors: [],
+    },
+    {
+      id: 'socks-pit', category: 'skate', title: 'Pit Crew Socks', price: 16, badge: '', added: '2026-09-10',
+      detail: 'Cushioned crew socks · 2 stripes',
+      mockup: { type: 'socks' },
+      colorways: [
+        { name: 'Grand Prix White', garment: '#ece9e1', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#e8892b' },
+      ],
+      sizes: ['S/M', 'L/XL'],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: [], vibes: ['clean', 'urban', 'workshop'], colors: [],
+    },
+
+    /* ---- Accessories ---- */
+    {
+      id: 'tote-dispatch', category: 'accessories', title: 'Dispatch Tote', price: 28, badge: '', added: '2026-09-05',
+      detail: 'Heavy canvas · arch print',
+      mockup: { type: 'tote', print: 'arch' },
+      colorways: [
+        { name: 'Stone', garment: '#c8bfae', ink: '#141414' },
+        { name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' },
+      ],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['spring', 'summer'], vibes: ['clean', 'coastal', 'daylight'], colors: [],
+    },
+    {
+      id: 'acc-keytag', category: 'accessories', title: 'Garage Key Tag', price: 18, badge: '', added: '2026-09-05',
+      detail: 'Anodised aluminium · laser-etched',
+      mockup: { type: 'keytag' },
+      colorways: [
+        { name: 'Chrome', garment: '#c9ccd1', ink: '#141414' },
+        { name: 'Sodium', garment: '#e8892b', ink: '#141414' },
+      ],
+      sizes: [],
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: [], vibes: ['clean', 'workshop', 'craft'], colors: [],
     },
     {
-      id: 'acc-sticker-pack', category: 'accessories', title: 'Issue 01 Sticker Pack',
-      detail: '6 die-cut vinyl · weatherproof', price: 10, tone: 'graphite',
+      id: 'acc-sticker-pack', category: 'accessories', title: 'Issue 01 Sticker Pack', price: 10, badge: '', added: '2026-09-01',
+      detail: '4 die-cut vinyl stickers',
+      mockup: { type: 'stickers' },
+      colorways: [{ name: 'Mixed', garment: '#ece9e1', ink: '#141414' }],
+      sizes: [],
       status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: [], vibes: ['jdm', 'urban'], colors: [],
+      seasons: [], vibes: ['jdm', 'urban', 'neon'], colors: [],
     },
     {
-      id: 'acc-chains', category: 'accessories', title: 'Chains',
-      detail: 'Gold + silver · KIOSK Supply', price: null, tone: 'desert',
-      status: 'available', shopifyHandle: '', href: 'collections/chains.html',
-      image: 'images/products/001-gold-chain-lifestyle.webp',
+      id: 'acc-chain', category: 'accessories', title: 'Curb Chain #001', price: 69.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'Stainless steel · plated',
+      mockup: { type: 'chain' },
+      colorways: [
+        { name: 'Gold', garment: '#c9a24a', ink: '#141414', shopifyHandle: '001-gold-chain' },
+        { name: 'Silver', garment: '#b9bcc1', ink: '#141414', shopifyHandle: '001-silver-chain' },
+      ],
+      sizes: [],
+      status: 'available', shopifyHandle: '001-gold-chain', href: '', image: '',
       seasons: ['summer'], vibes: ['golden-hour', 'warm', 'italian'], colors: ['Golden Hour', 'Brass'],
     },
     {
-      id: 'acc-bracelets', category: 'accessories', title: 'Bracelets',
-      detail: 'Gold + silver · KIOSK Supply', price: null, tone: 'chrome',
-      status: 'available', shopifyHandle: '', href: 'collections/bracelets.html',
-      image: 'images/products/001-silver-bracelet-lifestyle.webp',
+      id: 'acc-bracelet', category: 'accessories', title: 'Curb Bracelet #001', price: 49.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'Stainless steel · plated',
+      mockup: { type: 'chain', rx: 82, ry: 82, links: 30, cy: 240, linkW: 10, linkT: 5 },
+      colorways: [
+        { name: 'Silver', garment: '#b9bcc1', ink: '#141414', shopifyHandle: '001-silver-bracelet' },
+        { name: 'Gold', garment: '#c9a24a', ink: '#141414', shopifyHandle: '001-gold-bracelet' },
+      ],
+      sizes: [],
+      status: 'available', shopifyHandle: '001-silver-bracelet', href: '', image: '',
       seasons: ['spring', 'summer'], vibes: ['clean', 'coastal', 'heritage'], colors: ['Grand Prix White', 'Sea Fog'],
     },
+
+    /* ---- Digital ---- */
     {
-      id: 'app-tees', category: 'apparel', title: 'Essential Tees',
-      detail: 'Heavyweight cotton · black / white', price: null, tone: 'graphite',
-      status: 'available', shopifyHandle: '', href: 'collections/t-shirts.html',
-      image: 'images/products/001-black-tshirt-lifestyle.webp',
-      seasons: ['summer', 'spring'], vibes: ['clean', 'urban', 'daylight'], colors: ['Asphalt'],
+      id: 'mix-wangan-drift-vol1', category: 'mixes', title: 'Wangan Drift — Vol. 01', price: 12, badge: 'Digital', added: '2026-10-01',
+      detail: '42 min · WAV + MP3',
+      mockup: { type: 'cassette', label: 'WANGAN DRIFT', sub: 'VOL. 01' },
+      colorways: [{ name: 'Midnight Purple', garment: '#2b1d3a', ink: '#e8892b' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['night', 'jdm', 'moody', 'neon'], colors: ['Sodium'],
     },
     {
-      id: 'app-hoodies', category: 'apparel', title: 'Hoodies',
-      detail: 'Brushed fleece · black / white', price: null, tone: 'graphite',
-      status: 'available', shopifyHandle: '', href: 'collections/hoodies.html',
-      image: 'images/products/001-black-hoodie-lifestyle.webp',
-      seasons: ['fall', 'winter'], vibes: ['night', 'urban', 'moody'], colors: ['Asphalt', 'Blue Black'],
+      id: 'mix-midnight-garage-vol2', category: 'mixes', title: 'Midnight Garage — Vol. 02', price: 12, badge: 'Digital', added: '2026-09-20',
+      detail: '38 min · WAV + MP3',
+      mockup: { type: 'cassette', label: 'MIDNIGHT GARAGE', sub: 'VOL. 02' },
+      colorways: [{ name: 'Asphalt', garment: '#1b1b1d', ink: '#ece9e1' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['winter', 'fall'], vibes: ['night', 'urban', 'moody'], colors: [],
+    },
+    {
+      id: 'mix-cafe-racer-tapes', category: 'mixes', title: 'Café Racer Tapes — Vol. 03', price: 12, badge: 'Digital', added: '2026-09-10',
+      detail: '35 min · WAV + MP3',
+      mockup: { type: 'cassette', label: 'CAFÉ RACER TAPES', sub: 'VOL. 03' },
+      colorways: [{ name: 'Candy Brown', garment: '#5a2e1b', ink: '#e9dcc4' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall', 'spring'], vibes: ['vintage', 'workshop', 'craft', 'golden-hour'], colors: ['Brass'],
+    },
+    {
+      id: 'film-r32-wangan', category: 'films', title: 'R32 — Wangan Nights', price: 15, badge: 'Digital', added: '2026-09-18',
+      detail: '4K download · director’s cut · 04:12',
+      mockup: { type: 'vhs', label: 'Wangan Nights', sub: 'R32 · 04:12' },
+      colorways: [{ name: 'Sodium', garment: '#e8892b', ink: '#efe9dc' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall'], vibes: ['night', 'neon', 'jdm'], colors: ['Midnight Purple'],
+    },
+    {
+      id: 'film-issue-01-anthology', category: 'films', title: 'Issue 01 — Anthology', price: 39, badge: 'Digital', added: '2026-10-01',
+      detail: 'All Issue 01 films · 4K · 33 min',
+      mockup: { type: 'vhs', label: 'Night Shift', sub: 'ISSUE 01 · 33 MIN' },
+      colorways: [{ name: 'Asphalt', garment: '#141416', ink: '#efe9dc' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: [], vibes: [], colors: [],
+    },
+    {
+      id: 'lut-sodium-night', category: 'luts', title: 'Sodium Night LUTs', price: 29, badge: 'Digital', added: '2026-09-18',
+      detail: '12 LUTs · .cube · S-Log3 / Rec.709',
+      mockup: { type: 'lutbox', label: 'Sodium Night', sub: '12 LUTS · S-LOG3', swatches: ['#2b1d3a', '#e8892b', '#1f3b44', '#b3202a', '#141416'] },
+      colorways: [{ name: 'Asphalt', garment: '#141416', ink: '#f2f0eb' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['night', 'neon', 'moody', 'urban'], colors: ['Sodium', 'Midnight Purple', 'Bayshore Teal'],
+    },
+    {
+      id: 'lut-desert-chrome', category: 'luts', title: 'Desert Chrome LUTs', price: 29, badge: 'Digital', added: '2026-09-01',
+      detail: '10 LUTs · .cube · S-Log3 / Rec.709',
+      mockup: { type: 'lutbox', label: 'Desert Chrome', sub: '10 LUTS · S-LOG3', swatches: ['#e7b56a', '#9e1a1f', '#2c6e86', '#ece9e1', '#3e5560'] },
+      colorways: [{ name: 'Golden Hour', garment: '#e7b56a', ink: '#141414' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['summer', 'spring'], vibes: ['golden-hour', 'coastal', 'warm', 'daylight'], colors: ['Golden Hour'],
+    },
+    {
+      id: 'lut-vintage-stock', category: 'luts', title: 'Vintage Stock LUTs', price: 24, badge: 'Digital', added: '2026-08-20',
+      detail: '8 film emulations · .cube',
+      mockup: { type: 'lutbox', label: 'Vintage Stock', sub: '8 FILM LOOKS', swatches: ['#d9b59a', '#5a2e1b', '#a7a39a', '#4a1416', '#1b1f27'] },
+      colorways: [{ name: 'Candy Brown', garment: '#5a2e1b', ink: '#e9dcc4' }],
+      sizes: [],
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall', 'winter', 'spring'], vibes: ['vintage', 'film-grain', 'heritage', 'craft'], colors: ['Portra Skin'],
     },
   ],
 };

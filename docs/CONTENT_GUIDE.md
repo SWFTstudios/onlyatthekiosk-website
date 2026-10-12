@@ -10,7 +10,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Garage | `garage.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
 | Radio | `radio.html` | Phonk mixes, player, tracklists |
-| Vault | `vault.html?c=<category>` | Mixes, films, LUT packs, accessories, apparel |
+| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, mixes, films, LUT packs |
 
 The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. In the new nav they appear as **Supply**.
 
@@ -124,7 +124,7 @@ Products listed in a story's `products` always come first. The remaining slots g
 | --- | --- |
 | Product is the story's `gradedWith` LUT | +4 |
 | Product is the story's soundtrack mix | +4 |
-| A product `colors` name equals a story `palette` name | +3 each |
+| A product colourway name (or `colors` entry) equals a story `palette` name | +3 each, and that colourway is preselected |
 | Product `seasons` includes the story `season` | +2 |
 | A product `vibes` word matches a story `vibes` word | +2 each |
 
@@ -152,27 +152,44 @@ While `audio` is empty, the play button shows a "drops soon" message instead of 
 
 ---
 
-## 4. Add or sell a product
+## 4. Add or sell a product (KIOSK Supply)
+
+The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real product photo, each product renders as a **vector mockup** on a light tile.
 
 ```js
 {
-  id: 'lut-sodium-night', category: 'luts',      // mixes | films | luts | accessories | apparel
-  title: 'Sodium Night', detail: '12 LUTs · .cube · S-Log3 / Rec.709', price: 29,
-  tone: 'sodium', image: 'images/vault/sodium-night.webp',
-  status: 'soon',                // 'soon' → "Notify me"   |   'available' → Buy
-  shopifyHandle: '',             // when available: links to /products/<handle> (Shopify)
-  href: '',                      // …or any URL (Gumroad, Shopify collection, etc.)
-  seasons: ['fall', 'winter'], vibes: ['night', 'neon'], colors: ['Sodium'],
+  id: 'hoodie-garage', category: 'apparel',   // apparel | headwear | skate | accessories | mixes | films | luts
+  title: 'Midnight Garage Hoodie', price: 98,
+  badge: 'New',                               // tile label: 'New', 'Issue 01' (orange sticker), 'Classic', 'Digital'…
+  added: '2026-09-28',                        // used by "Newest" sort and the home "New in" row
+  detail: 'Brushed fleece · kangaroo pocket · arch print',
+  mockup: { type: 'hoodie', print: 'arch' },
+  colorways: [
+    { name: 'Plattenbau', garment: '#a7a39a', ink: '#141414' },
+    { name: 'Asphalt',    garment: '#141416', ink: '#f2f0eb', shopifyHandle: 'garage-hoodie-asphalt' },
+  ],
+  sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+  status: 'soon',            // 'soon' → "Notify me"   |   'available' → Buy
+  shopifyHandle: '',         // fallback handle when a colourway has none
+  href: '',                  // …or any URL
+  image: '',                 // real photo replaces the mockup
+  seasons: ['fall', 'winter'], vibes: ['night', 'urban'], colors: [],
 }
 ```
 
+**Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `cassette` (mixes), `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
+
+**Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
+
+**Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
+
 **To start selling a product:**
-1. Create it in Shopify. For mixes, films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
-2. Copy the product handle into `shopifyHandle` and change `status` to `'available'`.
+1. Create it in Shopify, one product per colourway. For mixes, films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
+2. Put each handle on its colourway (`shopifyHandle`) and set `status: 'available'`.
 
-The existing `/products/:handle` route (`product.html`) handles the product page and checkout.
+The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, and the existing `product.html` page handles checkout. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
 
-"Notify me" sends the email to the existing `/api/subscribe` function, which writes to the Airtable "Incoming Interest" table. Right now it stores the email only, not which product the visitor asked about.
+"Notify me" sends the email to `/api/subscribe`, which writes to the Airtable "Incoming Interest" table. It stores the email only, not the product.
 
 ---
 
@@ -194,5 +211,6 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 
 - Styles: `css/kiosk-glass.css`. Rendering: `js/kiosk-glass.js`. Content: `js/kiosk-content.js`.
 - Fonts: General Sans (local) and **Instrument Serif** from Google Fonts for italic editorial accents.
-- Colour: graphite, bone and glass. A single signal orange (`--signal`) appears only on "live" and "now playing" dots.
+- Theme: white by default. Photo and film surfaces (heroes, story cards, radio deck, player, lightbox) use a dark token scope so footage stays cinematic. Add class `k-dark` or `k-light` to flip any block.
+- Colour: graphite, bone and glass. A single signal orange (`--signal`) appears only on "live" and "now playing" dots and the "Issue 01" sticker.
 - Placeholder **plates** (tones `sodium`, `chrome`, `desert`, `ice`, `ember`, `graphite`, `moss`) stand in for any missing image, so pages never look broken while footage is in post.
