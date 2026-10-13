@@ -45,17 +45,6 @@ Preview: `story.html?s=honda-f4i-shop&draft=1`
 | 04 | `lights-on` | Lights on | Connecting the front end and headlights back up — did it all work first time? |
 | 05 | `whats-next` | What’s next | What’s left on the build, and what are the plans for the bike? |
 
-## Lunar New Year Meet — `lunar-new-year-meet`
-
-Preview: `story.html?s=lunar-new-year-meet&draft=1`
-
-| # | Chapter id | Heading | Talk about |
-| --- | --- | --- | --- |
-| 01 | `the-meet` | The meet | Where was it, who put it on, and what was the energy like? |
-| 02 | `standouts` | The builds that stood out | Which cars caught your eye and why? |
-| 03 | `the-people` | The people | Who did you meet or talk to? |
-| 04 | `cutting-the-film` | Cutting the film | How is the edit coming together? |
-
 ## Real Slummy — `andy-q50`
 
 Preview: `story.html?s=andy-q50&draft=1`

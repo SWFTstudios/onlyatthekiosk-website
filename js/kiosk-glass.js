@@ -55,7 +55,8 @@
   /* ------------------------------------------------------------ data */
 
   // Lead story first, then newest shoot first
-  const features = (C.features || []).slice().sort((a, b) => {
+  // `hidden: true` keeps a story in the content file but off the site
+  const features = (C.features || []).filter((f) => !f.hidden).sort((a, b) => {
     const lead = (C.issue || {}).lead;
     if (a.slug === lead) return -1;
     if (b.slug === lead) return 1;

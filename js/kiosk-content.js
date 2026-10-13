@@ -35,7 +35,7 @@ window.KIOSK_CONTENT = {
   issue: {
     number: '01',
     title: 'Hudson Line',
-    dek: 'Our first projects: Andy’s Q50, Moses’s R1M and a Lunar New Year meet. Shot on location, scored in phonk.',
+    dek: 'Our first projects: Andy’s Q50, Moses’s R1M and a Honda F4i in the shop. Shot on location, scored in phonk.',
     // Optional looping hero reel (muted, autoplay). Empty → lead story's cover image.
     reel: '',
     reelPoster: '',
@@ -272,6 +272,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'lunar-new-year-meet',
+      hidden: true,   // off the site for now: delete this line to bring the post back
       type: 'car',
       format: 'film',
       year: '',

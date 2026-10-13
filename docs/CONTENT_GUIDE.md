@@ -19,7 +19,7 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
 
 ## 1. Add a story (film, photo story or interview)
 
-The first three stories are real shoots from Google Drive › *RollerReels Video Files*: `andy-q50`, `moses-r1m` and `lunar-new-year-meet`. Copy one of them to start a new story.
+The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (`lunar-new-year-meet` is hidden for now).
 
 **Films from Google Drive:** set `embed` to `https://drive.google.com/file/d/<FILE_ID>/preview`. It only plays for visitors once the Drive file is shared as **Anyone with the link → Viewer**. For the best playback, upload to YouTube or Vimeo and use that embed URL instead.
 
