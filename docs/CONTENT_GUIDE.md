@@ -19,7 +19,7 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
 
 ## 1. Add a story (film, photo story or interview)
 
-The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (`lunar-new-year-meet` is hidden for now).
+The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (the optional `hidden: true` keeps a story off the site).
 
 **Films from Google Drive:** set `embed` to `https://drive.google.com/file/d/<FILE_ID>/preview`. It only plays for visitors once the Drive file is shared as **Anyone with the link → Viewer**. For the best playback, upload to YouTube or Vimeo and use that embed URL instead.
 
@@ -184,6 +184,14 @@ For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
 
 ---
+
+## 3d. Raw footage played from Google Drive
+
+For footage too big to host on the site (each file over 25 MB), list the Drive clips on a story and they play from Drive in the site's viewer, with no download:
+```js
+bts: { driveClips: [ { id: '<DRIVE_FILE_ID>', clip: '0066', time: '11:15:59' } ] }
+```
+The file must be shared **Anyone with the link** (viewer is enough). Your Lunar New Year clips are currently shared as *editor*, which lets anyone with the link change them. Switch them to **Viewer** in Drive. The reel only needs viewing access.
 
 ## 3a. Magazine layouts: departments, mosaics and rails
 

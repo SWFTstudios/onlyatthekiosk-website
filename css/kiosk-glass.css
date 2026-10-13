@@ -2307,3 +2307,19 @@ html.is-intro, html.is-intro body { overflow: hidden; }
 .k-globe-stats dd { margin: 0; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
 .k-globe-stats dd b { font-weight: 500; }
 .k-globe-stats small { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* Raw footage reel (clips played from Google Drive) */
+.k-hscroll-wrap--reel .k-hscroll { grid-auto-columns: 148px; gap: 8px; }
+.k-reel__clip { position: relative; display: grid; align-content: space-between; aspect-ratio: 16 / 11; padding: 12px; border-radius: var(--r-md); text-align: left; color: #f4f2ee; background: linear-gradient(160deg, #1b1b1e, #0d0d0e); border: 1px solid var(--line-2); overflow: hidden; transition: transform 0.4s var(--ease), border-color 0.2s; }
+.k-reel__clip:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.4); }
+.k-reel__time { font-family: var(--f-mono); font-size: 20px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 6px; }
+.k-reel__time small { font-size: 10px; color: rgba(244,242,238,.5); }
+.k-reel__play { position: absolute; right: 10px; top: 10px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #f4f2ee; color: #0d0d0e; }
+.k-reel__play svg { width: 10px; height: 10px; }
+.k-reel__meta { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: rgba(244,242,238,.8); }
+.k-reel__meta small { font-family: var(--f-mono); font-size: 10px; color: rgba(244,242,238,.45); }
+
+/* Rails inside grids must not stretch their container */
+.k-bts__notes, .k-hscroll-wrap, .k-bts > * { min-width: 0; }
+.k-bts { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .k-bts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

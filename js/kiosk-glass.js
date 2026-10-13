@@ -486,6 +486,18 @@
     hydrateVimeo(el);
   }
 
+  /** Play a raw clip straight from Google Drive (needs the file shared "Anyone with the link"). */
+  function openDriveClip(id, title) {
+    player.pause();
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">Raw footage</p><p class="k-h3 k-mt-s">${esc(title)}</p></div>
+        <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+      </div>
+      <div class="k-lightbox__screen"><iframe src="https://drive.google.com/file/d/${encodeURIComponent(id)}/preview" title="${esc(title)}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+      <p class="k-small k-mt-s"><a href="https://drive.google.com/file/d/${encodeURIComponent(id)}/view" target="_blank" rel="noopener" style="text-decoration:underline;text-underline-offset:3px">Open in Google Drive</a></p>`, 'Raw footage clip');
+  }
+
   function openNotify(id, title) {
     openLightbox(`
       <div class="k-glass k-glass--strong" style="max-width:560px;margin:0 auto;padding:clamp(20px,4vw,32px);border-radius:var(--r-xl)">
@@ -1386,6 +1398,8 @@
       }
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save, save); return; }
+      const dclip = e.target.closest('[data-drive-clip]');
+      if (dclip) { openDriveClip(dclip.dataset.driveClip, dclip.dataset.driveTitle); return; }
       const vim = e.target.closest('[data-vimeo]');
       if (vim) { const v = vimeoById(vim.dataset.vimeo); if (v) openVimeo(v); return; }
       const film = e.target.closest('[data-film]');
@@ -1813,6 +1827,15 @@
     if ((bts.gear || []).length) btsCards.push(`<div class="k-bts__card k-bts__gear k-glass" data-reveal data-reveal-delay="1"><h3>Kit</h3><ul>${bts.gear.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></div>`);
     if ((bts.conditions || []).length) btsCards.push(`<div class="k-bts__card k-glass" data-reveal data-reveal-delay="2"><h3>Conditions</h3><ul>${bts.conditions.map((c) => `<li><span>${esc(c.label)}</span>${esc(c.value)}</li>`).join('')}</ul></div>`);
     if (bts.notes) btsCards.push(`<div class="k-bts__card k-bts__notes k-glass" data-reveal><h3>Notes from set</h3><p class="k-prose__text" style="font-size:clamp(16px,1.4vw,19px)">${esc(bts.notes)}</p></div>`);
+    if ((bts.driveClips || []).length) {
+      const dc = bts.driveClips;
+      btsCards.push(`<div class="k-bts__notes"><h3 class="k-bts__label">Raw footage · ${dc.length} clips · ${esc(dc[0].time.slice(0, 5))}–${esc(dc[dc.length - 1].time.slice(0, 5))}</h3>${railShell(dc.map((c, i) => `
+        <button class="k-reel__clip" type="button" data-drive-clip="${esc(c.id)}" data-drive-title="${esc(`Clip ${c.clip} · ${c.time}`)}" aria-label="Play clip ${esc(c.clip)} from ${esc(c.time)}">
+          <span class="k-reel__time">${esc(c.time.slice(0, 5))}<small>${esc(c.time.slice(6))}s</small></span>
+          <span class="k-reel__play" aria-hidden="true">${icon.play}</span>
+          <span class="k-reel__meta">Clip ${esc(c.clip)}<small>${pad(i + 1)} / ${pad(dc.length)}</small></span>
+        </button>`).join(''), 'Raw footage', 'k-hscroll-wrap--reel')}</div>`);
+    }
     if ((bts.clips || []).length) btsCards.push(`<div class="k-bts__notes"><h3 class="k-bts__label">Raw footage</h3><div class="k-grid">${bts.clips.map((c) => `<figure class="k-bts__clip"><div class="k-card"><div class="k-media" style="aspect-ratio:16/9"><video${c.poster ? ` poster="${esc(c.poster)}"` : ''} autoplay muted loop playsinline preload="metadata" aria-label="${esc(c.caption || 'Behind the scenes clip')}">${c.webm ? `<source src="${esc(c.webm)}" type="video/webm">` : ''}<source src="${esc(c.src)}" type="video/mp4"></video></div></div>${c.caption || c.meta ? `<figcaption>${esc(c.caption || '')}${c.meta ? `<span>${esc(c.meta)}</span>` : ''}</figcaption>` : ''}</figure>`).join('')}</div></div>`);
     if ((bts.frames || []).length) btsCards.push(`<div class="k-bts__notes"><div class="k-grid">${bts.frames.map((src) => `<div class="k-card"><div class="k-media" style="aspect-ratio:4/3"><img src="${esc(src)}" alt="Behind the scenes" loading="lazy"></div></div>`).join('')}</div></div>`);
     if (btsCards.length) fill('story-bts', btsCards.join('')); else hideSection('bts');
