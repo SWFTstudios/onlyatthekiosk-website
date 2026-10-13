@@ -395,8 +395,14 @@
         <div><p class="k-eyebrow">${esc(formatLabel(f))} · ${esc(f.runtime || '—')}</p><p class="k-h3 k-mt-s">${esc(f.title || featureName(f))} <span class="k-serif" style="color:var(--ink-3)">— ${esc(featureName(f))}</span></p></div>
         <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
       </div>
-      <div class="k-lightbox__screen">${screen}</div>`, `${featureName(f)} film`);
+      <div class="k-lightbox__screen"${f.aspect ? ` style="${screenFit(f.aspect)}"` : ''}>${screen}</div>`, `${featureName(f)} film`);
   }
+
+  /** Film screen for a non-16:9 film ('4/3'): keep the ratio and fit the window height. */
+  const screenFit = (aspect) => {
+    const [w, h] = String(aspect).split('/').map(Number);
+    return w && h ? `aspect-ratio:${w}/${h};width:min(100%, calc(78svh * ${w} / ${h}));margin:0 auto` : '';
+  };
 
   /* ------------------------------------------------------------ vimeo */
 
@@ -468,7 +474,7 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
       </div>
-      <div class="k-lightbox__screen"><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
+      <div class="k-lightbox__screen"${v.aspect ? ` style="${screenFit(v.aspect)}"` : ''}><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
     vimeoInfo(v).then((d) => { const t = $('.k-lightbox.is-open [data-vimeo-title]'); if (t && !v.title && d.title) t.textContent = d.title; });
   }
 

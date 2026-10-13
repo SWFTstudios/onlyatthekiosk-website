@@ -265,6 +265,8 @@ window.KIOSK_CONTENT = {
         { src: 'images/garage/moses-r1m/08.webp', caption: 'Helmet + Midtown, tighter', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
         { src: 'images/garage/moses-r1m/09.webp', caption: 'Helmet + tower', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
         { src: 'images/garage/moses-r1m/10.webp', caption: 'Helmet, river level', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
+        { src: 'images/garage/moses-r1m/11.webp', caption: 'Helmet, bridge and skyline', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
+        { src: 'images/garage/moses-r1m/12.webp', caption: 'Helmet under the span', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
       ],
       video: '',
       embed: '',
@@ -531,11 +533,73 @@ window.KIOSK_CONTENT = {
       interview: [],
       image: '', poster: '', gallery: [], video: '',
       vimeo: { id: '1066971784', hash: '' },   // cover image is pulled from Vimeo
+      aspect: '4/3',                            // the film is 4:3
       embed: 'https://player.vimeo.com/video/1066971784?title=0&byline=0&portrait=0&dnt=1',
       soundtrack: '',
       gradedWith: '',
       filmProduct: '',
       products: ['lut-vintage-stock', 'beanie-night', 'tee-phonk'],
+    },
+    {
+      slug: 'ksenia-r3-moses-r1m',
+      desk: 'automotive',
+      type: 'motorcycle',
+      format: 'film',
+      year: '',
+      make: '',
+      model: 'R3 × R1M',
+      code: 'R3×R1M',
+      title: 'Ksenia’s R3 × Moses’ R1M',
+      tagline: 'Two riders, two Yamahas, one film.',
+      excerpt: 'Ksenia on her R3 and Moses on his R1M, on film.',
+      era: '',
+      season: '',
+      vibes: ['urban', 'clean', 'moody'],
+      location: '',
+      city: '',
+      country: '',
+      coords: '',
+      shotOn: '',
+      lens: '',
+      runtime: '',
+      published: '',
+      tone: 'ice',
+      tags: ['Superbike', 'Film', 'Riders'],
+      media: ['film'],
+      specs: [
+        { label: 'Riders', value: 'Ksenia + Moses' },
+        { label: 'Bikes', value: 'R3 + Yamaha YZF-R1M' },
+        { label: 'Format', value: 'Film · 4:3' },
+      ],
+      subjects: [
+        { name: 'Ksenia', role: 'Rider · R3', bio: '' },
+        { name: 'Moses', role: 'Rider · R1M', bio: 'Also in Under the Bridge, the R1M photo story.' },
+      ],
+      owner: { name: '', quote: '' },
+      story: [
+        { type: 'text', lead: 'Two riders.', body: 'Ksenia on her R3 and Moses on his R1M.' },
+      ],
+      author: 'RollerReels',
+      // Blog chapters: dictate a chapter and it gets typed into `body`.
+      // Empty chapters stay hidden (preview them with story.html?s=<slug>&draft=1).
+      chapters: [
+        { id: 'the-riders', heading: 'Ksenia and Moses', prompt: 'Who are Ksenia and Moses, and how do they ride together?', body: '' },
+        { id: 'the-bikes', heading: 'The R3 and the R1M', prompt: 'What should people know about each bike?', body: '' },
+        { id: 'the-day', heading: 'The ride', prompt: 'Where did you shoot, and how did the day go?', body: '' },
+        { id: 'the-cut', heading: 'Cutting the film', prompt: 'How did the edit come together — the music, the 4:3 look?', body: '' },
+      ],
+      palette: [],
+      bts: { crew: [{ role: 'Film', name: 'RollerReels' }], gear: [], conditions: [], notes: '', frames: [] },
+      timeline: [],
+      interview: [],
+      image: '', poster: '', gallery: [], video: '',
+      vimeo: { id: '1019207124', hash: '' },   // cover image is pulled from Vimeo
+      aspect: '4/3',
+      embed: 'https://player.vimeo.com/video/1019207124?title=0&byline=0&portrait=0&badge=0&dnt=1',
+      soundtrack: '',
+      gradedWith: '',
+      filmProduct: '',
+      products: ['cap-kmark', 'tee-q-tired', 'hoodie-q-glitch'],
     },
   ],
 
@@ -548,7 +612,8 @@ window.KIOSK_CONTENT = {
    * -------------------------------------------------------- */
   vimeo: [
     { id: '1212483051', hash: 'f428c5372f', title: '', story: 'honda-f4i-shop' },
-    { id: '1066971784', hash: '', title: '', story: 'l0st-tapes' },
+    { id: '1066971784', hash: '', title: 'L0ST TAPES', story: 'l0st-tapes', aspect: '4/3' },
+    { id: '1019207124', hash: '', title: 'Ksenia’s R3 × Moses’ R1M', story: 'ksenia-r3-moses-r1m', aspect: '4/3' },
   ],
 
   /* ----------------------------------------------------------

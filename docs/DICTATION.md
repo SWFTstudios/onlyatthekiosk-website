@@ -20,6 +20,17 @@ Add `&draft=1` to any story URL, e.g. `story.html?s=andy-q50&draft=1`, or open `
 
 ## Chapters by post
 
+## Ksenia’s R3 × Moses’ R1M — `ksenia-r3-moses-r1m`
+
+Preview: `story.html?s=ksenia-r3-moses-r1m&draft=1`
+
+| # | Chapter id | Heading | Talk about |
+| --- | --- | --- | --- |
+| 01 | `the-riders` | Ksenia and Moses | Who are Ksenia and Moses, and how do they ride together? |
+| 02 | `the-bikes` | The R3 and the R1M | What should people know about each bike? |
+| 03 | `the-day` | The ride | Where did you shoot, and how did the day go? |
+| 04 | `the-cut` | Cutting the film | How did the edit come together — the music, the 4:3 look? |
+
 ## L0ST TAPES — `l0st-tapes`
 
 Preview: `story.html?s=l0st-tapes&draft=1`
