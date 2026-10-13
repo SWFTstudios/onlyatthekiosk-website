@@ -2661,44 +2661,99 @@
     });
   }
 
-  /* ------------------------------------------------------------ globe intro
-   * First visit to the home page each session: the wireframe globe turns,
-   * flights leave New York, then the cover video takes over.
+  /* ------------------------------------------------- world traveler intro
+   * First visit to the home page each session. With WebGL, a 3D dotted
+   * Earth (js/kiosk-intro3d.js, three.js loaded only here) follows a
+   * traveler New York → Reykjavík → London → Marrakesh → Dubai → Tokyo,
+   * stamping each stop, then pulls back to the title. Without WebGL, or if
+   * the scripts are slow or fail, the 2D wireframe globe plays instead.
    * Skippable; skipped for reduced motion.
    * -------------------------------------------------------------------- */
+  const INTRO_3D = ['js/vendor/three-r149.min.js', 'js/kiosk-world.js', 'js/kiosk-intro3d.js'];
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = false;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error(`failed to load ${src}`));
+      document.head.append(s);
+    });
+  }
+
+  function hasWebGL() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
+
   function runIntro() {
     let seen = false;
     try { seen = sessionStorage.getItem('kiosk:intro') === '1'; sessionStorage.setItem('kiosk:intro', '1'); } catch (e) { seen = true; }
     if (seen || REDUCED) return;
+    const issue = esc((C.issue || {}).number || '01');
     const el = document.createElement('div');
-    el.className = 'k-intro';
+    el.className = 'k-intro k-i3d is-loading';
     el.setAttribute('role', 'presentation');
     el.innerHTML = `
       <canvas class="k-intro__globe" aria-hidden="true"></canvas>
+      <div class="k-i3d__labels" data-i3d-labels aria-hidden="true"></div>
+      <div class="k-i3d__pass" data-i3d-pass aria-hidden="true"></div>
       <div class="k-intro__copy">
         <p class="k-intro__kicker">Only at the</p>
         <p class="k-intro__word">KIOSK</p>
-        <p class="k-intro__line"><span data-intro-count>00</span> flights · ${pad(GLOBE_PLACES.length)} cities · Issue ${esc((C.issue || {}).number || '01')}</p>
+        <p class="k-intro__line" data-intro-line>World traveler edition · Issue ${issue}</p>
       </div>
       <button class="k-intro__skip" type="button">Skip intro</button>`;
     document.body.append(el);
     document.documentElement.classList.add('is-intro');
-    let n = 0;
-    const globe = createGlobe($('canvas', el), {
-      scale: 0.34, max: 9, homeBias: 0.8,
-      onFlight: () => { n += 1; const c = $('[data-intro-count]', el); if (c) c.textContent = pad(n); },
-    });
+
     let done = false;
+    let player = null;
     const finish = () => {
       if (done) return;
       done = true;
       el.classList.add('is-out');
       document.documentElement.classList.remove('is-intro');
-      setTimeout(() => { globe.stop(); el.remove(); }, 900);
+      setTimeout(() => { if (player) player.stop(); el.remove(); }, 900);
     };
     $('.k-intro__skip', el).addEventListener('click', finish);
-    el.addEventListener('click', (e) => { if (e.target === el) finish(); });
-    setTimeout(finish, 3200);
+    el.addEventListener('click', (e) => { if (e.target === el || e.target.tagName === 'CANVAS') finish(); });
+
+    // 2D wireframe globe: the original intro, kept as the fallback
+    const play2D = () => {
+      if (done || player) return;
+      el.classList.remove('k-i3d', 'is-loading', 'is-landed');
+      // A failed WebGL start can leave the canvas unusable for 2D
+      const canvas = document.createElement('canvas');
+      canvas.className = 'k-intro__globe'; canvas.setAttribute('aria-hidden', 'true');
+      $('canvas', el).replaceWith(canvas);
+      let n = 0;
+      const line = $('[data-intro-line]', el);
+      line.innerHTML = `<span data-intro-count>00</span> flights · ${pad(GLOBE_PLACES.length)} cities · Issue ${issue}`;
+      player = createGlobe(canvas, {
+        scale: 0.34, max: 9, homeBias: 0.8,
+        onFlight: () => { n += 1; const c = $('[data-intro-count]', el); if (c) c.textContent = pad(n); },
+      });
+      setTimeout(finish, 3200);
+    };
+
+    if (!hasWebGL()) { play2D(); return; }
+    // Slow connections shouldn't sit on a blank screen
+    const slow = setTimeout(play2D, 2500);
+    INTRO_3D.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+      .then(() => {
+        clearTimeout(slow);
+        if (done || player) return;
+        el.classList.remove('is-loading');
+        player = window.KioskIntro3D.run(el, { onDone: finish });
+      })
+      .catch((err) => {
+        console.warn('[KIOSK] 3D intro unavailable, using 2D globe', err);
+        clearTimeout(slow);
+        play2D();
+      });
   }
 
   /* ------------------------------------------------------------- boot */

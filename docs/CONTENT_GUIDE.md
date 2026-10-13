@@ -223,7 +223,12 @@ The title, thumbnail and length load from Vimeo automatically. `title` overrides
 ## 3c. Look and feel: cover, intro, day/night
 
 - **Cover video:** `issue.reel` / `issue.reelWebm` / `issue.reelPoster` play full screen behind the giant KIOSK on the home page. `videos/kiosk-reel.*` is cut from the Q50 and R1M shoots. Replace it with any 10–20 s muted clip under about 8 MB.
-- **Globe intro:** plays once per visit on the home page (skippable). It's skipped for visitors who have reduced motion turned on.
+- **World traveler intro:** plays once per visit on the home page (skippable).
+  - **The flight:** a 3D dotted Earth where a traveler flies New York → Reykjavík → London → Marrakesh → Dubai → Tokyo. Each stop gets a passport stamp, and a boarding pass shows the current leg and that city's local time. The camera then pulls back and the KIOSK title lands.
+  - **Changing the route:** edit `ROUTE` at the top of `js/kiosk-intro3d.js`.
+  - **Loading:** three.js (`js/vendor/`) and the land dots (`js/kiosk-world.js`) load only for this intro.
+  - **Fallback:** without WebGL, or if loading takes over 2.5 seconds, the 2D wireframe globe plays instead.
+  - **Reduced motion:** visitors who have reduced motion turned on skip the intro.
 - **Day / night:** follows the visitor's local time (day 06:00–18:59). The header button cycles auto → day → night, and the choice is remembered. The digital clock in the header and menu shows the visitor's local time and city.
 
 For stores, partner payouts, pickup-only Hunt pieces and quote merch, see **`docs/MARKETPLACE.md`**.
