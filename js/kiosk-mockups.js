@@ -84,10 +84,47 @@
     },
   };
 
-  const print = (name, ink, bg, x, y, w, id) => {
-    const fn = PRINTS[name] || PRINTS.wordmark;
-    return `<g transform="translate(${x} ${y}) scale(${w / 100})">${fn(ink, bg, id)}</g>`;
+  /** Word-wrap a quote into lines of roughly `max` characters. */
+  function wrap(text, max) {
+    const lines = [];
+    String(text || '').split(/\s+/).forEach((word) => {
+      const last = lines[lines.length - 1];
+      if (last && (last + ' ' + word).length <= max) lines[lines.length - 1] = `${last} ${word}`;
+      else lines.push(word);
+    });
+    return lines;
+  }
+
+  /**
+   * Quote print for the back of tees and hoodies (and totes): the line
+   * itself, set as an editorial block, signed ONLY AT THE KIOSK.
+   * spec.quote = text, spec.quoteStyle = 'serif' | 'grotesk', spec.quoteBy = attribution
+   */
+  PRINTS.quote = (ink, bg, id, spec = {}) => {
+    const serif = spec.quoteStyle !== 'grotesk';
+    const text = serif ? spec.quote : String(spec.quote || '').toUpperCase();
+    const lines = wrap(text, serif ? 13 : 14);
+    const longest = Math.max(...lines.map((l) => l.length), 6);
+    const size = Math.min(serif ? 21 : 15, (serif ? 188 : 152) / longest);
+    const lh = size * (serif ? 1.02 : 1.06);
+    const top = -((lines.length - 1) * lh) / 2 - 6;
+    const font = serif
+      ? `font-family="${SERIF}" font-size="${size.toFixed(2)}"`
+      : `font-family="${SANS}" font-weight="600" font-size="${size.toFixed(2)}" letter-spacing="-.2"`;
+    const body = lines.map((l, i) => `<text x="0" y="${(top + i * lh).toFixed(2)}" text-anchor="middle" ${font} fill="${ink}">${esc(l)}</text>`).join('');
+    const foot = top + (lines.length - 1) * lh + 14;
+    return `${body}
+      <rect x="-24" y="${(foot - 6).toFixed(2)}" width="48" height=".7" fill="${ink}" opacity=".55"/>
+      <text x="0" y="${(foot + 3).toFixed(2)}" text-anchor="middle" font-family="${SANS}" font-size="3.6" letter-spacing="1.6" fill="${ink}" opacity=".8">${esc(spec.quoteBy ? String(spec.quoteBy).toUpperCase() + ' · ' : '')}ONLY AT THE KIOSK</text>`;
   };
+
+  const print = (name, ink, bg, x, y, w, id, spec) => {
+    const fn = PRINTS[name] || PRINTS.wordmark;
+    return `<g transform="translate(${x} ${y}) scale(${w / 100})">${fn(ink, bg, id, spec)}</g>`;
+  };
+
+  /** Small K mark on the left chest (wearer's left = viewer's right). */
+  const chestMark = (c, x, y) => `<g transform="translate(${x} ${y}) scale(.3)">${PRINTS.kmark(c.ink, c.garment)}</g>`;
 
   /* --------------------------------------------------------- shared defs */
   function defs(id, g) {
@@ -131,11 +168,33 @@
   const garments = {
     tee(spec, c, id) {
       const s = seam(c.garment);
+      if (spec.side === 'back') {
+        return `${shadow(id, 200, 452, 140, 14)}
+        <path d="${TEE}" fill="${c.garment}"/>
+        <path d="M128,210 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
+        ${print(spec.backPrint || 'quote', c.ink, c.garment, 200, 200, spec.backW || 132, id, spec)}
+        ${shade(id, TEE)}
+        <path d="M158,58 Q200,70 242,58" stroke="${s}" stroke-width="2.4" fill="none"/>
+        <path d="M96,76 Q106,118 96,160 M304,76 Q294,118 304,160" stroke="${s}" stroke-width="1.2" fill="none"/>
+        <path d="M33,139 L70,175 M367,139 L330,175 M94,424 Q200,436 306,424" stroke="${s}" stroke-width="1.2" fill="none"/>`;
+      }
+      if (spec.chest) {
+        return `${shadow(id, 200, 452, 140, 14)}
+        <path d="${TEE}" fill="${c.garment}"/>
+        <path d="M128,210 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
+        ${chestMark(c, 250, 130)}
+        ${shade(id, TEE)}
+        <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
+        <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
+        <path d="M152,57 Q200,104 248,57" stroke="${s}" stroke-width="1" fill="none" opacity=".6"/>
+        <path d="M96,76 Q106,118 96,160 M304,76 Q294,118 304,160" stroke="${s}" stroke-width="1.2" fill="none"/>
+        <path d="M33,139 L70,175 M367,139 L330,175 M94,424 Q200,436 306,424" stroke="${s}" stroke-width="1.2" fill="none"/>`;
+      }
       return `${shadow(id, 200, 452, 140, 14)}
         <path d="${TEE}" fill="${c.garment}"/>
         <path d="M128,210 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
         <path d="M262,200 Q276,320 262,432" stroke="${fold(c.garment)}" stroke-width="12" fill="none"/>
-        ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 120, id)}
+        ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 120, id, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
@@ -149,7 +208,7 @@
       return `${shadow(id, 200, 452, 170, 14)}
         <path d="${LONG}" fill="${c.garment}"/>
         <path d="M130,220 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
-        ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 118, id)}
+        ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 118, id, spec)}
         ${spec.sleevePrint ? `<text transform="translate(338 300) rotate(84)" text-anchor="middle" font-family="${SANS}" font-size="9" letter-spacing="3" fill="${c.ink}">${esc(spec.sleevePrint)}</text>` : ''}
         ${shade(id, LONG)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
@@ -163,7 +222,7 @@
       return `${shadow(id, 200, 452, 170, 14)}
         <path d="${LONG}" fill="${c.garment}"/>
         <path d="M132,220 Q144,320 128,410" stroke="${fold(c.garment)}" stroke-width="18" fill="none"/>
-        ${print(spec.print, c.ink, c.garment, 200, 210, spec.printW || 120, id)}
+        ${print(spec.print, c.ink, c.garment, 200, 210, spec.printW || 120, id, spec)}
         ${shade(id, LONG)}
         <path d="M92,410 L308,410 L308,438 Q200,450 92,438 Z" fill="rgba(0,0,0,.08)"/>
         <path d="M30,398 L72,405 L70,428 L28,420 Z M370,398 L328,405 L330,428 L372,420 Z" fill="rgba(0,0,0,.08)"/>
@@ -174,6 +233,20 @@
 
     hoodie(spec, c, id) {
       const s = seam(c.garment);
+      if (spec.side === 'back') {
+        const hoodBack = 'M136,92 Q124,8 200,2 Q276,8 264,92 Q200,110 136,92 Z';
+        return `${shadow(id, 200, 452, 172, 14)}
+        <path d="${HOOD_BODY}" fill="${c.garment}"/>
+        <path d="M130,230 Q144,320 128,404" stroke="${fold(c.garment)}" stroke-width="18" fill="none"/>
+        ${print(spec.backPrint || 'quote', c.ink, c.garment, 200, 250, spec.backW || 132, id, spec)}
+        ${shade(id, HOOD_BODY)}
+        <path d="M90,410 L310,410 L310,438 Q200,450 90,438 Z" fill="rgba(0,0,0,.08)"/>
+        <path d="M28,398 L70,405 L68,428 L26,420 Z M372,398 L330,405 L332,428 L374,420 Z" fill="rgba(0,0,0,.08)"/>
+        <path d="${hoodBack}" fill="${c.garment}"/>${shade(id, hoodBack)}
+        <path d="M200,6 Q204,50 200,104" stroke="${s}" stroke-width="1.4" fill="none"/>
+        <path d="M136,92 Q200,110 264,92" stroke="${s}" stroke-width="2" fill="none"/>
+        <path d="M94,82 Q108,130 92,206 M306,82 Q292,130 308,206" stroke="${s}" stroke-width="1.2" fill="none"/>`;
+      }
       const hood = 'M142,76 Q134,12 200,6 Q266,12 258,76 Z';
       const opening = 'M160,70 Q162,26 200,22 Q238,26 240,70 Q222,100 200,102 Q178,100 160,70 Z';
       const string = lum(c.garment) < 0.35 ? '#e9e6df' : '#1a1a1a';
@@ -181,7 +254,7 @@
         <path d="${hood}" fill="${c.garment}"/>${shade(id, hood)}
         <path d="${HOOD_BODY}" fill="${c.garment}"/>
         <path d="M130,230 Q144,320 128,404" stroke="${fold(c.garment)}" stroke-width="18" fill="none"/>
-        ${print(spec.print, c.ink, c.garment, 200, 236, spec.printW || 108, id)}
+        ${spec.chest ? chestMark(c, 248, 170) : print(spec.print, c.ink, c.garment, 200, 236, spec.printW || 108, id, spec)}
         <path d="M128,326 L272,326 L294,404 L106,404 Z" fill="rgba(0,0,0,.05)"/>
         ${shade(id, HOOD_BODY)}
         <path d="M128,326 L272,326 M128,326 Q112,360 106,404 M272,326 Q288,360 294,404" stroke="${s}" stroke-width="1.4" fill="none"/>
@@ -256,7 +329,7 @@
         <path d="M148,196 Q146,78 200,76 Q254,78 252,196" stroke="rgba(0,0,0,.18)" stroke-width="16" fill="none"/>
         <path d="${bag}" fill="${c.garment}"/>
         <path d="M150,230 Q160,330 146,440" stroke="${fold(c.garment)}" stroke-width="18" fill="none"/>
-        ${print(spec.print, c.ink, c.garment, 200, 312, spec.printW || 130, id)}
+        ${print(spec.print, c.ink, c.garment, 200, 312, spec.printW || 130, id, spec)}
         ${shade(id, bag)}
         <path d="M110,200 L290,200" stroke="${seam(c.garment)}" stroke-width="1.2" stroke-dasharray="3 3"/>`;
     },

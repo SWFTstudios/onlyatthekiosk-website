@@ -177,6 +177,8 @@ To add a playlist, copy its share link (`open.spotify.com/playlist/<ID>`) and ad
   length: '', bpm: '', audio: '', tracks: [],
 }
 ```
+**SoundCloud:** instead of `spotify`, set `soundcloud` to any SoundCloud link: a track, a playlist (set), or a profile's likes page (`https://soundcloud.com/<username>/likes`). It plays in the same dock, and the dock shows the current track and artist. If an `on.soundcloud.com/…` short link doesn't play, use the full `soundcloud.com/…` link it opens to.
+
 For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in the KIOSK player instead of the Spotify embed, and `length`, `bpm` and `tracks` show on the deck.
 
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
@@ -209,6 +211,14 @@ vimeo: [
 ]
 ```
 The title, thumbnail and length load from Vimeo automatically. `title` overrides Vimeo's title, and `story` adds a "Read the story" link in the player. To use a Vimeo film as a story's main film instead, set that story's `embed` to `https://player.vimeo.com/video/<id>?h=<hash>`. In Vimeo, set the video's embed privacy to allow `onlyatthekiosk.com` (and the `*.pages.dev` preview), or Vimeo won't play it on the site.
+
+## 3c. Look and feel: cover, intro, day/night
+
+- **Cover video:** `issue.reel` / `issue.reelWebm` / `issue.reelPoster` play full screen behind the giant KIOSK on the home page. `videos/kiosk-reel.*` is cut from the Q50 and R1M shoots. Replace it with any 10–20 s muted clip under about 8 MB.
+- **Globe intro:** plays once per visit on the home page (skippable). It's skipped for visitors who have reduced motion turned on.
+- **Day / night:** follows the visitor's local time (day 06:00–18:59). The header button cycles auto → day → night, and the choice is remembered. The digital clock in the header and menu shows the visitor's local time and city.
+
+For stores, partner payouts, pickup-only Hunt pieces and quote merch, see **`docs/MARKETPLACE.md`**.
 
 ## 4. Add or sell a product (KIOSK Supply)
 

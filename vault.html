@@ -6,6 +6,7 @@
   <meta name="description" content="KIOSK Supply: streetwear, headwear, skate decks and accessories from every KIOSK shoot — plus 4K automotive films and cinematic LUT packs.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf8">
+  <script>/* Day/night before first paint: follows local time unless the visitor picked one */(function(){var p='auto';try{p=JSON.parse(localStorage.getItem('kiosk:theme'))||'auto'}catch(e){}var h=new Date().getHours();document.documentElement.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p)})();</script>
   <link rel="canonical" href="https://onlyatthekiosk.com/vault.html">
   <meta property="og:title" content="KIOSK Supply — Shop">
   <meta property="og:description" content="Apparel, skate, accessories, films and LUT packs from every KIOSK shoot.">
@@ -27,7 +28,7 @@
         <div>
           <p class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>KIOSK Supply</b> · Issue 01 capsule</p>
           <h1 class="k-shop-hero__title k-mt-m">Supply<br><em>&amp; co.</em></h1>
-          <p class="k-lede k-mt-m">Streetwear, skate and gear cut from every shoot — plus the films and grades behind them. Pick a colourway; most are named after the palette of the car they came from.</p>
+          <p class="k-lede k-mt-m">Pieces from the kiosk and stores around the globe: words to wear, travel goods, skate, and rare finds — some you can only collect in person. Most colourways are named after the palette of the shoot they came from.</p>
           <div class="k-row-flex k-mt-m">
             <a class="k-btn k-btn--solid" href="#shop">Shop the drop</a>
             <a class="k-btn" href="garage.html">See the shoots</a>
@@ -71,6 +72,25 @@
       </div>
     </section>
 
+    <!-- THE HUNT: pickup-only pieces -------------------------------- -->
+    <section class="k-section k-section--tight" id="hunt" aria-labelledby="hunt-title">
+      <div class="k-wrap">
+        <div class="k-hunt k-dark">
+          <div class="k-hunt__head">
+            <p class="k-eyebrow">The Hunt / Pickup only</p>
+            <h2 class="k-h2 k-mt-m" id="hunt-title">Some things you have to <em class="k-serif">go and get.</em></h2>
+            <ol class="k-hunt__steps">
+              <li><b>01</b><span>Reserve a Hunt piece here. Each run is small and numbered.</span></li>
+              <li><b>02</b><span>We pack it and handle the airport clearance.</span></li>
+              <li><b>03</b><span>The coordinates drop in the Dispatch. Travel there and collect it in person.</span></li>
+            </ol>
+            <button class="k-btn k-btn--solid k-mt-m" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Get the coordinates</button>
+          </div>
+          <div class="k-hunt__grid" data-mount="shop-hunt"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="k-section" id="shop" style="padding-top:0" aria-labelledby="all-title">
       <div class="k-wrap">
         <h2 class="k-sr" id="all-title">All products</h2>
@@ -88,6 +108,20 @@
           </div>
         </div>
         <div class="k-shop-grid" data-mount="vault-grid"></div>
+      </div>
+    </section>
+
+    <!-- STOCKISTS: the kiosk as a marketplace ------------------------ -->
+    <section class="k-section k-section--tight" id="stores" aria-labelledby="stores-title">
+      <div class="k-wrap">
+        <div class="k-section-head">
+          <div>
+            <p class="k-eyebrow">Stores at the kiosk</p>
+            <h2 class="k-h2 k-mt-m" id="stores-title">Sourced around <em class="k-serif">the globe.</em></h2>
+          </div>
+          <p class="k-lede">The kiosk is a hub for stores and makers from everywhere. Each one sells through its own Shopify and gets paid on every sale; the kiosk keeps a small share.</p>
+        </div>
+        <div class="k-stores" data-mount="shop-stores"></div>
       </div>
     </section>
 

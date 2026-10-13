@@ -66,7 +66,10 @@
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
   const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
-  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || (m.spotify ? 'Spotify' : '');
+  const sourceName = (m) => (m.soundcloud ? 'SoundCloud' : m.spotify ? 'Spotify' : '');
+  /** Where the playlist lives (button under each deck / card). */
+  const sourceLink = (m) => (m.soundcloud ? { href: m.soundcloud, label: 'Open on SoundCloud' } : m.spotify ? { href: spotifyUrl(m), label: 'Open in Spotify' } : null);
+  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || sourceName(m);
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
   const storyHref = (f) => `story.html?s=${encodeURIComponent(f.slug)}`;
@@ -100,10 +103,22 @@
   };
 
   /** Product visual: real photo when present, otherwise a vector mockup. */
-  function productVisual(p, cw = 0) {
+  /**
+   * Product image for a colourway. view: '' (default, back for quote pieces,
+   * flips to the front on hover), 'front', 'back' or 'life' (lifestyle photo).
+   */
+  const storeOf = (p) => (C.stores || []).find((x) => x.id === (p.store || 'kiosk'));
+
+  function productVisual(p, cw = 0, view = '') {
     const way = (p.colorways || [])[cw] || {};
+    const alt = esc(way.name ? `${p.title}, ${way.name}` : p.title);
+    if (view === 'life' && (p.lifestyle || []).length) return `<img class="k-product-img k-product-img--photo" src="${esc(p.lifestyle[0])}" alt="${alt}, on location" loading="lazy" decoding="async">`;
+    if (view === 'front' && way.imageFront) return `<img class="k-product-img" src="${esc(way.imageFront)}" alt="${alt}, front" loading="lazy" decoding="async">`;
     const src = way.image || p.image;
-    if (src) return `<img class="k-product-img" src="${esc(src)}" alt="${esc(way.name ? `${p.title}, ${way.name}` : p.title)}" loading="lazy" decoding="async">`;
+    if (src && way.imageFront && !view) {
+      return `<span class="k-flip"><img class="k-product-img" src="${esc(src)}" alt="${alt}, back" loading="lazy" decoding="async"><img class="k-product-img k-flip__alt" src="${esc(way.imageFront)}" alt="" aria-hidden="true" loading="lazy" decoding="async"></span>`;
+    }
+    if (src) return `<img class="k-product-img" src="${esc(src)}" alt="${alt}" loading="lazy" decoding="async">`;
     return window.KioskMockup ? window.KioskMockup.render(p.mockup || { type: 'tee' }, way) : '';
   }
 
@@ -162,19 +177,71 @@
     return PAGE;
   }
 
+  /* ------------------------------------------------- day / night + clock
+   * Theme follows the visitor's local time (light 06:00–18:59) unless they
+   * pick one. The <head> of each page sets data-theme before paint; this
+   * keeps it in sync, cycles the toggle and ticks the clocks.
+   * -------------------------------------------------------------------- */
+  const THEME_KEY = 'kiosk:theme';
+  const THEME_ICONS = {
+    auto: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>',
+    light: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3.6" stroke="currentColor" stroke-width="1.4"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    dark: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M15.6 12.6A6.8 6.8 0 0 1 7.4 4.4a6.8 6.8 0 1 0 8.2 8.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  };
+  const themeIcon = (mode) => THEME_ICONS[mode] || THEME_ICONS.auto;
+  const themePref = () => store.get(THEME_KEY, 'auto');
+  const autoTheme = () => { const h = new Date().getHours(); return h >= 6 && h < 19 ? 'light' : 'dark'; };
+  function applyTheme() {
+    const pref = themePref();
+    const mode = pref === 'auto' ? autoTheme() : pref;
+    document.documentElement.dataset.theme = mode;
+    const meta = $('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#0b0b0c' : '#ffffff');
+    $$('[data-theme-toggle]').forEach((b) => {
+      b.innerHTML = themeIcon(pref);
+      b.setAttribute('aria-label', `Theme: ${pref === 'auto' ? `auto (${mode === 'dark' ? 'night' : 'day'})` : pref === 'dark' ? 'night' : 'day'}`);
+      b.title = pref === 'auto' ? `Auto · follows your local time (${mode === 'dark' ? 'night' : 'day'} now)` : pref === 'dark' ? 'Night' : 'Day';
+    });
+  }
+  function bindThemeAndClock() {
+    applyTheme();
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-theme-toggle]')) return;
+      const order = ['auto', 'light', 'dark'];
+      const next = order[(order.indexOf(themePref()) + 1) % order.length];
+      store.set(THEME_KEY, next);
+      applyTheme();
+      toast(next === 'auto' ? 'Theme follows your local time' : next === 'dark' ? 'Night mode' : 'Day mode');
+    });
+    const zone = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' ');
+    const fmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    let lastMinute = -1;
+    const tick = () => {
+      const now = new Date();
+      const t = fmt.format(now);
+      $$('[data-clock]').forEach((el) => { el.textContent = t; });
+      $$('[data-clock-zone]').forEach((el) => { el.textContent = zone; });
+      if (now.getMinutes() !== lastMinute) { lastMinute = now.getMinutes(); if (themePref() === 'auto') applyTheme(); }
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
   function renderChrome() {
     const cur = currentNav();
     const links = NAV.map((n) => `<a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label}</a>`).join('');
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
+    // Glass header: logo · local clock · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
         <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span>KIOSK</a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
+        <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
         <div class="k-nav__actions">
-          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas>Radio</a>
-          <button class="k-nav__shop" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join</button>
+          <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
+          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas><span class="k-nav__radio-label">Radio</span></a>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
       </div>`;
@@ -184,11 +251,18 @@
     sheet.id = 'k-sheet';
     sheet.setAttribute('aria-hidden', 'true');
     sheet.innerHTML = `
+      <div class="k-sheet__top">
+        <p class="k-eyebrow">Only at the KIOSK · Issue ${esc((C.issue || {}).number || '01')}</p>
+        <p class="k-sheet__clock" aria-hidden="true"><span data-clock>--:--:--</span> <small data-clock-zone></small></p>
+      </div>
       <ul class="k-sheet__links">
         <li><a href="index.html">Home <span>00</span></a></li>
         ${NAV.map((n, i) => `<li><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
+        <li><a href="vault.html?c=hunt">The Hunt <span>${pad(NAV.length + 1)}</span></a></li>
       </ul>
       <div class="k-sheet__foot">
+        <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
+        <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
         <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
         <a class="k-btn k-btn--sm" href="about.html">About</a>
         <a class="k-btn k-btn--sm" href="contact.html">Contact</a>
@@ -212,7 +286,7 @@
       document.body.style.overflow = open ? 'hidden' : '';
     };
     btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
-    sheet.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify]')) setOpen(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
     const footer = document.createElement('footer');
@@ -222,10 +296,10 @@
         <div class="k-footer__grid">
           <div>
             <p class="k-eyebrow">Only at the KIOSK</p>
-            <p class="k-lede k-mt-s">A travel, streetwear and automotive journal. Cars, motorcycles, the people behind them — shot on location, scored in phonk.</p>
+            <p class="k-lede k-mt-s">A global magazine and marketplace. Cars, motorcycles, skate, travel and the people behind them, plus pieces you can only find at the kiosk.</p>
           </div>
           <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="vault.html?c=hunt">The Hunt</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -414,7 +488,9 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
         ${id === 'dispatch'
-          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists and Supply drops — one email per release.</p>`
+          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists, Supply drops and Hunt coordinates — one email per release.</p>`
+          : id === 'stockist'
+          ? `<p class="k-h3">Sell at <span class="k-serif">the KIOSK.</span></p><p class="k-body k-mt-s">Independent stores, thrift curators and makers: stock your pieces here. You sell through your own Shopify and keep your store; the kiosk takes a small share of each sale. Leave your email and we’ll send the stockist pack.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
         <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
@@ -605,10 +681,59 @@
     },
   };
 
+  /* SoundCloud: the Widget API plays a track, playlist or likes page in an
+   * iframe and reports play / pause / progress, which drive the waveform. */
+  const soundcloud = {
+    widget: null,
+    iframe: null,
+    url: '',
+    loading: null,
+    load() {
+      if (this.loading) return this.loading;
+      this.loading = new Promise((resolve) => {
+        if (window.SC && window.SC.Widget) { resolve(window.SC); return; }
+        const s = document.createElement('script');
+        s.src = 'https://w.soundcloud.com/player/api.js';
+        s.async = true;
+        s.onload = () => resolve(window.SC || null);
+        s.onerror = () => resolve(null);
+        document.head.append(s);
+      });
+      return this.loading;
+    },
+    async open(mix, slot) {
+      const SC = await this.load();
+      if (!SC || !SC.Widget) return false;
+      if (this.iframe && this.url === mix.soundcloud) { this.widget.play(); return true; }
+      if (this.iframe) this.iframe.remove();
+      this.url = mix.soundcloud;
+      const f = document.createElement('iframe');
+      f.title = `${mix.title} on SoundCloud`;
+      f.allow = 'autoplay';
+      f.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(mix.soundcloud)}&auto_play=true&visual=false&show_comments=false&show_reposts=false&show_teaser=false&hide_related=true&color=%23e8e5de`;
+      slot.append(f);
+      this.iframe = f;
+      const w = SC.Widget(f);
+      this.widget = w;
+      const E = SC.Widget.Events;
+      w.bind(E.PLAY, () => {
+        player.onSoundcloud({ playing: true });
+        w.getCurrentSound((sound) => { if (sound && sound.title) player.nowPlaying(sound.title, sound.user && sound.user.username); });
+      });
+      w.bind(E.PAUSE, () => player.onSoundcloud({ playing: false }));
+      w.bind(E.FINISH, () => player.onSoundcloud({ playing: false }));
+      w.bind(E.PLAY_PROGRESS, (e) => player.onSoundcloud({ playing: true, position: e.currentPosition, relative: e.relativePosition }));
+      return new Promise((resolve) => {
+        const t = setTimeout(() => resolve(false), 10000);
+        w.bind(E.READY, () => { clearTimeout(t); w.play(); resolve(true); });
+      });
+    },
+  };
+
   const player = {
     el: null,
     mix: null,
-    source: '',          // 'audio' | 'spotify'
+    source: '',          // 'audio' | 'spotify' | 'soundcloud'
     playing: false,
     buffering: false,
     audio: null,
@@ -622,8 +747,9 @@
       this.el.setAttribute('aria-label', 'KIOSK Radio player');
       this.el.innerHTML = `
         <div class="k-dock__panel" id="k-dock-panel" aria-hidden="true">
-          <div class="k-dock__embed"><div data-spotify-slot></div></div>
-          <p class="k-dock__note k-small">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
+          <div class="k-dock__embed" data-embed="spotify"><div data-spotify-slot></div></div>
+          <div class="k-dock__embed" data-embed="soundcloud" hidden></div>
+          <p class="k-dock__note k-small" data-embed="spotify">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
         </div>
         <div class="k-dock__bar">
           <button class="k-dock__btn" type="button" data-dock-toggle aria-label="Play">${icon.play}</button>
@@ -673,7 +799,7 @@
       const mix = mixBySlug(slug);
       if (!mix) return;
       if (this.mix === mix && this.active()) { this.toggle(); return; }
-      if (!mix.audio && !mix.spotify) { toast(`${mix.title} drops soon.`); return; }
+      if (!mix.audio && !mix.spotify && !mix.soundcloud) { toast(`${mix.title} drops soon.`); return; }
       this.pauseAll();
       this.show(mix);
       if (mix.audio) {
@@ -688,8 +814,22 @@
         $('.k-dock__progress', this.el).hidden = false;
         this.el.classList.remove('has-embed');
         this.audio.play().catch(() => {});
+      } else if (mix.soundcloud) {
+        this.source = 'soundcloud';
+        $('.k-dock__progress', this.el).hidden = true;
+        this.showEmbed('soundcloud');
+        this.buffering = true;
+        this.sync();
+        this.expand(true);
+        const ok = await soundcloud.open(mix, $('[data-embed="soundcloud"].k-dock__embed', this.el));
+        if (!ok) {
+          this.buffering = false;
+          toast('SoundCloud couldn’t load. Opening it in a new tab.');
+          window.open(mix.soundcloud, '_blank', 'noopener');
+        }
       } else {
         this.source = 'spotify';
+        this.showEmbed('spotify');
         $('.k-dock__progress', this.el).hidden = true;
         this.el.classList.add('has-embed');
         this.buffering = true;
@@ -705,6 +845,29 @@
           window.open(spotifyUrl(mix), '_blank', 'noopener');
         }
       }
+      this.sync();
+    },
+
+    /** Show the Spotify or SoundCloud player in the fold-out panel. */
+    showEmbed(which) {
+      this.el.classList.add('has-embed');
+      $$('[data-embed]', this.el).forEach((n) => { n.hidden = n.dataset.embed !== which; });
+    },
+
+    /** Track title from the source, shown in the dock next to the playlist name. */
+    nowPlaying(title, artist) {
+      if (!this.el || !this.mix) return;
+      $('.k-dock__title', this.el).textContent = `${title}${artist ? ` — ${artist}` : ''} · ${this.mix.title}`;
+    },
+
+    onSoundcloud(d) {
+      if (this.source !== 'soundcloud') return;
+      const was = this.playing;
+      this.playing = !!d.playing;
+      this.buffering = false;
+      if (d.position != null) wave.clock = { position: d.position, at: performance.now() };
+      if (this.playing && !was && this.el.classList.contains('is-expanded')) setTimeout(() => this.expand(false), 1200);
+      if (d.position != null) $('.k-dock__time', this.el).textContent = `${Math.floor(d.position / 60000)}:${pad(Math.floor((d.position / 1000) % 60))}`;
       this.sync();
     },
 
@@ -745,17 +908,21 @@
         if (this.audio.paused) { if (wave.ctx) wave.ctx.resume(); this.audio.play().catch(() => {}); } else this.audio.pause();
       } else if (this.source === 'spotify' && spotify.ctrl) {
         spotify.ctrl.togglePlay();
+      } else if (this.source === 'soundcloud' && soundcloud.widget) {
+        soundcloud.widget.toggle();
       }
     },
 
     pause() {
       if (this.audio && !this.audio.paused) this.audio.pause();
       if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
+      if (soundcloud.widget && this.source === 'soundcloud' && this.playing) soundcloud.widget.pause();
     },
 
     pauseAll() {
       if (this.audio) this.audio.pause();
       if (spotify.ctrl) spotify.ctrl.pause();
+      if (soundcloud.widget) soundcloud.widget.pause();
       this.playing = false;
     },
 
@@ -913,7 +1080,7 @@
       ? `<span class="k-badge${p.badge === 'Issue 01' ? ' k-badge--sticker' : p.badge === 'Digital' || p.badge === 'Classic' ? ' k-badge--soft' : ''}">${esc(p.badge)}</span>` : '';
     const status = p.status === 'available' ? '' : `<span class="k-shop-card__status">${isDigital ? 'Dropping soon' : 'Coming soon'}</span>`;
     return `
-      <article class="k-shop-card" id="${esc(p.id)}" data-product="${esc(p.id)}" data-cw="${cw}" data-reveal>
+      <article class="k-shop-card"${opts.noId ? '' : ` id="${esc(p.id)}"`} data-product="${esc(p.id)}" data-cw="${cw}" data-reveal>
         <div class="k-shop-card__tile" data-quickview="${esc(p.id)}">
           ${badge}${status}
           <div class="k-shop-card__img">${productVisual(p, cw)}</div>
@@ -924,7 +1091,9 @@
             <h3 class="k-shop-card__title"><button type="button" data-quickview="${esc(p.id)}" style="text-align:left">${esc(p.title)}</button></h3>
             <span class="k-shop-card__price">${esc(price(p))}</span>
           </div>
-          <p class="k-shop-card__sub">${esc(categoryLabel(p.category))}${ways.length > 1 ? ` · ${ways.length} colours` : ''}</p>
+          <p class="k-shop-card__sub">${storeOf(p) ? `by ${esc(storeOf(p).name)} · ` : ''}${esc(categoryLabel(p.category))}${ways.length > 1 ? ` · ${ways.length} colours` : ''}</p>
+          ${p.pickup ? `<p class="k-pickup"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 14.5s5-4.6 5-8.3A5 5 0 0 0 3 6.2c0 3.7 5 8.3 5 8.3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.3" r="1.7" stroke="currentColor" stroke-width="1.3"/></svg>Pickup only · ${esc(p.pickup.place)}</p>` : ''}
+          ${p.quote ? `<p class="k-shop-card__quote">“${esc(p.quote)}”</p>` : ''}
           ${ways.length > 1 ? `<div class="k-dots" role="group" aria-label="Colourways">${ways.map((w, i) => `<button class="k-dot" type="button" style="--sw:${esc(w.garment)}" data-dot="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}<span class="k-dots__name">${esc(ways[cw].name)}</span></div>` : ''}
           ${opts.reasons && opts.reasons.length ? `<div class="k-match">${opts.reasons.map((r) => `<span>${esc(r)}</span>`).join('')}</div>` : ''}
         </div>
@@ -950,19 +1119,22 @@
     const sizes = p.sizes || [];
     const seen = storiesFor(p);
     const mix = p.category === 'mixes' ? (C.mixes || []).find((m) => m.product === p.id) : null;
-    const state = { cw, size: sizes.length === 1 ? sizes[0] : '' };
+    const state = { cw, size: sizes.length === 1 ? sizes[0] : '', view: '' };
+    const views = (ways[0] || {}).imageFront ? ['back', 'front'] : [];
+    const store = storeOf(p);
 
     openLightbox(`
       <div class="k-qv k-light" data-qv="${esc(p.id)}">
         <div class="k-qv__media">
-          <div data-qv-img style="width:100%;height:100%;display:grid;place-items:center">${productVisual(p, cw)}</div>
+          <div data-qv-img style="width:100%;height:100%;display:grid;place-items:center">${productVisual(p, cw, views.length ? 'back' : '')}</div>
+          ${views.length ? `<div class="k-qv__views" role="group" aria-label="View">${[['back', 'Back'], ['front', 'Front'], ...((p.lifestyle || []).length ? [['life', 'On location']] : [])].map(([v, l], i) => `<button class="k-chip" type="button" data-qv-view="${v}" aria-pressed="${i === 0}">${l}</button>`).join('')}</div>` : ''}
           ${p.badge ? `<span class="k-badge${p.badge === 'Issue 01' ? ' k-badge--sticker' : ''}" style="top:16px;left:16px">${esc(p.badge)}</span>` : ''}
           ${ways.length > 1 ? `<div class="k-qv__thumbs">${ways.map((w, i) => `<button type="button" data-qv-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}">${productVisual(p, i)}</button>`).join('')}</div>` : ''}
         </div>
         <div class="k-qv__body">
           <div class="k-qv__head">
             <div>
-              <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.status === 'available' ? '' : ' · Coming soon'}</p>
+              <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.status === 'available' ? '' : ' · Coming soon'}${store ? ` · by ${esc(store.name)}` : ''}</p>
               <h2 class="k-qv__title k-mt-s">${esc(p.title)}</h2>
             </div>
             <button class="k-qv__close" type="button" data-close aria-label="Close">${icon.close}</button>
@@ -976,7 +1148,9 @@
           <p class="k-form-msg" data-qv-msg aria-live="polite"></p>
           <dl class="k-qv__list">
             ${p.detail ? `<div><dt>Details</dt><dd>${esc(p.detail)}</dd></div>` : ''}
-            <div><dt>Delivery</dt><dd>${['mixes', 'films', 'luts'].includes(p.category) ? 'Digital download' : 'Shipped'}</dd></div>
+            ${p.quote ? `<div><dt>On the back</dt><dd class="k-serif">“${esc(p.quote)}”</dd></div>` : ''}
+            <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : ['mixes', 'films', 'luts'].includes(p.category) ? 'Digital download' : 'Shipped'}</dd></div>
+            ${p.pickup ? `<div><dt>The Hunt</dt><dd>${esc(p.pickup.coords || 'Coordinates revealed at the drop')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
           </dl>
           ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
         </div>
@@ -1002,10 +1176,17 @@
       }
     };
     root.addEventListener('click', (e) => {
+      const v = e.target.closest('[data-qv-view]');
+      if (v) {
+        state.view = v.dataset.qvView;
+        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw, state.view);
+        $$('[data-qv-view]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === v)));
+        return;
+      }
       const c = e.target.closest('[data-qv-cw]');
       if (c) {
         state.cw = Number(c.dataset.qvCw);
-        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw);
+        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw, state.view || (views.length ? 'back' : ''));
         $$('[data-qv-cw]', root).forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.qvCw) === state.cw)));
         const nm = $('[data-qv-cwname]', root);
         if (nm) nm.textContent = ways[state.cw].name;
@@ -1061,7 +1242,7 @@
           <canvas class="k-radio__wave" data-wave="${esc(m.slug)}" data-wave-bar="3" data-wave-gap="3" aria-hidden="true"></canvas>
           <div class="k-radio__controls">
             ${mixButton(m)}
-            ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>` : ''}
+            ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">${esc(sourceLink(m).label)}<span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.tracks || []).length ? `<span class="k-small">${esc(m.tracks.length)} tracks</span>` : ''}
           </div>
         </div>
@@ -1071,7 +1252,7 @@
             <button class="k-radio__item${x.slug === m.slug ? ' is-active' : ''}" type="button" data-radio-select="${esc(x.slug)}">
               <span class="k-radio__cover">${media({ image: x.cover, tone: x.tone, mark: '' })}</span>
               <span><b>${esc(x.title)}</b><small>${esc(x.volume)} · ${esc(x.mood)}</small></span>
-              <span class="k-mono">${esc(x.length || (x.spotify ? 'Spotify' : ''))}</span>
+              <span class="k-mono">${esc(x.length || sourceName(x))}</span>
             </button>`).join('')}
           <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists<span class="k-arrow">${icon.arrow}</span></a></div>
         </div>
@@ -1232,7 +1413,7 @@
     // Hero background
     const fullBleed = { cls: 'k-media--clean', style: 'position:absolute;inset:0' };
     fill('hero-bg', issue.reel
-      ? media({ video: issue.reel, poster: issue.reelPoster, alt: 'KIOSK reel', ...fullBleed })
+      ? `<div class="k-media k-media--clean" style="position:absolute;inset:0"><video autoplay muted loop playsinline preload="auto"${issue.reelPoster ? ` poster="${esc(issue.reelPoster)}"` : ''} aria-label="KIOSK reel">${issue.reelWebm ? `<source src="${esc(issue.reelWebm)}" type="video/webm">` : ''}<source src="${esc(issue.reel)}" type="video/mp4"></video></div>`
       : featureMedia(lead, { meta: '', mark: '', eager: true, ...fullBleed }));
 
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
@@ -1815,7 +1996,7 @@
             ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
             <div class="k-row-flex">
               ${mixButton(m)}
-              ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>` : ''}
+              ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">${m.soundcloud ? 'Follow on SoundCloud' : 'Follow on Spotify'}</a>` : ''}
             </div>
           </div>
         </article>`;
@@ -1920,6 +2101,11 @@
         if (cw >= 0) push('fashion', { kind: 'product', id: p.id, cw, src: p.colorways[cw].image, caption: p.title, meta: `${p.colorways[cw].name} · ${price(p)}` });
       });
       (C.mixes || []).forEach((m) => push('music', { kind: 'mix', slug: m.slug, src: m.cover, tone: m.tone, caption: m.title, meta: m.mood }));
+      // Words to wear: the merch quotes as pull quotes, and their on-location shots
+      (C.products || []).filter((p) => p.quote && p.category === 'quotes').slice(0, 4).forEach((p, i) => {
+        if (i < 2) push('fashion', { kind: 'quote', text: p.quote, link: `vault.html?c=quotes#${p.id}`, cta: `${p.title} · ${price(p)}` });
+        if ((p.lifestyle || [])[0]) push('fashion', { kind: 'photo', src: p.lifestyle[0], thumb: p.lifestyle[0], caption: `${p.title}: “${p.quote}”`, meta: 'Words to wear · on location', place: 'Only at the KIOSK', story: '' });
+      });
       push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'KIOSK Radio' });
       push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'journal.html', cta: 'The Journal' });
     }
@@ -2160,6 +2346,22 @@
   }
 
   function pageVault() {
+    const hunt = (C.products || []).filter((p) => p.pickup);
+    if (hunt.length) fill('shop-hunt', hunt.map((p) => productCard(p, { noId: true })).join(''));
+    else { const h = mount('shop-hunt'); if (h) h.closest('section').hidden = true; }
+    fill('shop-stores', (C.stores || []).map((st) => `
+      <article class="k-store k-glass" data-reveal>
+        <p class="k-eyebrow">${esc([st.city, st.country].filter(Boolean).join(', '))}</p>
+        <h3 class="k-h3 k-mt-s">${esc(st.name)}</h3>
+        <p class="k-small k-mt-s">${esc(st.note || '')}</p>
+        <p class="k-small k-mt-s">${(C.products || []).filter((p) => (p.store || 'kiosk') === st.id).length} pieces</p>
+      </article>`).join('') + `
+      <button class="k-store k-store--join" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK" data-reveal>
+        <p class="k-eyebrow">Your store here</p>
+        <h3 class="k-h3 k-mt-s">Sell at the <span class="k-serif">KIOSK</span></h3>
+        <p class="k-small k-mt-s">Thrift curators, independent labels, makers anywhere in the world.</p>
+        <span class="k-bar k-mt-m">Get the stockist pack<span class="k-arrow">${icon.arrow}</span></span>
+      </button>`);
     const look = lookbookHtml();
     if (look) fill('shop-lookbook', railShell(look, 'Lookbook', 'k-hscroll-wrap--look'));
     else { const sec = mount('shop-lookbook'); if (sec) sec.closest('section').hidden = true; }
@@ -2226,6 +2428,137 @@
     }
   }
 
+  /* ------------------------------------------------------------ globe intro
+   * First visit to the home page each session: a dotted globe turns,
+   * flight arcs leave New York for cities around the world, then the
+   * cover video takes over. Skippable; skipped for reduced motion.
+   * -------------------------------------------------------------------- */
+  const INTRO_CITIES = [
+    ['New York', 40.71, -74.0], ['Tokyo', 35.68, 139.69], ['London', 51.5, -0.12], ['Lisbon', 38.72, -9.14],
+    ['Lagos', 6.52, 3.38], ['Mexico City', 19.43, -99.13], ['Seoul', 37.57, 126.98], ['Dubai', 25.2, 55.27],
+    ['São Paulo', -23.55, -46.63], ['Cape Town', -33.92, 18.42], ['Sydney', -33.87, 151.21], ['Marrakesh', 31.63, -7.99],
+  ];
+
+  function runIntro() {
+    let seen = false;
+    try { seen = sessionStorage.getItem('kiosk:intro') === '1'; sessionStorage.setItem('kiosk:intro', '1'); } catch (e) { seen = true; }
+    if (seen || REDUCED) return;
+    const el = document.createElement('div');
+    el.className = 'k-intro';
+    el.setAttribute('role', 'presentation');
+    el.innerHTML = `
+      <canvas class="k-intro__globe" aria-hidden="true"></canvas>
+      <div class="k-intro__copy">
+        <p class="k-intro__kicker">Only at the</p>
+        <p class="k-intro__word">KIOSK</p>
+        <p class="k-intro__line"><span data-intro-count>00</span> / ${pad(INTRO_CITIES.length)} cities · Issue ${esc((C.issue || {}).number || '01')}</p>
+      </div>
+      <button class="k-intro__skip" type="button">Skip intro</button>`;
+    document.body.append(el);
+    document.documentElement.classList.add('is-intro');
+    const c = $('canvas', el);
+    const ctx = c.getContext('2d');
+    const color = () => getComputedStyle(el).color;
+    const pts = [];
+    const N = 1400;
+    for (let i = 0; i < N; i += 1) {           // Fibonacci sphere
+      const y = 1 - (i / (N - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const th = i * 2.399963;
+      pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
+    }
+    const ll = (lat, lon) => { const a = (lat * Math.PI) / 180; const b = (lon * Math.PI) / 180; return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)]; };
+    const cities = INTRO_CITIES.map(([n, la, lo]) => ({ n, v: ll(la, lo) }));
+    const t0 = performance.now();
+    const DUR = 3000;
+    let raf = 0;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      el.classList.add('is-out');
+      document.documentElement.classList.remove('is-intro');
+      setTimeout(() => { cancelAnimationFrame(raf); el.remove(); }, 900);
+    };
+    $('.k-intro__skip', el).addEventListener('click', finish);
+    el.addEventListener('click', (e) => { if (e.target === el) finish(); });
+
+    const frame = (now) => {
+      const t = (now - t0) / 1000;
+      const w = c.clientWidth; const h = c.clientHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      const ink = color();
+      const ease = 1 - Math.pow(1 - Math.min(1, t / 1.2), 3);
+      const R = Math.min(w, h) * (0.27 + 0.05 * ease);
+      const cx = w / 2; const cy = h / 2;
+      const rot = -1.3 + t * 0.55;               // start facing the Atlantic
+      const tilt = 0.32;
+      const proj = ([x, y, z]) => {
+        const x1 = x * Math.cos(rot) + z * Math.sin(rot);
+        const z1 = -x * Math.sin(rot) + z * Math.cos(rot);
+        const y2 = y * Math.cos(tilt) - z1 * Math.sin(tilt);
+        const z2 = y * Math.sin(tilt) + z1 * Math.cos(tilt);
+        return [cx + x1 * R, cy - y2 * R, z2];
+      };
+      ctx.fillStyle = ink;
+      pts.forEach((p) => {
+        const [x, y, z] = proj(p);
+        ctx.globalAlpha = (z > 0 ? 0.25 + 0.6 * z : 0.06) * ease;
+        const s = z > 0 ? 1.3 : 0.9;
+        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+      });
+      // Outline + equator
+      ctx.globalAlpha = 0.5 * ease;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      // Flight arcs from New York, drawn one after another
+      const home = cities[0];
+      cities.slice(1).forEach((city, i) => {
+        const start = 0.5 + i * 0.16;
+        const k = Math.max(0, Math.min(1, (t - start) / 0.7));
+        if (!k) return;
+        const a = home.v; const b = city.v;
+        const steps = 40;
+        ctx.beginPath();
+        let drawn = false;
+        for (let j = 0; j <= steps * k; j += 1) {
+          const u = j / steps;
+          const m = [a[0] * (1 - u) + b[0] * u, a[1] * (1 - u) + b[1] * u, a[2] * (1 - u) + b[2] * u];
+          const len = Math.hypot(...m) || 1;
+          const lift = 1 + 0.22 * Math.sin(Math.PI * u);
+          const [x, y, z] = proj(m.map((q) => (q / len) * lift));
+          if (z < -0.1) { drawn = false; continue; }
+          if (!drawn) { ctx.moveTo(x, y); drawn = true; } else ctx.lineTo(x, y);
+        }
+        ctx.globalAlpha = 0.85;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+        if (k >= 1) {
+          const [x, y, z] = proj(b);
+          if (z > 0) {
+            ctx.globalAlpha = Math.min(1, z * 2);
+            ctx.fillRect(x - 3, y - 3, 6, 6);
+            ctx.font = '10px ui-monospace, Menlo, monospace';
+            ctx.fillText(city.n.toUpperCase(), x + 8, y + 3);
+          }
+        }
+      });
+      const [hx, hy, hz] = proj(home.v);
+      if (hz > 0) { ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(hx, hy, 4 + 2 * Math.sin(t * 6), 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      const count = Math.min(INTRO_CITIES.length, Math.max(1, Math.floor((t - 0.5) / 0.16) + 2));
+      const cnt = $('[data-intro-count]', el);
+      if (cnt) cnt.textContent = pad(count);
+      if (now - t0 > DUR) finish();
+      if (!done || el.isConnected) raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+  }
+
   /* ------------------------------------------------------------- boot */
 
   const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal };
@@ -2240,7 +2573,9 @@
     }
   }
 
+  if (PAGE === 'home') runIntro();
   renderChrome();
+  bindThemeAndClock();
   bindGlobal();
   bindMagazine();
   bindSoftNav();
