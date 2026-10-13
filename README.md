@@ -11,8 +11,8 @@ The home page and the new sections run on the **KIOSK Glass** design system:
 | `index.html` | Issue home: hero film, Garage rail, films, KIOSK Radio, Vault, Dispatch signup |
 | `garage.html` | Archive of films, photo stories and interviews with filters |
 | `story.html?s=<slug>` | A story page: specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
-| `radio.html` | Phonk DJ mixes and tracklists |
-| `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories (vector mockups), phonk mixes, films and LUT packs |
+| `radio.html` | KIOSK Radio: phonk playlists (Spotify) in a site-wide player with a live waveform |
+| `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories, films and LUT packs |
 
 All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` and styles in `css/kiosk-glass.css`.
 **To add a shoot, film, mix or product, see [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md).**

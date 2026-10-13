@@ -12,7 +12,7 @@
   document.documentElement.classList.remove('no-js');
 
   const C = window.KIOSK_CONTENT || { features: [], mixes: [], products: [], categories: [], issue: {} };
-  const PAGE = document.body.dataset.page || '';
+  let PAGE = document.body.dataset.page || '';
 
   /* ------------------------------------------------------------ utils */
 
@@ -65,8 +65,6 @@
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
   const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
-  /** Spotify's playlist player (dark theme). height 152 = compact, 352 = with tracklist. */
-  const spotifyEmbed = (m, height = 152) => `<iframe class="k-spotify" title="${esc(m.title)} on Spotify" src="https://open.spotify.com/embed/playlist/${encodeURIComponent(m.spotify)}?utm_source=generator&theme=0" height="${height}" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
   const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || (m.spotify ? 'Spotify' : '');
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
@@ -174,7 +172,7 @@
         <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span>KIOSK</a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
-          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span>Radio</a>
+          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas>Radio</a>
           <button class="k-nav__shop" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join</button>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
@@ -226,7 +224,7 @@
             <p class="k-lede k-mt-s">A travel, streetwear and automotive journal. Cars, motorcycles, the people behind them — shot on location, scored in phonk.</p>
           </div>
           <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=mixes">Phonk mixes</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -300,6 +298,7 @@
   }
 
   function openFilm(f) {
+    player.pause();   // the film has its own soundtrack
     let screen;
     if (f.embed) {
       const src = f.embed + (f.embed.includes('?') ? '&' : '?') + 'autoplay=1';
@@ -324,6 +323,72 @@
       <div class="k-lightbox__screen">${screen}</div>`, `${featureName(f)} film`);
   }
 
+  /* ------------------------------------------------------------ vimeo */
+
+  const vimeoById = (id) => (C.vimeo || []).find((v) => String(v.id) === String(id));
+  const vimeoPage = (v) => `https://vimeo.com/${encodeURIComponent(v.id)}${v.hash ? `/${encodeURIComponent(v.hash)}` : ''}`;
+  const vimeoSrc = (v) => `https://player.vimeo.com/video/${encodeURIComponent(v.id)}?${v.hash ? `h=${encodeURIComponent(v.hash)}&` : ''}autoplay=1&title=0&byline=0&portrait=0&dnt=1`;
+  const vimeoMeta = new Map();
+
+  /** Title, thumbnail and length from Vimeo's oEmbed endpoint (CORS-enabled, no key). */
+  function vimeoInfo(v) {
+    if (!vimeoMeta.has(v.id)) {
+      vimeoMeta.set(v.id, fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoPage(v))}&width=1280`)
+        .then((r) => (r.ok ? r.json() : {}))
+        .catch(() => ({})));
+    }
+    return vimeoMeta.get(v.id);
+  }
+
+  function vimeoCards() {
+    return (C.vimeo || []).map((v, n) => `
+      <button class="k-vimeo__card k-dark" type="button" data-vimeo="${esc(v.id)}" data-reveal data-reveal-delay="${n % 3}">
+        <span class="k-vimeo__thumb"><span class="plate plate--graphite"></span></span>
+        <span class="k-vimeo__play" aria-hidden="true">${icon.play}</span>
+        <span class="k-vimeo__meta">
+          <span class="k-eyebrow">Film · <span data-vimeo-time>Vimeo</span></span>
+          <b data-vimeo-title>${esc(v.title || 'Loading…')}</b>
+        </span>
+      </button>`).join('');
+  }
+
+  function hydrateVimeo(root) {
+    $$('[data-vimeo]', root).forEach((card) => {
+      const v = vimeoById(card.dataset.vimeo);
+      if (!v) return;
+      vimeoInfo(v).then((d) => {
+        const title = v.title || d.title || 'Film';
+        $('[data-vimeo-title]', card).textContent = title;
+        card.setAttribute('aria-label', `Play ${title}`);
+        if (d.duration) $('[data-vimeo-time]', card).textContent = `${Math.floor(d.duration / 60)}:${pad(d.duration % 60)}`;
+        if (d.thumbnail_url) $('.k-vimeo__thumb', card).innerHTML = `<img src="${esc(d.thumbnail_url)}" alt="" loading="lazy" decoding="async">`;
+      });
+    });
+  }
+
+  function openVimeo(v) {
+    player.pause();   // the film has its own soundtrack
+    const story = v.story && featureBySlug(v.story);
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">Film · Vimeo</p><p class="k-h3 k-mt-s" data-vimeo-title>${esc(v.title || 'Film')}</p></div>
+        <div class="k-row-flex">
+          ${story ? `<a class="k-btn k-btn--sm" href="${storyHref(story)}">Read the story</a>` : ''}
+          <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+        </div>
+      </div>
+      <div class="k-lightbox__screen"><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
+    vimeoInfo(v).then((d) => { const t = $('.k-lightbox.is-open [data-vimeo-title]'); if (t && !v.title && d.title) t.textContent = d.title; });
+  }
+
+  function fillVimeo(name) {
+    const el = mount(name);
+    if (!el) return;
+    if (!(C.vimeo || []).length) { const sec = el.closest('[data-vimeo-section]'); if (sec) sec.hidden = true; return; }
+    el.innerHTML = vimeoCards();
+    hydrateVimeo(el);
+  }
+
   function openNotify(id, title) {
     openLightbox(`
       <div class="k-glass k-glass--strong" style="max-width:560px;margin:0 auto;padding:clamp(20px,4vw,32px);border-radius:var(--r-xl)">
@@ -332,7 +397,7 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
         ${id === 'dispatch'
-          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, phonk mixes and Supply drops — one email per release.</p>`
+          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists and Supply drops — one email per release.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
         <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
@@ -343,87 +408,452 @@
       </div>`, 'Notify me');
   }
 
-  /* ------------------------------------------------------------ player */
+  /* ------------------------------------------------------------ radio
+   * One player for the whole site, docked at the bottom of every page.
+   *
+   * - A mix with `audio` (a self-hosted MP3) plays through <audio> and the
+   *   waveform is the real signal, read from a Web Audio analyser.
+   * - A mix with `spotify` plays through Spotify's IFrame API. Spotify never
+   *   exposes its audio to the page, so that waveform is synthesised: a
+   *   140 BPM phonk pattern (808, cowbell, hats) that starts, stops and seeks
+   *   with Spotify's own playback updates.
+   *
+   * Every <canvas data-wave> on the page is drawn from the same signal.
+   * data-wave="<slug>" only moves while that mix is the one playing.
+   * While the radio is on, internal links load in place (see softNavigate)
+   * so the music keeps going from page to page.
+   * -------------------------------------------------------------------- */
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const wave = {
+    bins: new Float32Array(64),
+    level: 0,
+    raf: 0,
+    analyser: null,
+    freq: null,
+    silentFrames: 0,
+    clock: { position: 0, at: 0 },     // Spotify position (ms) at performance.now()
+
+    /** Synthesised spectrum for Spotify: kick + 808 lows, cowbell mids, hat highs. */
+    synth(now) {
+      const pos = player.playing ? this.clock.position + (now - this.clock.at) : this.clock.position;
+      const beat = 60000 / 140;
+      const ph = (pos % beat) / beat;
+      const off = ((pos + beat / 2) % beat) / beat;
+      const sixteenth = ((pos % (beat / 4)) / (beat / 4));
+      const bar = Math.floor(pos / (beat * 4));
+      const kick = Math.exp(-ph * 6);
+      const sub = Math.exp(-ph * 1.8) * 0.85;
+      const cow = (Math.floor(pos / beat) % 2 ? 1 : 0.55) * Math.exp(-off * 10);
+      const hat = Math.exp(-sixteenth * 14) * (0.5 + 0.5 * ((Math.floor(pos / (beat / 4)) + bar) % 3 ? 0.6 : 1));
+      const n = this.bins.length;
+      for (let i = 0; i < n; i += 1) {
+        const x = i / (n - 1);
+        const low = Math.max(0, 1 - x * 3.2) * (0.55 * kick + 0.45 * sub);
+        const mid = Math.exp(-((x - 0.42) ** 2) / 0.012) * cow * 0.9;
+        const high = Math.max(0, x - 0.55) * 1.8 * hat;
+        const shimmer = 0.12 + 0.1 * Math.sin(now / 170 + i * 1.7) * Math.sin(now / 410 + i * 0.6);
+        this.bins[i] = Math.min(1, 1.35 * (low + mid + high + shimmer * (1 - x * 0.5)) * (0.9 + 0.1 * Math.sin(i * 12.9898 + pos / 90)));
+      }
+    },
+
+    /** Real spectrum from the analyser, log-spaced into bins. */
+    sample() {
+      if (!this.analyser) return false;
+      this.analyser.getByteFrequencyData(this.freq);
+      const n = this.bins.length;
+      const len = this.freq.length;
+      let total = 0;
+      for (let i = 0; i < n; i += 1) {
+        const a = Math.floor(2 * (len / 2) ** (i / n));
+        const b = Math.max(a + 1, Math.floor(2 * (len / 2) ** ((i + 1) / n)));
+        let sum = 0;
+        for (let k = a; k < b && k < len; k += 1) sum += this.freq[k];
+        const v = sum / (b - a) / 255;
+        this.bins[i] = v;
+        total += v;
+      }
+      // Cross-origin audio without CORS reads as silence: fall back to the synth
+      this.silentFrames = total === 0 ? this.silentFrames + 1 : 0;
+      return this.silentFrames < 90;
+    },
+
+    start() {
+      if (!this.raf) this.raf = requestAnimationFrame((t) => this.frame(t));
+    },
+
+    frame(now) {
+      this.raf = 0;
+      const target = player.playing && !player.buffering ? 1 : 0;
+      this.level += (target - this.level) * (target ? 0.08 : 0.06);
+      if (!(player.source === 'audio' && this.sample())) this.synth(now);
+      this.draw();
+      if (player.playing || this.level > 0.004) this.start();
+      else { this.level = 0; this.draw(); }
+    },
+
+    draw() {
+      $$('canvas[data-wave]').forEach((c) => {
+        const w = c.clientWidth;
+        const h = c.clientHeight;
+        if (!w || !h) return;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+          c.width = Math.round(w * dpr);
+          c.height = Math.round(h * dpr);
+        }
+        const ctx = c.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        const mine = !c.dataset.wave || c.dataset.wave === (player.mix && player.mix.slug);
+        const level = mine ? (REDUCED ? this.level * 0.35 : this.level) : 0;
+        const gap = Number(c.dataset.waveGap || 3);
+        const barW = Number(c.dataset.waveBar || 2);
+        const count = Math.max(4, Math.floor((w + gap) / (barW + gap)));
+        const mid = h / 2;
+        ctx.fillStyle = getComputedStyle(c).color;
+        for (let i = 0; i < count; i += 1) {
+          // Mirror the spectrum so lows sit in the middle, like a stereo meter
+          const t = Math.abs(i / (count - 1) - 0.5) * 2;
+          const v = this.bins[Math.min(this.bins.length - 1, Math.floor(t * (this.bins.length - 1)))];
+          const amp = Math.max(1, v * level * (h - 2));
+          ctx.globalAlpha = 0.35 + 0.65 * Math.min(1, v * level * 1.4 + 0.1);
+          const x = i * (barW + gap);
+          const r = Math.min(barW / 2, amp / 2);
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x, mid - amp / 2, barW, amp, r); else ctx.rect(x, mid - amp / 2, barW, amp);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      });
+    },
+
+    connect(audio) {
+      if (this.analyser) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try {
+        const ctx = new AC();
+        const src = ctx.createMediaElementSource(audio);
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 1024;
+        this.analyser.smoothingTimeConstant = 0.78;
+        this.freq = new Uint8Array(this.analyser.frequencyBinCount);
+        src.connect(this.analyser);
+        this.analyser.connect(ctx.destination);
+        this.ctx = ctx;
+      } catch (err) { this.analyser = null; }
+    },
+  };
+
+  const spotify = {
+    api: null,
+    ctrl: null,
+    uri: '',
+    wantPlay: false,
+    loading: null,
+    load() {
+      if (this.loading) return this.loading;
+      this.loading = new Promise((resolve) => {
+        window.onSpotifyIframeApiReady = (api) => { this.api = api; resolve(api); };
+        const s = document.createElement('script');
+        s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+        s.async = true;
+        s.onerror = () => resolve(null);
+        document.head.append(s);
+      });
+      return this.loading;
+    },
+    async open(mix, slot) {
+      const api = await this.load();
+      if (!api) return false;
+      const uri = `spotify:playlist:${mix.spotify}`;
+      this.wantPlay = true;
+      if (this.ctrl) {
+        if (this.uri !== uri) { this.uri = uri; this.ctrl.loadUri(uri); } else this.ctrl.resume();
+        setTimeout(() => { if (this.wantPlay) this.ctrl.play(); }, 600);
+        return true;
+      }
+      this.uri = uri;
+      await new Promise((resolve) => {
+        api.createController(slot, { uri, width: '100%', height: 352 }, (ctrl) => {
+          this.ctrl = ctrl;
+          ctrl.addListener('ready', () => { if (this.wantPlay) ctrl.play(); resolve(); });
+          ctrl.addListener('playback_update', (e) => player.onSpotify(e.data || {}));
+          setTimeout(resolve, 4000);
+        });
+      });
+      return true;
+    },
+  };
 
   const player = {
-    audio: null,
     el: null,
     mix: null,
+    source: '',          // 'audio' | 'spotify'
+    playing: false,
+    buffering: false,
+    audio: null,
+
+    active() { return !!(this.el && this.el.classList.contains('is-visible')); },
+
     ensure() {
       if (this.el) return;
-      this.audio = new Audio();
-      this.audio.preload = 'none';
-      this.el = document.createElement('div');
-      this.el.className = 'k-player';
+      this.el = document.createElement('section');
+      this.el.className = 'k-dock k-dark';
       this.el.setAttribute('aria-label', 'KIOSK Radio player');
       this.el.innerHTML = `
-        <button class="k-player__btn" type="button" data-player-toggle aria-label="Pause">${icon.pause}</button>
-        <div class="k-player__info">
-          <div class="k-player__title"></div>
-          <div class="k-player__bar" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="k-player__fill"></div></div>
+        <div class="k-dock__panel" id="k-dock-panel" aria-hidden="true">
+          <div class="k-dock__embed"><div data-spotify-slot></div></div>
+          <p class="k-dock__note k-small">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
         </div>
-        <span class="k-player__time">0:00</span>
-        <button class="k-player__close" type="button" data-player-close aria-label="Close player">${icon.close}</button>`;
+        <div class="k-dock__bar">
+          <button class="k-dock__btn" type="button" data-dock-toggle aria-label="Play">${icon.play}</button>
+          <div class="k-dock__info">
+            <span class="k-dock__eyebrow"><span class="k-live" aria-hidden="true"></span>KIOSK Radio</span>
+            <b class="k-dock__title"></b>
+          </div>
+          <canvas class="k-dock__wave" data-wave aria-hidden="true"></canvas>
+          <span class="k-dock__time" aria-live="off"></span>
+          <button class="k-dock__icon" type="button" data-dock-expand aria-expanded="false" aria-controls="k-dock-panel" aria-label="Show tracklist">${icon.arrow}</button>
+          <button class="k-dock__icon" type="button" data-dock-close aria-label="Close player">${icon.close}</button>
+          <div class="k-dock__progress" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><i></i></div>
+        </div>`;
       document.body.append(this.el);
-
-      const fmt = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}` : '0:00');
-      this.audio.addEventListener('timeupdate', () => {
-        const pct = this.audio.duration ? (this.audio.currentTime / this.audio.duration) * 100 : 0;
-        $('.k-player__fill', this.el).style.width = `${pct}%`;
-        $('.k-player__bar', this.el).setAttribute('aria-valuenow', String(Math.round(pct)));
-        $('.k-player__time', this.el).textContent = fmt(this.audio.currentTime);
-      });
-      this.audio.addEventListener('play', () => this.sync());
-      this.audio.addEventListener('pause', () => this.sync());
-      this.audio.addEventListener('error', () => { toast('This mix couldn’t be loaded.'); this.sync(); });
-      $('[data-player-toggle]', this.el).addEventListener('click', () => (this.audio.paused ? this.audio.play() : this.audio.pause()));
-      $('[data-player-close]', this.el).addEventListener('click', () => { this.audio.pause(); this.el.classList.remove('is-visible'); });
-      const bar = $('.k-player__bar', this.el);
+      $('[data-dock-toggle]', this.el).addEventListener('click', () => this.toggle());
+      $('[data-dock-expand]', this.el).addEventListener('click', () => this.expand(!this.el.classList.contains('is-expanded')));
+      $('[data-dock-close]', this.el).addEventListener('click', () => this.close());
+      const bar = $('.k-dock__progress', this.el);
       bar.addEventListener('click', (e) => {
-        if (!this.audio.duration) return;
+        if (!this.audio || !this.audio.duration) return;
         const r = bar.getBoundingClientRect();
         this.audio.currentTime = ((e.clientX - r.left) / r.width) * this.audio.duration;
       });
       bar.addEventListener('keydown', (e) => {
-        if (!this.audio.duration) return;
+        if (!this.audio || !this.audio.duration) return;
         if (e.key === 'ArrowRight') this.audio.currentTime = Math.min(this.audio.duration, this.audio.currentTime + 10);
         if (e.key === 'ArrowLeft') this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
       });
     },
-    play(slug) {
+
+    show(mix) {
+      this.ensure();
+      this.mix = mix;
+      $('.k-dock__title', this.el).textContent = `${mix.title}${mix.volume ? ` · ${mix.volume}` : ''}`;
+      this.el.classList.add('is-visible');
+      document.body.classList.add('is-radio-on');
+    },
+
+    expand(open) {
+      if (!this.el) return;
+      this.el.classList.toggle('is-expanded', open);
+      $('#k-dock-panel', this.el).setAttribute('aria-hidden', String(!open));
+      $('[data-dock-expand]', this.el).setAttribute('aria-expanded', String(open));
+    },
+
+    async play(slug) {
       const mix = mixBySlug(slug);
       if (!mix) return;
-      if (!mix.audio && mix.spotify) { window.open(spotifyUrl(mix), '_blank', 'noopener'); return; }
-      if (!mix.audio) {
-        toast(`${mix.title} ${mix.volume} drops soon — join the Dispatch to hear it first.`);
-        return;
-      }
-      this.ensure();
-      if (this.mix !== mix) {
-        this.mix = mix;
+      if (this.mix === mix && this.active()) { this.toggle(); return; }
+      if (!mix.audio && !mix.spotify) { toast(`${mix.title} drops soon.`); return; }
+      this.pauseAll();
+      this.show(mix);
+      if (mix.audio) {
+        this.source = 'audio';
+        if (!this.audio) this.bindAudio();
+        // Remote audio needs CORS for the analyser to read it (R2/Bunny: allow this origin)
+        if (new URL(mix.audio, location.href).origin !== location.origin) this.audio.crossOrigin = 'anonymous';
+        else this.audio.removeAttribute('crossorigin');
         this.audio.src = mix.audio;
-        $('.k-player__title', this.el).innerHTML = `${esc(mix.title)} <span>· ${esc(mix.volume)} · KIOSK Radio</span>`;
+        wave.connect(this.audio);
+        if (wave.ctx && wave.ctx.state === 'suspended') wave.ctx.resume();
+        $('.k-dock__progress', this.el).hidden = false;
+        this.el.classList.remove('has-embed');
+        this.audio.play().catch(() => {});
+      } else {
+        this.source = 'spotify';
+        $('.k-dock__progress', this.el).hidden = true;
+        this.el.classList.add('has-embed');
+        this.buffering = true;
+        this.sync();
+        const slot = $('[data-spotify-slot]', this.el) || $('.k-dock__embed iframe', this.el);
+        // Open the tracklist so the Spotify play button is right there if the
+        // browser blocks autoplay; it folds away once music starts.
+        this.expand(true);
+        const ok = await spotify.open(mix, slot);
+        if (!ok) {
+          this.buffering = false;
+          toast('Spotify couldn’t load. Opening it in a new tab.');
+          window.open(spotifyUrl(mix), '_blank', 'noopener');
+        }
       }
-      this.el.classList.add('is-visible');
-      if (this.audio.paused) this.audio.play().catch(() => {}); else this.audio.pause();
+      this.sync();
     },
-    isPlaying(slug) { return !!(this.mix && this.mix.slug === slug && this.audio && !this.audio.paused); },
+
+    bindAudio() {
+      this.audio = new Audio();
+      this.audio.preload = 'none';
+      const fmt = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}` : '0:00');
+      this.audio.addEventListener('timeupdate', () => {
+        const pct = this.audio.duration ? (this.audio.currentTime / this.audio.duration) * 100 : 0;
+        $('.k-dock__progress i', this.el).style.width = `${pct}%`;
+        $('.k-dock__progress', this.el).setAttribute('aria-valuenow', String(Math.round(pct)));
+        $('.k-dock__time', this.el).textContent = fmt(this.audio.currentTime);
+      });
+      this.audio.addEventListener('play', () => { this.playing = true; this.buffering = false; this.sync(); });
+      this.audio.addEventListener('pause', () => { this.playing = false; this.sync(); });
+      this.audio.addEventListener('waiting', () => { this.buffering = true; this.sync(); });
+      this.audio.addEventListener('playing', () => { this.buffering = false; this.sync(); });
+      this.audio.addEventListener('error', () => { toast('This mix couldn’t be loaded.'); this.playing = false; this.sync(); });
+    },
+
+    onSpotify(d) {
+      if (this.source !== 'spotify') return;
+      const was = this.playing;
+      this.playing = d.isPaused === false;
+      this.buffering = !!d.isBuffering;
+      wave.clock = { position: d.position || 0, at: performance.now() };
+      if (this.playing) spotify.wantPlay = false;
+      if (this.playing && !was && this.el.classList.contains('is-expanded') && !this.userExpanded) {
+        setTimeout(() => this.expand(false), 1200);
+      }
+      const fmt = (ms) => `${Math.floor(ms / 60000)}:${pad(Math.floor((ms / 1000) % 60))}`;
+      $('.k-dock__time', this.el).textContent = d.duration ? `${fmt(d.position || 0)} / ${fmt(d.duration)}` : '';
+      this.sync();
+    },
+
+    toggle() {
+      if (this.source === 'audio' && this.audio) {
+        if (this.audio.paused) { if (wave.ctx) wave.ctx.resume(); this.audio.play().catch(() => {}); } else this.audio.pause();
+      } else if (this.source === 'spotify' && spotify.ctrl) {
+        spotify.ctrl.togglePlay();
+      }
+    },
+
+    pause() {
+      if (this.audio && !this.audio.paused) this.audio.pause();
+      if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
+    },
+
+    pauseAll() {
+      if (this.audio) this.audio.pause();
+      if (spotify.ctrl) spotify.ctrl.pause();
+      this.playing = false;
+    },
+
+    close() {
+      this.pauseAll();
+      this.expand(false);
+      this.el.classList.remove('is-visible');
+      document.body.classList.remove('is-radio-on');
+      this.sync();
+    },
+
+    isPlaying(slug) { return !!(this.mix && this.mix.slug === slug && this.playing); },
+
     sync() {
       if (this.el) {
-        const btn = $('[data-player-toggle]', this.el);
-        const playing = !this.audio.paused;
-        btn.innerHTML = playing ? icon.pause : icon.play;
-        btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        const btn = $('[data-dock-toggle]', this.el);
+        btn.innerHTML = this.playing ? icon.pause : icon.play;
+        btn.setAttribute('aria-label', this.playing ? 'Pause' : 'Play');
+        this.el.classList.toggle('is-playing', this.playing);
+        this.el.classList.toggle('is-buffering', this.buffering && !this.playing);
       }
+      document.body.classList.toggle('is-radio-playing', this.playing);
       $$('[data-mix-play]').forEach((b) => {
         const on = this.isPlaying(b.dataset.mixPlay);
         b.setAttribute('aria-pressed', String(on));
         const ico = $('[data-ico]', b);
         if (ico) ico.innerHTML = on ? icon.pause : icon.play;
+        const label = $('[data-label]', b);
+        if (label) label.textContent = on ? 'Pause' : 'Play';
       });
       $$('[data-radio-deck]').forEach((d) => d.classList.toggle('is-playing', this.isPlaying(d.dataset.radioDeck)));
+      wave.start();
     },
   };
+
+  /* ---------------------------------------------------- soft navigation
+   * While the radio is on, links to KIOSK Glass pages swap <main> in place
+   * instead of reloading, so the dock (and the music) survive navigation.
+   * Anything else (legacy pages, other sites, new tabs) navigates normally.
+   * -------------------------------------------------------------------- */
+
+  const SOFT_PAGES = new Set(['', 'index', 'garage', 'journal', 'story', 'radio', 'vault']);
+  let pageAbort = new AbortController();
+  let renderedKey = location.pathname + location.search;
+
+  function softUrl(a) {
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.dataset.hard != null) return null;
+    const url = new URL(a.getAttribute('href'), location.href);
+    if (url.origin !== location.origin) return null;
+    const file = url.pathname.split('/').pop().replace(/\.html$/, '');
+    if (!SOFT_PAGES.has(file)) return null;
+    if (url.pathname + url.search === location.pathname + location.search && url.hash) return null;
+    return url;
+  }
+
+  function markNav() {
+    const cur = currentNav();
+    $$('.k-nav__links a, .k-sheet__links a').forEach((a) => {
+      const item = NAV.find((n) => n.href === a.getAttribute('href'));
+      if (item && item.id === cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+  }
+
+  async function softNavigate(href, push) {
+    let doc;
+    try {
+      const res = await fetch(href, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(String(res.status));
+      doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+    } catch (err) { location.href = href; return; }
+    const next = doc.body && doc.body.dataset.page;
+    const main = doc.querySelector('main');
+    if (!PAGES[next] || !main) { location.href = href; return; }
+
+    pageAbort.abort();
+    pageAbort = new AbortController();
+    if (push) history.pushState({ kiosk: true }, '', href);
+    renderedKey = location.pathname + location.search;
+    document.title = doc.title;
+    const desc = doc.querySelector('meta[name="description"]');
+    const here = $('meta[name="description"]');
+    if (desc && here) here.setAttribute('content', desc.getAttribute('content'));
+    document.body.dataset.page = next;
+    PAGE = next;
+    const lb = $('.k-lightbox.is-open');
+    if (lb) closeLightbox();
+
+    $('main').replaceWith(document.importNode(main, true));
+    markNav();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    runPage();
+    reveal();
+    player.sync();
+    const hash = new URL(href, location.href).hash;
+    const target = hash && document.getElementById(hash.slice(1));
+    if (target) target.scrollIntoView({ block: 'start' });
+    const m = $('main');
+    if (m) { m.setAttribute('tabindex', '-1'); m.focus({ preventScroll: true }); }
+    if (typeof window.gtag === 'function') window.gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
+  }
+
+  function bindSoftNav() {
+    document.addEventListener('click', (e) => {
+      if (!player.active() || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const url = softUrl(e.target.closest('a[href]'));
+      if (!url) return;
+      e.preventDefault();
+      softNavigate(url.href, true);
+    });
+    window.addEventListener('popstate', () => {
+      if (location.pathname + location.search === renderedKey) return;   // hash-only change
+      if (!player.active()) { location.reload(); return; }
+      softNavigate(location.href, false);
+    });
+  }
 
   /* ------------------------------------------------------------ saves */
 
@@ -592,26 +1022,16 @@
 
   /* ------------------------------------------------------------ radio */
 
-  function waveBars(seed, n = 64) {
-    let h = hash(seed);
-    let out = '';
-    for (let i = 0; i < n; i += 1) {
-      h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
-      const env = Math.sin((i / n) * Math.PI) * 0.6 + 0.4;
-      const v = Math.max(0.12, ((h % 1000) / 1000) * env);
-      out += `<i style="height:${(v * 100).toFixed(1)}%;animation-delay:${((h % 900) / 1000).toFixed(2)}s"${i < n * 0.35 ? ' class="is-on"' : ''}></i>`;
-    }
-    return out;
-  }
+  /** The play / pause button used wherever a mix appears. */
+  const mixButton = (m, cls = 'k-btn k-btn--solid') => `<button class="${cls}" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="${player.isPlaying(m.slug)}"><span data-ico style="display:inline-grid;width:12px">${player.isPlaying(m.slug) ? icon.pause : icon.play}</span> <span data-label>${player.isPlaying(m.slug) ? 'Pause' : 'Play'}</span></button>`;
 
   function radioBlock(activeSlug) {
     const mixes = C.mixes || [];
     if (!mixes.length) return '';
-    const m = mixBySlug(activeSlug) || mixes[0];
-    const product = productById(m.product);
+    const m = mixBySlug(activeSlug) || (player.mix && mixBySlug(player.mix.slug)) || mixes[0];
     return `
       <div class="k-radio">
-        <div class="k-radio__deck k-glass" data-radio-deck="${esc(m.slug)}" data-reveal>
+        <div class="k-radio__deck k-glass${player.isPlaying(m.slug) ? ' is-playing' : ''}" data-radio-deck="${esc(m.slug)}" data-reveal>
           <div class="plate plate--${esc(m.tone)}"></div>
           <div class="k-row-flex" style="justify-content:space-between">
             <span class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>KIOSK Radio</b> · ${esc(m.volume)}</span>
@@ -621,14 +1041,10 @@
             <h3 class="k-radio__now">${esc(m.title)} <span class="k-serif" style="opacity:.6">${esc(m.volume)}</span></h3>
             <p class="k-radio__mood">${esc(m.mood)}</p>
           </div>
-          ${m.spotify && !m.audio ? spotifyEmbed(m) : `<div class="k-wave" aria-hidden="true">${waveBars(m.slug)}</div>`}
+          <canvas class="k-radio__wave" data-wave="${esc(m.slug)}" data-wave-bar="3" data-wave-gap="3" aria-hidden="true"></canvas>
           <div class="k-radio__controls">
-            ${m.spotify && !m.audio
-              ? `<a class="k-btn k-btn--solid" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>`
-              : `<button class="k-round" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false" aria-label="Play ${esc(m.title)}"><span data-ico>${icon.play}</span></button>`}
-            ${product ? (productHref(product)
-              ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
-              : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
+            ${mixButton(m)}
+            ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.tracks || []).length ? `<span class="k-small">${esc(m.tracks.length)} tracks</span>` : ''}
           </div>
         </div>
@@ -640,7 +1056,7 @@
               <span><b>${esc(x.title)}</b><small>${esc(x.volume)} · ${esc(x.mood)}</small></span>
               <span class="k-mono">${esc(x.length || (x.spotify ? 'Spotify' : ''))}</span>
             </button>`).join('')}
-          <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists + tracklists<span class="k-arrow">${icon.arrow}</span></a></div>
+          <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists<span class="k-arrow">${icon.arrow}</span></a></div>
         </div>
       </div>`;
   }
@@ -653,6 +1069,7 @@
       container.innerHTML = radioBlock(sel.dataset.radioSelect);
       reveal(container);
       player.sync();
+      wave.draw();
     });
   }
 
@@ -764,6 +1181,8 @@
       }
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save, save); return; }
+      const vim = e.target.closest('[data-vimeo]');
+      if (vim) { const v = vimeoById(vim.dataset.vimeo); if (v) openVimeo(v); return; }
       const film = e.target.closest('[data-film]');
       if (film) { const f = featureBySlug(film.dataset.film); if (f) openFilm(f); return; }
       const notify = e.target.closest('[data-notify]');
@@ -858,6 +1277,7 @@
         </div>`);
       fill('films-rows', films.slice(0, 5).map(filmRow).join(''));
     }
+    fillVimeo('films-vimeo');
 
     // Radio
     const radio = fill('radio', radioBlock((C.mixes || [])[0] && C.mixes[0].slug));
@@ -876,6 +1296,7 @@
   /* ----------------------------------------------------------- garage */
 
   function pageGarage() {
+    fillVimeo('garage-vimeo');
     const params = new URLSearchParams(location.search);
     const state = {
       q: params.get('q') || '',
@@ -1029,7 +1450,7 @@
     });
 
     // Saved toggles should refresh the list when filtering by saved
-    document.addEventListener('click', (e) => { if (state.saved && e.target.closest('[data-save]')) setTimeout(render, 0); });
+    document.addEventListener('click', (e) => { if (state.saved && e.target.closest('[data-save]')) setTimeout(render, 0); }, { signal: pageAbort.signal });
 
     const head = mount('garage-title');
     if (head && state.format === 'film') head.innerHTML = '<span>Films,</span><span>scored in <em class="k-serif">phonk.</em></span>';
@@ -1219,7 +1640,7 @@
       if (!g) return;
       const ss = mount('story-slideshow');
       if (ss && ss.kGoto) { ss.kGoto(Number(g.dataset.gotoSlide)); ss.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    });
+    }, { signal: pageAbort.signal });
 
     // JSON-LD for search engines
     const ld = document.createElement('script');
@@ -1236,6 +1657,9 @@
       contentLocation: { '@type': 'Place', name: `${f.location}, ${f.city}` },
       publisher: { '@type': 'Organization', name: 'KIOSK' },
     });
+    ld.id = 'k-ld';
+    const oldLd = document.getElementById('k-ld');
+    if (oldLd) oldLd.remove();
     document.head.append(ld);
   }
 
@@ -1276,6 +1700,7 @@
     let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const show = (n) => {
+      if (!root.isConnected) { clearTimeout(timer); return; }   // page was swapped out
       i = (n + slides.length) % slides.length;
       slideEls.forEach((el, k) => { el.classList.toggle('is-active', k === i); el.setAttribute('aria-hidden', String(k !== i)); });
       bars.forEach((b, k) => {
@@ -1345,27 +1770,25 @@
     bindRadio(deck);
     fill('tracklists', (C.mixes || []).map((m, n) => {
       const used = features.filter((f) => f.soundtrack === m.slug);
-      const product = productById(m.product);
       return `
-        <article class="k-glass" style="padding:clamp(20px,3vw,28px);border-radius:var(--r-xl)" data-reveal>
-          <div class="k-row-flex" style="justify-content:space-between">
-            <p class="k-eyebrow">${pad(n + 1)} / ${esc(m.volume)}</p>
-            <p class="k-eyebrow">${esc(mixMeta(m))}</p>
-          </div>
-          <h3 class="k-h2 k-mt-m">${esc(m.title)}</h3>
-          <p class="k-body k-mt-s">${esc(m.mood)}</p>
-          ${m.spotify ? `<div class="k-mt-m">${spotifyEmbed(m, 352)}</div>` : ''}
-          ${(m.tracks || []).length ? `<ol class="k-rows k-mt-m">
-            ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
-          </ol>` : ''}
-          ${used.length ? `<p class="k-small k-mt-m">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
-          <div class="k-row-flex k-mt-m">
-            ${m.spotify && !m.audio
-              ? `<a class="k-btn k-btn--solid" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>`
-              : `<button class="k-btn k-btn--solid" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false"><span data-ico style="display:inline-grid;width:12px">${icon.play}</span> Listen</button>`}
-            ${product ? (productHref(product)
-              ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
-              : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
+        <article class="k-radio-card k-glass" data-reveal>
+          <div class="k-radio-card__cover">${media({ image: m.cover, tone: m.tone, mark: '' })}</div>
+          <div class="k-radio-card__body">
+            <div class="k-row-flex" style="justify-content:space-between">
+              <p class="k-eyebrow">${pad(n + 1)} / ${esc(m.volume)}</p>
+              <p class="k-eyebrow">${esc(mixMeta(m))}</p>
+            </div>
+            <h3 class="k-h2">${esc(m.title)}</h3>
+            <p class="k-body">${esc(m.mood)}</p>
+            <canvas class="k-radio-card__wave" data-wave="${esc(m.slug)}" aria-hidden="true"></canvas>
+            ${(m.tracks || []).length ? `<ol class="k-rows">
+              ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
+            </ol>` : ''}
+            ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
+            <div class="k-row-flex">
+              ${mixButton(m)}
+              ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>` : ''}
+            </div>
           </div>
         </article>`;
     }).join(''));
@@ -1467,7 +1890,7 @@
       const next = b.classList.contains('k-cat') && cat === b.dataset.cat ? 'all' : b.dataset.cat;
       setCat(next);
       if (b.classList.contains('k-cat')) mount('vault-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    }, { signal: pageAbort.signal });
     if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); });
     render();
     if (location.hash) {
@@ -1478,14 +1901,21 @@
 
   /* ------------------------------------------------------------- boot */
 
+  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal };
+  function runPage() {
+    try {
+      (PAGES[PAGE] || (() => {}))();
+    } catch (err) {
+      // Never leave a blank page if content has a typo
+      console.error('[KIOSK] render error', err);
+    }
+  }
+
   renderChrome();
   bindGlobal();
-  try {
-    ({ home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal }[PAGE] || (() => {}))();
-  } catch (err) {
-    // Never leave a blank page if content has a typo
-    console.error('[KIOSK] render error', err);
-  }
+  bindSoftNav();
+  runPage();
   reveal();
+  wave.draw();
   window.KIOSK = { openFilm: (s) => openFilm(featureBySlug(s)), player, toast };
 })();

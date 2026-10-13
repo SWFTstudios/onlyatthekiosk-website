@@ -59,7 +59,7 @@
 .k-films__lead,
 .k-radio__deck,
 .k-tile--invert,
-.k-player,
+.k-dock,
 .k-lightbox,
 .k-pager a,
 .k-slideshow,
@@ -1200,45 +1200,122 @@ body.k::after {
 .k-round svg { width: 20px; height: 20px; }
 .k-round--ghost { background: var(--glass-2); color: var(--ink); border: 1px solid var(--line-2); width: 52px; height: 52px; }
 
-/* Sticky mini player (kodilion-style round controls + progress) */
-.k-player {
+/* Radio dock: one player for the whole site, with a live waveform */
+.k-dock {
   position: fixed;
   left: 50%;
   bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 120;
+  width: min(760px, calc(100% - 24px));
+  color: var(--ink);
+  transform: translate(-50%, 160%);
+  transition: transform 0.6s var(--ease);
+}
+.k-dock.is-visible { transform: translate(-50%, 0); }
+.k-dock__bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: min(720px, calc(100% - 24px));
-  padding: 8px 14px 8px 8px;
+  padding: 8px 10px 8px 8px;
   border-radius: var(--r-pill);
   border: 1px solid var(--line-2);
-  background: rgba(16, 16, 18, 0.72);
+  background: rgba(16, 16, 18, 0.78);
   -webkit-backdrop-filter: var(--blur-strong);
   backdrop-filter: var(--blur-strong);
   box-shadow: var(--shadow);
-  transform: translate(-50%, 140%);
-  transition: transform 0.6s var(--ease);
 }
-.k-player.is-visible { transform: translate(-50%, 0); }
-.k-player__btn {
-  display: grid;
-  place-items: center;
-  width: 44px; height: 44px;
-  flex: none;
+.k-dock__btn {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; flex: none;
   border-radius: 50%;
-  background: var(--bone);
-  color: var(--bone-ink);
+  background: var(--bone); color: var(--bone-ink);
+  transition: transform 0.3s var(--ease);
 }
-.k-player__btn svg { width: 14px; height: 14px; }
-.k-player__btn--ghost { background: var(--glass-2); color: var(--ink); }
-.k-player__info { min-width: 0; flex: 1; }
-.k-player__title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.k-player__title span { color: var(--ink-3); }
-.k-player__bar { position: relative; height: 4px; margin-top: 8px; border-radius: 4px; background: var(--ink-4); overflow: hidden; cursor: pointer; }
-.k-player__fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); border-radius: 4px; }
-.k-player__time { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); flex: none; }
-.k-player__close { color: var(--ink-3); width: 28px; height: 28px; flex: none; display: grid; place-items: center; }
+.k-dock__btn:hover { transform: scale(1.06); }
+.k-dock__btn svg { width: 14px; height: 14px; }
+.k-dock.is-buffering .k-dock__btn { animation: k-pulse 1s var(--ease-io) infinite alternate; }
+@keyframes k-pulse { from { opacity: 0.55; } to { opacity: 1; } }
+.k-dock__info { min-width: 0; flex: 0 1 auto; display: grid; gap: 2px; max-width: 34%; }
+.k-dock__eyebrow { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.k-dock__title { font-weight: 400; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.k-dock__wave { flex: 1; min-width: 40px; height: 34px; color: var(--ink); }
+.k-dock__time { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); flex: none; }
+.k-dock__time:empty { display: none; }
+.k-dock__icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 50%; color: var(--ink-3); transition: color 0.2s, background 0.2s, transform 0.4s var(--ease); }
+.k-dock__icon:hover { color: var(--ink); background: var(--glass-2); }
+.k-dock__icon svg { width: 14px; height: 14px; }
+.k-dock [data-dock-expand] { transform: rotate(-45deg); }
+.k-dock.is-expanded [data-dock-expand] { transform: rotate(135deg); }
+.k-dock:not(.has-embed) [data-dock-expand] { display: none; }
+.k-dock__progress { position: absolute; left: 64px; right: 24px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--ink-4); cursor: pointer; }
+.k-dock__progress i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); border-radius: 2px; }
+/* The Spotify player lives here; it stays rendered (and playing) while folded away */
+.k-dock__panel {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: calc(100% + 10px);
+  padding: 10px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line-2);
+  background: rgba(16, 16, 18, 0.86);
+  -webkit-backdrop-filter: var(--blur-strong);
+  backdrop-filter: var(--blur-strong);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.98);
+  transform-origin: bottom center;
+  transition: opacity 0.35s var(--ease), transform 0.5s var(--ease);
+}
+.k-dock.is-expanded .k-dock__panel { opacity: 1; pointer-events: auto; transform: none; }
+.k-dock__embed iframe { display: block; width: 100%; height: 352px; border: 0; border-radius: 12px; }
+.k-dock__note { padding: 8px 4px 0; }
+body.is-radio-on { padding-bottom: 84px; }
+@media (max-width: 640px) {
+  .k-dock__info { max-width: 42%; }
+  .k-dock__time { display: none; }
+  .k-dock__embed iframe { height: 280px; }
+}
+
+/* Live waveforms (drawn by the radio engine into canvas[data-wave]) */
+canvas[data-wave] { display: block; }
+.k-radio__wave { width: 100%; height: clamp(64px, 9vw, 110px); color: var(--ink); }
+.k-nav__wave { display: none; width: 34px; height: 16px; color: var(--ink); }
+body.is-radio-playing .k-nav__wave { display: block; }
+body.is-radio-playing .k-nav__radio .k-live { display: none; }
+
+/* Radio page playlist cards */
+.k-radio-card { display: grid; grid-template-columns: 1fr; gap: 0; border-radius: var(--r-xl); overflow: hidden; }
+@media (min-width: 700px) { .k-radio-card { grid-template-columns: minmax(160px, 0.8fr) 1.2fr; } }
+.k-radio-card__cover { position: relative; aspect-ratio: 16 / 9; }
+@media (min-width: 700px) { .k-radio-card__cover { aspect-ratio: auto; min-height: 100%; } }
+.k-radio-card__cover > .k-media { position: absolute; inset: 0; }
+.k-radio-card__body { display: grid; gap: 14px; align-content: start; padding: clamp(20px, 3vw, 28px); }
+.k-radio-card__wave { width: 100%; height: 44px; color: var(--ink); }
+
+/* Films on Vimeo */
+.k-vimeo__grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.k-vimeo__card {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  text-align: left;
+  color: var(--ink);
+  background: #0e0e10;
+}
+.k-vimeo__thumb, .k-vimeo__thumb .plate, .k-vimeo__thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.k-vimeo__thumb img { transition: transform 1s var(--ease); }
+.k-vimeo__card:hover .k-vimeo__thumb img { transform: scale(1.04); }
+.k-vimeo__card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.72)); }
+.k-vimeo__play { position: absolute; z-index: 2; top: 14px; right: 14px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--bone); color: var(--bone-ink); transition: transform 0.3s var(--ease); }
+.k-vimeo__card:hover .k-vimeo__play { transform: scale(1.08); }
+.k-vimeo__play svg { width: 14px; height: 14px; }
+.k-vimeo__meta { position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 14px; display: grid; gap: 4px; }
+.k-vimeo__meta b { font-weight: 400; font-size: clamp(16px, 1.6vw, 20px); letter-spacing: -0.01em; }
 
 /* ------------------------------------------------------ dispatch / form */
 

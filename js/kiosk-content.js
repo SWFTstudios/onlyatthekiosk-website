@@ -402,11 +402,23 @@ window.KIOSK_CONTENT = {
   ],
 
   /* ----------------------------------------------------------
+   * VIMEO — films hosted on Vimeo. Title, thumbnail and length are
+   * read from Vimeo when the page loads, so only the ID is needed.
+   * Private (unlisted) links carry a hash: vimeo.com/<id>/<hash>.
+   * Set `title` to override Vimeo's, and `story` to the slug of the
+   * shoot it belongs to (adds a "Read the story" link).
+   * -------------------------------------------------------- */
+  vimeo: [
+    { id: '1212483051', hash: 'f428c5372f', title: '', story: '' },
+    { id: '1066971784', hash: '', title: '', story: '' },
+  ],
+
+  /* ----------------------------------------------------------
    * RADIO — your phonk playlists on Spotify.
    * `spotify` is the playlist ID from its share link
    * (open.spotify.com/playlist/<ID>) and renders Spotify's player.
-   * Add `audio` (an MP3 URL) for a self-hosted DJ mix instead.
-   * `product` links a playlist to its DJ-mix download in the shop.
+   * Add `audio` (an MP3 URL) to play a self-hosted mix instead.
+   * Radio is free to listen to: nothing here is sold.
    * -------------------------------------------------------- */
   mixes: [
     {
@@ -420,7 +432,6 @@ window.KIOSK_CONTENT = {
       spotify: '1fO87QEdH8Y3WIVjAjDARS',
       audio: '',
       cover: 'https://mosaic.scdn.co/640/ab67616d0000b27303a253cffd6d9e556ef4eec5ab67616d0000b27365fc93b5c819602262be24d4ab67616d0000b2738b78cb4ebf3f1719d61d0f4eab67616d0000b273c465a9daacf171835b602cbd',
-      product: 'mix-phonk-n95',
       tracks: [],
     },
     {
@@ -434,7 +445,6 @@ window.KIOSK_CONTENT = {
       spotify: '6FhSH1DSCzAspiCtAnMAZk',
       audio: '',
       cover: 'https://mosaic.scdn.co/640/ab67616d0000b2735f154e86d6078ba8a0ff918eab67616d0000b2736b4118a6648f973cf8c587a3ab67616d0000b2739079689dc439fa4361b49f82ab67616d0000b273d1476c299b9f86960612fc9b',
-      product: 'mix-keifetgr33n-phonk',
       tracks: [],
     },
   ],
@@ -463,7 +473,6 @@ window.KIOSK_CONTENT = {
     { id: 'headwear', label: 'Headwear', kind: 'physical' },
     { id: 'skate', label: 'Skate', kind: 'physical' },
     { id: 'accessories', label: 'Accessories', kind: 'physical' },
-    { id: 'mixes', label: 'Phonk Mixes', kind: 'digital' },
     { id: 'films', label: 'Films', kind: 'digital' },
     { id: 'luts', label: 'LUT Packs', kind: 'digital' },
   ],
@@ -687,24 +696,6 @@ window.KIOSK_CONTENT = {
     },
 
     /* ---- Digital ---- */
-    {
-      id: 'mix-phonk-n95', category: 'mixes', title: 'Phonk nº 95 — DJ mix', price: 12, badge: 'Digital', added: '2026-10-13',
-      detail: 'Continuous mix · WAV + MP3',
-      mockup: { type: 'cassette', label: 'PHONK Nº 95', sub: 'DJ MIX' },
-      colorways: [{ name: 'Obsidian', garment: '#0b0b0e', ink: '#ece9e1' }],
-      sizes: [],
-      status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['fall', 'winter'], vibes: ['night', 'urban', 'moody'], colors: [],
-    },
-    {
-      id: 'mix-keifetgr33n-phonk', category: 'mixes', title: 'Keifetgr33n Phonk — DJ mix', price: 12, badge: 'Digital', added: '2026-10-13',
-      detail: 'Continuous mix · WAV + MP3',
-      mockup: { type: 'cassette', label: 'KEIFETGR33N', sub: 'PHONK · DJ MIX' },
-      colorways: [{ name: 'Moss', garment: '#2f3a2a', ink: '#d9e4c8' }],
-      sizes: [],
-      status: 'soon', shopifyHandle: '', href: '', image: '',
-      seasons: ['spring', 'summer'], vibes: ['urban', 'daylight', 'moody'], colors: [],
-    },
     {
       id: 'film-andy-q50', category: 'films', title: 'Real Slummy — Andy’s Q50', price: 15, badge: 'Digital', added: '2026-10-01',
       detail: 'Full-res download · the Q50 film',

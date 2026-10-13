@@ -1,6 +1,6 @@
 # KIOSK Content Guide
 
-How to publish films, photo stories, interviews, phonk mixes and products on the KIOSK Glass site.
+How to publish films, photo stories, interviews, radio playlists and products on the KIOSK Glass site.
 
 Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no build step. Edit the file, add your media, commit, and Cloudflare Pages deploys it.
 
@@ -10,8 +10,8 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Journal | `journal.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
 | Garage | `garage.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
-| Radio | `radio.html` | Phonk mixes, player, tracklists |
-| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, mixes, films, LUT packs |
+| Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
+| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
 
 The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. In the new nav they appear as **Supply**.
 
@@ -161,16 +161,19 @@ Each card shows the reasons it matched, such as `FALL`, `NIGHT` or `GRADED WITH`
 
 ---
 
-## 3. Radio: Spotify playlists and phonk mixes
+## 3. Radio: Spotify playlists (free to listen, nothing for sale)
 
-The Radio deck plays your Spotify playlists through Spotify's own player. To add one, copy its share link (`open.spotify.com/playlist/<ID>`) and add an entry to `mixes`:
+Radio plays in a **dock that stays at the bottom of every page**. Once a visitor presses play, links between the KIOSK pages (Home, Garage, Journal, Story, Radio, Shop) load in place, so the music keeps going. Older pages (store, about, contact…) still reload normally, which stops playback. Playing a film pauses the radio.
+
+**Live waveform:** every `<canvas data-wave>` draws the music as it plays: in the dock, on the radio deck, on each playlist card, and in the nav "Radio" pill. For a self-hosted `audio` file, the waveform is the real signal. Spotify doesn't let websites read its audio, so for Spotify playlists the waveform is generated to match a phonk beat, and it starts, stops and seeks with Spotify. Visitors logged in to Spotify hear full tracks; everyone else gets Spotify's 30-second previews.
+
+To add a playlist, copy its share link (`open.spotify.com/playlist/<ID>`) and add an entry to `mixes`:
 ```js
 {
   slug: 'phonk-n95', title: 'Phonk nº 95', volume: 'Playlist 01',
   mood: 'Phonk · curated on Spotify', tone: 'graphite',
   spotify: '1fO87QEdH8Y3WIVjAjDARS',   // playlist ID
   cover: '',                            // optional cover image URL
-  product: 'mix-phonk-n95',             // shop item for the DJ-mix download
   length: '', bpm: '', audio: '', tracks: [],
 }
 ```
@@ -180,13 +183,23 @@ For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in
 
 ---
 
+## 3b. Films on Vimeo
+
+Vimeo films show in an **On Vimeo** strip on the home page and the Garage. Add the ID from the link (`vimeo.com/<id>`, or `vimeo.com/<id>/<hash>` for an unlisted video):
+```js
+vimeo: [
+  { id: '1212483051', hash: 'f428c5372f', title: '', story: 'andy-q50' },
+]
+```
+The title, thumbnail and length load from Vimeo automatically. `title` overrides Vimeo's title, and `story` adds a "Read the story" link in the player. To use a Vimeo film as a story's main film instead, set that story's `embed` to `https://player.vimeo.com/video/<id>?h=<hash>`. In Vimeo, set the video's embed privacy to allow `onlyatthekiosk.com` (and the `*.pages.dev` preview), or Vimeo won't play it on the site.
+
 ## 4. Add or sell a product (KIOSK Supply)
 
 The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real product photo, each product renders as a **vector mockup** on a light tile.
 
 ```js
 {
-  id: 'hoodie-garage', category: 'apparel',   // apparel | headwear | skate | accessories | mixes | films | luts
+  id: 'hoodie-garage', category: 'apparel',   // apparel | headwear | skate | accessories | films | luts
   title: 'Midnight Garage Hoodie', price: 98,
   badge: 'New',                               // tile label: 'New', 'Issue 01' (orange sticker), 'Classic', 'Digital'…
   added: '2026-09-28',                        // used by "Newest" sort and the home "New in" row
@@ -205,7 +218,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 }
 ```
 
-**Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `cassette` (mixes), `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
+**Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
 
 **Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
 
@@ -214,7 +227,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 **Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
 
 **To start selling a product:**
-1. Create it in Shopify, one product per colourway. For mixes, films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
+1. Create it in Shopify, one product per colourway. For films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
 2. Put each handle on its colourway (`shopifyHandle`) and set `status: 'available'`.
 
 The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, and the existing `product.html` page handles checkout. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
