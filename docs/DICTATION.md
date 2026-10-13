@@ -20,6 +20,31 @@ Add `&draft=1` to any story URL, e.g. `story.html?s=andy-q50&draft=1`, or open `
 
 ## Chapters by post
 
+## L0ST TAPES — `l0st-tapes`
+
+Preview: `story.html?s=l0st-tapes&draft=1`
+
+| # | Chapter id | Heading | Talk about |
+| --- | --- | --- | --- |
+| 01 | `the-tape` | The tape | What VHS camera was it, and how did the footage get recovered? |
+| 02 | `the-crew` | The crew | Who was out that night? |
+| 03 | `chinatown` | Chinatown | Starting in Chinatown — what was the plan, and what was the feel? |
+| 04 | `the-highways` | Onto the highways | What was it like shooting on the move at night? |
+| 05 | `the-bridge` | The bridge | Which bridge was it, and what were the lights doing when you crossed? |
+| 06 | `mixing-the-media` | Mixing the media | How did you put the VHS and the other footage together? |
+
+## In the Shop — `honda-f4i-shop`
+
+Preview: `story.html?s=honda-f4i-shop&draft=1`
+
+| # | Chapter id | Heading | Talk about |
+| --- | --- | --- | --- |
+| 01 | `the-f4i` | The F4i | How did you get the bike, and what state was it in? |
+| 02 | `the-garage` | The garage and the crew | Whose garage is it, and who was there helping? |
+| 03 | `the-wiring` | Into the wiring | What was going on with the wiring, and how did you sort it out? |
+| 04 | `lights-on` | Lights on | Connecting the front end and headlights back up — did it all work first time? |
+| 05 | `whats-next` | What’s next | What’s left on the build, and what are the plans for the bike? |
+
 ## Lunar New Year Meet — `lunar-new-year-meet`
 
 Preview: `story.html?s=lunar-new-year-meet&draft=1`

@@ -125,7 +125,7 @@
    * tonal "plate" with the subject's code as a ghost watermark.
    */
   function media(opts) {
-    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style, focus } = opts;
+    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style, focus, vimeo } = opts;
     let inner;
     if (video) {
       inner = `<video src="${esc(video)}" ${poster ? `poster="${esc(poster)}"` : ''} muted loop playsinline autoplay preload="metadata"></video>`;
@@ -133,13 +133,13 @@
       inner = `<img src="${esc(image)}" alt="${esc(alt || '')}" loading="${eager ? 'eager' : 'lazy'}" decoding="async"${focus ? ` style="object-position:${esc(focus)}"` : ''}>`;
     } else {
       const style = swatch ? ` style="--a:${esc(swatch)};--c:${esc(swatch)}66"` : '';
-      inner = `<div class="plate plate--${esc(tone || 'graphite')}"${style} role="img" aria-label="${esc(alt || mark || '')}">${mark ? `<span class="plate__mark">${esc(mark)}</span>` : ''}${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}</div>`;
+      inner = `<div class="plate plate--${esc(tone || 'graphite')}"${style}${vimeo && vimeo.id ? ` data-vimeo-cover="${esc(vimeo.id)}"` : ''} role="img" aria-label="${esc(alt || mark || '')}">${mark ? `<span class="plate__mark">${esc(mark)}</span>` : ''}${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}</div>`;
     }
     return `<div class="k-media${cls ? ` ${cls}` : ''}"${style ? ` style="${esc(style)}"` : ''}>${inner}</div>`;
   }
 
   const featureMedia = (f, extra = {}) => media({
-    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus,
+    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus, vimeo: f.vimeo,
     meta: extra.meta !== undefined ? extra.meta : `${f.city} · ${f.coords || ''}`,
     ...extra,
   });
@@ -362,6 +362,22 @@
         card.setAttribute('aria-label', `Play ${title}`);
         if (d.duration) $('[data-vimeo-time]', card).textContent = `${Math.floor(d.duration / 60)}:${pad(d.duration % 60)}`;
         if (d.thumbnail_url) $('.k-vimeo__thumb', card).innerHTML = `<img src="${esc(d.thumbnail_url)}" alt="" loading="lazy" decoding="async">`;
+      });
+    });
+  }
+
+  /** Swap placeholder plates for Vimeo thumbnails (stories whose only media is a Vimeo film). */
+  function hydrateCovers(root = document) {
+    $$('[data-vimeo-cover]', root).forEach((plate) => {
+      const f = features.find((x) => x.vimeo && String(x.vimeo.id) === plate.dataset.vimeoCover);
+      if (!f) return;
+      vimeoInfo(f.vimeo).then((d) => {
+        if (!d.thumbnail_url || !plate.isConnected) return;
+        const img = document.createElement('img');
+        img.src = d.thumbnail_url;
+        img.alt = plate.getAttribute('aria-label') || '';
+        img.decoding = 'async';
+        plate.replaceWith(img);
       });
     });
   }
@@ -1068,6 +1084,7 @@
       if (!sel) return;
       container.innerHTML = radioBlock(sel.dataset.radioSelect);
       reveal(container);
+      hydrateCovers(container);
       player.sync();
       wave.draw();
     });
@@ -1464,7 +1481,7 @@
     const f = featureBySlug(slug) || features[0];
     if (!f) return;
 
-    document.title = `${f.title ? `${f.title} — ` : ''}${featureName(f)} · KIOSK`;
+    document.title = `${f.title && f.title !== featureName(f) ? `${f.title} — ` : ''}${featureName(f)} · KIOSK`;
     const desc = $('meta[name="description"]');
     if (desc) desc.setAttribute('content', f.excerpt || f.tagline || '');
 
@@ -1520,7 +1537,7 @@
         ${f.shotOn ? `<div><dt>Shot on</dt><dd>${esc(f.shotOn)}</dd></div>` : ''}
         ${f.lens ? `<div><dt>Lens</dt><dd>${esc(f.lens)}</dd></div>` : ''}
         ${f.runtime ? `<div><dt>Runtime</dt><dd>${esc(f.runtime)}</dd></div>` : ''}
-        <div><dt>Shot</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>
+        ${f.published ? `<div><dt>Shot</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>` : ''}
       </dl>
       ${soundtrack ? `<button class="k-bar" type="button" data-mix-play="${esc(soundtrack.slug)}" style="width:100%;text-align:left"><span>Soundtrack<small>${esc(soundtrack.title)} ${esc(soundtrack.volume)} · KIOSK Radio</small></span><span class="k-arrow" data-ico>${icon.play}</span></button>` : ''}
       ${lut ? `<a class="k-bar" href="vault.html?c=luts#${esc(lut.id)}"><span>Graded with<small>${esc(lut.title)} · ${esc(price(lut))}</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
@@ -1654,7 +1671,7 @@
       datePublished: f.published,
       uploadDate: f.published,
       thumbnailUrl: f.image ? new URL(f.image, location.href).href : undefined,
-      contentLocation: { '@type': 'Place', name: `${f.location}, ${f.city}` },
+      contentLocation: { '@type': 'Place', name: [f.location, f.city].filter(Boolean).join(', ') },
       publisher: { '@type': 'Organization', name: 'KIOSK' },
     });
     ld.id = 'k-ld';
@@ -1809,7 +1826,7 @@
             ${media({ image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus })}
           </a>
           <div class="k-post__body">
-            <p class="k-eyebrow">${pad(posts.length - n)} · ${esc(longDate(f.published))} · ${esc(status)}</p>
+            <p class="k-eyebrow">${[pad(posts.length - n), longDate(f.published), status].filter(Boolean).map(esc).join(' · ')}</p>
             <h2 class="k-h2"><a href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}">${esc(f.title || featureName(f))}</a></h2>
             <p class="k-small">${esc(featureName(f))}${place(f) ? ` · ${esc(place(f))}` : ''}</p>
             <p class="k-body k-mt-s">${esc(f.excerpt || f.tagline || '')}</p>
@@ -1905,6 +1922,7 @@
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
+      hydrateCovers();
     } catch (err) {
       // Never leave a blank page if content has a typo
       console.error('[KIOSK] render error', err);
