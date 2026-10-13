@@ -244,6 +244,26 @@ window.KIOSK_CONTENT = {
         ],
         notes: 'Session 2 stills edited in Lightroom Classic. Footage from both sessions is in the edit.',
         frames: [],
+        // Raw clips (19 April evening, Osmo) played straight from Google Drive.
+        driveClips: [
+          { id: '1jvffEeJc3-3hK8An1i9Q5dPiiqAihHFl', clip: '01', time: '19:38:22' },
+          { id: '1YxOLS0vrDkv_PUtbWDwIWm-bk5zCXL2F', clip: '02', time: '19:43:49' },
+          { id: '1PyNlevKZZ-QiDYdf6-uYzDeymkFTelIr', clip: '03', time: '19:44:37' },
+          { id: '1G6maCGnho1Cr1Pkiw0nllAcZ3yF9oGJv', clip: '04', time: '19:46:16' },
+          { id: '1MrZ33zY6RV1jC-SgdkfvlGCzRImBipHs', clip: '05', time: '19:46:35' },
+          { id: '1Nb0yYGHAJI55O6Eiq330ET3ExzFbgGUe', clip: '06', time: '19:47:42' },
+          { id: '1QJNceOKspGFFfdUHN5HKF_H7SZPwBrPR', clip: '07', time: '19:50:12' },
+          { id: '18I5Db1q9-2cEV4jGQfHg9f4qTxXM23f7', clip: '08', time: '19:52:40' },
+          { id: '1qn26egea9kUqT8z7Cnrnr0yNZHeHtF8I', clip: '09', time: '19:52:40' },
+          { id: '1ePs-eanZxb_p4vqtf8YqINsPEzjMAsvB', clip: '10', time: '19:58:46' },
+          { id: '1CQ2kdEwsmQ1QxyOhnx3BM1NMviAcOW4q', clip: '11', time: '19:59:24' },
+          { id: '195JLW-rzuJg1mDJu-aNSGQGostFmuuB_', clip: '12', time: '20:00:51' },
+          { id: '1t_Kd_Kz4loTA5bNiIbzHfFibUDmA1huC', clip: '13', time: '20:01:33' },
+          { id: '1g39pe_8jBTK-L8jPDEH8wlVy2CkY3wsy', clip: '14', time: '20:02:18' },
+          { id: '15XgZ2zmvw2_vjO_dugVEYFD8s8C--hnr', clip: '15', time: '20:04:05' },
+          { id: '1Li60p-5O-XmQE47m2NPuWSePMsMBaEcM', clip: '16', time: '20:07:40' },
+          { id: '13SFcUhXHtYtVL3gFlhqI0qEY1zfzCACc', clip: '17', time: '20:08:00' }
+        ],
       },
       timeline: [
         { year: '16 Apr 2025', label: 'Night session' },
