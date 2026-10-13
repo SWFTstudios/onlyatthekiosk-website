@@ -11,8 +11,8 @@ The home page and the new sections run on the **KIOSK Glass** design system:
 | `index.html` | Issue home: hero film, Garage rail, films, KIOSK Radio, Vault, Dispatch signup |
 | `garage.html` | Archive of films, photo stories and interviews with filters |
 | `story.html?s=<slug>` | A story page: specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
-| `radio.html` | Phonk DJ mixes and tracklists |
-| `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories (vector mockups), phonk mixes, films and LUT packs |
+| `radio.html` | KIOSK Radio: phonk playlists (Spotify) in a site-wide player with a live waveform |
+| `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories, films and LUT packs |
 
 All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` and styles in `css/kiosk-glass.css`.
 **To add a shoot, film, mix or product, see [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md).**
@@ -157,3 +157,18 @@ Private project - All rights reserved
 - **Website**: https://onlyatthekiosk.com
 - **Store**: https://onlyatthekiosk.com/store
 - **GitHub**: https://github.com/SWFTstudios/onlyatthekiosk-website
+
+
+## Cloudflare Worker (`onlyatthekiosk`)
+
+The site can run as a Cloudflare Worker named **onlyatthekiosk** (`wrangler.jsonc`), deployed from the `main` branch with Workers Builds:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build:worker` |
+| Deploy command | `npx wrangler deploy` |
+| Build variable | `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` (skips a dev-only browser download) |
+
+`npm run build:worker` builds the nav, copies only the public files into `dist/`, and compiles `functions/api/*` into the Worker. Run `npm run deploy:worker` to build and deploy from your own machine (needs `wrangler login`).
+
+The `/api` endpoints need these as Worker **Variables and Secrets** (copy them from the Pages project): `AIRTABLE_ACCESS_TOKEN`, `AIRTABLE_BASE_ID`, `AIRTABLE_ORDERS_TABLE`, `AIRTABLE_PRODUCTS_TABLE`, `SHOPIFY_STORE`, `SHOPIFY_STOREFRONT_TOKEN`, `SHOPIFY_API_VERSION`, `SITE_ORIGIN`, `IMAGE_SYNC_SECRET`, `IMAGE_GEN_API_KEY`, `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL`.

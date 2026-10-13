@@ -1,16 +1,17 @@
 # KIOSK Content Guide
 
-How to publish films, photo stories, interviews, phonk mixes and products on the KIOSK Glass site.
+How to publish films, photo stories, interviews, radio playlists and products on the KIOSK Glass site.
 
 Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no build step. Edit the file, add your media, commit, and Cloudflare Pages deploys it.
 
 | Page | URL | Renders |
 | --- | --- | --- |
 | Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
+| Journal | `journal.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
 | Garage | `garage.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
-| Radio | `radio.html` | Phonk mixes, player, tracklists |
-| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, mixes, films, LUT packs |
+| Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
+| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
 
 The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. In the new nav they appear as **Supply**.
 
@@ -18,7 +19,7 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
 
 ## 1. Add a story (film, photo story or interview)
 
-The first three stories are real shoots from Google Drive › *RollerReels Video Files*: `andy-q50`, `moses-r1m` and `lunar-new-year-meet`. Copy one of them to start a new story.
+The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (`lunar-new-year-meet` is hidden for now).
 
 **Films from Google Drive:** set `embed` to `https://drive.google.com/file/d/<FILE_ID>/preview`. It only plays for visitors once the Drive file is shared as **Anyone with the link → Viewer**. For the best playback, upload to YouTube or Vimeo and use that embed URL instead.
 
@@ -59,6 +60,16 @@ The first three stories are real shoots from Google Drive › *RollerReels Video
 ```
 
 Cards and the hero only need the identity fields (`slug` through `tone`) plus the media. Every other section on the story page is optional, and a section with no data is hidden.
+
+### Blog chapters (dictated)
+Each story is also a Journal post. Its `chapters` start empty and stay hidden from visitors until they have a `body`. Dictate a chapter to Claude and it gets typed in. See **`docs/DICTATION.md`** for every post's chapter list and prompts.
+```js
+author: 'RollerReels',
+chapters: [
+  { id: 'the-car', heading: 'The Q50', prompt: 'What has been done to the car?', body: 'First paragraph…\n\nSecond paragraph…' },
+]
+```
+`type` can be `'car'`, `'motorcycle'` or `'meet'`.
 
 ### Specs (the stat strip)
 ```js
@@ -126,7 +137,7 @@ timeline: [ { year: '1991', label: 'Built in Musashimurayama' }, { year: '2026',
 
 ### Links to Radio and the Vault
 ```js
-soundtrack: 'wangan-drift-vol1',    // slug of a mix → "Soundtrack" button plays it
+soundtrack: 'phonk-n95',           // slug of a mix or playlist → "Soundtrack" button
 gradedWith: 'lut-sodium-night',     // product id → "Graded with" link
 filmProduct: 'film-r32-wangan',     // product id → "Own the film"
 products: ['film-r32-wangan', 'app-hoodies'],   // pinned first in "Shop the look"
@@ -150,25 +161,54 @@ Each card shows the reasons it matched, such as `FALL`, `NIGHT` or `GRADED WITH`
 
 ---
 
-## 3. Add a phonk mix
+## 3. Radio: Spotify playlists (free to listen, nothing for sale)
 
-1. Put the audio in `audio/radio/<slug>.mp3`. Use 320 kbps MP3 for streaming.
-2. Add it to `mixes`:
+Radio plays in a **dock that stays at the bottom of every page**. Once a visitor presses play, links between the KIOSK pages (Home, Garage, Journal, Story, Radio, Shop) load in place, so the music keeps going. Older pages (store, about, contact…) still reload normally, which stops playback. Playing a film pauses the radio.
+
+**Live waveform:** every `<canvas data-wave>` draws the music as it plays: in the dock, on the radio deck, on each playlist card, and in the nav "Radio" pill. For a self-hosted `audio` file, the waveform is the real signal. Spotify doesn't let websites read its audio, so for Spotify playlists the waveform is generated to match a phonk beat, and it starts, stops and seeks with Spotify. Visitors logged in to Spotify hear full tracks; everyone else gets Spotify's 30-second previews.
+
+To add a playlist, copy its share link (`open.spotify.com/playlist/<ID>`) and add an entry to `mixes`:
 ```js
 {
-  slug: 'wangan-drift-vol1', title: 'Wangan Drift', volume: 'Vol. 01',
-  length: '42:10', bpm: '130–140', mood: 'Drift phonk · cowbell · night drive',
-  tone: 'sodium', cover: 'images/radio/wangan-drift.webp',
-  audio: 'audio/radio/wangan-drift-vol1.mp3',
-  product: 'mix-wangan-drift-vol1',     // Vault item for the full download
-  tracks: ['Intro', 'Overpass', '…'],
+  slug: 'phonk-n95', title: 'Phonk nº 95', volume: 'Playlist 01',
+  mood: 'Phonk · curated on Spotify', tone: 'graphite',
+  spotify: '1fO87QEdH8Y3WIVjAjDARS',   // playlist ID
+  cover: '',                            // optional cover image URL
+  length: '', bpm: '', audio: '', tracks: [],
 }
 ```
-While `audio` is empty, the play button shows a "drops soon" message instead of playing.
+For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in the KIOSK player instead of the Spotify embed, and `length`, `bpm` and `tracks` show on the deck.
 
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
 
 ---
+
+## 3a. Magazine layouts: departments, mosaics and rails
+
+The site is organised like a magazine with four **desks**: Travel, Automotive, Music and Fashion.
+
+- **Departments rail** (home page and Journal): one big card per desk.
+- **Mosaic** (home page, Journal archive, and the contact sheet on each story): a Pinterest-style board. It mixes gallery photos, Vimeo films, story palettes, 3D product renders, playlists and pull quotes, with filter chips per desk. Tap a photo to open the photo viewer (← → to browse).
+- **Lookbook rail** (shop): each product colourway next to the shoot whose palette it's named after.
+- **Rails** scroll sideways with drag, arrow buttons or the keyboard.
+
+Each story has a `desk` (`'travel' | 'automotive'`). A single gallery photo can go to a different desk with `desk: 'travel'` on that entry. Products always go under Fashion and playlists under Music.
+
+**Thumbnails:** mosaics load 720px versions from `images/garage/<slug>/thumbs/`. After adding photos, make them with:
+```bash
+for f in images/garage/<slug>/[0-9][0-9].webp; do mkdir -p images/garage/<slug>/thumbs; convert "$f" -resize '720x720>' -strip -quality 72 "images/garage/<slug>/thumbs/$(basename "$f")"; done
+```
+If a thumbnail is missing, the full image is used instead.
+
+## 3b. Films on Vimeo
+
+Vimeo films show in an **On Vimeo** strip on the home page and the Garage. Add the ID from the link (`vimeo.com/<id>`, or `vimeo.com/<id>/<hash>` for an unlisted video):
+```js
+vimeo: [
+  { id: '1212483051', hash: 'f428c5372f', title: '', story: 'andy-q50' },
+]
+```
+The title, thumbnail and length load from Vimeo automatically. `title` overrides Vimeo's title, and `story` adds a "Read the story" link in the player. To use a Vimeo film as a story's main film instead, set that story's `embed` to `https://player.vimeo.com/video/<id>?h=<hash>`. In Vimeo, set the video's embed privacy to allow `onlyatthekiosk.com` (and the `*.pages.dev` preview), or Vimeo won't play it on the site.
 
 ## 4. Add or sell a product (KIOSK Supply)
 
@@ -176,7 +216,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 
 ```js
 {
-  id: 'hoodie-garage', category: 'apparel',   // apparel | headwear | skate | accessories | mixes | films | luts
+  id: 'hoodie-garage', category: 'apparel',   // apparel | headwear | skate | accessories | films | luts
   title: 'Midnight Garage Hoodie', price: 98,
   badge: 'New',                               // tile label: 'New', 'Issue 01' (orange sticker), 'Classic', 'Digital'…
   added: '2026-09-28',                        // used by "Newest" sort and the home "New in" row
@@ -195,14 +235,16 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 }
 ```
 
-**Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `cassette` (mixes), `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
+**Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
 
 **Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
+
+**3D product renders:** tees and hoodies use rendered product shots in `images/shop/3d/<id>-<colourway index>.webp`, set per colourway with `image`. To re-render after changing a print or colour, run `node scripts/render-3d-flat.js <dir>` with the local server on port 8765, then `python3 scripts/render-3d-shade.py <dir>/<id>--<n>.png images/shop/3d/<id>-<n>.webp tee|hoodie`.
 
 **Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
 
 **To start selling a product:**
-1. Create it in Shopify, one product per colourway. For mixes, films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
+1. Create it in Shopify, one product per colourway. For films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
 2. Put each handle on its colourway (`shopifyHandle`) and set `status: 'available'`.
 
 The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, and the existing `product.html` page handles checkout. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.

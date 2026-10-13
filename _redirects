@@ -1,1 +1,1 @@
-/products/:handle  /product.html?handle=:handle  200
+/products/:handle  /product?handle=:handle  200

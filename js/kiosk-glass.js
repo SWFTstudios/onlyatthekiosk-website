@@ -12,7 +12,7 @@
   document.documentElement.classList.remove('no-js');
 
   const C = window.KIOSK_CONTENT || { features: [], mixes: [], products: [], categories: [], issue: {} };
-  const PAGE = document.body.dataset.page || '';
+  let PAGE = document.body.dataset.page || '';
 
   /* ------------------------------------------------------------ utils */
 
@@ -55,7 +55,8 @@
   /* ------------------------------------------------------------ data */
 
   // Lead story first, then newest shoot first
-  const features = (C.features || []).slice().sort((a, b) => {
+  // `hidden: true` keeps a story in the content file but off the site
+  const features = (C.features || []).filter((f) => !f.hidden).sort((a, b) => {
     const lead = (C.issue || {}).lead;
     if (a.slug === lead) return -1;
     if (b.slug === lead) return 1;
@@ -64,12 +65,25 @@
   const featureBySlug = (slug) => features.find((f) => f.slug === slug);
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
+  const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
+  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || (m.spotify ? 'Spotify' : '');
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
   const storyHref = (f) => `story.html?s=${encodeURIComponent(f.slug)}`;
   const featureName = (f) => [f.year, f.make, f.model].filter(Boolean).join(' ');
   const place = (f) => [f.city, f.country].filter(Boolean).join(', ');
-  const typeLabel = (t) => (t === 'motorcycle' ? 'Motorcycle' : 'Car');
+  const typeLabel = (t) => ({ motorcycle: 'Motorcycle', meet: 'Meet' }[t] || 'Car');
+
+  /* Blog helpers: chapters are dictated later; empty ones stay hidden. */
+  const DRAFT = new URLSearchParams(location.search).get('draft') === '1';
+  const written = (f) => (f.chapters || []).filter((c) => (c.body || '').trim());
+  const paragraphs = (text) => String(text || '').split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
+  function readMinutes(f) {
+    const words = (f.story || []).map((b) => `${b.lead || ''} ${b.body || b.text || ''}`)
+      .concat(written(f).map((c) => c.body)).join(' ').split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 220));
+  }
+  const longDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : '');
   const formatLabel = (f) => ({ film: 'Film', gallery: 'Photo story', interview: 'Interview' }[f.format] || 'Story');
   const price = (p) => {
     if (p.price == null) return 'Shop';
@@ -87,8 +101,9 @@
 
   /** Product visual: real photo when present, otherwise a vector mockup. */
   function productVisual(p, cw = 0) {
-    if (p.image) return `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async">`;
     const way = (p.colorways || [])[cw] || {};
+    const src = way.image || p.image;
+    if (src) return `<img class="k-product-img" src="${esc(src)}" alt="${esc(way.name ? `${p.title}, ${way.name}` : p.title)}" loading="lazy" decoding="async">`;
     return window.KioskMockup ? window.KioskMockup.render(p.mockup || { type: 'tee' }, way) : '';
   }
 
@@ -111,7 +126,7 @@
    * tonal "plate" with the subject's code as a ghost watermark.
    */
   function media(opts) {
-    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style, focus } = opts;
+    const { image, video, poster, tone, mark, meta, alt, eager, swatch, cls, style, focus, vimeo } = opts;
     let inner;
     if (video) {
       inner = `<video src="${esc(video)}" ${poster ? `poster="${esc(poster)}"` : ''} muted loop playsinline autoplay preload="metadata"></video>`;
@@ -119,13 +134,13 @@
       inner = `<img src="${esc(image)}" alt="${esc(alt || '')}" loading="${eager ? 'eager' : 'lazy'}" decoding="async"${focus ? ` style="object-position:${esc(focus)}"` : ''}>`;
     } else {
       const style = swatch ? ` style="--a:${esc(swatch)};--c:${esc(swatch)}66"` : '';
-      inner = `<div class="plate plate--${esc(tone || 'graphite')}"${style} role="img" aria-label="${esc(alt || mark || '')}">${mark ? `<span class="plate__mark">${esc(mark)}</span>` : ''}${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}</div>`;
+      inner = `<div class="plate plate--${esc(tone || 'graphite')}"${style}${vimeo && vimeo.id ? ` data-vimeo-cover="${esc(vimeo.id)}"` : ''} role="img" aria-label="${esc(alt || mark || '')}">${mark ? `<span class="plate__mark">${esc(mark)}</span>` : ''}${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}</div>`;
     }
     return `<div class="k-media${cls ? ` ${cls}` : ''}"${style ? ` style="${esc(style)}"` : ''}>${inner}</div>`;
   }
 
   const featureMedia = (f, extra = {}) => media({
-    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus,
+    image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus, vimeo: f.vimeo,
     meta: extra.meta !== undefined ? extra.meta : `${f.city} · ${f.coords || ''}`,
     ...extra,
   });
@@ -134,6 +149,7 @@
 
   const NAV = [
     { id: 'garage', label: 'Garage', href: 'garage.html' },
+    { id: 'journal', label: 'Journal', href: 'journal.html' },
     { id: 'films', label: 'Films', href: 'garage.html?format=film' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
@@ -142,7 +158,7 @@
   function currentNav() {
     const params = new URLSearchParams(location.search);
     if (PAGE === 'garage' && params.get('format') === 'film') return 'films';
-    if (PAGE === 'story') return 'garage';
+    if (PAGE === 'story') return 'journal';
     return PAGE;
   }
 
@@ -157,7 +173,7 @@
         <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span>KIOSK</a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
-          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span>Radio</a>
+          <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas>Radio</a>
           <button class="k-nav__shop" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join</button>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
@@ -209,7 +225,7 @@
             <p class="k-lede k-mt-s">A travel, streetwear and automotive journal. Cars, motorcycles, the people behind them — shot on location, scored in phonk.</p>
           </div>
           <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=mixes">Phonk mixes</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=headwear">Headwear</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -283,6 +299,7 @@
   }
 
   function openFilm(f) {
+    player.pause();   // the film has its own soundtrack
     let screen;
     if (f.embed) {
       const src = f.embed + (f.embed.includes('?') ? '&' : '?') + 'autoplay=1';
@@ -307,6 +324,88 @@
       <div class="k-lightbox__screen">${screen}</div>`, `${featureName(f)} film`);
   }
 
+  /* ------------------------------------------------------------ vimeo */
+
+  const vimeoById = (id) => (C.vimeo || []).find((v) => String(v.id) === String(id));
+  const vimeoPage = (v) => `https://vimeo.com/${encodeURIComponent(v.id)}${v.hash ? `/${encodeURIComponent(v.hash)}` : ''}`;
+  const vimeoSrc = (v) => `https://player.vimeo.com/video/${encodeURIComponent(v.id)}?${v.hash ? `h=${encodeURIComponent(v.hash)}&` : ''}autoplay=1&title=0&byline=0&portrait=0&dnt=1`;
+  const vimeoMeta = new Map();
+
+  /** Title, thumbnail and length from Vimeo's oEmbed endpoint (CORS-enabled, no key). */
+  function vimeoInfo(v) {
+    if (!vimeoMeta.has(v.id)) {
+      vimeoMeta.set(v.id, fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoPage(v))}&width=1280`)
+        .then((r) => (r.ok ? r.json() : {}))
+        .catch(() => ({})));
+    }
+    return vimeoMeta.get(v.id);
+  }
+
+  function vimeoCards() {
+    return (C.vimeo || []).map((v, n) => `
+      <button class="k-vimeo__card k-dark" type="button" data-vimeo="${esc(v.id)}" data-reveal data-reveal-delay="${n % 3}">
+        <span class="k-vimeo__thumb"><span class="plate plate--graphite"></span></span>
+        <span class="k-vimeo__play" aria-hidden="true">${icon.play}</span>
+        <span class="k-vimeo__meta">
+          <span class="k-eyebrow">Film · <span data-vimeo-time>Vimeo</span></span>
+          <b data-vimeo-title>${esc(v.title || 'Loading…')}</b>
+        </span>
+      </button>`).join('');
+  }
+
+  function hydrateVimeo(root) {
+    $$('[data-vimeo]', root).forEach((card) => {
+      const v = vimeoById(card.dataset.vimeo);
+      if (!v) return;
+      vimeoInfo(v).then((d) => {
+        const title = v.title || d.title || 'Film';
+        $('[data-vimeo-title]', card).textContent = title;
+        card.setAttribute('aria-label', `Play ${title}`);
+        if (d.duration) $('[data-vimeo-time]', card).textContent = `${Math.floor(d.duration / 60)}:${pad(d.duration % 60)}`;
+        if (d.thumbnail_url) $('.k-vimeo__thumb', card).innerHTML = `<img src="${esc(d.thumbnail_url)}" alt="" loading="lazy" decoding="async">`;
+      });
+    });
+  }
+
+  /** Swap placeholder plates for Vimeo thumbnails (stories whose only media is a Vimeo film). */
+  function hydrateCovers(root = document) {
+    $$('[data-vimeo-cover]', root).forEach((plate) => {
+      const f = features.find((x) => x.vimeo && String(x.vimeo.id) === plate.dataset.vimeoCover);
+      if (!f) return;
+      vimeoInfo(f.vimeo).then((d) => {
+        if (!d.thumbnail_url || !plate.isConnected) return;
+        const img = document.createElement('img');
+        img.src = d.thumbnail_url;
+        img.alt = plate.getAttribute('aria-label') || '';
+        img.decoding = 'async';
+        plate.replaceWith(img);
+      });
+    });
+  }
+
+  function openVimeo(v) {
+    player.pause();   // the film has its own soundtrack
+    const story = v.story && featureBySlug(v.story);
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">Film · Vimeo</p><p class="k-h3 k-mt-s" data-vimeo-title>${esc(v.title || 'Film')}</p></div>
+        <div class="k-row-flex">
+          ${story ? `<a class="k-btn k-btn--sm" href="${storyHref(story)}">Read the story</a>` : ''}
+          <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+        </div>
+      </div>
+      <div class="k-lightbox__screen"><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
+    vimeoInfo(v).then((d) => { const t = $('.k-lightbox.is-open [data-vimeo-title]'); if (t && !v.title && d.title) t.textContent = d.title; });
+  }
+
+  function fillVimeo(name) {
+    const el = mount(name);
+    if (!el) return;
+    if (!(C.vimeo || []).length) { const sec = el.closest('[data-vimeo-section]'); if (sec) sec.hidden = true; return; }
+    el.innerHTML = vimeoCards();
+    hydrateVimeo(el);
+  }
+
   function openNotify(id, title) {
     openLightbox(`
       <div class="k-glass k-glass--strong" style="max-width:560px;margin:0 auto;padding:clamp(20px,4vw,32px);border-radius:var(--r-xl)">
@@ -315,7 +414,7 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
         ${id === 'dispatch'
-          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, phonk mixes and Supply drops — one email per release.</p>`
+          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists and Supply drops — one email per release.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
         <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
@@ -326,86 +425,452 @@
       </div>`, 'Notify me');
   }
 
-  /* ------------------------------------------------------------ player */
+  /* ------------------------------------------------------------ radio
+   * One player for the whole site, docked at the bottom of every page.
+   *
+   * - A mix with `audio` (a self-hosted MP3) plays through <audio> and the
+   *   waveform is the real signal, read from a Web Audio analyser.
+   * - A mix with `spotify` plays through Spotify's IFrame API. Spotify never
+   *   exposes its audio to the page, so that waveform is synthesised: a
+   *   140 BPM phonk pattern (808, cowbell, hats) that starts, stops and seeks
+   *   with Spotify's own playback updates.
+   *
+   * Every <canvas data-wave> on the page is drawn from the same signal.
+   * data-wave="<slug>" only moves while that mix is the one playing.
+   * While the radio is on, internal links load in place (see softNavigate)
+   * so the music keeps going from page to page.
+   * -------------------------------------------------------------------- */
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const wave = {
+    bins: new Float32Array(64),
+    level: 0,
+    raf: 0,
+    analyser: null,
+    freq: null,
+    silentFrames: 0,
+    clock: { position: 0, at: 0 },     // Spotify position (ms) at performance.now()
+
+    /** Synthesised spectrum for Spotify: kick + 808 lows, cowbell mids, hat highs. */
+    synth(now) {
+      const pos = player.playing ? this.clock.position + (now - this.clock.at) : this.clock.position;
+      const beat = 60000 / 140;
+      const ph = (pos % beat) / beat;
+      const off = ((pos + beat / 2) % beat) / beat;
+      const sixteenth = ((pos % (beat / 4)) / (beat / 4));
+      const bar = Math.floor(pos / (beat * 4));
+      const kick = Math.exp(-ph * 6);
+      const sub = Math.exp(-ph * 1.8) * 0.85;
+      const cow = (Math.floor(pos / beat) % 2 ? 1 : 0.55) * Math.exp(-off * 10);
+      const hat = Math.exp(-sixteenth * 14) * (0.5 + 0.5 * ((Math.floor(pos / (beat / 4)) + bar) % 3 ? 0.6 : 1));
+      const n = this.bins.length;
+      for (let i = 0; i < n; i += 1) {
+        const x = i / (n - 1);
+        const low = Math.max(0, 1 - x * 3.2) * (0.55 * kick + 0.45 * sub);
+        const mid = Math.exp(-((x - 0.42) ** 2) / 0.012) * cow * 0.9;
+        const high = Math.max(0, x - 0.55) * 1.8 * hat;
+        const shimmer = 0.12 + 0.1 * Math.sin(now / 170 + i * 1.7) * Math.sin(now / 410 + i * 0.6);
+        this.bins[i] = Math.min(1, 1.35 * (low + mid + high + shimmer * (1 - x * 0.5)) * (0.9 + 0.1 * Math.sin(i * 12.9898 + pos / 90)));
+      }
+    },
+
+    /** Real spectrum from the analyser, log-spaced into bins. */
+    sample() {
+      if (!this.analyser) return false;
+      this.analyser.getByteFrequencyData(this.freq);
+      const n = this.bins.length;
+      const len = this.freq.length;
+      let total = 0;
+      for (let i = 0; i < n; i += 1) {
+        const a = Math.floor(2 * (len / 2) ** (i / n));
+        const b = Math.max(a + 1, Math.floor(2 * (len / 2) ** ((i + 1) / n)));
+        let sum = 0;
+        for (let k = a; k < b && k < len; k += 1) sum += this.freq[k];
+        const v = sum / (b - a) / 255;
+        this.bins[i] = v;
+        total += v;
+      }
+      // Cross-origin audio without CORS reads as silence: fall back to the synth
+      this.silentFrames = total === 0 ? this.silentFrames + 1 : 0;
+      return this.silentFrames < 90;
+    },
+
+    start() {
+      if (!this.raf) this.raf = requestAnimationFrame((t) => this.frame(t));
+    },
+
+    frame(now) {
+      this.raf = 0;
+      const target = player.playing && !player.buffering ? 1 : 0;
+      this.level += (target - this.level) * (target ? 0.08 : 0.06);
+      if (!(player.source === 'audio' && this.sample())) this.synth(now);
+      this.draw();
+      if (player.playing || this.level > 0.004) this.start();
+      else { this.level = 0; this.draw(); }
+    },
+
+    draw() {
+      $$('canvas[data-wave]').forEach((c) => {
+        const w = c.clientWidth;
+        const h = c.clientHeight;
+        if (!w || !h) return;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+          c.width = Math.round(w * dpr);
+          c.height = Math.round(h * dpr);
+        }
+        const ctx = c.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        const mine = !c.dataset.wave || c.dataset.wave === (player.mix && player.mix.slug);
+        const level = mine ? (REDUCED ? this.level * 0.35 : this.level) : 0;
+        const gap = Number(c.dataset.waveGap || 3);
+        const barW = Number(c.dataset.waveBar || 2);
+        const count = Math.max(4, Math.floor((w + gap) / (barW + gap)));
+        const mid = h / 2;
+        ctx.fillStyle = getComputedStyle(c).color;
+        for (let i = 0; i < count; i += 1) {
+          // Mirror the spectrum so lows sit in the middle, like a stereo meter
+          const t = Math.abs(i / (count - 1) - 0.5) * 2;
+          const v = this.bins[Math.min(this.bins.length - 1, Math.floor(t * (this.bins.length - 1)))];
+          const amp = Math.max(1, v * level * (h - 2));
+          ctx.globalAlpha = 0.35 + 0.65 * Math.min(1, v * level * 1.4 + 0.1);
+          const x = i * (barW + gap);
+          const r = Math.min(barW / 2, amp / 2);
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x, mid - amp / 2, barW, amp, r); else ctx.rect(x, mid - amp / 2, barW, amp);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      });
+    },
+
+    connect(audio) {
+      if (this.analyser) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try {
+        const ctx = new AC();
+        const src = ctx.createMediaElementSource(audio);
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 1024;
+        this.analyser.smoothingTimeConstant = 0.78;
+        this.freq = new Uint8Array(this.analyser.frequencyBinCount);
+        src.connect(this.analyser);
+        this.analyser.connect(ctx.destination);
+        this.ctx = ctx;
+      } catch (err) { this.analyser = null; }
+    },
+  };
+
+  const spotify = {
+    api: null,
+    ctrl: null,
+    uri: '',
+    wantPlay: false,
+    loading: null,
+    load() {
+      if (this.loading) return this.loading;
+      this.loading = new Promise((resolve) => {
+        window.onSpotifyIframeApiReady = (api) => { this.api = api; resolve(api); };
+        const s = document.createElement('script');
+        s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+        s.async = true;
+        s.onerror = () => resolve(null);
+        document.head.append(s);
+      });
+      return this.loading;
+    },
+    async open(mix, slot) {
+      const api = await this.load();
+      if (!api) return false;
+      const uri = `spotify:playlist:${mix.spotify}`;
+      this.wantPlay = true;
+      if (this.ctrl) {
+        if (this.uri !== uri) { this.uri = uri; this.ctrl.loadUri(uri); } else this.ctrl.resume();
+        setTimeout(() => { if (this.wantPlay) this.ctrl.play(); }, 600);
+        return true;
+      }
+      this.uri = uri;
+      await new Promise((resolve) => {
+        api.createController(slot, { uri, width: '100%', height: 352 }, (ctrl) => {
+          this.ctrl = ctrl;
+          ctrl.addListener('ready', () => { if (this.wantPlay) ctrl.play(); resolve(); });
+          ctrl.addListener('playback_update', (e) => player.onSpotify(e.data || {}));
+          setTimeout(resolve, 4000);
+        });
+      });
+      return true;
+    },
+  };
 
   const player = {
-    audio: null,
     el: null,
     mix: null,
+    source: '',          // 'audio' | 'spotify'
+    playing: false,
+    buffering: false,
+    audio: null,
+
+    active() { return !!(this.el && this.el.classList.contains('is-visible')); },
+
     ensure() {
       if (this.el) return;
-      this.audio = new Audio();
-      this.audio.preload = 'none';
-      this.el = document.createElement('div');
-      this.el.className = 'k-player';
+      this.el = document.createElement('section');
+      this.el.className = 'k-dock k-dark';
       this.el.setAttribute('aria-label', 'KIOSK Radio player');
       this.el.innerHTML = `
-        <button class="k-player__btn" type="button" data-player-toggle aria-label="Pause">${icon.pause}</button>
-        <div class="k-player__info">
-          <div class="k-player__title"></div>
-          <div class="k-player__bar" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="k-player__fill"></div></div>
+        <div class="k-dock__panel" id="k-dock-panel" aria-hidden="true">
+          <div class="k-dock__embed"><div data-spotify-slot></div></div>
+          <p class="k-dock__note k-small">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
         </div>
-        <span class="k-player__time">0:00</span>
-        <button class="k-player__close" type="button" data-player-close aria-label="Close player">${icon.close}</button>`;
+        <div class="k-dock__bar">
+          <button class="k-dock__btn" type="button" data-dock-toggle aria-label="Play">${icon.play}</button>
+          <div class="k-dock__info">
+            <span class="k-dock__eyebrow"><span class="k-live" aria-hidden="true"></span>KIOSK Radio</span>
+            <b class="k-dock__title"></b>
+          </div>
+          <canvas class="k-dock__wave" data-wave aria-hidden="true"></canvas>
+          <span class="k-dock__time" aria-live="off"></span>
+          <button class="k-dock__icon" type="button" data-dock-expand aria-expanded="false" aria-controls="k-dock-panel" aria-label="Show tracklist">${icon.arrow}</button>
+          <button class="k-dock__icon" type="button" data-dock-close aria-label="Close player">${icon.close}</button>
+          <div class="k-dock__progress" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><i></i></div>
+        </div>`;
       document.body.append(this.el);
-
-      const fmt = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}` : '0:00');
-      this.audio.addEventListener('timeupdate', () => {
-        const pct = this.audio.duration ? (this.audio.currentTime / this.audio.duration) * 100 : 0;
-        $('.k-player__fill', this.el).style.width = `${pct}%`;
-        $('.k-player__bar', this.el).setAttribute('aria-valuenow', String(Math.round(pct)));
-        $('.k-player__time', this.el).textContent = fmt(this.audio.currentTime);
-      });
-      this.audio.addEventListener('play', () => this.sync());
-      this.audio.addEventListener('pause', () => this.sync());
-      this.audio.addEventListener('error', () => { toast('This mix couldn’t be loaded.'); this.sync(); });
-      $('[data-player-toggle]', this.el).addEventListener('click', () => (this.audio.paused ? this.audio.play() : this.audio.pause()));
-      $('[data-player-close]', this.el).addEventListener('click', () => { this.audio.pause(); this.el.classList.remove('is-visible'); });
-      const bar = $('.k-player__bar', this.el);
+      $('[data-dock-toggle]', this.el).addEventListener('click', () => this.toggle());
+      $('[data-dock-expand]', this.el).addEventListener('click', () => this.expand(!this.el.classList.contains('is-expanded')));
+      $('[data-dock-close]', this.el).addEventListener('click', () => this.close());
+      const bar = $('.k-dock__progress', this.el);
       bar.addEventListener('click', (e) => {
-        if (!this.audio.duration) return;
+        if (!this.audio || !this.audio.duration) return;
         const r = bar.getBoundingClientRect();
         this.audio.currentTime = ((e.clientX - r.left) / r.width) * this.audio.duration;
       });
       bar.addEventListener('keydown', (e) => {
-        if (!this.audio.duration) return;
+        if (!this.audio || !this.audio.duration) return;
         if (e.key === 'ArrowRight') this.audio.currentTime = Math.min(this.audio.duration, this.audio.currentTime + 10);
         if (e.key === 'ArrowLeft') this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
       });
     },
-    play(slug) {
+
+    show(mix) {
+      this.ensure();
+      this.mix = mix;
+      $('.k-dock__title', this.el).textContent = `${mix.title}${mix.volume ? ` · ${mix.volume}` : ''}`;
+      this.el.classList.add('is-visible');
+      document.body.classList.add('is-radio-on');
+    },
+
+    expand(open) {
+      if (!this.el) return;
+      this.el.classList.toggle('is-expanded', open);
+      $('#k-dock-panel', this.el).setAttribute('aria-hidden', String(!open));
+      $('[data-dock-expand]', this.el).setAttribute('aria-expanded', String(open));
+    },
+
+    async play(slug) {
       const mix = mixBySlug(slug);
       if (!mix) return;
-      if (!mix.audio) {
-        toast(`${mix.title} ${mix.volume} drops soon — join the Dispatch to hear it first.`);
-        return;
-      }
-      this.ensure();
-      if (this.mix !== mix) {
-        this.mix = mix;
+      if (this.mix === mix && this.active()) { this.toggle(); return; }
+      if (!mix.audio && !mix.spotify) { toast(`${mix.title} drops soon.`); return; }
+      this.pauseAll();
+      this.show(mix);
+      if (mix.audio) {
+        this.source = 'audio';
+        if (!this.audio) this.bindAudio();
+        // Remote audio needs CORS for the analyser to read it (R2/Bunny: allow this origin)
+        if (new URL(mix.audio, location.href).origin !== location.origin) this.audio.crossOrigin = 'anonymous';
+        else this.audio.removeAttribute('crossorigin');
         this.audio.src = mix.audio;
-        $('.k-player__title', this.el).innerHTML = `${esc(mix.title)} <span>· ${esc(mix.volume)} · KIOSK Radio</span>`;
+        wave.connect(this.audio);
+        if (wave.ctx && wave.ctx.state === 'suspended') wave.ctx.resume();
+        $('.k-dock__progress', this.el).hidden = false;
+        this.el.classList.remove('has-embed');
+        this.audio.play().catch(() => {});
+      } else {
+        this.source = 'spotify';
+        $('.k-dock__progress', this.el).hidden = true;
+        this.el.classList.add('has-embed');
+        this.buffering = true;
+        this.sync();
+        const slot = $('[data-spotify-slot]', this.el) || $('.k-dock__embed iframe', this.el);
+        // Open the tracklist so the Spotify play button is right there if the
+        // browser blocks autoplay; it folds away once music starts.
+        this.expand(true);
+        const ok = await spotify.open(mix, slot);
+        if (!ok) {
+          this.buffering = false;
+          toast('Spotify couldn’t load. Opening it in a new tab.');
+          window.open(spotifyUrl(mix), '_blank', 'noopener');
+        }
       }
-      this.el.classList.add('is-visible');
-      if (this.audio.paused) this.audio.play().catch(() => {}); else this.audio.pause();
+      this.sync();
     },
-    isPlaying(slug) { return !!(this.mix && this.mix.slug === slug && this.audio && !this.audio.paused); },
+
+    bindAudio() {
+      this.audio = new Audio();
+      this.audio.preload = 'none';
+      const fmt = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}` : '0:00');
+      this.audio.addEventListener('timeupdate', () => {
+        const pct = this.audio.duration ? (this.audio.currentTime / this.audio.duration) * 100 : 0;
+        $('.k-dock__progress i', this.el).style.width = `${pct}%`;
+        $('.k-dock__progress', this.el).setAttribute('aria-valuenow', String(Math.round(pct)));
+        $('.k-dock__time', this.el).textContent = fmt(this.audio.currentTime);
+      });
+      this.audio.addEventListener('play', () => { this.playing = true; this.buffering = false; this.sync(); });
+      this.audio.addEventListener('pause', () => { this.playing = false; this.sync(); });
+      this.audio.addEventListener('waiting', () => { this.buffering = true; this.sync(); });
+      this.audio.addEventListener('playing', () => { this.buffering = false; this.sync(); });
+      this.audio.addEventListener('error', () => { toast('This mix couldn’t be loaded.'); this.playing = false; this.sync(); });
+    },
+
+    onSpotify(d) {
+      if (this.source !== 'spotify') return;
+      const was = this.playing;
+      this.playing = d.isPaused === false;
+      this.buffering = !!d.isBuffering;
+      wave.clock = { position: d.position || 0, at: performance.now() };
+      if (this.playing) spotify.wantPlay = false;
+      if (this.playing && !was && this.el.classList.contains('is-expanded') && !this.userExpanded) {
+        setTimeout(() => this.expand(false), 1200);
+      }
+      const fmt = (ms) => `${Math.floor(ms / 60000)}:${pad(Math.floor((ms / 1000) % 60))}`;
+      $('.k-dock__time', this.el).textContent = d.duration ? `${fmt(d.position || 0)} / ${fmt(d.duration)}` : '';
+      this.sync();
+    },
+
+    toggle() {
+      if (this.source === 'audio' && this.audio) {
+        if (this.audio.paused) { if (wave.ctx) wave.ctx.resume(); this.audio.play().catch(() => {}); } else this.audio.pause();
+      } else if (this.source === 'spotify' && spotify.ctrl) {
+        spotify.ctrl.togglePlay();
+      }
+    },
+
+    pause() {
+      if (this.audio && !this.audio.paused) this.audio.pause();
+      if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
+    },
+
+    pauseAll() {
+      if (this.audio) this.audio.pause();
+      if (spotify.ctrl) spotify.ctrl.pause();
+      this.playing = false;
+    },
+
+    close() {
+      this.pauseAll();
+      this.expand(false);
+      this.el.classList.remove('is-visible');
+      document.body.classList.remove('is-radio-on');
+      this.sync();
+    },
+
+    isPlaying(slug) { return !!(this.mix && this.mix.slug === slug && this.playing); },
+
     sync() {
       if (this.el) {
-        const btn = $('[data-player-toggle]', this.el);
-        const playing = !this.audio.paused;
-        btn.innerHTML = playing ? icon.pause : icon.play;
-        btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        const btn = $('[data-dock-toggle]', this.el);
+        btn.innerHTML = this.playing ? icon.pause : icon.play;
+        btn.setAttribute('aria-label', this.playing ? 'Pause' : 'Play');
+        this.el.classList.toggle('is-playing', this.playing);
+        this.el.classList.toggle('is-buffering', this.buffering && !this.playing);
       }
+      document.body.classList.toggle('is-radio-playing', this.playing);
       $$('[data-mix-play]').forEach((b) => {
         const on = this.isPlaying(b.dataset.mixPlay);
         b.setAttribute('aria-pressed', String(on));
         const ico = $('[data-ico]', b);
         if (ico) ico.innerHTML = on ? icon.pause : icon.play;
+        const label = $('[data-label]', b);
+        if (label) label.textContent = on ? 'Pause' : 'Play';
       });
       $$('[data-radio-deck]').forEach((d) => d.classList.toggle('is-playing', this.isPlaying(d.dataset.radioDeck)));
+      wave.start();
     },
   };
+
+  /* ---------------------------------------------------- soft navigation
+   * While the radio is on, links to KIOSK Glass pages swap <main> in place
+   * instead of reloading, so the dock (and the music) survive navigation.
+   * Anything else (legacy pages, other sites, new tabs) navigates normally.
+   * -------------------------------------------------------------------- */
+
+  const SOFT_PAGES = new Set(['', 'index', 'garage', 'journal', 'story', 'radio', 'vault']);
+  let pageAbort = new AbortController();
+  let renderedKey = location.pathname + location.search;
+
+  function softUrl(a) {
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.dataset.hard != null) return null;
+    const url = new URL(a.getAttribute('href'), location.href);
+    if (url.origin !== location.origin) return null;
+    const file = url.pathname.split('/').pop().replace(/\.html$/, '');
+    if (!SOFT_PAGES.has(file)) return null;
+    if (url.pathname + url.search === location.pathname + location.search && url.hash) return null;
+    return url;
+  }
+
+  function markNav() {
+    const cur = currentNav();
+    $$('.k-nav__links a, .k-sheet__links a').forEach((a) => {
+      const item = NAV.find((n) => n.href === a.getAttribute('href'));
+      if (item && item.id === cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+  }
+
+  async function softNavigate(href, push) {
+    let doc;
+    try {
+      const res = await fetch(href, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(String(res.status));
+      doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+    } catch (err) { location.href = href; return; }
+    const next = doc.body && doc.body.dataset.page;
+    const main = doc.querySelector('main');
+    if (!PAGES[next] || !main) { location.href = href; return; }
+
+    pageAbort.abort();
+    pageAbort = new AbortController();
+    if (push) history.pushState({ kiosk: true }, '', href);
+    renderedKey = location.pathname + location.search;
+    document.title = doc.title;
+    const desc = doc.querySelector('meta[name="description"]');
+    const here = $('meta[name="description"]');
+    if (desc && here) here.setAttribute('content', desc.getAttribute('content'));
+    document.body.dataset.page = next;
+    PAGE = next;
+    const lb = $('.k-lightbox.is-open');
+    if (lb) closeLightbox();
+
+    $('main').replaceWith(document.importNode(main, true));
+    markNav();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    runPage();
+    reveal();
+    player.sync();
+    const hash = new URL(href, location.href).hash;
+    const target = hash && document.getElementById(hash.slice(1));
+    if (target) target.scrollIntoView({ block: 'start' });
+    const m = $('main');
+    if (m) { m.setAttribute('tabindex', '-1'); m.focus({ preventScroll: true }); }
+    if (typeof window.gtag === 'function') window.gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
+  }
+
+  function bindSoftNav() {
+    document.addEventListener('click', (e) => {
+      if (!player.active() || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const url = softUrl(e.target.closest('a[href]'));
+      if (!url) return;
+      e.preventDefault();
+      softNavigate(url.href, true);
+    });
+    window.addEventListener('popstate', () => {
+      if (location.pathname + location.search === renderedKey) return;   // hash-only change
+      if (!player.active()) { location.reload(); return; }
+      softNavigate(location.href, false);
+    });
+  }
 
   /* ------------------------------------------------------------ saves */
 
@@ -574,42 +1039,30 @@
 
   /* ------------------------------------------------------------ radio */
 
-  function waveBars(seed, n = 64) {
-    let h = hash(seed);
-    let out = '';
-    for (let i = 0; i < n; i += 1) {
-      h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
-      const env = Math.sin((i / n) * Math.PI) * 0.6 + 0.4;
-      const v = Math.max(0.12, ((h % 1000) / 1000) * env);
-      out += `<i style="height:${(v * 100).toFixed(1)}%;animation-delay:${((h % 900) / 1000).toFixed(2)}s"${i < n * 0.35 ? ' class="is-on"' : ''}></i>`;
-    }
-    return out;
-  }
+  /** The play / pause button used wherever a mix appears. */
+  const mixButton = (m, cls = 'k-btn k-btn--solid') => `<button class="${cls}" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="${player.isPlaying(m.slug)}"><span data-ico style="display:inline-grid;width:12px">${player.isPlaying(m.slug) ? icon.pause : icon.play}</span> <span data-label>${player.isPlaying(m.slug) ? 'Pause' : 'Play'}</span></button>`;
 
   function radioBlock(activeSlug) {
     const mixes = C.mixes || [];
     if (!mixes.length) return '';
-    const m = mixBySlug(activeSlug) || mixes[0];
-    const product = productById(m.product);
+    const m = mixBySlug(activeSlug) || (player.mix && mixBySlug(player.mix.slug)) || mixes[0];
     return `
       <div class="k-radio">
-        <div class="k-radio__deck k-glass" data-radio-deck="${esc(m.slug)}" data-reveal>
+        <div class="k-radio__deck k-glass${player.isPlaying(m.slug) ? ' is-playing' : ''}" data-radio-deck="${esc(m.slug)}" data-reveal>
           <div class="plate plate--${esc(m.tone)}"></div>
           <div class="k-row-flex" style="justify-content:space-between">
             <span class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>KIOSK Radio</b> · ${esc(m.volume)}</span>
-            <span class="k-eyebrow">${esc(m.bpm)} BPM · ${esc(m.length)}</span>
+            <span class="k-eyebrow">${esc(mixMeta(m))}</span>
           </div>
           <div>
             <h3 class="k-radio__now">${esc(m.title)} <span class="k-serif" style="opacity:.6">${esc(m.volume)}</span></h3>
             <p class="k-radio__mood">${esc(m.mood)}</p>
           </div>
-          <div class="k-wave" aria-hidden="true">${waveBars(m.slug)}</div>
+          <canvas class="k-radio__wave" data-wave="${esc(m.slug)}" data-wave-bar="3" data-wave-gap="3" aria-hidden="true"></canvas>
           <div class="k-radio__controls">
-            <button class="k-round" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false" aria-label="Play ${esc(m.title)}"><span data-ico>${icon.play}</span></button>
-            ${product ? (productHref(product)
-              ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
-              : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
-            <span class="k-small">${esc((m.tracks || []).length)} tracks</span>
+            ${mixButton(m)}
+            ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>` : ''}
+            ${(m.tracks || []).length ? `<span class="k-small">${esc(m.tracks.length)} tracks</span>` : ''}
           </div>
         </div>
         <div class="k-radio__list k-glass" data-reveal data-reveal-delay="1">
@@ -618,9 +1071,9 @@
             <button class="k-radio__item${x.slug === m.slug ? ' is-active' : ''}" type="button" data-radio-select="${esc(x.slug)}">
               <span class="k-radio__cover">${media({ image: x.cover, tone: x.tone, mark: '' })}</span>
               <span><b>${esc(x.title)}</b><small>${esc(x.volume)} · ${esc(x.mood)}</small></span>
-              <span class="k-mono">${esc(x.length)}</span>
+              <span class="k-mono">${esc(x.length || (x.spotify ? 'Spotify' : ''))}</span>
             </button>`).join('')}
-          <div style="padding:10px"><a class="k-bar" href="radio.html">All mixes + tracklists<span class="k-arrow">${icon.arrow}</span></a></div>
+          <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists<span class="k-arrow">${icon.arrow}</span></a></div>
         </div>
       </div>`;
   }
@@ -632,7 +1085,9 @@
       if (!sel) return;
       container.innerHTML = radioBlock(sel.dataset.radioSelect);
       reveal(container);
+      hydrateCovers(container);
       player.sync();
+      wave.draw();
     });
   }
 
@@ -739,11 +1194,13 @@
       const qv = e.target.closest('[data-quickview]');
       if (qv) {
         const card = qv.closest('[data-product]');
-        openQuickView(qv.dataset.quickview, card ? Number(card.dataset.cw || 0) : 0);
+        openQuickView(qv.dataset.quickview, qv.dataset.cw != null ? Number(qv.dataset.cw) : card ? Number(card.dataset.cw || 0) : 0);
         return;
       }
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save, save); return; }
+      const vim = e.target.closest('[data-vimeo]');
+      if (vim) { const v = vimeoById(vim.dataset.vimeo); if (v) openVimeo(v); return; }
       const film = e.target.closest('[data-film]');
       if (film) { const f = featureBySlug(film.dataset.film); if (f) openFilm(f); return; }
       const notify = e.target.closest('[data-notify]');
@@ -838,6 +1295,11 @@
         </div>`);
       fill('films-rows', films.slice(0, 5).map(filmRow).join(''));
     }
+    fillVimeo('films-vimeo');
+
+    // Magazine: departments rail + mosaic board
+    fill('departments', railShell(departmentsHtml(), 'Departments', 'k-hscroll-wrap--depts'));
+    fillMosaic('home-mosaic', mosaicItems(null, 24), { label: 'The Mosaic' });
 
     // Radio
     const radio = fill('radio', radioBlock((C.mixes || [])[0] && C.mixes[0].slug));
@@ -856,6 +1318,7 @@
   /* ----------------------------------------------------------- garage */
 
   function pageGarage() {
+    fillVimeo('garage-vimeo');
     const params = new URLSearchParams(location.search);
     const state = {
       q: params.get('q') || '',
@@ -886,7 +1349,7 @@
       <div class="k-filter">
         <span class="k-filter__label">Machine</span>
         <div class="k-seg" data-group="type">
-          ${[['all', 'Any'], ['car', 'Cars'], ['motorcycle', 'Motorcycles']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${state.type === v}">${l}</button>`).join('')}
+          ${[['all', 'Any'], ['car', 'Cars'], ['motorcycle', 'Motorcycles'], ['meet', 'Meets']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${state.type === v}">${l}</button>`).join('')}
         </div>
       </div>
       <div class="k-filter">
@@ -1009,7 +1472,7 @@
     });
 
     // Saved toggles should refresh the list when filtering by saved
-    document.addEventListener('click', (e) => { if (state.saved && e.target.closest('[data-save]')) setTimeout(render, 0); });
+    document.addEventListener('click', (e) => { if (state.saved && e.target.closest('[data-save]')) setTimeout(render, 0); }, { signal: pageAbort.signal });
 
     const head = mount('garage-title');
     if (head && state.format === 'film') head.innerHTML = '<span>Films,</span><span>scored in <em class="k-serif">phonk.</em></span>';
@@ -1023,7 +1486,7 @@
     const f = featureBySlug(slug) || features[0];
     if (!f) return;
 
-    document.title = `${f.title ? `${f.title} — ` : ''}${featureName(f)} · KIOSK`;
+    document.title = `${f.title && f.title !== featureName(f) ? `${f.title} — ` : ''}${featureName(f)} · KIOSK`;
     const desc = $('meta[name="description"]');
     if (desc) desc.setAttribute('content', f.excerpt || f.tagline || '');
 
@@ -1079,7 +1542,7 @@
         ${f.shotOn ? `<div><dt>Shot on</dt><dd>${esc(f.shotOn)}</dd></div>` : ''}
         ${f.lens ? `<div><dt>Lens</dt><dd>${esc(f.lens)}</dd></div>` : ''}
         ${f.runtime ? `<div><dt>Runtime</dt><dd>${esc(f.runtime)}</dd></div>` : ''}
-        <div><dt>Shot</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>
+        ${f.published ? `<div><dt>Shot</dt><dd>${esc(new Date(`${f.published}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }))}</dd></div>` : ''}
       </dl>
       ${soundtrack ? `<button class="k-bar" type="button" data-mix-play="${esc(soundtrack.slug)}" style="width:100%;text-align:left"><span>Soundtrack<small>${esc(soundtrack.title)} ${esc(soundtrack.volume)} · KIOSK Radio</small></span><span class="k-arrow" data-ico>${icon.play}</span></button>` : ''}
       ${lut ? `<a class="k-bar" href="vault.html?c=luts#${esc(lut.id)}"><span>Graded with<small>${esc(lut.title)} · ${esc(price(lut))}</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
@@ -1095,7 +1558,26 @@
     }).join('');
     const ownerQuote = f.owner && f.owner.quote && !(f.story || []).some((b) => b.type === 'quote')
       ? `<blockquote class="k-prose__quote" data-reveal><p>“${esc(f.owner.quote)}”</p><cite>— ${esc(f.owner.name)}</cite></blockquote>` : '';
-    fill('story-body', (blocks + ownerQuote) || `<p class="k-prose__text"><strong>${esc(f.tagline)}</strong> ${esc(f.excerpt || '')}</p>`);
+    const done = written(f);
+    const chapters = (f.chapters || []).map((c, n) => {
+      const body = paragraphs(c.body);
+      if (body.length) {
+        return `<section class="k-chapter" id="${esc(c.id)}" data-reveal>
+          <p class="k-chapter__num">Chapter ${pad(n + 1)}</p>
+          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
+          ${body.map((t) => `<p class="k-prose__text">${esc(t)}</p>`).join('')}
+        </section>`;
+      }
+      return DRAFT ? `<section class="k-chapter k-chapter--draft" id="${esc(c.id)}">
+          <p class="k-chapter__num">Chapter ${pad(n + 1)} · <code>${esc(c.id)}</code> · not written yet</p>
+          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
+          <p class="k-prose__text">${esc(c.prompt || '')}</p>
+        </section>` : '';
+    }).join('');
+    const pending = (f.chapters || []).length - done.length;
+    const byline = `<p class="k-byline">By ${esc(f.author || 'KIOSK')}${f.published ? ` · ${esc(longDate(f.published))}` : ''} · ${readMinutes(f)} min read${DRAFT ? ` · <b>Draft view: ${done.length} of ${(f.chapters || []).length} chapters written</b>` : ''}</p>`;
+    const more = !DRAFT && pending > 0 ? `<p class="k-small k-chapter__more">${done.length ? 'More chapters' : 'The full story'} coming soon, told by ${esc(f.author || 'KIOSK')}.</p>` : '';
+    fill('story-body', byline + ((blocks + ownerQuote) || `<p class="k-prose__text"><strong>${esc(f.tagline)}</strong> ${esc(f.excerpt || '')}</p>`) + chapters + more);
 
     // TIMELINE
     const tl = f.timeline || [];
@@ -1164,6 +1646,12 @@
       fill('story-look-why', `Matched to this story’s ${[f.season, ...(f.vibes || []).slice(0, 2)].filter(Boolean).map(esc).join(', ')} mood and colour guide.`);
     } else hideSection('look');
 
+    // CONTACT SHEET + KEEP READING
+    fillMosaic('story-mosaic', mosaicItems(f.slug), { filters: false, label: 'Contact sheet' });
+    const others = features.filter((x) => x !== f);
+    if (others.length) fill('story-more', railShell(others.map(featureCard).join(''), 'More stories', 'k-hscroll-wrap--cards'));
+    else { const m = mount('story-more'); if (m) m.closest('section').hidden = true; }
+
     // PREV / NEXT
     const idx = features.indexOf(f);
     const prev = features[(idx - 1 + features.length) % features.length];
@@ -1180,7 +1668,7 @@
       if (!g) return;
       const ss = mount('story-slideshow');
       if (ss && ss.kGoto) { ss.kGoto(Number(g.dataset.gotoSlide)); ss.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    });
+    }, { signal: pageAbort.signal });
 
     // JSON-LD for search engines
     const ld = document.createElement('script');
@@ -1194,9 +1682,12 @@
       datePublished: f.published,
       uploadDate: f.published,
       thumbnailUrl: f.image ? new URL(f.image, location.href).href : undefined,
-      contentLocation: { '@type': 'Place', name: `${f.location}, ${f.city}` },
+      contentLocation: { '@type': 'Place', name: [f.location, f.city].filter(Boolean).join(', ') },
       publisher: { '@type': 'Organization', name: 'KIOSK' },
     });
+    ld.id = 'k-ld';
+    const oldLd = document.getElementById('k-ld');
+    if (oldLd) oldLd.remove();
     document.head.append(ld);
   }
 
@@ -1237,6 +1728,7 @@
     let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const show = (n) => {
+      if (!root.isConnected) { clearTimeout(timer); return; }   // page was swapped out
       i = (n + slides.length) % slides.length;
       slideEls.forEach((el, k) => { el.classList.toggle('is-active', k === i); el.setAttribute('aria-hidden', String(k !== i)); });
       bars.forEach((b, k) => {
@@ -1306,24 +1798,347 @@
     bindRadio(deck);
     fill('tracklists', (C.mixes || []).map((m, n) => {
       const used = features.filter((f) => f.soundtrack === m.slug);
-      const product = productById(m.product);
       return `
-        <article class="k-glass" style="padding:clamp(20px,3vw,28px);border-radius:var(--r-xl)" data-reveal>
-          <div class="k-row-flex" style="justify-content:space-between">
-            <p class="k-eyebrow">${pad(n + 1)} / ${esc(m.volume)}</p>
-            <p class="k-eyebrow">${esc(m.length)} · ${esc(m.bpm)} BPM</p>
+        <article class="k-radio-card k-glass" data-reveal>
+          <div class="k-radio-card__cover">${media({ image: m.cover, tone: m.tone, mark: '' })}</div>
+          <div class="k-radio-card__body">
+            <div class="k-row-flex" style="justify-content:space-between">
+              <p class="k-eyebrow">${pad(n + 1)} / ${esc(m.volume)}</p>
+              <p class="k-eyebrow">${esc(mixMeta(m))}</p>
+            </div>
+            <h3 class="k-h2">${esc(m.title)}</h3>
+            <p class="k-body">${esc(m.mood)}</p>
+            <canvas class="k-radio-card__wave" data-wave="${esc(m.slug)}" aria-hidden="true"></canvas>
+            ${(m.tracks || []).length ? `<ol class="k-rows">
+              ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
+            </ol>` : ''}
+            ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
+            <div class="k-row-flex">
+              ${mixButton(m)}
+              ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>` : ''}
+            </div>
           </div>
-          <h3 class="k-h2 k-mt-m">${esc(m.title)}</h3>
-          <p class="k-body k-mt-s">${esc(m.mood)}</p>
-          <ol class="k-rows k-mt-m">
-            ${(m.tracks || []).map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
-          </ol>
-          ${used.length ? `<p class="k-small k-mt-m">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
-          <div class="k-row-flex k-mt-m">
-            <button class="k-btn k-btn--solid" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false"><span data-ico style="display:inline-grid;width:12px">${icon.play}</span> Listen</button>
-            ${product ? (productHref(product)
-              ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
-              : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
+        </article>`;
+    }).join(''));
+  }
+
+  /* ---------------------------------------------- magazine: rails + mosaic
+   * Two layout pieces used across the site:
+   *   railShell()  a horizontal scroller with drag, arrow buttons and a
+   *                progress bar (any [data-hscroll] gets the behaviour).
+   *   mosaicHtml() a Pinterest-style masonry board that mixes photos,
+   *                films, products, playlists, palettes and pull quotes,
+   *                each labelled with its department (desk).
+   * -------------------------------------------------------------------- */
+
+  const DESKS = { travel: 'Travel', automotive: 'Automotive', music: 'Music', fashion: 'Fashion' };
+  const ARROW_L = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ARROW_R = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /** Gallery images have 720px versions in a thumbs/ folder (scripts: see CONTENT_GUIDE). */
+  const thumbOf = (src) => (/^images\/garage\/[^/]+\/\d+\.webp$/.test(src || '') ? src.replace(/\/(\d+\.webp)$/, '/thumbs/$1') : src);
+
+  function railShell(inner, label, cls = '') {
+    return `
+      <div class="k-hscroll-wrap ${cls}">
+        <div class="k-hscroll" data-hscroll tabindex="0" role="region" aria-label="${esc(label)}">${inner}</div>
+        <div class="k-hscroll__ui">
+          <div class="k-hscroll__bar" aria-hidden="true"><i></i></div>
+          <button class="k-hscroll__btn" type="button" data-rail-prev aria-label="Scroll back">${ARROW_L}</button>
+          <button class="k-hscroll__btn" type="button" data-rail-next aria-label="Scroll forward">${ARROW_R}</button>
+        </div>
+      </div>`;
+  }
+
+  /** Drag-to-scroll, arrow buttons and progress for every horizontal scroller. */
+  function bindRails(root = document) {
+    $$('[data-hscroll], .k-rail', root).forEach((el) => {
+      if (el.dataset.railBound) return;
+      el.dataset.railBound = '1';
+      const wrap = el.closest('.k-hscroll-wrap');
+      const bar = wrap && $('.k-hscroll__bar i', wrap);
+      const update = () => {
+        const max = el.scrollWidth - el.clientWidth;
+        const p = max > 0 ? el.scrollLeft / max : 1;
+        if (bar) bar.style.transform = `scaleX(${Math.max(0.08, Math.min(1, p))})`;
+        if (wrap) {
+          wrap.classList.toggle('is-start', el.scrollLeft < 4);
+          wrap.classList.toggle('is-end', el.scrollLeft > max - 4);
+          wrap.classList.toggle('is-static', max <= 4);
+        }
+      };
+      el.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true, signal: pageAbort.signal });
+      update();
+      if (wrap) {
+        const step = (dir) => el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: REDUCED ? 'auto' : 'smooth' });
+        $('[data-rail-prev]', wrap).addEventListener('click', () => step(-1));
+        $('[data-rail-next]', wrap).addEventListener('click', () => step(1));
+      }
+      el.addEventListener('keydown', (e) => {
+        if (e.target !== el) return;
+        if (e.key === 'ArrowRight') { el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' }); e.preventDefault(); }
+        if (e.key === 'ArrowLeft') { el.scrollBy({ left: -el.clientWidth * 0.8, behavior: 'smooth' }); e.preventDefault(); }
+      });
+      // Mouse drag (touch already scrolls natively)
+      let x0 = 0; let s0 = 0; let dragging = false; let moved = false;
+      el.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        dragging = true; moved = false; x0 = e.clientX; s0 = el.scrollLeft;
+      });
+      el.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - x0;
+        if (!moved && Math.abs(dx) > 6) { moved = true; el.classList.add('is-dragging'); el.setPointerCapture(e.pointerId); }
+        if (moved) el.scrollLeft = s0 - dx;
+      });
+      const end = () => { dragging = false; setTimeout(() => el.classList.remove('is-dragging'), 0); };
+      el.addEventListener('pointerup', end);
+      el.addEventListener('dragstart', (e) => e.preventDefault());   // links and images would start a native drag
+      el.addEventListener('pointercancel', end);
+      // A drag shouldn't count as a click on the card underneath
+      el.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    });
+  }
+
+  /** Everything the mosaic can show, sorted into departments. */
+  function mosaicPool(only) {
+    const out = { automotive: [], travel: [], fashion: [], music: [] };
+    const push = (desk, item) => (out[DESKS[desk] ? desk : 'automotive']).push({ ...item, desk: DESKS[desk] ? desk : 'automotive' });
+    features.filter((f) => !only || f.slug === only).forEach((f) => {
+      (f.gallery || []).forEach((g) => {
+        const it = typeof g === 'string' ? { src: g } : g;
+        push(it.desk || f.desk, { kind: 'photo', src: it.src, thumb: thumbOf(it.src), caption: it.caption || '', meta: it.meta || '', place: place(f) || f.location || '', story: f.slug });
+      });
+      if (only) return;
+      if (f.vimeo && f.vimeo.id) push(f.desk, { kind: 'film', vimeo: f.vimeo, story: f.slug, caption: f.title || featureName(f), place: place(f) || f.location || '' });
+      if ((f.palette || []).length >= 4) push('fashion', { kind: 'palette', colors: f.palette.slice(0, 6), story: f.slug, caption: `${f.title || featureName(f)} palette` });
+    });
+    if (!only) {
+      (C.products || []).forEach((p) => {
+        const cw = (p.colorways || []).findIndex((w) => w.image);
+        if (cw >= 0) push('fashion', { kind: 'product', id: p.id, cw, src: p.colorways[cw].image, caption: p.title, meta: `${p.colorways[cw].name} · ${price(p)}` });
+      });
+      (C.mixes || []).forEach((m) => push('music', { kind: 'mix', slug: m.slug, src: m.cover, tone: m.tone, caption: m.title, meta: m.mood }));
+      push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'KIOSK Radio' });
+      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'journal.html', cta: 'The Journal' });
+    }
+    return out;
+  }
+
+  /** Spread each department evenly through the board instead of in clumps. */
+  function mosaicItems(only, limit = Infinity) {
+    const pool = mosaicPool(only);
+    if (Number.isFinite(limit)) {
+      // Every desk gets a fair share (films, playlists and quotes first), photos fill the rest
+      const desks = Object.keys(pool).filter((d) => pool[d].length);
+      const total = desks.reduce((n, d) => n + pool[d].length, 0);
+      const rank = (it) => (it.kind === 'photo' ? 1 : 0);
+      desks.forEach((d) => { pool[d] = pool[d].map((it, k) => ({ it, k })).sort((a, b) => rank(a.it) - rank(b.it) || a.k - b.k).map((x) => x.it); });
+      const quota = {};
+      desks.forEach((d) => { quota[d] = Math.min(pool[d].length, Math.max(4, Math.round((limit * pool[d].length) / total))); });
+      let over = desks.reduce((n, d) => n + quota[d], 0) - limit;
+      while (over > 0) {
+        const big = desks.reduce((a, d) => (quota[d] > quota[a] ? d : a), desks[0]);
+        quota[big] -= 1; over -= 1;
+      }
+      desks.forEach((d) => { pool[d] = pool[d].slice(0, quota[d]); });
+    }
+    const keyed = [];
+    Object.keys(pool).forEach((desk, d) => {
+      const list = pool[desk];
+      list.forEach((it, k) => keyed.push({ it, key: (k + 0.35 + d * 0.13) / list.length }));
+    });
+    return keyed.sort((a, b) => a.key - b.key).map((x) => x.it).slice(0, limit);
+  }
+
+  function mosaicTile(it, n) {
+    const desk = `<span class="k-mosaic__desk">${esc(DESKS[it.desk])}</span>`;
+    const cap = (title, sub) => `<span class="k-mosaic__cap">${desk}<b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span>`;
+    const tile = (cls, attrs, inner) => `<li class="k-mosaic__tile k-mosaic__tile--${cls}" data-desk="${esc(it.desk)}" data-reveal>${attrs ? `<button type="button" ${attrs}>` : '<div>'}${inner}${attrs ? '</button>' : '</div>'}</li>`;
+    if (it.kind === 'photo') {
+      return tile('photo', `data-mosaic-open="${n}" aria-label="${esc(it.caption || 'Photo')}"`,
+        `<img src="${esc(it.thumb)}" data-full="${esc(it.src)}" alt="${esc(it.caption)}" loading="lazy" decoding="async">${cap(it.caption, it.place)}`);
+    }
+    if (it.kind === 'film') {
+      return tile('film k-dark', `data-vimeo="${esc(it.vimeo.id)}" aria-label="Play ${esc(it.caption)}"`,
+        `<span class="k-mosaic__frame"><span class="plate plate--${esc((featureBySlug(it.story) || {}).tone || 'graphite')}" data-vimeo-cover="${esc(it.vimeo.id)}"><span class="plate__mark">${esc((featureBySlug(it.story) || {}).code || '')}</span></span></span><span class="k-mosaic__play">${icon.play}</span>${cap(it.caption, ['Film', it.place].filter(Boolean).join(' · '))}`);
+    }
+    if (it.kind === 'product') {
+      const p = productById(it.id);
+      return tile('product', `data-quickview="${esc(it.id)}" data-cw="${it.cw}" aria-label="${esc(it.caption)}"`,
+        `<span class="k-mosaic__product">${p ? productVisual(p, it.cw) : ''}</span>${cap(it.caption, it.meta)}`);
+    }
+    if (it.kind === 'mix') {
+      return tile('mix k-dark', `data-mix-play="${esc(it.slug)}" aria-label="Play ${esc(it.caption)}"`,
+        `<span class="k-mosaic__frame">${media({ image: it.src, tone: it.tone, mark: '' })}</span><span class="k-mosaic__play" data-ico>${icon.play}</span><canvas class="k-mosaic__wave" data-wave="${esc(it.slug)}" aria-hidden="true"></canvas>${cap(it.caption, it.meta)}`);
+    }
+    if (it.kind === 'palette') {
+      const f = featureBySlug(it.story);
+      return `<li class="k-mosaic__tile k-mosaic__tile--palette" data-desk="${esc(it.desk)}" data-reveal><a href="${f ? storyHref(f) : '#'}">
+        <span class="k-mosaic__swatches">${it.colors.map((c) => `<span style="background:${esc(c.hex)}" title="${esc(c.name)}"></span>`).join('')}</span>
+        ${cap(it.caption, it.colors.map((c) => c.name).join(' · '))}</a></li>`;
+    }
+    // quote
+    return `<li class="k-mosaic__tile k-mosaic__tile--quote" data-desk="${esc(it.desk)}" data-reveal><a href="${esc(it.link)}">
+      ${desk}<q>${esc(it.text)}</q><span class="k-mosaic__more">${esc(it.cta)}<span class="k-arrow">${icon.arrow}</span></span></a></li>`;
+  }
+
+  /** Board + department filter chips. */
+  function mosaicHtml(items, { filters = true, label = 'Mosaic' } = {}) {
+    const present = Object.keys(DESKS).filter((d) => items.some((it) => it.desk === d));
+    return `
+      ${filters && present.length > 1 ? `<div class="k-mosaic__filters" role="group" aria-label="Filter by department">
+        <button class="k-chip" type="button" data-mosaic-filter="all" aria-pressed="true">All</button>
+        ${present.map((d) => `<button class="k-chip" type="button" data-mosaic-filter="${d}" aria-pressed="false">${DESKS[d]}</button>`).join('')}
+      </div>` : ''}
+      <ul class="k-mosaic" data-mosaic aria-label="${esc(label)}">${items.map(mosaicTile).join('')}</ul>`;
+  }
+
+  /** Fill a mount with a mosaic and remember its items for the photo viewer. */
+  function fillMosaic(name, items, opts) {
+    const el = mount(name);
+    if (!el) return null;
+    if (!items.length) { const sec = el.closest('[data-mosaic-section]'); if (sec) sec.hidden = true; return null; }
+    el.innerHTML = mosaicHtml(items, opts);
+    el.kItems = items;
+    return el;
+  }
+
+  let photoNav = null;   // { items, i } while the photo viewer is open
+
+  function openPhoto(items, i) {
+    const photos = items.filter((it) => it.kind === 'photo');
+    const at = Math.max(0, photos.indexOf(items[i]));
+    photoNav = { photos, i: at };
+    showPhoto();
+  }
+
+  function showPhoto() {
+    const { photos, i } = photoNav;
+    const it = photos[i];
+    const f = featureBySlug(it.story);
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">${esc(DESKS[it.desk])} · ${pad(i + 1)} / ${pad(photos.length)}</p><p class="k-h3 k-mt-s">${esc(it.caption || (f && f.title) || '')}</p></div>
+        <div class="k-row-flex">
+          ${f && PAGE !== 'story' ? `<a class="k-btn k-btn--sm" href="${storyHref(f)}">Read the story</a>` : ''}
+          <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+        </div>
+      </div>
+      <figure class="k-photo">
+        <img src="${esc(it.src)}" alt="${esc(it.caption)}">
+        <figcaption>${[f && (f.title || featureName(f)), it.place, it.meta].filter(Boolean).map(esc).join(' · ')}</figcaption>
+        ${photos.length > 1 ? `<button class="k-photo__nav k-photo__nav--prev" type="button" data-photo-step="-1" aria-label="Previous photo">${ARROW_L}</button>
+        <button class="k-photo__nav k-photo__nav--next" type="button" data-photo-step="1" aria-label="Next photo">${ARROW_R}</button>` : ''}
+      </figure>`, 'Photo');
+  }
+
+  function bindMagazine() {
+    document.addEventListener('click', (e) => {
+      const open = e.target.closest('[data-mosaic-open]');
+      if (open) {
+        const host = open.closest('[data-mount]');
+        if (host && host.kItems) openPhoto(host.kItems, Number(open.dataset.mosaicOpen));
+        return;
+      }
+      const stepBtn = e.target.closest('[data-photo-step]');
+      if (stepBtn && photoNav) {
+        photoNav.i = (photoNav.i + Number(stepBtn.dataset.photoStep) + photoNav.photos.length) % photoNav.photos.length;
+        showPhoto();
+        return;
+      }
+      const filter = e.target.closest('[data-mosaic-filter]');
+      if (filter) {
+        const host = filter.closest('[data-mount]');
+        const d = filter.dataset.mosaicFilter;
+        $$('[data-mosaic-filter]', host).forEach((b) => b.setAttribute('aria-pressed', String(b === filter)));
+        $$('.k-mosaic__tile', host).forEach((t) => { t.hidden = d !== 'all' && t.dataset.desk !== d; });
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!photoNav || !$('.k-lightbox.is-open .k-photo')) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        photoNav.i = (photoNav.i + (e.key === 'ArrowRight' ? 1 : -1) + photoNav.photos.length) % photoNav.photos.length;
+        showPhoto();
+      }
+    });
+    // Thumbs that haven't been generated fall back to the full image
+    document.addEventListener('error', (e) => {
+      const img = e.target;
+      if (img && img.tagName === 'IMG' && img.dataset.full && img.src.indexOf(img.dataset.full) === -1) img.src = img.dataset.full;
+    }, true);
+  }
+
+  /** Magazine "departments" rail: one big card per desk. */
+  function departmentsHtml() {
+    const pool = mosaicPool();
+    const firstPhoto = (desk, not) => (pool[desk] || []).find((it) => it.kind === 'photo' && it.story !== not) || (pool[desk] || []).find((it) => it.kind === 'photo');
+    const autoPhoto = firstPhoto('automotive');
+    const hoodie = (C.products || []).find((p) => (p.colorways || []).some((w) => w.image) && (p.mockup || {}).type === 'hoodie');
+    const mix = (C.mixes || [])[0];
+    const desks = [
+      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'garage.html', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
+      { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'journal.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
+      { id: 'music', n: '03', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
+      { id: 'fashion', n: '04', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
+    ];
+    return desks.map((d) => `
+      <a class="k-dept k-dept--${d.id}" href="${d.href}" data-reveal>
+        <span class="k-dept__media">${d.product ? `<span class="k-dept__product">${productVisual(d.product, (d.product.colorways || []).findIndex((w) => w.image))}</span>` : media({ image: d.img, tone: d.tone || 'graphite', mark: '' })}</span>
+        <span class="k-dept__top"><span class="k-dept__n">${d.n}</span><span class="k-eyebrow">${d.count} ${d.unit}</span></span>
+        <span class="k-dept__body"><b class="k-dept__title">${esc(d.title)}</b><span class="k-dept__dek">${esc(d.dek)}</span></span>
+      </a>`).join('');
+  }
+
+  /** Shop lookbook: products shown against the shoot their colourway is named after. */
+  function lookbookHtml() {
+    const slides = [];
+    (C.products || []).forEach((p) => {
+      (p.colorways || []).forEach((w, cw) => {
+        if (!w.image) return;
+        const f = features.find((x) => (x.palette || []).some((c) => c.name.toLowerCase() === w.name.toLowerCase()) && (x.gallery || []).length);
+        if (!f) return;
+        const g = f.gallery[hash(p.id + w.name) % f.gallery.length];
+        const src = typeof g === 'string' ? g : g.src;
+        slides.push({ p, w, cw, f, src });
+      });
+    });
+    return slides.map(({ p, w, cw, f, src }) => `
+      <article class="k-look" data-reveal>
+        <a class="k-look__photo" href="${storyHref(f)}" aria-label="${esc(f.title || featureName(f))}">${media({ image: thumbOf(src), tone: f.tone, alt: f.title })}</a>
+        <button class="k-look__product" type="button" data-quickview="${esc(p.id)}" data-cw="${cw}" aria-label="${esc(`${p.title}, ${w.name}`)}">${productVisual(p, cw)}</button>
+        <div class="k-look__cap">
+          <span class="k-mosaic__desk">Fashion × ${esc(DESKS[f.desk] || 'Automotive')}</span>
+          <b>${esc(p.title)} <span class="k-serif">in ${esc(w.name)}</span></b>
+          <small>${esc(w.name)} is from the ${esc(f.title || featureName(f))} palette · ${esc(price(p))}</small>
+        </div>
+      </article>`).join('');
+  }
+
+  /* ---------------------------------------------------------- journal */
+
+  function pageJournal() {
+    fill('journal-departments', railShell(departmentsHtml(), 'Departments', 'k-hscroll-wrap--depts'));
+    fillMosaic('journal-mosaic', mosaicItems(), { label: 'The archive' });
+    const posts = features.slice().sort((a, b) => String(b.published).localeCompare(String(a.published)));
+    fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
+    fill('journal', posts.map((f, n) => {
+      const total = (f.chapters || []).length;
+      const done = written(f).length;
+      const status = (f.tags || []).includes('In the edit') ? 'In the edit' : formatLabel(f);
+      return `
+        <article class="k-post" data-reveal>
+          <a class="k-post__media" href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}" aria-label="${esc(f.title || featureName(f))}">
+            ${media({ image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus })}
+          </a>
+          <div class="k-post__body">
+            <p class="k-eyebrow">${[pad(posts.length - n), longDate(f.published), status].filter(Boolean).map(esc).join(' · ')}</p>
+            <h2 class="k-h2"><a href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}">${esc(f.title || featureName(f))}</a></h2>
+            <p class="k-small">${esc(featureName(f))}${place(f) ? ` · ${esc(place(f))}` : ''}</p>
+            <p class="k-body k-mt-s">${esc(f.excerpt || f.tagline || '')}</p>
+            ${total ? `<ol class="k-post__chapters" aria-label="Chapters">${(f.chapters || []).map((c) => `<li class="${(c.body || '').trim() ? 'is-done' : ''}">${esc(c.heading)}</li>`).join('')}</ol>` : ''}
+            <p class="k-byline">By ${esc(f.author || 'KIOSK')} · ${readMinutes(f)} min read${total ? ` · ${done} of ${total} chapters written` : ''}</p>
           </div>
         </article>`;
     }).join(''));
@@ -1345,6 +2160,9 @@
   }
 
   function pageVault() {
+    const look = lookbookHtml();
+    if (look) fill('shop-lookbook', railShell(look, 'Lookbook', 'k-hscroll-wrap--look'));
+    else { const sec = mount('shop-lookbook'); if (sec) sec.closest('section').hidden = true; }
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
     let sort = params.get('sort') || 'featured';
@@ -1399,7 +2217,7 @@
       const next = b.classList.contains('k-cat') && cat === b.dataset.cat ? 'all' : b.dataset.cat;
       setCat(next);
       if (b.classList.contains('k-cat')) mount('vault-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    }, { signal: pageAbort.signal });
     if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); });
     render();
     if (location.hash) {
@@ -1410,14 +2228,24 @@
 
   /* ------------------------------------------------------------- boot */
 
+  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal };
+  function runPage() {
+    try {
+      (PAGES[PAGE] || (() => {}))();
+      hydrateCovers();
+      bindRails();
+    } catch (err) {
+      // Never leave a blank page if content has a typo
+      console.error('[KIOSK] render error', err);
+    }
+  }
+
   renderChrome();
   bindGlobal();
-  try {
-    ({ home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault }[PAGE] || (() => {}))();
-  } catch (err) {
-    // Never leave a blank page if content has a typo
-    console.error('[KIOSK] render error', err);
-  }
+  bindMagazine();
+  bindSoftNav();
+  runPage();
   reveal();
+  wave.draw();
   window.KIOSK = { openFilm: (s) => openFilm(featureBySlug(s)), player, toast };
 })();
