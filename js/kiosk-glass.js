@@ -66,7 +66,10 @@
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
   const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
-  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || (m.spotify ? 'Spotify' : '');
+  const sourceName = (m) => (m.soundcloud ? 'SoundCloud' : m.spotify ? 'Spotify' : '');
+  /** Where the playlist lives (button under each deck / card). */
+  const sourceLink = (m) => (m.soundcloud ? { href: m.soundcloud, label: 'Open on SoundCloud' } : m.spotify ? { href: spotifyUrl(m), label: 'Open in Spotify' } : null);
+  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || sourceName(m);
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
   const storyHref = (f) => `story.html?s=${encodeURIComponent(f.slug)}`;
@@ -605,10 +608,59 @@
     },
   };
 
+  /* SoundCloud: the Widget API plays a track, playlist or likes page in an
+   * iframe and reports play / pause / progress, which drive the waveform. */
+  const soundcloud = {
+    widget: null,
+    iframe: null,
+    url: '',
+    loading: null,
+    load() {
+      if (this.loading) return this.loading;
+      this.loading = new Promise((resolve) => {
+        if (window.SC && window.SC.Widget) { resolve(window.SC); return; }
+        const s = document.createElement('script');
+        s.src = 'https://w.soundcloud.com/player/api.js';
+        s.async = true;
+        s.onload = () => resolve(window.SC || null);
+        s.onerror = () => resolve(null);
+        document.head.append(s);
+      });
+      return this.loading;
+    },
+    async open(mix, slot) {
+      const SC = await this.load();
+      if (!SC || !SC.Widget) return false;
+      if (this.iframe && this.url === mix.soundcloud) { this.widget.play(); return true; }
+      if (this.iframe) this.iframe.remove();
+      this.url = mix.soundcloud;
+      const f = document.createElement('iframe');
+      f.title = `${mix.title} on SoundCloud`;
+      f.allow = 'autoplay';
+      f.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(mix.soundcloud)}&auto_play=true&visual=false&show_comments=false&show_reposts=false&show_teaser=false&hide_related=true&color=%23e8e5de`;
+      slot.append(f);
+      this.iframe = f;
+      const w = SC.Widget(f);
+      this.widget = w;
+      const E = SC.Widget.Events;
+      w.bind(E.PLAY, () => {
+        player.onSoundcloud({ playing: true });
+        w.getCurrentSound((sound) => { if (sound && sound.title) player.nowPlaying(sound.title, sound.user && sound.user.username); });
+      });
+      w.bind(E.PAUSE, () => player.onSoundcloud({ playing: false }));
+      w.bind(E.FINISH, () => player.onSoundcloud({ playing: false }));
+      w.bind(E.PLAY_PROGRESS, (e) => player.onSoundcloud({ playing: true, position: e.currentPosition, relative: e.relativePosition }));
+      return new Promise((resolve) => {
+        const t = setTimeout(() => resolve(false), 10000);
+        w.bind(E.READY, () => { clearTimeout(t); w.play(); resolve(true); });
+      });
+    },
+  };
+
   const player = {
     el: null,
     mix: null,
-    source: '',          // 'audio' | 'spotify'
+    source: '',          // 'audio' | 'spotify' | 'soundcloud'
     playing: false,
     buffering: false,
     audio: null,
@@ -622,8 +674,9 @@
       this.el.setAttribute('aria-label', 'KIOSK Radio player');
       this.el.innerHTML = `
         <div class="k-dock__panel" id="k-dock-panel" aria-hidden="true">
-          <div class="k-dock__embed"><div data-spotify-slot></div></div>
-          <p class="k-dock__note k-small">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
+          <div class="k-dock__embed" data-embed="spotify"><div data-spotify-slot></div></div>
+          <div class="k-dock__embed" data-embed="soundcloud" hidden></div>
+          <p class="k-dock__note k-small" data-embed="spotify">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
         </div>
         <div class="k-dock__bar">
           <button class="k-dock__btn" type="button" data-dock-toggle aria-label="Play">${icon.play}</button>
@@ -673,7 +726,7 @@
       const mix = mixBySlug(slug);
       if (!mix) return;
       if (this.mix === mix && this.active()) { this.toggle(); return; }
-      if (!mix.audio && !mix.spotify) { toast(`${mix.title} drops soon.`); return; }
+      if (!mix.audio && !mix.spotify && !mix.soundcloud) { toast(`${mix.title} drops soon.`); return; }
       this.pauseAll();
       this.show(mix);
       if (mix.audio) {
@@ -688,8 +741,22 @@
         $('.k-dock__progress', this.el).hidden = false;
         this.el.classList.remove('has-embed');
         this.audio.play().catch(() => {});
+      } else if (mix.soundcloud) {
+        this.source = 'soundcloud';
+        $('.k-dock__progress', this.el).hidden = true;
+        this.showEmbed('soundcloud');
+        this.buffering = true;
+        this.sync();
+        this.expand(true);
+        const ok = await soundcloud.open(mix, $('[data-embed="soundcloud"].k-dock__embed', this.el));
+        if (!ok) {
+          this.buffering = false;
+          toast('SoundCloud couldn’t load. Opening it in a new tab.');
+          window.open(mix.soundcloud, '_blank', 'noopener');
+        }
       } else {
         this.source = 'spotify';
+        this.showEmbed('spotify');
         $('.k-dock__progress', this.el).hidden = true;
         this.el.classList.add('has-embed');
         this.buffering = true;
@@ -705,6 +772,29 @@
           window.open(spotifyUrl(mix), '_blank', 'noopener');
         }
       }
+      this.sync();
+    },
+
+    /** Show the Spotify or SoundCloud player in the fold-out panel. */
+    showEmbed(which) {
+      this.el.classList.add('has-embed');
+      $$('[data-embed]', this.el).forEach((n) => { n.hidden = n.dataset.embed !== which; });
+    },
+
+    /** Track title from the source, shown in the dock next to the playlist name. */
+    nowPlaying(title, artist) {
+      if (!this.el || !this.mix) return;
+      $('.k-dock__title', this.el).textContent = `${title}${artist ? ` — ${artist}` : ''} · ${this.mix.title}`;
+    },
+
+    onSoundcloud(d) {
+      if (this.source !== 'soundcloud') return;
+      const was = this.playing;
+      this.playing = !!d.playing;
+      this.buffering = false;
+      if (d.position != null) wave.clock = { position: d.position, at: performance.now() };
+      if (this.playing && !was && this.el.classList.contains('is-expanded')) setTimeout(() => this.expand(false), 1200);
+      if (d.position != null) $('.k-dock__time', this.el).textContent = `${Math.floor(d.position / 60000)}:${pad(Math.floor((d.position / 1000) % 60))}`;
       this.sync();
     },
 
@@ -745,17 +835,21 @@
         if (this.audio.paused) { if (wave.ctx) wave.ctx.resume(); this.audio.play().catch(() => {}); } else this.audio.pause();
       } else if (this.source === 'spotify' && spotify.ctrl) {
         spotify.ctrl.togglePlay();
+      } else if (this.source === 'soundcloud' && soundcloud.widget) {
+        soundcloud.widget.toggle();
       }
     },
 
     pause() {
       if (this.audio && !this.audio.paused) this.audio.pause();
       if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
+      if (soundcloud.widget && this.source === 'soundcloud' && this.playing) soundcloud.widget.pause();
     },
 
     pauseAll() {
       if (this.audio) this.audio.pause();
       if (spotify.ctrl) spotify.ctrl.pause();
+      if (soundcloud.widget) soundcloud.widget.pause();
       this.playing = false;
     },
 
@@ -1061,7 +1155,7 @@
           <canvas class="k-radio__wave" data-wave="${esc(m.slug)}" data-wave-bar="3" data-wave-gap="3" aria-hidden="true"></canvas>
           <div class="k-radio__controls">
             ${mixButton(m)}
-            ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>` : ''}
+            ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">${esc(sourceLink(m).label)}<span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.tracks || []).length ? `<span class="k-small">${esc(m.tracks.length)} tracks</span>` : ''}
           </div>
         </div>
@@ -1071,7 +1165,7 @@
             <button class="k-radio__item${x.slug === m.slug ? ' is-active' : ''}" type="button" data-radio-select="${esc(x.slug)}">
               <span class="k-radio__cover">${media({ image: x.cover, tone: x.tone, mark: '' })}</span>
               <span><b>${esc(x.title)}</b><small>${esc(x.volume)} · ${esc(x.mood)}</small></span>
-              <span class="k-mono">${esc(x.length || (x.spotify ? 'Spotify' : ''))}</span>
+              <span class="k-mono">${esc(x.length || sourceName(x))}</span>
             </button>`).join('')}
           <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists<span class="k-arrow">${icon.arrow}</span></a></div>
         </div>
@@ -1815,7 +1909,7 @@
             ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
             <div class="k-row-flex">
               ${mixButton(m)}
-              ${m.spotify ? `<a class="k-btn" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>` : ''}
+              ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">${m.soundcloud ? 'Follow on SoundCloud' : 'Follow on Spotify'}</a>` : ''}
             </div>
           </div>
         </article>`;

@@ -584,6 +584,19 @@ window.KIOSK_CONTENT = {
       cover: 'https://mosaic.scdn.co/640/ab67616d0000b2735f154e86d6078ba8a0ff918eab67616d0000b2736b4118a6648f973cf8c587a3ab67616d0000b2739079689dc439fa4361b49f82ab67616d0000b273d1476c299b9f86960612fc9b',
       tracks: [],
     },
+    {
+      slug: 'soundcloud-likes',
+      title: 'Liked on SoundCloud',
+      volume: 'Playlist 03',
+      length: '',
+      bpm: '',
+      mood: 'Phonk likes · curated on SoundCloud',
+      tone: 'ember',
+      soundcloud: 'https://on.soundcloud.com/hZrsAbhlhyPSPwlry1',   // any SoundCloud track, playlist or likes link
+      audio: '',
+      cover: '',
+      tracks: [],
+    },
   ],
 
   /* ----------------------------------------------------------

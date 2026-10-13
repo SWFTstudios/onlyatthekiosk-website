@@ -177,6 +177,8 @@ To add a playlist, copy its share link (`open.spotify.com/playlist/<ID>`) and ad
   length: '', bpm: '', audio: '', tracks: [],
 }
 ```
+**SoundCloud:** instead of `spotify`, set `soundcloud` to any SoundCloud link: a track, a playlist (set), or a profile's likes page (`https://soundcloud.com/<username>/likes`). It plays in the same dock, and the dock shows the current track and artist. If an `on.soundcloud.com/…` short link doesn't play, use the full `soundcloud.com/…` link it opens to.
+
 For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in the KIOSK player instead of the Spotify embed, and `length`, `bpm` and `tracks` show on the deck.
 
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
