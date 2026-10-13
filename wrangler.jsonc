@@ -1,0 +1,16 @@
+// Cloudflare Worker for onlyatthekiosk.com
+// Build: npm run build:worker    Deploy: npx wrangler deploy
+// Secrets used by /api (Airtable, Shopify, …) are set on the Worker in the
+// Cloudflare dashboard (Settings → Variables and Secrets), not in this file.
+{
+  "name": "onlyatthekiosk",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+}
