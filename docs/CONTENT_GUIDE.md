@@ -212,6 +212,14 @@ vimeo: [
 ```
 The title, thumbnail and length load from Vimeo automatically. `title` overrides Vimeo's title, and `story` adds a "Read the story" link in the player. To use a Vimeo film as a story's main film instead, set that story's `embed` to `https://player.vimeo.com/video/<id>?h=<hash>`. In Vimeo, set the video's embed privacy to allow `onlyatthekiosk.com` (and the `*.pages.dev` preview), or Vimeo won't play it on the site.
 
+## 3c. Look and feel: cover, intro, day/night
+
+- **Cover video:** `issue.reel` / `issue.reelWebm` / `issue.reelPoster` play full screen behind the giant KIOSK on the home page. `videos/kiosk-reel.*` is cut from the Q50 and R1M shoots. Replace it with any 10–20 s muted clip under about 8 MB.
+- **Globe intro:** plays once per visit on the home page (skippable). It's skipped for visitors who have reduced motion turned on.
+- **Day / night:** follows the visitor's local time (day 06:00–18:59). The header button cycles auto → day → night, and the choice is remembered. The digital clock in the header and menu shows the visitor's local time and city.
+
+For stores, partner payouts, pickup-only Hunt pieces and quote merch, see **`docs/MARKETPLACE.md`**.
+
 ## 4. Add or sell a product (KIOSK Supply)
 
 The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real product photo, each product renders as a **vector mockup** on a light tile.

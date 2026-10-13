@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>KIOSK — Cars, Motorcycles, Phonk &amp; Film</title>
-  <meta name="description" content="KIOSK is a travel, streetwear and automotive journal. Cinematic films and photo stories of cars, motorcycles and their owners — scored in phonk. Free phonk radio; shop films, LUT packs and apparel.">
+  <meta name="description" content="KIOSK is a global magazine and marketplace: films and stories about cars, motorcycles, skate, travel and the people behind them, plus rare pieces sourced around the world — some you can only collect in person.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf8">
+  <script>/* Day/night before first paint: follows local time unless the visitor picked one */(function(){var p='auto';try{p=JSON.parse(localStorage.getItem('kiosk:theme'))||'auto'}catch(e){}var h=new Date().getHours();document.documentElement.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p)})();</script>
   <link rel="canonical" href="https://onlyatthekiosk.com/">
 
   <meta property="og:type" content="website">
@@ -49,36 +50,37 @@
 
   <main id="main">
 
-    <!-- HERO ---------------------------------------------------------- -->
-    <section class="k-hero" aria-label="Issue 01">
-      <div class="k-hero__frame">
-        <div class="k-hero__bg" data-mount="hero-bg"></div>
-
-        <div class="k-hero__top">
+    <!-- COVER: full-screen video ------------------------------------- -->
+    <section class="k-cover k-dark" aria-labelledby="cover-title">
+      <div class="k-cover__media" data-mount="hero-bg"></div>
+      <div class="k-cover__shade" aria-hidden="true"></div>
+      <div class="k-cover__inner">
+        <div class="k-cover__top">
           <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
-          <h1 class="k-display k-stagger k-hero__title">
-            <span>Machines, people</span>
-            <span>&amp; the long</span>
-            <span><em class="k-serif">way home.</em></span>
-          </h1>
-          <p class="k-lede k-hero__dek" data-mount="hero-dek"></p>
+          <p class="k-eyebrow k-cover__edition">Global edition · <span data-clock>--:--</span> <span data-clock-zone></span></p>
         </div>
-
-        <div class="k-hero__bottom">
-          <div class="k-stack">
-            <div data-mount="hero-watch"></div>
-            <dl class="k-hero__stats k-glass k-glass--dark" data-mount="hero-stats"></dl>
-          </div>
-          <div class="k-hero__aside" data-mount="hero-aside"></div>
+        <h1 class="k-cover__title" id="cover-title"><span class="k-cover__kicker">Only at the</span><span class="k-cover__word">KIOSK</span></h1>
+        <p class="k-cover__dek">A global magazine and marketplace. Cars, motorcycles, skate, travel and the people behind them, plus rare pieces sourced around the world. Some you can only collect in person.</p>
+        <div class="k-cover__cta">
+          <a class="k-cover__pill" href="#garage">Open the issue <span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          <a class="k-btn" href="vault.html">Shop the kiosk</a>
+          <div data-mount="hero-watch"></div>
         </div>
+        <ol class="k-cover__index" aria-label="In this issue">
+          <li><a href="garage.html"><span>01</span>Automotive</a></li>
+          <li><a href="journal.html"><span>02</span>Travel</a></li>
+          <li><a href="radio.html"><span>03</span>Music</a></li>
+          <li><a href="vault.html"><span>04</span>Fashion</a></li>
+          <li><a href="vault.html?c=hunt"><span>05</span>The Hunt</a></li>
+        </ol>
       </div>
     </section>
 
     <!-- MARQUEE ------------------------------------------------------- -->
     <div class="k-marquee" aria-hidden="true">
       <div class="k-marquee__track">
-        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Phonk</span><span class="k-serif">Film</span><span>Streetwear</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Photography</span>
-        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Phonk</span><span class="k-serif">Film</span><span>Streetwear</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Photography</span>
+        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Skate</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Rare finds</span><span>Phonk</span><span class="k-serif">Culture</span>
+        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Skate</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Rare finds</span><span>Phonk</span><span class="k-serif">Culture</span>
       </div>
     </div>
 
@@ -126,12 +128,12 @@
     <!-- 02 / MANIFESTO ------------------------------------------------ -->
     <section class="k-section k-section--tight" aria-label="About KIOSK">
       <div class="k-wrap">
-        <p class="k-eyebrow">02 / Why we shoot</p>
+        <p class="k-eyebrow">02 / Why the kiosk</p>
         <p class="k-quote k-mt-m" data-reveal>
-          “We don’t sell cars. We film the people who
+          “Pick it up at the kiosk, get lost in a world
           <span class="k-quote__inline" data-mount="quote-inline" aria-hidden="true"></span>
-          keep them alive — then score it in phonk.”
-          <span class="k-quote__aside">Cars, motorcycles, streetwear and travel — one shoot, one city, one story at a time.</span>
+          you never knew existed — then go and find it.”
+          <span class="k-quote__aside">For anyone, any age, anywhere: cars, motorcycles, skate, travel and the people doing cool things across the globe. Different cultures, same feeling.</span>
         </p>
       </div>
     </section>
