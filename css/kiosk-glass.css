@@ -1541,6 +1541,7 @@ body.k::after {
 .k-bts__gear li::before { content: '—'; color: var(--ink-4); }
 .k-bts__label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 400; margin: 8px 0 14px; }
 .k-bts__clip { margin: 0; }
+.k-spotify { display: block; width: 100%; border: 0; border-radius: 12px; background: rgba(0,0,0,.25); position: relative; z-index: 1; }
 .k-bts__clip figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 10px 4px 0; font-size: 13px; }
 .k-bts__clip figcaption span { white-space: nowrap; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
 
@@ -1644,7 +1645,8 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
    SHOP — KIOSK Supply (skateshop)
    ========================================================================== */
 
-.k-mockup { display: block; width: 100%; height: 100%; }
+.k-mockup, .k-product-img { display: block; width: 100%; height: 100%; }
+.k-product-img { object-fit: contain; }
 
 /* Ticker strip */
 .k-ticker {
@@ -1685,7 +1687,7 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
   transition: transform 0.6s var(--ease);
 }
 .k-wall__item:hover { transform: translateY(-4px); }
-.k-wall__item .k-mockup { width: 92%; height: 92%; }
+.k-wall__item .k-mockup, .k-wall__item .k-product-img { width: 92%; height: 92%; }
 .k-wall__item--tall { grid-row: span 2; }
 .k-wall__item span {
   position: absolute; left: 10px; bottom: 10px;
@@ -1708,8 +1710,8 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
   transition: background 0.3s var(--ease);
 }
 .k-cat:hover, .k-cat[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
-.k-cat .k-mockup { position: absolute; inset: 14% 10% 10%; width: 80%; height: 76%; transition: transform 0.6s var(--ease); }
-.k-cat:hover .k-mockup { transform: scale(1.06) rotate(-2deg); }
+.k-cat .k-mockup, .k-cat .k-product-img { position: absolute; inset: 14% 10% 10%; width: 80%; height: 76%; transition: transform 0.6s var(--ease); }
+.k-cat:hover .k-mockup, .k-cat:hover .k-product-img { transform: scale(1.06) rotate(-2deg); }
 .k-cat b { position: relative; z-index: 1; font-weight: 500; font-size: 14px; }
 .k-cat small { position: relative; z-index: 1; font-family: var(--f-mono); font-size: 10px; opacity: 0.6; align-self: flex-end; }
 
@@ -1854,3 +1856,29 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
   .k-qv__media { aspect-ratio: auto; min-height: 560px; }
 }
 .k-lightbox__inner:has(.k-qv) { width: min(1080px, 100%); }
+
+/* ---------------------------------------------------------- journal / blog */
+.k-byline { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 18px; }
+.k-byline b { color: var(--ink); font-weight: 400; }
+.k-chapter { margin-top: clamp(28px, 4vw, 48px); display: grid; gap: 14px; }
+.k-chapter__num { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.k-chapter__num code { font: inherit; color: var(--ink); }
+.k-chapter--draft { padding: 20px; border: 1px dashed var(--line-2, var(--line)); border-radius: var(--r-lg); background: var(--glass, transparent); }
+.k-chapter--draft .k-prose__heading { margin-top: 0; color: var(--ink-3); }
+.k-chapter--draft .k-prose__text { font-style: italic; }
+.k-chapter__more { margin-top: clamp(24px, 3vw, 40px); padding-top: 16px; border-top: 1px solid var(--line); }
+.k-journal { display: grid; gap: clamp(28px, 5vw, 64px); }
+.k-post { display: grid; gap: clamp(16px, 3vw, 40px); grid-template-columns: 1fr; align-items: start; padding-bottom: clamp(28px, 5vw, 64px); border-bottom: 1px solid var(--line); }
+@media (min-width: 900px) { .k-post { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
+.k-post__media { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--r-xl); overflow: hidden; }
+.k-post__media > .k-media { position: absolute; inset: 0; }
+.k-post__media img { transition: transform 1s var(--ease); }
+.k-post__media:hover img { transform: scale(1.03); }
+.k-post__body { display: grid; gap: 10px; }
+.k-post__body h2 a { color: inherit; text-decoration: none; }
+.k-post__body h2 a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.k-post__body .k-byline { margin: 8px 0 0; }
+.k-post__chapters { list-style: none; counter-reset: ch; display: grid; gap: 0; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.k-post__chapters li { counter-increment: ch; display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--ink-3); }
+.k-post__chapters li::before { content: counter(ch, decimal-leading-zero); font-family: var(--f-mono); font-size: 11px; color: var(--ink-4, var(--ink-3)); padding-top: 2px; }
+.k-post__chapters li.is-done { color: var(--ink); }

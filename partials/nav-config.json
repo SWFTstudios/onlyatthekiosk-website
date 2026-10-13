@@ -12,7 +12,14 @@
       "label": "Garage",
       "path": "garage.html",
       "match": [
-        "garage.html",
+        "garage.html"
+      ]
+    },
+    {
+      "label": "Journal",
+      "path": "journal.html",
+      "match": [
+        "journal.html",
         "story.html"
       ]
     },

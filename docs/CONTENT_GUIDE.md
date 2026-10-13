@@ -7,6 +7,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Page | URL | Renders |
 | --- | --- | --- |
 | Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
+| Journal | `journal.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
 | Garage | `garage.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
 | Radio | `radio.html` | Phonk mixes, player, tracklists |
@@ -59,6 +60,16 @@ The first three stories are real shoots from Google Drive › *RollerReels Video
 ```
 
 Cards and the hero only need the identity fields (`slug` through `tone`) plus the media. Every other section on the story page is optional, and a section with no data is hidden.
+
+### Blog chapters (dictated)
+Each story is also a Journal post. Its `chapters` start empty and stay hidden from visitors until they have a `body`. Dictate a chapter to Claude and it gets typed in. See **`docs/DICTATION.md`** for every post's chapter list and prompts.
+```js
+author: 'RollerReels',
+chapters: [
+  { id: 'the-car', heading: 'The Q50', prompt: 'What has been done to the car?', body: 'First paragraph…\n\nSecond paragraph…' },
+]
+```
+`type` can be `'car'`, `'motorcycle'` or `'meet'`.
 
 ### Specs (the stat strip)
 ```js
@@ -126,7 +137,7 @@ timeline: [ { year: '1991', label: 'Built in Musashimurayama' }, { year: '2026',
 
 ### Links to Radio and the Vault
 ```js
-soundtrack: 'wangan-drift-vol1',    // slug of a mix → "Soundtrack" button plays it
+soundtrack: 'phonk-n95',           // slug of a mix or playlist → "Soundtrack" button
 gradedWith: 'lut-sodium-night',     // product id → "Graded with" link
 filmProduct: 'film-r32-wangan',     // product id → "Own the film"
 products: ['film-r32-wangan', 'app-hoodies'],   // pinned first in "Shop the look"
@@ -150,21 +161,20 @@ Each card shows the reasons it matched, such as `FALL`, `NIGHT` or `GRADED WITH`
 
 ---
 
-## 3. Add a phonk mix
+## 3. Radio: Spotify playlists and phonk mixes
 
-1. Put the audio in `audio/radio/<slug>.mp3`. Use 320 kbps MP3 for streaming.
-2. Add it to `mixes`:
+The Radio deck plays your Spotify playlists through Spotify's own player. To add one, copy its share link (`open.spotify.com/playlist/<ID>`) and add an entry to `mixes`:
 ```js
 {
-  slug: 'wangan-drift-vol1', title: 'Wangan Drift', volume: 'Vol. 01',
-  length: '42:10', bpm: '130–140', mood: 'Drift phonk · cowbell · night drive',
-  tone: 'sodium', cover: 'images/radio/wangan-drift.webp',
-  audio: 'audio/radio/wangan-drift-vol1.mp3',
-  product: 'mix-wangan-drift-vol1',     // Vault item for the full download
-  tracks: ['Intro', 'Overpass', '…'],
+  slug: 'phonk-n95', title: 'Phonk nº 95', volume: 'Playlist 01',
+  mood: 'Phonk · curated on Spotify', tone: 'graphite',
+  spotify: '1fO87QEdH8Y3WIVjAjDARS',   // playlist ID
+  cover: '',                            // optional cover image URL
+  product: 'mix-phonk-n95',             // shop item for the DJ-mix download
+  length: '', bpm: '', audio: '', tracks: [],
 }
 ```
-While `audio` is empty, the play button shows a "drops soon" message instead of playing.
+For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in the KIOSK player instead of the Spotify embed, and `length`, `bpm` and `tracks` show on the deck.
 
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
 
@@ -198,6 +208,8 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 **Mockup types:** `tee`, `longsleeve`, `crew`, `hoodie`, `cap`, `beanie`, `deck`, `socks`, `tote`, `keytag`, `stickers`, `chain`. Digital goods use `cassette` (mixes), `vhs` (films) and `lutbox` (LUT packs; pass `swatches: ['#hex', …]`).
 
 **Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
+
+**3D product renders:** tees and hoodies use rendered product shots in `images/shop/3d/<id>-<colourway index>.webp`, set per colourway with `image`. To re-render after changing a print or colour, run `node scripts/render-3d-flat.js <dir>` with the local server on port 8765, then `python3 scripts/render-3d-shade.py <dir>/<id>--<n>.png images/shop/3d/<id>-<n>.webp tee|hoodie`.
 
 **Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
 

@@ -64,12 +64,27 @@
   const featureBySlug = (slug) => features.find((f) => f.slug === slug);
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
+  const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
+  /** Spotify's playlist player (dark theme). height 152 = compact, 352 = with tracklist. */
+  const spotifyEmbed = (m, height = 152) => `<iframe class="k-spotify" title="${esc(m.title)} on Spotify" src="https://open.spotify.com/embed/playlist/${encodeURIComponent(m.spotify)}?utm_source=generator&theme=0" height="${height}" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
+  const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || (m.spotify ? 'Spotify' : '');
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
   const storyHref = (f) => `story.html?s=${encodeURIComponent(f.slug)}`;
   const featureName = (f) => [f.year, f.make, f.model].filter(Boolean).join(' ');
   const place = (f) => [f.city, f.country].filter(Boolean).join(', ');
-  const typeLabel = (t) => (t === 'motorcycle' ? 'Motorcycle' : 'Car');
+  const typeLabel = (t) => ({ motorcycle: 'Motorcycle', meet: 'Meet' }[t] || 'Car');
+
+  /* Blog helpers: chapters are dictated later; empty ones stay hidden. */
+  const DRAFT = new URLSearchParams(location.search).get('draft') === '1';
+  const written = (f) => (f.chapters || []).filter((c) => (c.body || '').trim());
+  const paragraphs = (text) => String(text || '').split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
+  function readMinutes(f) {
+    const words = (f.story || []).map((b) => `${b.lead || ''} ${b.body || b.text || ''}`)
+      .concat(written(f).map((c) => c.body)).join(' ').split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 220));
+  }
+  const longDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : '');
   const formatLabel = (f) => ({ film: 'Film', gallery: 'Photo story', interview: 'Interview' }[f.format] || 'Story');
   const price = (p) => {
     if (p.price == null) return 'Shop';
@@ -87,8 +102,9 @@
 
   /** Product visual: real photo when present, otherwise a vector mockup. */
   function productVisual(p, cw = 0) {
-    if (p.image) return `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async">`;
     const way = (p.colorways || [])[cw] || {};
+    const src = way.image || p.image;
+    if (src) return `<img class="k-product-img" src="${esc(src)}" alt="${esc(way.name ? `${p.title}, ${way.name}` : p.title)}" loading="lazy" decoding="async">`;
     return window.KioskMockup ? window.KioskMockup.render(p.mockup || { type: 'tee' }, way) : '';
   }
 
@@ -134,6 +150,7 @@
 
   const NAV = [
     { id: 'garage', label: 'Garage', href: 'garage.html' },
+    { id: 'journal', label: 'Journal', href: 'journal.html' },
     { id: 'films', label: 'Films', href: 'garage.html?format=film' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
@@ -142,7 +159,7 @@
   function currentNav() {
     const params = new URLSearchParams(location.search);
     if (PAGE === 'garage' && params.get('format') === 'film') return 'films';
-    if (PAGE === 'story') return 'garage';
+    if (PAGE === 'story') return 'journal';
     return PAGE;
   }
 
@@ -376,6 +393,7 @@
     play(slug) {
       const mix = mixBySlug(slug);
       if (!mix) return;
+      if (!mix.audio && mix.spotify) { window.open(spotifyUrl(mix), '_blank', 'noopener'); return; }
       if (!mix.audio) {
         toast(`${mix.title} ${mix.volume} drops soon — join the Dispatch to hear it first.`);
         return;
@@ -597,19 +615,21 @@
           <div class="plate plate--${esc(m.tone)}"></div>
           <div class="k-row-flex" style="justify-content:space-between">
             <span class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>KIOSK Radio</b> · ${esc(m.volume)}</span>
-            <span class="k-eyebrow">${esc(m.bpm)} BPM · ${esc(m.length)}</span>
+            <span class="k-eyebrow">${esc(mixMeta(m))}</span>
           </div>
           <div>
             <h3 class="k-radio__now">${esc(m.title)} <span class="k-serif" style="opacity:.6">${esc(m.volume)}</span></h3>
             <p class="k-radio__mood">${esc(m.mood)}</p>
           </div>
-          <div class="k-wave" aria-hidden="true">${waveBars(m.slug)}</div>
+          ${m.spotify && !m.audio ? spotifyEmbed(m) : `<div class="k-wave" aria-hidden="true">${waveBars(m.slug)}</div>`}
           <div class="k-radio__controls">
-            <button class="k-round" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false" aria-label="Play ${esc(m.title)}"><span data-ico>${icon.play}</span></button>
+            ${m.spotify && !m.audio
+              ? `<a class="k-btn k-btn--solid" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Open in Spotify<span class="k-arrow">${icon.arrow}</span></a>`
+              : `<button class="k-round" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false" aria-label="Play ${esc(m.title)}"><span data-ico>${icon.play}</span></button>`}
             ${product ? (productHref(product)
               ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
               : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
-            <span class="k-small">${esc((m.tracks || []).length)} tracks</span>
+            ${(m.tracks || []).length ? `<span class="k-small">${esc(m.tracks.length)} tracks</span>` : ''}
           </div>
         </div>
         <div class="k-radio__list k-glass" data-reveal data-reveal-delay="1">
@@ -618,9 +638,9 @@
             <button class="k-radio__item${x.slug === m.slug ? ' is-active' : ''}" type="button" data-radio-select="${esc(x.slug)}">
               <span class="k-radio__cover">${media({ image: x.cover, tone: x.tone, mark: '' })}</span>
               <span><b>${esc(x.title)}</b><small>${esc(x.volume)} · ${esc(x.mood)}</small></span>
-              <span class="k-mono">${esc(x.length)}</span>
+              <span class="k-mono">${esc(x.length || (x.spotify ? 'Spotify' : ''))}</span>
             </button>`).join('')}
-          <div style="padding:10px"><a class="k-bar" href="radio.html">All mixes + tracklists<span class="k-arrow">${icon.arrow}</span></a></div>
+          <div style="padding:10px"><a class="k-bar" href="radio.html">All playlists + tracklists<span class="k-arrow">${icon.arrow}</span></a></div>
         </div>
       </div>`;
   }
@@ -886,7 +906,7 @@
       <div class="k-filter">
         <span class="k-filter__label">Machine</span>
         <div class="k-seg" data-group="type">
-          ${[['all', 'Any'], ['car', 'Cars'], ['motorcycle', 'Motorcycles']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${state.type === v}">${l}</button>`).join('')}
+          ${[['all', 'Any'], ['car', 'Cars'], ['motorcycle', 'Motorcycles'], ['meet', 'Meets']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${state.type === v}">${l}</button>`).join('')}
         </div>
       </div>
       <div class="k-filter">
@@ -1095,7 +1115,26 @@
     }).join('');
     const ownerQuote = f.owner && f.owner.quote && !(f.story || []).some((b) => b.type === 'quote')
       ? `<blockquote class="k-prose__quote" data-reveal><p>“${esc(f.owner.quote)}”</p><cite>— ${esc(f.owner.name)}</cite></blockquote>` : '';
-    fill('story-body', (blocks + ownerQuote) || `<p class="k-prose__text"><strong>${esc(f.tagline)}</strong> ${esc(f.excerpt || '')}</p>`);
+    const done = written(f);
+    const chapters = (f.chapters || []).map((c, n) => {
+      const body = paragraphs(c.body);
+      if (body.length) {
+        return `<section class="k-chapter" id="${esc(c.id)}" data-reveal>
+          <p class="k-chapter__num">Chapter ${pad(n + 1)}</p>
+          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
+          ${body.map((t) => `<p class="k-prose__text">${esc(t)}</p>`).join('')}
+        </section>`;
+      }
+      return DRAFT ? `<section class="k-chapter k-chapter--draft" id="${esc(c.id)}">
+          <p class="k-chapter__num">Chapter ${pad(n + 1)} · <code>${esc(c.id)}</code> · not written yet</p>
+          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
+          <p class="k-prose__text">${esc(c.prompt || '')}</p>
+        </section>` : '';
+    }).join('');
+    const pending = (f.chapters || []).length - done.length;
+    const byline = `<p class="k-byline">By ${esc(f.author || 'KIOSK')}${f.published ? ` · ${esc(longDate(f.published))}` : ''} · ${readMinutes(f)} min read${DRAFT ? ` · <b>Draft view: ${done.length} of ${(f.chapters || []).length} chapters written</b>` : ''}</p>`;
+    const more = !DRAFT && pending > 0 ? `<p class="k-small k-chapter__more">${done.length ? 'More chapters' : 'The full story'} coming soon, told by ${esc(f.author || 'KIOSK')}.</p>` : '';
+    fill('story-body', byline + ((blocks + ownerQuote) || `<p class="k-prose__text"><strong>${esc(f.tagline)}</strong> ${esc(f.excerpt || '')}</p>`) + chapters + more);
 
     // TIMELINE
     const tl = f.timeline || [];
@@ -1311,19 +1350,48 @@
         <article class="k-glass" style="padding:clamp(20px,3vw,28px);border-radius:var(--r-xl)" data-reveal>
           <div class="k-row-flex" style="justify-content:space-between">
             <p class="k-eyebrow">${pad(n + 1)} / ${esc(m.volume)}</p>
-            <p class="k-eyebrow">${esc(m.length)} · ${esc(m.bpm)} BPM</p>
+            <p class="k-eyebrow">${esc(mixMeta(m))}</p>
           </div>
           <h3 class="k-h2 k-mt-m">${esc(m.title)}</h3>
           <p class="k-body k-mt-s">${esc(m.mood)}</p>
-          <ol class="k-rows k-mt-m">
-            ${(m.tracks || []).map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
-          </ol>
+          ${m.spotify ? `<div class="k-mt-m">${spotifyEmbed(m, 352)}</div>` : ''}
+          ${(m.tracks || []).length ? `<ol class="k-rows k-mt-m">
+            ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
+          </ol>` : ''}
           ${used.length ? `<p class="k-small k-mt-m">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
           <div class="k-row-flex k-mt-m">
-            <button class="k-btn k-btn--solid" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false"><span data-ico style="display:inline-grid;width:12px">${icon.play}</span> Listen</button>
+            ${m.spotify && !m.audio
+              ? `<a class="k-btn k-btn--solid" href="${esc(spotifyUrl(m))}" target="_blank" rel="noopener">Follow on Spotify</a>`
+              : `<button class="k-btn k-btn--solid" type="button" data-mix-play="${esc(m.slug)}" aria-pressed="false"><span data-ico style="display:inline-grid;width:12px">${icon.play}</span> Listen</button>`}
             ${product ? (productHref(product)
               ? `<a class="k-btn" href="${esc(productHref(product))}">Download · ${esc(price(product))}</a>`
               : `<button class="k-btn" type="button" data-notify="${esc(product.id)}" data-notify-title="${esc(product.title)}">Get the mix · ${esc(price(product))}</button>`) : ''}
+          </div>
+        </article>`;
+    }).join(''));
+  }
+
+  /* ---------------------------------------------------------- journal */
+
+  function pageJournal() {
+    const posts = features.slice().sort((a, b) => String(b.published).localeCompare(String(a.published)));
+    fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
+    fill('journal', posts.map((f, n) => {
+      const total = (f.chapters || []).length;
+      const done = written(f).length;
+      const status = (f.tags || []).includes('In the edit') ? 'In the edit' : formatLabel(f);
+      return `
+        <article class="k-post" data-reveal>
+          <a class="k-post__media" href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}" aria-label="${esc(f.title || featureName(f))}">
+            ${media({ image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus })}
+          </a>
+          <div class="k-post__body">
+            <p class="k-eyebrow">${pad(posts.length - n)} · ${esc(longDate(f.published))} · ${esc(status)}</p>
+            <h2 class="k-h2"><a href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}">${esc(f.title || featureName(f))}</a></h2>
+            <p class="k-small">${esc(featureName(f))}${place(f) ? ` · ${esc(place(f))}` : ''}</p>
+            <p class="k-body k-mt-s">${esc(f.excerpt || f.tagline || '')}</p>
+            ${total ? `<ol class="k-post__chapters" aria-label="Chapters">${(f.chapters || []).map((c) => `<li class="${(c.body || '').trim() ? 'is-done' : ''}">${esc(c.heading)}</li>`).join('')}</ol>` : ''}
+            <p class="k-byline">By ${esc(f.author || 'KIOSK')} · ${readMinutes(f)} min read${total ? ` · ${done} of ${total} chapters written` : ''}</p>
           </div>
         </article>`;
     }).join(''));
@@ -1413,7 +1481,7 @@
   renderChrome();
   bindGlobal();
   try {
-    ({ home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault }[PAGE] || (() => {}))();
+    ({ home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal }[PAGE] || (() => {}))();
   } catch (err) {
     // Never leave a blank page if content has a typo
     console.error('[KIOSK] render error', err);
