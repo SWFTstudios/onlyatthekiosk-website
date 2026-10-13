@@ -1194,7 +1194,7 @@
       const qv = e.target.closest('[data-quickview]');
       if (qv) {
         const card = qv.closest('[data-product]');
-        openQuickView(qv.dataset.quickview, card ? Number(card.dataset.cw || 0) : 0);
+        openQuickView(qv.dataset.quickview, qv.dataset.cw != null ? Number(qv.dataset.cw) : card ? Number(card.dataset.cw || 0) : 0);
         return;
       }
       const save = e.target.closest('[data-save]');
@@ -1296,6 +1296,10 @@
       fill('films-rows', films.slice(0, 5).map(filmRow).join(''));
     }
     fillVimeo('films-vimeo');
+
+    // Magazine: departments rail + mosaic board
+    fill('departments', railShell(departmentsHtml(), 'Departments', 'k-hscroll-wrap--depts'));
+    fillMosaic('home-mosaic', mosaicItems(null, 24), { label: 'The Mosaic' });
 
     // Radio
     const radio = fill('radio', radioBlock((C.mixes || [])[0] && C.mixes[0].slug));
@@ -1642,6 +1646,12 @@
       fill('story-look-why', `Matched to this story’s ${[f.season, ...(f.vibes || []).slice(0, 2)].filter(Boolean).map(esc).join(', ')} mood and colour guide.`);
     } else hideSection('look');
 
+    // CONTACT SHEET + KEEP READING
+    fillMosaic('story-mosaic', mosaicItems(f.slug), { filters: false, label: 'Contact sheet' });
+    const others = features.filter((x) => x !== f);
+    if (others.length) fill('story-more', railShell(others.map(featureCard).join(''), 'More stories', 'k-hscroll-wrap--cards'));
+    else { const m = mount('story-more'); if (m) m.closest('section').hidden = true; }
+
     // PREV / NEXT
     const idx = features.indexOf(f);
     const prev = features[(idx - 1 + features.length) % features.length];
@@ -1812,9 +1822,305 @@
     }).join(''));
   }
 
+  /* ---------------------------------------------- magazine: rails + mosaic
+   * Two layout pieces used across the site:
+   *   railShell()  a horizontal scroller with drag, arrow buttons and a
+   *                progress bar (any [data-hscroll] gets the behaviour).
+   *   mosaicHtml() a Pinterest-style masonry board that mixes photos,
+   *                films, products, playlists, palettes and pull quotes,
+   *                each labelled with its department (desk).
+   * -------------------------------------------------------------------- */
+
+  const DESKS = { travel: 'Travel', automotive: 'Automotive', music: 'Music', fashion: 'Fashion' };
+  const ARROW_L = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ARROW_R = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /** Gallery images have 720px versions in a thumbs/ folder (scripts: see CONTENT_GUIDE). */
+  const thumbOf = (src) => (/^images\/garage\/[^/]+\/\d+\.webp$/.test(src || '') ? src.replace(/\/(\d+\.webp)$/, '/thumbs/$1') : src);
+
+  function railShell(inner, label, cls = '') {
+    return `
+      <div class="k-hscroll-wrap ${cls}">
+        <div class="k-hscroll" data-hscroll tabindex="0" role="region" aria-label="${esc(label)}">${inner}</div>
+        <div class="k-hscroll__ui">
+          <div class="k-hscroll__bar" aria-hidden="true"><i></i></div>
+          <button class="k-hscroll__btn" type="button" data-rail-prev aria-label="Scroll back">${ARROW_L}</button>
+          <button class="k-hscroll__btn" type="button" data-rail-next aria-label="Scroll forward">${ARROW_R}</button>
+        </div>
+      </div>`;
+  }
+
+  /** Drag-to-scroll, arrow buttons and progress for every horizontal scroller. */
+  function bindRails(root = document) {
+    $$('[data-hscroll], .k-rail', root).forEach((el) => {
+      if (el.dataset.railBound) return;
+      el.dataset.railBound = '1';
+      const wrap = el.closest('.k-hscroll-wrap');
+      const bar = wrap && $('.k-hscroll__bar i', wrap);
+      const update = () => {
+        const max = el.scrollWidth - el.clientWidth;
+        const p = max > 0 ? el.scrollLeft / max : 1;
+        if (bar) bar.style.transform = `scaleX(${Math.max(0.08, Math.min(1, p))})`;
+        if (wrap) {
+          wrap.classList.toggle('is-start', el.scrollLeft < 4);
+          wrap.classList.toggle('is-end', el.scrollLeft > max - 4);
+          wrap.classList.toggle('is-static', max <= 4);
+        }
+      };
+      el.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true, signal: pageAbort.signal });
+      update();
+      if (wrap) {
+        const step = (dir) => el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: REDUCED ? 'auto' : 'smooth' });
+        $('[data-rail-prev]', wrap).addEventListener('click', () => step(-1));
+        $('[data-rail-next]', wrap).addEventListener('click', () => step(1));
+      }
+      el.addEventListener('keydown', (e) => {
+        if (e.target !== el) return;
+        if (e.key === 'ArrowRight') { el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' }); e.preventDefault(); }
+        if (e.key === 'ArrowLeft') { el.scrollBy({ left: -el.clientWidth * 0.8, behavior: 'smooth' }); e.preventDefault(); }
+      });
+      // Mouse drag (touch already scrolls natively)
+      let x0 = 0; let s0 = 0; let dragging = false; let moved = false;
+      el.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        dragging = true; moved = false; x0 = e.clientX; s0 = el.scrollLeft;
+      });
+      el.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - x0;
+        if (!moved && Math.abs(dx) > 6) { moved = true; el.classList.add('is-dragging'); el.setPointerCapture(e.pointerId); }
+        if (moved) el.scrollLeft = s0 - dx;
+      });
+      const end = () => { dragging = false; setTimeout(() => el.classList.remove('is-dragging'), 0); };
+      el.addEventListener('pointerup', end);
+      el.addEventListener('dragstart', (e) => e.preventDefault());   // links and images would start a native drag
+      el.addEventListener('pointercancel', end);
+      // A drag shouldn't count as a click on the card underneath
+      el.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    });
+  }
+
+  /** Everything the mosaic can show, sorted into departments. */
+  function mosaicPool(only) {
+    const out = { automotive: [], travel: [], fashion: [], music: [] };
+    const push = (desk, item) => (out[DESKS[desk] ? desk : 'automotive']).push({ ...item, desk: DESKS[desk] ? desk : 'automotive' });
+    features.filter((f) => !only || f.slug === only).forEach((f) => {
+      (f.gallery || []).forEach((g) => {
+        const it = typeof g === 'string' ? { src: g } : g;
+        push(it.desk || f.desk, { kind: 'photo', src: it.src, thumb: thumbOf(it.src), caption: it.caption || '', meta: it.meta || '', place: place(f) || f.location || '', story: f.slug });
+      });
+      if (only) return;
+      if (f.vimeo && f.vimeo.id) push(f.desk, { kind: 'film', vimeo: f.vimeo, story: f.slug, caption: f.title || featureName(f), place: place(f) || f.location || '' });
+      if ((f.palette || []).length >= 4) push('fashion', { kind: 'palette', colors: f.palette.slice(0, 6), story: f.slug, caption: `${f.title || featureName(f)} palette` });
+    });
+    if (!only) {
+      (C.products || []).forEach((p) => {
+        const cw = (p.colorways || []).findIndex((w) => w.image);
+        if (cw >= 0) push('fashion', { kind: 'product', id: p.id, cw, src: p.colorways[cw].image, caption: p.title, meta: `${p.colorways[cw].name} · ${price(p)}` });
+      });
+      (C.mixes || []).forEach((m) => push('music', { kind: 'mix', slug: m.slug, src: m.cover, tone: m.tone, caption: m.title, meta: m.mood }));
+      push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'KIOSK Radio' });
+      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'journal.html', cta: 'The Journal' });
+    }
+    return out;
+  }
+
+  /** Spread each department evenly through the board instead of in clumps. */
+  function mosaicItems(only, limit = Infinity) {
+    const pool = mosaicPool(only);
+    if (Number.isFinite(limit)) {
+      // Every desk gets a fair share (films, playlists and quotes first), photos fill the rest
+      const desks = Object.keys(pool).filter((d) => pool[d].length);
+      const total = desks.reduce((n, d) => n + pool[d].length, 0);
+      const rank = (it) => (it.kind === 'photo' ? 1 : 0);
+      desks.forEach((d) => { pool[d] = pool[d].map((it, k) => ({ it, k })).sort((a, b) => rank(a.it) - rank(b.it) || a.k - b.k).map((x) => x.it); });
+      const quota = {};
+      desks.forEach((d) => { quota[d] = Math.min(pool[d].length, Math.max(4, Math.round((limit * pool[d].length) / total))); });
+      let over = desks.reduce((n, d) => n + quota[d], 0) - limit;
+      while (over > 0) {
+        const big = desks.reduce((a, d) => (quota[d] > quota[a] ? d : a), desks[0]);
+        quota[big] -= 1; over -= 1;
+      }
+      desks.forEach((d) => { pool[d] = pool[d].slice(0, quota[d]); });
+    }
+    const keyed = [];
+    Object.keys(pool).forEach((desk, d) => {
+      const list = pool[desk];
+      list.forEach((it, k) => keyed.push({ it, key: (k + 0.35 + d * 0.13) / list.length }));
+    });
+    return keyed.sort((a, b) => a.key - b.key).map((x) => x.it).slice(0, limit);
+  }
+
+  function mosaicTile(it, n) {
+    const desk = `<span class="k-mosaic__desk">${esc(DESKS[it.desk])}</span>`;
+    const cap = (title, sub) => `<span class="k-mosaic__cap">${desk}<b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span>`;
+    const tile = (cls, attrs, inner) => `<li class="k-mosaic__tile k-mosaic__tile--${cls}" data-desk="${esc(it.desk)}" data-reveal>${attrs ? `<button type="button" ${attrs}>` : '<div>'}${inner}${attrs ? '</button>' : '</div>'}</li>`;
+    if (it.kind === 'photo') {
+      return tile('photo', `data-mosaic-open="${n}" aria-label="${esc(it.caption || 'Photo')}"`,
+        `<img src="${esc(it.thumb)}" data-full="${esc(it.src)}" alt="${esc(it.caption)}" loading="lazy" decoding="async">${cap(it.caption, it.place)}`);
+    }
+    if (it.kind === 'film') {
+      return tile('film k-dark', `data-vimeo="${esc(it.vimeo.id)}" aria-label="Play ${esc(it.caption)}"`,
+        `<span class="k-mosaic__frame"><span class="plate plate--${esc((featureBySlug(it.story) || {}).tone || 'graphite')}" data-vimeo-cover="${esc(it.vimeo.id)}"><span class="plate__mark">${esc((featureBySlug(it.story) || {}).code || '')}</span></span></span><span class="k-mosaic__play">${icon.play}</span>${cap(it.caption, ['Film', it.place].filter(Boolean).join(' · '))}`);
+    }
+    if (it.kind === 'product') {
+      const p = productById(it.id);
+      return tile('product', `data-quickview="${esc(it.id)}" data-cw="${it.cw}" aria-label="${esc(it.caption)}"`,
+        `<span class="k-mosaic__product">${p ? productVisual(p, it.cw) : ''}</span>${cap(it.caption, it.meta)}`);
+    }
+    if (it.kind === 'mix') {
+      return tile('mix k-dark', `data-mix-play="${esc(it.slug)}" aria-label="Play ${esc(it.caption)}"`,
+        `<span class="k-mosaic__frame">${media({ image: it.src, tone: it.tone, mark: '' })}</span><span class="k-mosaic__play" data-ico>${icon.play}</span><canvas class="k-mosaic__wave" data-wave="${esc(it.slug)}" aria-hidden="true"></canvas>${cap(it.caption, it.meta)}`);
+    }
+    if (it.kind === 'palette') {
+      const f = featureBySlug(it.story);
+      return `<li class="k-mosaic__tile k-mosaic__tile--palette" data-desk="${esc(it.desk)}" data-reveal><a href="${f ? storyHref(f) : '#'}">
+        <span class="k-mosaic__swatches">${it.colors.map((c) => `<span style="background:${esc(c.hex)}" title="${esc(c.name)}"></span>`).join('')}</span>
+        ${cap(it.caption, it.colors.map((c) => c.name).join(' · '))}</a></li>`;
+    }
+    // quote
+    return `<li class="k-mosaic__tile k-mosaic__tile--quote" data-desk="${esc(it.desk)}" data-reveal><a href="${esc(it.link)}">
+      ${desk}<q>${esc(it.text)}</q><span class="k-mosaic__more">${esc(it.cta)}<span class="k-arrow">${icon.arrow}</span></span></a></li>`;
+  }
+
+  /** Board + department filter chips. */
+  function mosaicHtml(items, { filters = true, label = 'Mosaic' } = {}) {
+    const present = Object.keys(DESKS).filter((d) => items.some((it) => it.desk === d));
+    return `
+      ${filters && present.length > 1 ? `<div class="k-mosaic__filters" role="group" aria-label="Filter by department">
+        <button class="k-chip" type="button" data-mosaic-filter="all" aria-pressed="true">All</button>
+        ${present.map((d) => `<button class="k-chip" type="button" data-mosaic-filter="${d}" aria-pressed="false">${DESKS[d]}</button>`).join('')}
+      </div>` : ''}
+      <ul class="k-mosaic" data-mosaic aria-label="${esc(label)}">${items.map(mosaicTile).join('')}</ul>`;
+  }
+
+  /** Fill a mount with a mosaic and remember its items for the photo viewer. */
+  function fillMosaic(name, items, opts) {
+    const el = mount(name);
+    if (!el) return null;
+    if (!items.length) { const sec = el.closest('[data-mosaic-section]'); if (sec) sec.hidden = true; return null; }
+    el.innerHTML = mosaicHtml(items, opts);
+    el.kItems = items;
+    return el;
+  }
+
+  let photoNav = null;   // { items, i } while the photo viewer is open
+
+  function openPhoto(items, i) {
+    const photos = items.filter((it) => it.kind === 'photo');
+    const at = Math.max(0, photos.indexOf(items[i]));
+    photoNav = { photos, i: at };
+    showPhoto();
+  }
+
+  function showPhoto() {
+    const { photos, i } = photoNav;
+    const it = photos[i];
+    const f = featureBySlug(it.story);
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">${esc(DESKS[it.desk])} · ${pad(i + 1)} / ${pad(photos.length)}</p><p class="k-h3 k-mt-s">${esc(it.caption || (f && f.title) || '')}</p></div>
+        <div class="k-row-flex">
+          ${f && PAGE !== 'story' ? `<a class="k-btn k-btn--sm" href="${storyHref(f)}">Read the story</a>` : ''}
+          <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+        </div>
+      </div>
+      <figure class="k-photo">
+        <img src="${esc(it.src)}" alt="${esc(it.caption)}">
+        <figcaption>${[f && (f.title || featureName(f)), it.place, it.meta].filter(Boolean).map(esc).join(' · ')}</figcaption>
+        ${photos.length > 1 ? `<button class="k-photo__nav k-photo__nav--prev" type="button" data-photo-step="-1" aria-label="Previous photo">${ARROW_L}</button>
+        <button class="k-photo__nav k-photo__nav--next" type="button" data-photo-step="1" aria-label="Next photo">${ARROW_R}</button>` : ''}
+      </figure>`, 'Photo');
+  }
+
+  function bindMagazine() {
+    document.addEventListener('click', (e) => {
+      const open = e.target.closest('[data-mosaic-open]');
+      if (open) {
+        const host = open.closest('[data-mount]');
+        if (host && host.kItems) openPhoto(host.kItems, Number(open.dataset.mosaicOpen));
+        return;
+      }
+      const stepBtn = e.target.closest('[data-photo-step]');
+      if (stepBtn && photoNav) {
+        photoNav.i = (photoNav.i + Number(stepBtn.dataset.photoStep) + photoNav.photos.length) % photoNav.photos.length;
+        showPhoto();
+        return;
+      }
+      const filter = e.target.closest('[data-mosaic-filter]');
+      if (filter) {
+        const host = filter.closest('[data-mount]');
+        const d = filter.dataset.mosaicFilter;
+        $$('[data-mosaic-filter]', host).forEach((b) => b.setAttribute('aria-pressed', String(b === filter)));
+        $$('.k-mosaic__tile', host).forEach((t) => { t.hidden = d !== 'all' && t.dataset.desk !== d; });
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!photoNav || !$('.k-lightbox.is-open .k-photo')) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        photoNav.i = (photoNav.i + (e.key === 'ArrowRight' ? 1 : -1) + photoNav.photos.length) % photoNav.photos.length;
+        showPhoto();
+      }
+    });
+    // Thumbs that haven't been generated fall back to the full image
+    document.addEventListener('error', (e) => {
+      const img = e.target;
+      if (img && img.tagName === 'IMG' && img.dataset.full && img.src.indexOf(img.dataset.full) === -1) img.src = img.dataset.full;
+    }, true);
+  }
+
+  /** Magazine "departments" rail: one big card per desk. */
+  function departmentsHtml() {
+    const pool = mosaicPool();
+    const firstPhoto = (desk, not) => (pool[desk] || []).find((it) => it.kind === 'photo' && it.story !== not) || (pool[desk] || []).find((it) => it.kind === 'photo');
+    const autoPhoto = firstPhoto('automotive');
+    const hoodie = (C.products || []).find((p) => (p.colorways || []).some((w) => w.image) && (p.mockup || {}).type === 'hoodie');
+    const mix = (C.mixes || [])[0];
+    const desks = [
+      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'garage.html', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
+      { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'journal.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
+      { id: 'music', n: '03', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
+      { id: 'fashion', n: '04', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
+    ];
+    return desks.map((d) => `
+      <a class="k-dept k-dept--${d.id}" href="${d.href}" data-reveal>
+        <span class="k-dept__media">${d.product ? `<span class="k-dept__product">${productVisual(d.product, (d.product.colorways || []).findIndex((w) => w.image))}</span>` : media({ image: d.img, tone: d.tone || 'graphite', mark: '' })}</span>
+        <span class="k-dept__top"><span class="k-dept__n">${d.n}</span><span class="k-eyebrow">${d.count} ${d.unit}</span></span>
+        <span class="k-dept__body"><b class="k-dept__title">${esc(d.title)}</b><span class="k-dept__dek">${esc(d.dek)}</span></span>
+      </a>`).join('');
+  }
+
+  /** Shop lookbook: products shown against the shoot their colourway is named after. */
+  function lookbookHtml() {
+    const slides = [];
+    (C.products || []).forEach((p) => {
+      (p.colorways || []).forEach((w, cw) => {
+        if (!w.image) return;
+        const f = features.find((x) => (x.palette || []).some((c) => c.name.toLowerCase() === w.name.toLowerCase()) && (x.gallery || []).length);
+        if (!f) return;
+        const g = f.gallery[hash(p.id + w.name) % f.gallery.length];
+        const src = typeof g === 'string' ? g : g.src;
+        slides.push({ p, w, cw, f, src });
+      });
+    });
+    return slides.map(({ p, w, cw, f, src }) => `
+      <article class="k-look" data-reveal>
+        <a class="k-look__photo" href="${storyHref(f)}" aria-label="${esc(f.title || featureName(f))}">${media({ image: thumbOf(src), tone: f.tone, alt: f.title })}</a>
+        <button class="k-look__product" type="button" data-quickview="${esc(p.id)}" data-cw="${cw}" aria-label="${esc(`${p.title}, ${w.name}`)}">${productVisual(p, cw)}</button>
+        <div class="k-look__cap">
+          <span class="k-mosaic__desk">Fashion × ${esc(DESKS[f.desk] || 'Automotive')}</span>
+          <b>${esc(p.title)} <span class="k-serif">in ${esc(w.name)}</span></b>
+          <small>${esc(w.name)} is from the ${esc(f.title || featureName(f))} palette · ${esc(price(p))}</small>
+        </div>
+      </article>`).join('');
+  }
+
   /* ---------------------------------------------------------- journal */
 
   function pageJournal() {
+    fill('journal-departments', railShell(departmentsHtml(), 'Departments', 'k-hscroll-wrap--depts'));
+    fillMosaic('journal-mosaic', mosaicItems(), { label: 'The archive' });
     const posts = features.slice().sort((a, b) => String(b.published).localeCompare(String(a.published)));
     fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
     fill('journal', posts.map((f, n) => {
@@ -1854,6 +2160,9 @@
   }
 
   function pageVault() {
+    const look = lookbookHtml();
+    if (look) fill('shop-lookbook', railShell(look, 'Lookbook', 'k-hscroll-wrap--look'));
+    else { const sec = mount('shop-lookbook'); if (sec) sec.closest('section').hidden = true; }
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
     let sort = params.get('sort') || 'featured';
@@ -1924,6 +2233,7 @@
     try {
       (PAGES[PAGE] || (() => {}))();
       hydrateCovers();
+      bindRails();
     } catch (err) {
       // Never leave a blank page if content has a typo
       console.error('[KIOSK] render error', err);
@@ -1932,6 +2242,7 @@
 
   renderChrome();
   bindGlobal();
+  bindMagazine();
   bindSoftNav();
   runPage();
   reveal();

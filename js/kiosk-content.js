@@ -49,6 +49,7 @@ window.KIOSK_CONTENT = {
   features: [
     {
       slug: 'andy-q50',
+      desk: 'automotive',   // magazine department: travel | automotive | music | fashion
       type: 'car',
       format: 'film',
       year: '',
@@ -142,13 +143,13 @@ window.KIOSK_CONTENT = {
         { src: 'images/garage/andy-q50/03.webp', caption: 'Bridge roller, three-quarter', meta: 'A7C II · 28mm · 1/50 · f/8 · ISO 100' },
         { src: 'images/garage/andy-q50/04.webp', caption: 'Through the cables', meta: 'A7C II · 39mm · 1/50 · f/8 · ISO 100' },
         { src: 'images/garage/andy-q50/05.webp', caption: 'Off the bridge', meta: 'A7C II · 28mm · 1/50 · f/8 · ISO 100' },
-        { src: 'images/garage/andy-q50/06.webp', caption: 'Parkway, river side', meta: 'A7C II · 41mm · 1/50 · f/8 · ISO 100' },
+        { src: 'images/garage/andy-q50/06.webp', caption: 'Parkway, river side', meta: 'A7C II · 41mm · 1/50 · f/8 · ISO 100', desk: 'travel' },
         { src: 'images/garage/andy-q50/07.webp', caption: 'Parkway, head-on', meta: 'A7C II · 57mm · 1/50 · f/8 · ISO 100' },
         { src: 'images/garage/andy-q50/08.webp', caption: 'Parkway, long lens', meta: 'A7C II · 54mm · 1/50 · f/9 · ISO 100' },
         { src: 'images/garage/andy-q50/09.webp', caption: 'Profile on the grass', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
         { src: 'images/garage/andy-q50/10.webp', caption: 'Face-on', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
         { src: 'images/garage/andy-q50/11.webp', caption: 'Face-on, warm', meta: 'A7C II · 50mm · 1/4000 · f/1.8 · ISO 64' },
-        { src: 'images/garage/andy-q50/12.webp', caption: 'Below the spillway', meta: 'A7C II · 50mm · 1/1250 · f/1.8 · ISO 100' },
+        { src: 'images/garage/andy-q50/12.webp', caption: 'Below the spillway', meta: 'A7C II · 50mm · 1/1250 · f/1.8 · ISO 100', desk: 'travel' },
         { src: 'images/garage/andy-q50/13.webp', caption: 'Bridge roller, cables overhead', meta: 'A7C II · 39mm · 1/50 · f/8 · ISO 100' },
         { src: 'images/garage/andy-q50/14.webp', caption: 'Coming off the bridge', meta: 'A7C II · 35mm · 1/50 · f/8 · ISO 100' },
         { src: 'images/garage/andy-q50/15.webp', caption: 'Rear roller, sound wall', meta: 'A7C II · 38mm · 1/50 · f/8 · ISO 100' },
@@ -172,6 +173,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'moses-r1m',
+      desk: 'automotive',
       type: 'motorcycle',
       format: 'gallery',
       year: '',
@@ -252,16 +254,16 @@ window.KIOSK_CONTENT = {
       focus: '64% 70%',
       poster: 'images/garage/moses-r1m/01.webp',
       gallery: [
-        { src: 'images/garage/moses-r1m/01.webp', caption: 'Bridge tower, three-quarter', meta: 'iPhone 14 Pro · 3× · 1/25 · f/2.8 · ISO 500' },
+        { src: 'images/garage/moses-r1m/01.webp', caption: 'Bridge tower, three-quarter', meta: 'iPhone 14 Pro · 3× · 1/25 · f/2.8 · ISO 500', desk: 'travel' },
         { src: 'images/garage/moses-r1m/02.webp', caption: 'On the yellow curb', meta: 'iPhone 14 Pro · 3× · 1/105 · f/2.8 · ISO 250' },
         { src: 'images/garage/moses-r1m/03.webp', caption: 'On the yellow curb, wider', meta: 'iPhone 14 Pro · 3× · 1/30 · f/2.8 · ISO 400' },
         { src: 'images/garage/moses-r1m/04.webp', caption: 'Front fairing', meta: 'iPhone 14 Pro · 3× · 1/15 · f/2.8 · ISO 500' },
-        { src: 'images/garage/moses-r1m/05.webp', caption: 'Last light', meta: 'iPhone 14 Pro · 3× · 1/25 · f/2.8 · ISO 500' },
+        { src: 'images/garage/moses-r1m/05.webp', caption: 'Last light', meta: 'iPhone 14 Pro · 3× · 1/25 · f/2.8 · ISO 500', desk: 'travel' },
         { src: 'images/garage/moses-r1m/06.webp', caption: 'Tank detail, bridge behind', meta: 'iPhone 14 Pro · 1× · 1/60 · f/1.8 · ISO 640' },
-        { src: 'images/garage/moses-r1m/07.webp', caption: 'Helmet + Midtown', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 320' },
-        { src: 'images/garage/moses-r1m/08.webp', caption: 'Helmet + Midtown, tighter', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250' },
-        { src: 'images/garage/moses-r1m/09.webp', caption: 'Helmet + tower', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250' },
-        { src: 'images/garage/moses-r1m/10.webp', caption: 'Helmet, river level', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250' },
+        { src: 'images/garage/moses-r1m/07.webp', caption: 'Helmet + Midtown', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 320', desk: 'travel' },
+        { src: 'images/garage/moses-r1m/08.webp', caption: 'Helmet + Midtown, tighter', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
+        { src: 'images/garage/moses-r1m/09.webp', caption: 'Helmet + tower', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
+        { src: 'images/garage/moses-r1m/10.webp', caption: 'Helmet, river level', meta: 'iPhone 14 Pro · 3× · 1/40 · f/2.8 · ISO 250', desk: 'travel' },
       ],
       video: '',
       embed: '',
@@ -272,6 +274,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'lunar-new-year-meet',
+      desk: 'automotive',
       hidden: true,   // off the site for now: delete this line to bring the post back
       type: 'car',
       format: 'film',
@@ -337,6 +340,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'doom-racing-prospect-meet',
+      desk: 'automotive',
       type: 'meet',
       format: 'film',
       year: '',
@@ -402,6 +406,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'honda-f4i-shop',
+      desk: 'automotive',
       type: 'motorcycle',
       format: 'film',
       year: '',
@@ -467,6 +472,7 @@ window.KIOSK_CONTENT = {
     },
     {
       slug: 'l0st-tapes',
+      desk: 'travel',
       type: 'car',
       format: 'film',
       year: '',

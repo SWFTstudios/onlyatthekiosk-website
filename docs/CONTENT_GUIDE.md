@@ -183,6 +183,23 @@ For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in
 
 ---
 
+## 3a. Magazine layouts: departments, mosaics and rails
+
+The site is organised like a magazine with four **desks**: Travel, Automotive, Music and Fashion.
+
+- **Departments rail** (home page and Journal): one big card per desk.
+- **Mosaic** (home page, Journal archive, and the contact sheet on each story): a Pinterest-style board. It mixes gallery photos, Vimeo films, story palettes, 3D product renders, playlists and pull quotes, with filter chips per desk. Tap a photo to open the photo viewer (← → to browse).
+- **Lookbook rail** (shop): each product colourway next to the shoot whose palette it's named after.
+- **Rails** scroll sideways with drag, arrow buttons or the keyboard.
+
+Each story has a `desk` (`'travel' | 'automotive'`). A single gallery photo can go to a different desk with `desk: 'travel'` on that entry. Products always go under Fashion and playlists under Music.
+
+**Thumbnails:** mosaics load 720px versions from `images/garage/<slug>/thumbs/`. After adding photos, make them with:
+```bash
+for f in images/garage/<slug>/[0-9][0-9].webp; do mkdir -p images/garage/<slug>/thumbs; convert "$f" -resize '720x720>' -strip -quality 72 "images/garage/<slug>/thumbs/$(basename "$f")"; done
+```
+If a thumbnail is missing, the full image is used instead.
+
 ## 3b. Films on Vimeo
 
 Vimeo films show in an **On Vimeo** strip on the home page and the Garage. Add the ID from the link (`vimeo.com/<id>`, or `vimeo.com/<id>/<hash>` for an unlisted video):
