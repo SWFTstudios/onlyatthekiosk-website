@@ -24,7 +24,7 @@ function absoluteUrl(relativePath) {
  */
 function parseCsvRows(content) {
   const rows = [];
-  const lines = content.split('\n');
+  const lines = content.split(/\r?\n/);
   let i = 0;
 
   while (i < lines.length) {
@@ -56,7 +56,8 @@ function isFirstVariantRow(row) {
   return /^(\d{3}-(?:gold|silver|black|white)-(?:chain|bracelet|hoodie|tshirt)),([^,]+),/.test(row);
 }
 
-function updateImageSrc(row, imageUrl, position, altText) {
+function parseCsvRow(row) {
+  row = row.replace(/\r$/, '');
   const cols = [];
   let current = '';
   let inQuotes = false;
@@ -64,8 +65,12 @@ function updateImageSrc(row, imageUrl, position, altText) {
   for (let i = 0; i < row.length; i++) {
     const ch = row[i];
     if (ch === '"') {
-      inQuotes = !inQuotes;
-      current += ch;
+      if (inQuotes && row[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
     } else if (ch === ',' && !inQuotes) {
       cols.push(current);
       current = '';
@@ -74,16 +79,10 @@ function updateImageSrc(row, imageUrl, position, altText) {
     }
   }
   cols.push(current);
+  return cols;
+}
 
-  // Image Src = col 31, Image Position = 32, Image Alt Text = 33 (0-indexed: 30, 31, 32)
-  const IMAGE_SRC_IDX = 30;
-  const IMAGE_POS_IDX = 31;
-  const IMAGE_ALT_IDX = 32;
-
-  if (cols.length > IMAGE_SRC_IDX) cols[IMAGE_SRC_IDX] = imageUrl;
-  if (cols.length > IMAGE_POS_IDX) cols[IMAGE_POS_IDX] = String(position);
-  if (cols.length > IMAGE_ALT_IDX && altText) cols[IMAGE_ALT_IDX] = altText;
-
+function serializeCsvRow(cols) {
   return cols.map((col) => {
     if (col.includes(',') || col.includes('"') || col.includes('\n')) {
       return `"${col.replace(/"/g, '""')}"`;
@@ -92,45 +91,37 @@ function updateImageSrc(row, imageUrl, position, altText) {
   }).join(',');
 }
 
-function buildLifestyleRow(firstRow, handle, entry, imageUrl) {
-  const cols = [];
-  let current = '';
-  let inQuotes = false;
+function updateImageSrc(row, imageUrl, position, altText) {
+  const cols = parseCsvRow(row);
 
-  for (let i = 0; i < firstRow.length; i++) {
-    const ch = firstRow[i];
-    if (ch === '"') {
-      inQuotes = !inQuotes;
-      current += ch;
-    } else if (ch === ',' && !inQuotes) {
-      cols.push(current);
-      current = '';
-    } else {
-      current += ch;
-    }
-  }
-  cols.push(current);
+  // Shopify CSV columns (0-indexed).
+  const IMAGE_SRC_IDX = 31;
+  const IMAGE_POS_IDX = 32;
+  const IMAGE_ALT_IDX = 33;
 
+  if (cols.length > IMAGE_SRC_IDX) cols[IMAGE_SRC_IDX] = imageUrl;
+  if (cols.length > IMAGE_POS_IDX) cols[IMAGE_POS_IDX] = String(position);
+  if (cols.length > IMAGE_ALT_IDX && altText) cols[IMAGE_ALT_IDX] = altText;
+
+  return serializeCsvRow(cols);
+}
+
+function buildGalleryRow(firstRow, handle, imageUrl, position, altText) {
+  const cols = parseCsvRow(firstRow);
   // Clear variant-specific fields, keep handle
-  const IMAGE_SRC_IDX = 30;
-  const IMAGE_POS_IDX = 31;
-  const IMAGE_ALT_IDX = 32;
+  const IMAGE_SRC_IDX = 31;
+  const IMAGE_POS_IDX = 32;
+  const IMAGE_ALT_IDX = 33;
 
   cols[0] = handle;
   for (let i = 1; i < cols.length; i++) {
     if (i === IMAGE_SRC_IDX) cols[i] = imageUrl;
-    else if (i === IMAGE_POS_IDX) cols[i] = '2';
-    else if (i === IMAGE_ALT_IDX) cols[i] = entry.lifestyleAlt;
-    else if (i >= 1 && i <= 29) cols[i] = '';
+    else if (i === IMAGE_POS_IDX) cols[i] = String(position);
+    else if (i === IMAGE_ALT_IDX) cols[i] = altText;
+    else cols[i] = '';
   }
 
-  return cols.map((col) => {
-    if (!col) return '';
-    if (col.includes(',') || col.includes('"') || col.includes('\n')) {
-      return `"${col.replace(/"/g, '""')}"`;
-    }
-    return col;
-  }).join(',');
+  return serializeCsvRow(cols);
 }
 
 function main() {
@@ -141,7 +132,7 @@ function main() {
 
   const header = rows[0];
   const dataRows = rows.slice(1);
-  const lifestyleRowsByHandle = new Map();
+  const galleryRowsByHandle = new Map();
   const outputRows = [header];
   const updatedHandles = new Set();
 
@@ -155,14 +146,21 @@ function main() {
     const entry = manifest[handle];
     const productUrl = absoluteUrl(entry.productPath);
 
+    // Remove previously generated image-only rows so the update is idempotent.
+    if (!isFirstVariantRow(row) && parseCsvRow(row)[31]) {
+      continue;
+    }
+
     if (isFirstVariantRow(row) && !updatedHandles.has(handle)) {
       const updated = updateImageSrc(row, productUrl, 1, entry.productAlt);
       outputRows.push(updated);
       updatedHandles.add(handle);
 
-      if (!lifestyleRowsByHandle.has(handle)) {
-        const lifestyleUrl = absoluteUrl(entry.lifestylePath);
-        lifestyleRowsByHandle.set(handle, buildLifestyleRow(row, handle, entry, lifestyleUrl));
+      if (!galleryRowsByHandle.has(handle)) {
+        galleryRowsByHandle.set(handle, [
+          buildGalleryRow(row, handle, absoluteUrl(entry.lifestylePath), 2, entry.lifestyleAlt),
+          buildGalleryRow(row, handle, absoluteUrl(entry.lifestyle2Path), 3, entry.lifestyle2Alt),
+        ]);
       }
     } else {
       outputRows.push(row);
@@ -176,29 +174,29 @@ function main() {
     finalRows.push(outputRows[i]);
     const handle = getHandleFromRow(outputRows[i]);
 
-    if (handle && lifestyleRowsByHandle.has(handle)) {
+    if (handle && galleryRowsByHandle.has(handle)) {
       const nextHandle = i + 1 < outputRows.length ? getHandleFromRow(outputRows[i + 1]) : null;
       if (nextHandle !== handle) {
-        finalRows.push(lifestyleRowsByHandle.get(handle));
-        lifestyleRowsByHandle.delete(handle);
+        finalRows.push(...galleryRowsByHandle.get(handle));
+        galleryRowsByHandle.delete(handle);
       }
     }
     i++;
   }
 
   // Append any remaining lifestyle rows
-  for (const row of lifestyleRowsByHandle.values()) {
-    finalRows.push(row);
+  for (const rowsForHandle of galleryRowsByHandle.values()) {
+    finalRows.push(...rowsForHandle);
   }
 
   if (dryRun) {
-    console.log(`[dry-run] Would update ${updatedHandles.size} product image URLs and add ${updatedHandles.size} lifestyle rows`);
+    console.log(`[dry-run] Would update ${updatedHandles.size} product image URLs and add ${updatedHandles.size * 2} lifestyle rows`);
     return;
   }
 
   fs.writeFileSync(CSV_PATH, finalRows.join('\n') + '\n');
   console.log(`✅ Updated ${CSV_PATH}`);
-  console.log(`   ${updatedHandles.size} product URLs updated, ${updatedHandles.size} lifestyle rows added`);
+  console.log(`   ${updatedHandles.size} product URLs updated, ${updatedHandles.size * 2} lifestyle rows added`);
 }
 
 main();

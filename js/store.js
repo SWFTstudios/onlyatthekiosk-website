@@ -79,7 +79,8 @@
         edges: [
           { node: { url: manifest.product, altText: manifest.productAlt } },
           { node: { url: manifest.lifestyle, altText: manifest.lifestyleAlt } },
-        ],
+          { node: { url: manifest.lifestyle2, altText: manifest.lifestyle2Alt } },
+        ].filter(({ node }) => Boolean(node.url)),
       },
     };
   }

@@ -99,9 +99,15 @@ export async function onRequest(context) {
     const body = await request.json();
     const { handle, kind } = body;
 
-    if (!handle || !kind || !['product', 'lifestyle'].includes(kind)) {
+    const promptKeys = {
+      product: 'productPrompt',
+      lifestyle: 'lifestylePrompt',
+      lifestyle2: 'lifestyle2Prompt',
+    };
+
+    if (!handle || !promptKeys[kind]) {
       return new Response(
-        JSON.stringify({ error: 'Invalid request. Provide handle and kind (product|lifestyle).' }),
+        JSON.stringify({ error: 'Invalid request. Provide handle and kind (product|lifestyle|lifestyle2).' }),
         { status: 400, headers: corsHeaders }
       );
     }
@@ -121,7 +127,13 @@ export async function onRequest(context) {
       });
     }
 
-    const prompt = kind === 'product' ? entry.productPrompt : entry.lifestylePrompt;
+    const prompt = entry[promptKeys[kind]];
+    if (!prompt) {
+      return new Response(JSON.stringify({ error: `Missing ${promptKeys[kind]} for ${handle}` }), {
+        status: 422,
+        headers: corsHeaders,
+      });
+    }
     const { b64, model: usedModel } = await generateOpenAIImage(prompt, apiKey, model);
 
     return new Response(

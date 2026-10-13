@@ -319,21 +319,23 @@ class AirtableClient {
       }
     }
 
-    // Append lifestyle image from local manifest when available
+    // Append both lifestyle images from the local manifest when available.
     const handle = fields.Handle || '';
     if (handle && typeof getProductImagesByHandle === 'function') {
       const manifestImages = getProductImagesByHandle(handle);
-      if (manifestImages?.lifestyle) {
-        const hasLifestyle = images.some((img) => img.url === manifestImages.lifestyle);
-        if (!hasLifestyle) {
+      [
+        [manifestImages?.lifestyle, manifestImages?.lifestyleAlt || `${fields.Title} close lifestyle`],
+        [manifestImages?.lifestyle2, manifestImages?.lifestyle2Alt || `${fields.Title} street lifestyle`],
+      ].forEach(([url, altText]) => {
+        if (url && !images.some((img) => img.url === url)) {
           images.push({
-            url: manifestImages.lifestyle,
-            altText: manifestImages.lifestyleAlt || `${fields.Title} lifestyle`,
+            url,
+            altText,
             width: 800,
             height: 800
           });
         }
-      }
+      });
     }
     
     // Parse variants

@@ -25,6 +25,11 @@ const SIZE = 1200;
 const OPENAI_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
 const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://onlyatthekiosk.com';
 const RATE_LIMIT_MS = parseInt(process.env.OPENAI_RATE_LIMIT_MS || '1500', 10);
+const IMAGE_KINDS = [
+  { kind: 'product', promptKey: 'productPrompt', suffix: 'product' },
+  { kind: 'lifestyle', promptKey: 'lifestylePrompt', suffix: 'lifestyle' },
+  { kind: 'lifestyle2', promptKey: 'lifestyle2Prompt', suffix: 'lifestyle-2' },
+];
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -132,34 +137,39 @@ async function generateImageB64(handle, kind, prompt, apiKey, remote) {
 }
 
 async function processProduct(handle, entry, opts, apiKey) {
-  const rawProduct = path.join(RAW_DIR, `${handle}-product.png`);
-  const rawLifestyle = path.join(RAW_DIR, `${handle}-lifestyle.png`);
-  const webpProduct = path.join(OUT_DIR, `${handle}-product.webp`);
-  const webpLifestyle = path.join(OUT_DIR, `${handle}-lifestyle.webp`);
+  const jobs = IMAGE_KINDS.map(({ kind, promptKey, suffix }) => ({
+    kind,
+    prompt: entry[promptKey],
+    rawPath: path.join(RAW_DIR, `${handle}-${suffix}.png`),
+    webpPath: path.join(OUT_DIR, `${handle}-${suffix}.webp`),
+  }));
 
-  if (!opts.force && fs.existsSync(webpProduct) && fs.existsSync(webpLifestyle)) {
+  if (jobs.some((job) => !job.prompt)) {
+    throw new Error(`Manifest entry is missing one or more prompts for ${handle}`);
+  }
+
+  if (!opts.force && jobs.every((job) => fs.existsSync(job.webpPath))) {
     console.log(`  ⏭️  ${handle} (already exists, use --force to regenerate)`);
     entry.status = 'optimized';
     return;
   }
 
   if (opts.dryRun) {
-    console.log(`  [dry-run] ${handle}: product + lifestyle`);
+    console.log(`  [dry-run] ${handle}: ${IMAGE_KINDS.map(({ kind }) => kind).join(' + ')}`);
     return;
   }
 
   fs.mkdirSync(RAW_DIR, { recursive: true });
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
-  const productB64 = await generateImageB64(handle, 'product', entry.productPrompt, apiKey, opts.remote);
-  fs.writeFileSync(rawProduct, Buffer.from(productB64, 'base64'));
-  await sleep(RATE_LIMIT_MS);
+  for (const job of jobs) {
+    if (!opts.force && fs.existsSync(job.webpPath)) continue;
 
-  const lifestyleB64 = await generateImageB64(handle, 'lifestyle', entry.lifestylePrompt, apiKey, opts.remote);
-  fs.writeFileSync(rawLifestyle, Buffer.from(lifestyleB64, 'base64'));
-
-  await optimizeToWebp(rawProduct, webpProduct);
-  await optimizeToWebp(rawLifestyle, webpLifestyle);
+    const imageB64 = await generateImageB64(handle, job.kind, job.prompt, apiKey, opts.remote);
+    fs.writeFileSync(job.rawPath, Buffer.from(imageB64, 'base64'));
+    await optimizeToWebp(job.rawPath, job.webpPath);
+    await sleep(RATE_LIMIT_MS);
+  }
 
   entry.status = 'optimized';
   console.log(`  ✅ ${handle}`);
@@ -201,7 +211,7 @@ async function main() {
 
   const apiKey = process.env.IMAGE_GEN_API_KEY || process.env.OPENAI_API_KEY || null;
 
-  if (opts.openai && !apiKey && !opts.remote) {
+  if (opts.openai && !apiKey && !opts.remote && !opts.dryRun) {
     console.error('❌ --openai requires OPENAI_API_KEY locally or --remote with key on Cloudflare.');
     process.exit(1);
   }
@@ -216,7 +226,7 @@ async function main() {
       ? `OpenAI ${OPENAI_MODEL} (local)`
       : 'procedural fallback disabled — use --openai';
 
-  if (opts.openai && !apiKey && !opts.remote) {
+  if (opts.openai && !apiKey && !opts.remote && !opts.dryRun) {
     process.exit(1);
   }
 
@@ -225,7 +235,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\n🖼️  Generating ${handles.length} products (${handles.length * 2} images) via ${mode}`);
+  console.log(`\n🖼️  Generating ${handles.length} products (${handles.length * IMAGE_KINDS.length} images) via ${mode}`);
   if (opts.collection) console.log(`   Collection: ${opts.collection}`);
   if (opts.force) console.log('   Force regenerate: yes');
 

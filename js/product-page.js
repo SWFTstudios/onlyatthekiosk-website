@@ -158,7 +158,7 @@
               return {
                 title: manifest.title || h,
                 mainImage: manifest.product,
-                gallery: [manifest.lifestyle].filter(Boolean),
+                gallery: [manifest.lifestyle, manifest.lifestyle2].filter(Boolean),
                 description: `<p>${manifest.title || h} — an essential piece from KIOSK.</p>`,
                 price: { amount: '0', currencyCode: 'USD' },
               };

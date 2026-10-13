@@ -36,6 +36,7 @@ function buildManifestEntry(handle, title) {
   const prompts = buildPrompts(handle, title);
   const productFilename = `${handle}-product.webp`;
   const lifestyleFilename = `${handle}-lifestyle.webp`;
+  const lifestyle2Filename = `${handle}-lifestyle-2.webp`;
 
   return {
     title,
@@ -43,12 +44,16 @@ function buildManifestEntry(handle, title) {
     variant: prompts.variant,
     number: prompts.number,
     collection: prompts.collection,
+    designName: prompts.designName,
     productPrompt: prompts.productPrompt,
     lifestylePrompt: prompts.lifestylePrompt,
+    lifestyle2Prompt: prompts.lifestyle2Prompt,
     productPath: `/images/products/${productFilename}`,
     lifestylePath: `/images/products/${lifestyleFilename}`,
+    lifestyle2Path: `/images/products/${lifestyle2Filename}`,
     productAlt: `${title} product shot`,
-    lifestyleAlt: `${title} lifestyle`,
+    lifestyleAlt: `${title} close lifestyle photo`,
+    lifestyle2Alt: `${title} street lifestyle photo`,
     status: 'pending',
   };
 }

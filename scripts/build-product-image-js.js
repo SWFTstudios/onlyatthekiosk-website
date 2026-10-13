@@ -41,9 +41,11 @@ function main() {
     images[handle] = {
       product: entry.productPath,
       lifestyle: entry.lifestylePath,
+      lifestyle2: entry.lifestyle2Path,
       title: entry.title,
       productAlt: entry.productAlt,
       lifestyleAlt: entry.lifestyleAlt,
+      lifestyle2Alt: entry.lifestyle2Alt,
     };
   }
 
@@ -91,7 +93,7 @@ function getProductPlaceholder(productHandle, collectionKey) {
   const title = entry ? entry.title : 'Product';
   const mainImage = entry ? entry.product : fallbackImage;
   const gallery = entry
-    ? [entry.lifestyle]
+    ? [entry.lifestyle, entry.lifestyle2].filter(Boolean)
     : [fallbackImage];
 
   return {
@@ -110,8 +112,10 @@ function getProductImagesByHandle(handle) {
   return {
     product: entry.product,
     lifestyle: entry.lifestyle,
+    lifestyle2: entry.lifestyle2,
     productAlt: entry.productAlt,
     lifestyleAlt: entry.lifestyleAlt,
+    lifestyle2Alt: entry.lifestyle2Alt,
     title: entry.title,
   };
 }

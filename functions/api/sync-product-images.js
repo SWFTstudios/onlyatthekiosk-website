@@ -125,10 +125,16 @@ export async function onRequest(context) {
       updatedHandles.add(handle);
 
       const entry = manifest[handle];
+      const imageUrls = [
+        entry.productPath,
+        entry.lifestylePath,
+        entry.lifestyle2Path,
+      ].filter(Boolean).map((imagePath) => absoluteUrl(siteOrigin, imagePath));
       updates.push({
         id: record.id,
         fields: {
-          'Image Src': absoluteUrl(siteOrigin, entry.productPath),
+          'Image Src': imageUrls[0],
+          'Image URLs': JSON.stringify(imageUrls),
           'Image Alt Text': entry.productAlt,
         },
       });

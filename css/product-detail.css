@@ -432,6 +432,7 @@
   to { transform: rotate(360deg); }
 }
 
+.product-detail__loading[hidden],
 .product-detail__error[hidden],
 .product-detail__layout[hidden],
 .product-detail__sticky-bar[hidden] {

@@ -6,562 +6,722 @@ const PRODUCT_IMAGES = {
   "001-gold-chain": {
     "product": "/images/products/001-gold-chain-product.webp",
     "lifestyle": "/images/products/001-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/001-gold-chain-lifestyle-2.webp",
     "title": "#001 Gold Chain",
     "productAlt": "#001 Gold Chain product shot",
-    "lifestyleAlt": "#001 Gold Chain lifestyle"
+    "lifestyleAlt": "#001 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#001 Gold Chain street lifestyle photo"
   },
   "001-silver-chain": {
     "product": "/images/products/001-silver-chain-product.webp",
     "lifestyle": "/images/products/001-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/001-silver-chain-lifestyle-2.webp",
     "title": "#001 Silver Chain",
     "productAlt": "#001 Silver Chain product shot",
-    "lifestyleAlt": "#001 Silver Chain lifestyle"
+    "lifestyleAlt": "#001 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#001 Silver Chain street lifestyle photo"
   },
   "001-gold-bracelet": {
     "product": "/images/products/001-gold-bracelet-product.webp",
     "lifestyle": "/images/products/001-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/001-gold-bracelet-lifestyle-2.webp",
     "title": "#001 Gold Bracelet",
     "productAlt": "#001 Gold Bracelet product shot",
-    "lifestyleAlt": "#001 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#001 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#001 Gold Bracelet street lifestyle photo"
   },
   "001-silver-bracelet": {
     "product": "/images/products/001-silver-bracelet-product.webp",
     "lifestyle": "/images/products/001-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/001-silver-bracelet-lifestyle-2.webp",
     "title": "#001 Silver Bracelet",
     "productAlt": "#001 Silver Bracelet product shot",
-    "lifestyleAlt": "#001 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#001 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#001 Silver Bracelet street lifestyle photo"
   },
   "001-black-hoodie": {
     "product": "/images/products/001-black-hoodie-product.webp",
     "lifestyle": "/images/products/001-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/001-black-hoodie-lifestyle-2.webp",
     "title": "#001 Black Hoodie",
     "productAlt": "#001 Black Hoodie product shot",
-    "lifestyleAlt": "#001 Black Hoodie lifestyle"
+    "lifestyleAlt": "#001 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#001 Black Hoodie street lifestyle photo"
   },
   "001-white-hoodie": {
     "product": "/images/products/001-white-hoodie-product.webp",
     "lifestyle": "/images/products/001-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/001-white-hoodie-lifestyle-2.webp",
     "title": "#001 White Hoodie",
     "productAlt": "#001 White Hoodie product shot",
-    "lifestyleAlt": "#001 White Hoodie lifestyle"
+    "lifestyleAlt": "#001 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#001 White Hoodie street lifestyle photo"
   },
   "001-black-tshirt": {
     "product": "/images/products/001-black-tshirt-product.webp",
     "lifestyle": "/images/products/001-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/001-black-tshirt-lifestyle-2.webp",
     "title": "#001 Black T-shirt",
     "productAlt": "#001 Black T-shirt product shot",
-    "lifestyleAlt": "#001 Black T-shirt lifestyle"
+    "lifestyleAlt": "#001 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#001 Black T-shirt street lifestyle photo"
   },
   "001-white-tshirt": {
     "product": "/images/products/001-white-tshirt-product.webp",
     "lifestyle": "/images/products/001-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/001-white-tshirt-lifestyle-2.webp",
     "title": "#001 White T-shirt",
     "productAlt": "#001 White T-shirt product shot",
-    "lifestyleAlt": "#001 White T-shirt lifestyle"
+    "lifestyleAlt": "#001 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#001 White T-shirt street lifestyle photo"
   },
   "002-gold-chain": {
     "product": "/images/products/002-gold-chain-product.webp",
     "lifestyle": "/images/products/002-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/002-gold-chain-lifestyle-2.webp",
     "title": "#002 Gold Chain",
     "productAlt": "#002 Gold Chain product shot",
-    "lifestyleAlt": "#002 Gold Chain lifestyle"
+    "lifestyleAlt": "#002 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#002 Gold Chain street lifestyle photo"
   },
   "002-silver-chain": {
     "product": "/images/products/002-silver-chain-product.webp",
     "lifestyle": "/images/products/002-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/002-silver-chain-lifestyle-2.webp",
     "title": "#002 Silver Chain",
     "productAlt": "#002 Silver Chain product shot",
-    "lifestyleAlt": "#002 Silver Chain lifestyle"
+    "lifestyleAlt": "#002 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#002 Silver Chain street lifestyle photo"
   },
   "002-gold-bracelet": {
     "product": "/images/products/002-gold-bracelet-product.webp",
     "lifestyle": "/images/products/002-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/002-gold-bracelet-lifestyle-2.webp",
     "title": "#002 Gold Bracelet",
     "productAlt": "#002 Gold Bracelet product shot",
-    "lifestyleAlt": "#002 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#002 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#002 Gold Bracelet street lifestyle photo"
   },
   "002-silver-bracelet": {
     "product": "/images/products/002-silver-bracelet-product.webp",
     "lifestyle": "/images/products/002-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/002-silver-bracelet-lifestyle-2.webp",
     "title": "#002 Silver Bracelet",
     "productAlt": "#002 Silver Bracelet product shot",
-    "lifestyleAlt": "#002 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#002 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#002 Silver Bracelet street lifestyle photo"
   },
   "002-black-hoodie": {
     "product": "/images/products/002-black-hoodie-product.webp",
     "lifestyle": "/images/products/002-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/002-black-hoodie-lifestyle-2.webp",
     "title": "#002 Black Hoodie",
     "productAlt": "#002 Black Hoodie product shot",
-    "lifestyleAlt": "#002 Black Hoodie lifestyle"
+    "lifestyleAlt": "#002 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#002 Black Hoodie street lifestyle photo"
   },
   "002-white-hoodie": {
     "product": "/images/products/002-white-hoodie-product.webp",
     "lifestyle": "/images/products/002-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/002-white-hoodie-lifestyle-2.webp",
     "title": "#002 White Hoodie",
     "productAlt": "#002 White Hoodie product shot",
-    "lifestyleAlt": "#002 White Hoodie lifestyle"
+    "lifestyleAlt": "#002 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#002 White Hoodie street lifestyle photo"
   },
   "002-black-tshirt": {
     "product": "/images/products/002-black-tshirt-product.webp",
     "lifestyle": "/images/products/002-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/002-black-tshirt-lifestyle-2.webp",
     "title": "#002 Black T-shirt",
     "productAlt": "#002 Black T-shirt product shot",
-    "lifestyleAlt": "#002 Black T-shirt lifestyle"
+    "lifestyleAlt": "#002 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#002 Black T-shirt street lifestyle photo"
   },
   "002-white-tshirt": {
     "product": "/images/products/002-white-tshirt-product.webp",
     "lifestyle": "/images/products/002-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/002-white-tshirt-lifestyle-2.webp",
     "title": "#002 White T-shirt",
     "productAlt": "#002 White T-shirt product shot",
-    "lifestyleAlt": "#002 White T-shirt lifestyle"
+    "lifestyleAlt": "#002 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#002 White T-shirt street lifestyle photo"
   },
   "003-gold-chain": {
     "product": "/images/products/003-gold-chain-product.webp",
     "lifestyle": "/images/products/003-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/003-gold-chain-lifestyle-2.webp",
     "title": "#003 Gold Chain",
     "productAlt": "#003 Gold Chain product shot",
-    "lifestyleAlt": "#003 Gold Chain lifestyle"
+    "lifestyleAlt": "#003 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#003 Gold Chain street lifestyle photo"
   },
   "003-silver-chain": {
     "product": "/images/products/003-silver-chain-product.webp",
     "lifestyle": "/images/products/003-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/003-silver-chain-lifestyle-2.webp",
     "title": "#003 Silver Chain",
     "productAlt": "#003 Silver Chain product shot",
-    "lifestyleAlt": "#003 Silver Chain lifestyle"
+    "lifestyleAlt": "#003 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#003 Silver Chain street lifestyle photo"
   },
   "003-gold-bracelet": {
     "product": "/images/products/003-gold-bracelet-product.webp",
     "lifestyle": "/images/products/003-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/003-gold-bracelet-lifestyle-2.webp",
     "title": "#003 Gold Bracelet",
     "productAlt": "#003 Gold Bracelet product shot",
-    "lifestyleAlt": "#003 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#003 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#003 Gold Bracelet street lifestyle photo"
   },
   "003-silver-bracelet": {
     "product": "/images/products/003-silver-bracelet-product.webp",
     "lifestyle": "/images/products/003-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/003-silver-bracelet-lifestyle-2.webp",
     "title": "#003 Silver Bracelet",
     "productAlt": "#003 Silver Bracelet product shot",
-    "lifestyleAlt": "#003 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#003 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#003 Silver Bracelet street lifestyle photo"
   },
   "003-black-hoodie": {
     "product": "/images/products/003-black-hoodie-product.webp",
     "lifestyle": "/images/products/003-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/003-black-hoodie-lifestyle-2.webp",
     "title": "#003 Black Hoodie",
     "productAlt": "#003 Black Hoodie product shot",
-    "lifestyleAlt": "#003 Black Hoodie lifestyle"
+    "lifestyleAlt": "#003 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#003 Black Hoodie street lifestyle photo"
   },
   "003-white-hoodie": {
     "product": "/images/products/003-white-hoodie-product.webp",
     "lifestyle": "/images/products/003-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/003-white-hoodie-lifestyle-2.webp",
     "title": "#003 White Hoodie",
     "productAlt": "#003 White Hoodie product shot",
-    "lifestyleAlt": "#003 White Hoodie lifestyle"
+    "lifestyleAlt": "#003 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#003 White Hoodie street lifestyle photo"
   },
   "003-black-tshirt": {
     "product": "/images/products/003-black-tshirt-product.webp",
     "lifestyle": "/images/products/003-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/003-black-tshirt-lifestyle-2.webp",
     "title": "#003 Black T-shirt",
     "productAlt": "#003 Black T-shirt product shot",
-    "lifestyleAlt": "#003 Black T-shirt lifestyle"
+    "lifestyleAlt": "#003 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#003 Black T-shirt street lifestyle photo"
   },
   "003-white-tshirt": {
     "product": "/images/products/003-white-tshirt-product.webp",
     "lifestyle": "/images/products/003-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/003-white-tshirt-lifestyle-2.webp",
     "title": "#003 White T-shirt",
     "productAlt": "#003 White T-shirt product shot",
-    "lifestyleAlt": "#003 White T-shirt lifestyle"
+    "lifestyleAlt": "#003 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#003 White T-shirt street lifestyle photo"
   },
   "004-gold-chain": {
     "product": "/images/products/004-gold-chain-product.webp",
     "lifestyle": "/images/products/004-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/004-gold-chain-lifestyle-2.webp",
     "title": "#004 Gold Chain",
     "productAlt": "#004 Gold Chain product shot",
-    "lifestyleAlt": "#004 Gold Chain lifestyle"
+    "lifestyleAlt": "#004 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#004 Gold Chain street lifestyle photo"
   },
   "004-silver-chain": {
     "product": "/images/products/004-silver-chain-product.webp",
     "lifestyle": "/images/products/004-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/004-silver-chain-lifestyle-2.webp",
     "title": "#004 Silver Chain",
     "productAlt": "#004 Silver Chain product shot",
-    "lifestyleAlt": "#004 Silver Chain lifestyle"
+    "lifestyleAlt": "#004 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#004 Silver Chain street lifestyle photo"
   },
   "004-gold-bracelet": {
     "product": "/images/products/004-gold-bracelet-product.webp",
     "lifestyle": "/images/products/004-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/004-gold-bracelet-lifestyle-2.webp",
     "title": "#004 Gold Bracelet",
     "productAlt": "#004 Gold Bracelet product shot",
-    "lifestyleAlt": "#004 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#004 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#004 Gold Bracelet street lifestyle photo"
   },
   "004-silver-bracelet": {
     "product": "/images/products/004-silver-bracelet-product.webp",
     "lifestyle": "/images/products/004-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/004-silver-bracelet-lifestyle-2.webp",
     "title": "#004 Silver Bracelet",
     "productAlt": "#004 Silver Bracelet product shot",
-    "lifestyleAlt": "#004 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#004 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#004 Silver Bracelet street lifestyle photo"
   },
   "004-black-hoodie": {
     "product": "/images/products/004-black-hoodie-product.webp",
     "lifestyle": "/images/products/004-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/004-black-hoodie-lifestyle-2.webp",
     "title": "#004 Black Hoodie",
     "productAlt": "#004 Black Hoodie product shot",
-    "lifestyleAlt": "#004 Black Hoodie lifestyle"
+    "lifestyleAlt": "#004 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#004 Black Hoodie street lifestyle photo"
   },
   "004-white-hoodie": {
     "product": "/images/products/004-white-hoodie-product.webp",
     "lifestyle": "/images/products/004-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/004-white-hoodie-lifestyle-2.webp",
     "title": "#004 White Hoodie",
     "productAlt": "#004 White Hoodie product shot",
-    "lifestyleAlt": "#004 White Hoodie lifestyle"
+    "lifestyleAlt": "#004 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#004 White Hoodie street lifestyle photo"
   },
   "004-black-tshirt": {
     "product": "/images/products/004-black-tshirt-product.webp",
     "lifestyle": "/images/products/004-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/004-black-tshirt-lifestyle-2.webp",
     "title": "#004 Black T-shirt",
     "productAlt": "#004 Black T-shirt product shot",
-    "lifestyleAlt": "#004 Black T-shirt lifestyle"
+    "lifestyleAlt": "#004 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#004 Black T-shirt street lifestyle photo"
   },
   "004-white-tshirt": {
     "product": "/images/products/004-white-tshirt-product.webp",
     "lifestyle": "/images/products/004-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/004-white-tshirt-lifestyle-2.webp",
     "title": "#004 White T-shirt",
     "productAlt": "#004 White T-shirt product shot",
-    "lifestyleAlt": "#004 White T-shirt lifestyle"
+    "lifestyleAlt": "#004 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#004 White T-shirt street lifestyle photo"
   },
   "005-gold-chain": {
     "product": "/images/products/005-gold-chain-product.webp",
     "lifestyle": "/images/products/005-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/005-gold-chain-lifestyle-2.webp",
     "title": "#005 Gold Chain",
     "productAlt": "#005 Gold Chain product shot",
-    "lifestyleAlt": "#005 Gold Chain lifestyle"
+    "lifestyleAlt": "#005 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#005 Gold Chain street lifestyle photo"
   },
   "005-silver-chain": {
     "product": "/images/products/005-silver-chain-product.webp",
     "lifestyle": "/images/products/005-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/005-silver-chain-lifestyle-2.webp",
     "title": "#005 Silver Chain",
     "productAlt": "#005 Silver Chain product shot",
-    "lifestyleAlt": "#005 Silver Chain lifestyle"
+    "lifestyleAlt": "#005 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#005 Silver Chain street lifestyle photo"
   },
   "005-gold-bracelet": {
     "product": "/images/products/005-gold-bracelet-product.webp",
     "lifestyle": "/images/products/005-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/005-gold-bracelet-lifestyle-2.webp",
     "title": "#005 Gold Bracelet",
     "productAlt": "#005 Gold Bracelet product shot",
-    "lifestyleAlt": "#005 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#005 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#005 Gold Bracelet street lifestyle photo"
   },
   "005-silver-bracelet": {
     "product": "/images/products/005-silver-bracelet-product.webp",
     "lifestyle": "/images/products/005-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/005-silver-bracelet-lifestyle-2.webp",
     "title": "#005 Silver Bracelet",
     "productAlt": "#005 Silver Bracelet product shot",
-    "lifestyleAlt": "#005 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#005 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#005 Silver Bracelet street lifestyle photo"
   },
   "005-black-hoodie": {
     "product": "/images/products/005-black-hoodie-product.webp",
     "lifestyle": "/images/products/005-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/005-black-hoodie-lifestyle-2.webp",
     "title": "#005 Black Hoodie",
     "productAlt": "#005 Black Hoodie product shot",
-    "lifestyleAlt": "#005 Black Hoodie lifestyle"
+    "lifestyleAlt": "#005 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#005 Black Hoodie street lifestyle photo"
   },
   "005-white-hoodie": {
     "product": "/images/products/005-white-hoodie-product.webp",
     "lifestyle": "/images/products/005-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/005-white-hoodie-lifestyle-2.webp",
     "title": "#005 White Hoodie",
     "productAlt": "#005 White Hoodie product shot",
-    "lifestyleAlt": "#005 White Hoodie lifestyle"
+    "lifestyleAlt": "#005 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#005 White Hoodie street lifestyle photo"
   },
   "005-black-tshirt": {
     "product": "/images/products/005-black-tshirt-product.webp",
     "lifestyle": "/images/products/005-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/005-black-tshirt-lifestyle-2.webp",
     "title": "#005 Black T-shirt",
     "productAlt": "#005 Black T-shirt product shot",
-    "lifestyleAlt": "#005 Black T-shirt lifestyle"
+    "lifestyleAlt": "#005 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#005 Black T-shirt street lifestyle photo"
   },
   "005-white-tshirt": {
     "product": "/images/products/005-white-tshirt-product.webp",
     "lifestyle": "/images/products/005-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/005-white-tshirt-lifestyle-2.webp",
     "title": "#005 White T-shirt",
     "productAlt": "#005 White T-shirt product shot",
-    "lifestyleAlt": "#005 White T-shirt lifestyle"
+    "lifestyleAlt": "#005 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#005 White T-shirt street lifestyle photo"
   },
   "006-gold-chain": {
     "product": "/images/products/006-gold-chain-product.webp",
     "lifestyle": "/images/products/006-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/006-gold-chain-lifestyle-2.webp",
     "title": "#006 Gold Chain",
     "productAlt": "#006 Gold Chain product shot",
-    "lifestyleAlt": "#006 Gold Chain lifestyle"
+    "lifestyleAlt": "#006 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#006 Gold Chain street lifestyle photo"
   },
   "006-silver-chain": {
     "product": "/images/products/006-silver-chain-product.webp",
     "lifestyle": "/images/products/006-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/006-silver-chain-lifestyle-2.webp",
     "title": "#006 Silver Chain",
     "productAlt": "#006 Silver Chain product shot",
-    "lifestyleAlt": "#006 Silver Chain lifestyle"
+    "lifestyleAlt": "#006 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#006 Silver Chain street lifestyle photo"
   },
   "006-gold-bracelet": {
     "product": "/images/products/006-gold-bracelet-product.webp",
     "lifestyle": "/images/products/006-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/006-gold-bracelet-lifestyle-2.webp",
     "title": "#006 Gold Bracelet",
     "productAlt": "#006 Gold Bracelet product shot",
-    "lifestyleAlt": "#006 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#006 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#006 Gold Bracelet street lifestyle photo"
   },
   "006-silver-bracelet": {
     "product": "/images/products/006-silver-bracelet-product.webp",
     "lifestyle": "/images/products/006-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/006-silver-bracelet-lifestyle-2.webp",
     "title": "#006 Silver Bracelet",
     "productAlt": "#006 Silver Bracelet product shot",
-    "lifestyleAlt": "#006 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#006 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#006 Silver Bracelet street lifestyle photo"
   },
   "006-black-hoodie": {
     "product": "/images/products/006-black-hoodie-product.webp",
     "lifestyle": "/images/products/006-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/006-black-hoodie-lifestyle-2.webp",
     "title": "#006 Black Hoodie",
     "productAlt": "#006 Black Hoodie product shot",
-    "lifestyleAlt": "#006 Black Hoodie lifestyle"
+    "lifestyleAlt": "#006 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#006 Black Hoodie street lifestyle photo"
   },
   "006-white-hoodie": {
     "product": "/images/products/006-white-hoodie-product.webp",
     "lifestyle": "/images/products/006-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/006-white-hoodie-lifestyle-2.webp",
     "title": "#006 White Hoodie",
     "productAlt": "#006 White Hoodie product shot",
-    "lifestyleAlt": "#006 White Hoodie lifestyle"
+    "lifestyleAlt": "#006 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#006 White Hoodie street lifestyle photo"
   },
   "006-black-tshirt": {
     "product": "/images/products/006-black-tshirt-product.webp",
     "lifestyle": "/images/products/006-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/006-black-tshirt-lifestyle-2.webp",
     "title": "#006 Black T-shirt",
     "productAlt": "#006 Black T-shirt product shot",
-    "lifestyleAlt": "#006 Black T-shirt lifestyle"
+    "lifestyleAlt": "#006 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#006 Black T-shirt street lifestyle photo"
   },
   "006-white-tshirt": {
     "product": "/images/products/006-white-tshirt-product.webp",
     "lifestyle": "/images/products/006-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/006-white-tshirt-lifestyle-2.webp",
     "title": "#006 White T-shirt",
     "productAlt": "#006 White T-shirt product shot",
-    "lifestyleAlt": "#006 White T-shirt lifestyle"
+    "lifestyleAlt": "#006 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#006 White T-shirt street lifestyle photo"
   },
   "007-gold-chain": {
     "product": "/images/products/007-gold-chain-product.webp",
     "lifestyle": "/images/products/007-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/007-gold-chain-lifestyle-2.webp",
     "title": "#007 Gold Chain",
     "productAlt": "#007 Gold Chain product shot",
-    "lifestyleAlt": "#007 Gold Chain lifestyle"
+    "lifestyleAlt": "#007 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#007 Gold Chain street lifestyle photo"
   },
   "007-silver-chain": {
     "product": "/images/products/007-silver-chain-product.webp",
     "lifestyle": "/images/products/007-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/007-silver-chain-lifestyle-2.webp",
     "title": "#007 Silver Chain",
     "productAlt": "#007 Silver Chain product shot",
-    "lifestyleAlt": "#007 Silver Chain lifestyle"
+    "lifestyleAlt": "#007 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#007 Silver Chain street lifestyle photo"
   },
   "007-gold-bracelet": {
     "product": "/images/products/007-gold-bracelet-product.webp",
     "lifestyle": "/images/products/007-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/007-gold-bracelet-lifestyle-2.webp",
     "title": "#007 Gold Bracelet",
     "productAlt": "#007 Gold Bracelet product shot",
-    "lifestyleAlt": "#007 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#007 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#007 Gold Bracelet street lifestyle photo"
   },
   "007-silver-bracelet": {
     "product": "/images/products/007-silver-bracelet-product.webp",
     "lifestyle": "/images/products/007-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/007-silver-bracelet-lifestyle-2.webp",
     "title": "#007 Silver Bracelet",
     "productAlt": "#007 Silver Bracelet product shot",
-    "lifestyleAlt": "#007 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#007 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#007 Silver Bracelet street lifestyle photo"
   },
   "007-black-hoodie": {
     "product": "/images/products/007-black-hoodie-product.webp",
     "lifestyle": "/images/products/007-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/007-black-hoodie-lifestyle-2.webp",
     "title": "#007 Black Hoodie",
     "productAlt": "#007 Black Hoodie product shot",
-    "lifestyleAlt": "#007 Black Hoodie lifestyle"
+    "lifestyleAlt": "#007 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#007 Black Hoodie street lifestyle photo"
   },
   "007-white-hoodie": {
     "product": "/images/products/007-white-hoodie-product.webp",
     "lifestyle": "/images/products/007-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/007-white-hoodie-lifestyle-2.webp",
     "title": "#007 White Hoodie",
     "productAlt": "#007 White Hoodie product shot",
-    "lifestyleAlt": "#007 White Hoodie lifestyle"
+    "lifestyleAlt": "#007 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#007 White Hoodie street lifestyle photo"
   },
   "007-black-tshirt": {
     "product": "/images/products/007-black-tshirt-product.webp",
     "lifestyle": "/images/products/007-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/007-black-tshirt-lifestyle-2.webp",
     "title": "#007 Black T-shirt",
     "productAlt": "#007 Black T-shirt product shot",
-    "lifestyleAlt": "#007 Black T-shirt lifestyle"
+    "lifestyleAlt": "#007 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#007 Black T-shirt street lifestyle photo"
   },
   "007-white-tshirt": {
     "product": "/images/products/007-white-tshirt-product.webp",
     "lifestyle": "/images/products/007-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/007-white-tshirt-lifestyle-2.webp",
     "title": "#007 White T-shirt",
     "productAlt": "#007 White T-shirt product shot",
-    "lifestyleAlt": "#007 White T-shirt lifestyle"
+    "lifestyleAlt": "#007 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#007 White T-shirt street lifestyle photo"
   },
   "008-gold-chain": {
     "product": "/images/products/008-gold-chain-product.webp",
     "lifestyle": "/images/products/008-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/008-gold-chain-lifestyle-2.webp",
     "title": "#008 Gold Chain",
     "productAlt": "#008 Gold Chain product shot",
-    "lifestyleAlt": "#008 Gold Chain lifestyle"
+    "lifestyleAlt": "#008 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#008 Gold Chain street lifestyle photo"
   },
   "008-silver-chain": {
     "product": "/images/products/008-silver-chain-product.webp",
     "lifestyle": "/images/products/008-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/008-silver-chain-lifestyle-2.webp",
     "title": "#008 Silver Chain",
     "productAlt": "#008 Silver Chain product shot",
-    "lifestyleAlt": "#008 Silver Chain lifestyle"
+    "lifestyleAlt": "#008 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#008 Silver Chain street lifestyle photo"
   },
   "008-gold-bracelet": {
     "product": "/images/products/008-gold-bracelet-product.webp",
     "lifestyle": "/images/products/008-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/008-gold-bracelet-lifestyle-2.webp",
     "title": "#008 Gold Bracelet",
     "productAlt": "#008 Gold Bracelet product shot",
-    "lifestyleAlt": "#008 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#008 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#008 Gold Bracelet street lifestyle photo"
   },
   "008-silver-bracelet": {
     "product": "/images/products/008-silver-bracelet-product.webp",
     "lifestyle": "/images/products/008-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/008-silver-bracelet-lifestyle-2.webp",
     "title": "#008 Silver Bracelet",
     "productAlt": "#008 Silver Bracelet product shot",
-    "lifestyleAlt": "#008 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#008 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#008 Silver Bracelet street lifestyle photo"
   },
   "008-black-hoodie": {
     "product": "/images/products/008-black-hoodie-product.webp",
     "lifestyle": "/images/products/008-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/008-black-hoodie-lifestyle-2.webp",
     "title": "#008 Black Hoodie",
     "productAlt": "#008 Black Hoodie product shot",
-    "lifestyleAlt": "#008 Black Hoodie lifestyle"
+    "lifestyleAlt": "#008 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#008 Black Hoodie street lifestyle photo"
   },
   "008-white-hoodie": {
     "product": "/images/products/008-white-hoodie-product.webp",
     "lifestyle": "/images/products/008-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/008-white-hoodie-lifestyle-2.webp",
     "title": "#008 White Hoodie",
     "productAlt": "#008 White Hoodie product shot",
-    "lifestyleAlt": "#008 White Hoodie lifestyle"
+    "lifestyleAlt": "#008 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#008 White Hoodie street lifestyle photo"
   },
   "008-black-tshirt": {
     "product": "/images/products/008-black-tshirt-product.webp",
     "lifestyle": "/images/products/008-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/008-black-tshirt-lifestyle-2.webp",
     "title": "#008 Black T-shirt",
     "productAlt": "#008 Black T-shirt product shot",
-    "lifestyleAlt": "#008 Black T-shirt lifestyle"
+    "lifestyleAlt": "#008 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#008 Black T-shirt street lifestyle photo"
   },
   "008-white-tshirt": {
     "product": "/images/products/008-white-tshirt-product.webp",
     "lifestyle": "/images/products/008-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/008-white-tshirt-lifestyle-2.webp",
     "title": "#008 White T-shirt",
     "productAlt": "#008 White T-shirt product shot",
-    "lifestyleAlt": "#008 White T-shirt lifestyle"
+    "lifestyleAlt": "#008 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#008 White T-shirt street lifestyle photo"
   },
   "009-gold-chain": {
     "product": "/images/products/009-gold-chain-product.webp",
     "lifestyle": "/images/products/009-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/009-gold-chain-lifestyle-2.webp",
     "title": "#009 Gold Chain",
     "productAlt": "#009 Gold Chain product shot",
-    "lifestyleAlt": "#009 Gold Chain lifestyle"
+    "lifestyleAlt": "#009 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#009 Gold Chain street lifestyle photo"
   },
   "009-silver-chain": {
     "product": "/images/products/009-silver-chain-product.webp",
     "lifestyle": "/images/products/009-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/009-silver-chain-lifestyle-2.webp",
     "title": "#009 Silver Chain",
     "productAlt": "#009 Silver Chain product shot",
-    "lifestyleAlt": "#009 Silver Chain lifestyle"
+    "lifestyleAlt": "#009 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#009 Silver Chain street lifestyle photo"
   },
   "009-gold-bracelet": {
     "product": "/images/products/009-gold-bracelet-product.webp",
     "lifestyle": "/images/products/009-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/009-gold-bracelet-lifestyle-2.webp",
     "title": "#009 Gold Bracelet",
     "productAlt": "#009 Gold Bracelet product shot",
-    "lifestyleAlt": "#009 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#009 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#009 Gold Bracelet street lifestyle photo"
   },
   "009-silver-bracelet": {
     "product": "/images/products/009-silver-bracelet-product.webp",
     "lifestyle": "/images/products/009-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/009-silver-bracelet-lifestyle-2.webp",
     "title": "#009 Silver Bracelet",
     "productAlt": "#009 Silver Bracelet product shot",
-    "lifestyleAlt": "#009 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#009 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#009 Silver Bracelet street lifestyle photo"
   },
   "009-black-hoodie": {
     "product": "/images/products/009-black-hoodie-product.webp",
     "lifestyle": "/images/products/009-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/009-black-hoodie-lifestyle-2.webp",
     "title": "#009 Black Hoodie",
     "productAlt": "#009 Black Hoodie product shot",
-    "lifestyleAlt": "#009 Black Hoodie lifestyle"
+    "lifestyleAlt": "#009 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#009 Black Hoodie street lifestyle photo"
   },
   "009-white-hoodie": {
     "product": "/images/products/009-white-hoodie-product.webp",
     "lifestyle": "/images/products/009-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/009-white-hoodie-lifestyle-2.webp",
     "title": "#009 White Hoodie",
     "productAlt": "#009 White Hoodie product shot",
-    "lifestyleAlt": "#009 White Hoodie lifestyle"
+    "lifestyleAlt": "#009 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#009 White Hoodie street lifestyle photo"
   },
   "009-black-tshirt": {
     "product": "/images/products/009-black-tshirt-product.webp",
     "lifestyle": "/images/products/009-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/009-black-tshirt-lifestyle-2.webp",
     "title": "#009 Black T-shirt",
     "productAlt": "#009 Black T-shirt product shot",
-    "lifestyleAlt": "#009 Black T-shirt lifestyle"
+    "lifestyleAlt": "#009 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#009 Black T-shirt street lifestyle photo"
   },
   "009-white-tshirt": {
     "product": "/images/products/009-white-tshirt-product.webp",
     "lifestyle": "/images/products/009-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/009-white-tshirt-lifestyle-2.webp",
     "title": "#009 White T-shirt",
     "productAlt": "#009 White T-shirt product shot",
-    "lifestyleAlt": "#009 White T-shirt lifestyle"
+    "lifestyleAlt": "#009 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#009 White T-shirt street lifestyle photo"
   },
   "010-gold-chain": {
     "product": "/images/products/010-gold-chain-product.webp",
     "lifestyle": "/images/products/010-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/010-gold-chain-lifestyle-2.webp",
     "title": "#010 Gold Chain",
     "productAlt": "#010 Gold Chain product shot",
-    "lifestyleAlt": "#010 Gold Chain lifestyle"
+    "lifestyleAlt": "#010 Gold Chain close lifestyle photo",
+    "lifestyle2Alt": "#010 Gold Chain street lifestyle photo"
   },
   "010-silver-chain": {
     "product": "/images/products/010-silver-chain-product.webp",
     "lifestyle": "/images/products/010-silver-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/010-silver-chain-lifestyle-2.webp",
     "title": "#010 Silver Chain",
     "productAlt": "#010 Silver Chain product shot",
-    "lifestyleAlt": "#010 Silver Chain lifestyle"
+    "lifestyleAlt": "#010 Silver Chain close lifestyle photo",
+    "lifestyle2Alt": "#010 Silver Chain street lifestyle photo"
   },
   "010-gold-bracelet": {
     "product": "/images/products/010-gold-bracelet-product.webp",
     "lifestyle": "/images/products/010-gold-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/010-gold-bracelet-lifestyle-2.webp",
     "title": "#010 Gold Bracelet",
     "productAlt": "#010 Gold Bracelet product shot",
-    "lifestyleAlt": "#010 Gold Bracelet lifestyle"
+    "lifestyleAlt": "#010 Gold Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#010 Gold Bracelet street lifestyle photo"
   },
   "010-silver-bracelet": {
     "product": "/images/products/010-silver-bracelet-product.webp",
     "lifestyle": "/images/products/010-silver-bracelet-lifestyle.webp",
+    "lifestyle2": "/images/products/010-silver-bracelet-lifestyle-2.webp",
     "title": "#010 Silver Bracelet",
     "productAlt": "#010 Silver Bracelet product shot",
-    "lifestyleAlt": "#010 Silver Bracelet lifestyle"
+    "lifestyleAlt": "#010 Silver Bracelet close lifestyle photo",
+    "lifestyle2Alt": "#010 Silver Bracelet street lifestyle photo"
   },
   "010-black-hoodie": {
     "product": "/images/products/010-black-hoodie-product.webp",
     "lifestyle": "/images/products/010-black-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/010-black-hoodie-lifestyle-2.webp",
     "title": "#010 Black Hoodie",
     "productAlt": "#010 Black Hoodie product shot",
-    "lifestyleAlt": "#010 Black Hoodie lifestyle"
+    "lifestyleAlt": "#010 Black Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#010 Black Hoodie street lifestyle photo"
   },
   "010-white-hoodie": {
     "product": "/images/products/010-white-hoodie-product.webp",
     "lifestyle": "/images/products/010-white-hoodie-lifestyle.webp",
+    "lifestyle2": "/images/products/010-white-hoodie-lifestyle-2.webp",
     "title": "#010 White Hoodie",
     "productAlt": "#010 White Hoodie product shot",
-    "lifestyleAlt": "#010 White Hoodie lifestyle"
+    "lifestyleAlt": "#010 White Hoodie close lifestyle photo",
+    "lifestyle2Alt": "#010 White Hoodie street lifestyle photo"
   },
   "010-black-tshirt": {
     "product": "/images/products/010-black-tshirt-product.webp",
     "lifestyle": "/images/products/010-black-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/010-black-tshirt-lifestyle-2.webp",
     "title": "#010 Black T-shirt",
     "productAlt": "#010 Black T-shirt product shot",
-    "lifestyleAlt": "#010 Black T-shirt lifestyle"
+    "lifestyleAlt": "#010 Black T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#010 Black T-shirt street lifestyle photo"
   },
   "010-white-tshirt": {
     "product": "/images/products/010-white-tshirt-product.webp",
     "lifestyle": "/images/products/010-white-tshirt-lifestyle.webp",
+    "lifestyle2": "/images/products/010-white-tshirt-lifestyle-2.webp",
     "title": "#010 White T-shirt",
     "productAlt": "#010 White T-shirt product shot",
-    "lifestyleAlt": "#010 White T-shirt lifestyle"
+    "lifestyleAlt": "#010 White T-shirt close lifestyle photo",
+    "lifestyle2Alt": "#010 White T-shirt street lifestyle photo"
   }
 };
 
@@ -692,7 +852,7 @@ function getProductPlaceholder(productHandle, collectionKey) {
   const title = entry ? entry.title : 'Product';
   const mainImage = entry ? entry.product : fallbackImage;
   const gallery = entry
-    ? [entry.lifestyle]
+    ? [entry.lifestyle, entry.lifestyle2].filter(Boolean)
     : [fallbackImage];
 
   return {
@@ -711,8 +871,10 @@ function getProductImagesByHandle(handle) {
   return {
     product: entry.product,
     lifestyle: entry.lifestyle,
+    lifestyle2: entry.lifestyle2,
     productAlt: entry.productAlt,
     lifestyleAlt: entry.lifestyleAlt,
+    lifestyle2Alt: entry.lifestyle2Alt,
     title: entry.title,
   };
 }

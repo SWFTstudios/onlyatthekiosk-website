@@ -189,8 +189,14 @@ async function main() {
     if (!handle || !handlesInManifest.has(handle)) continue;
 
     const entry = manifest[handle];
+    const imageUrls = [
+      entry.productPath,
+      entry.lifestylePath,
+      entry.lifestyle2Path,
+    ].filter(Boolean).map(absoluteUrl);
     await updateRecord(record.id, {
-      'Image Src': absoluteUrl(entry.productPath),
+      'Image Src': imageUrls[0],
+      'Image URLs': JSON.stringify(imageUrls),
       'Image Alt Text': entry.productAlt,
     }, opts.dryRun);
 

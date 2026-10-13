@@ -6,12 +6,13 @@ The carousel supports multiple image sources. This document explains how to conf
 
 ## Current Setup
 
-Each of the **80 catalog products** has **two unique placeholder images** (product packshot + lifestyle) stored locally:
+Each of the **80 catalog products** has **three unique campaign images** (studio product shot + two lifestyle photos) stored locally:
 
 ```
 images/products/
   001-gold-chain-product.webp
   001-gold-chain-lifestyle.webp
+  001-gold-chain-lifestyle-2.webp
   ...
 ```
 
@@ -73,7 +74,8 @@ Writes `Image URLs` JSON per product:
 ```json
 [
   "https://onlyatthekiosk.com/images/products/001-gold-chain-product.webp",
-  "https://onlyatthekiosk.com/images/products/001-gold-chain-lifestyle.webp"
+  "https://onlyatthekiosk.com/images/products/001-gold-chain-lifestyle.webp",
+  "https://onlyatthekiosk.com/images/products/001-gold-chain-lifestyle-2.webp"
 ]
 ```
 
@@ -83,7 +85,7 @@ Writes `Image URLs` JSON per product:
 npm run update:csv-images
 ```
 
-Sets unique `Image Src` per product and adds lifestyle rows (`Image Position: 2`).
+Sets the unique product image and adds two lifestyle rows (`Image Position: 2` and `3`).
 
 ### 6. Regenerate frontend manifest
 
@@ -103,7 +105,7 @@ node scripts/verify-product-images.js
 
 When real images are ready, replace files **keeping the same filenames**:
 
-1. Drop new photos into `images/products/` as `{handle}-product.webp` and `{handle}-lifestyle.webp`
+1. Drop new photos into `images/products/` as `{handle}-product.webp`, `{handle}-lifestyle.webp`, and `{handle}-lifestyle-2.webp`
 2. Run `npm run optimize:images` if needed
 3. If filenames unchanged, **no Airtable or code updates required**
 4. Update manifest status to `"real"` manually or re-run generation scripts
@@ -120,7 +122,8 @@ When real images are ready, replace files **keeping the same filenames**:
 const PRODUCT_IMAGES = {
   "001-gold-chain": {
     "product": "/images/products/001-gold-chain-product.webp",
-    "lifestyle": "/images/products/001-gold-chain-lifestyle.webp"
+    "lifestyle": "/images/products/001-gold-chain-lifestyle.webp",
+    "lifestyle2": "/images/products/001-gold-chain-lifestyle-2.webp"
   }
 };
 ```
@@ -141,10 +144,10 @@ const PRODUCT_IMAGES = {
 Collection pages fetch products via [`js/airtable.js`](../js/airtable.js). Set the `Image URLs` field to a JSON array:
 
 ```json
-["/images/products/001-gold-chain-product.webp", "/images/products/001-gold-chain-lifestyle.webp"]
+["/images/products/001-gold-chain-product.webp", "/images/products/001-gold-chain-lifestyle.webp", "/images/products/001-gold-chain-lifestyle-2.webp"]
 ```
 
-First image = carousel thumbnail + drawer main. Second = drawer gallery.
+First image = carousel thumbnail + drawer main. Second and third = drawer gallery.
 
 ---
 
@@ -208,7 +211,7 @@ Used only when no product-specific image is found.
 3. Regenerate JS manifest: `npm run build:product-image-js`
 
 **Slow loading?**
-1. Images are already optimized WebP (~8KB each)
+1. Images are optimized 1200×1200 WebP files
 2. Use `loading="lazy"` for below-fold carousel items (already set)
 3. Consider Cloudflare image optimization for production
 
