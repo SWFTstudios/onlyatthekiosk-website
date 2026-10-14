@@ -140,10 +140,10 @@
   const productHref = (p, cw) => (canBuy(p, cw) ? (p.href && !handleOf(p, cw) ? p.href : pdpHref(p, cw)) : '');
   const pdpHref = (p, cw) => `vault.html?p=${encodeURIComponent(p.id)}${cw ? `&cw=${cw}` : ''}`;
 
-  /** Product visual: real photo when present, otherwise a vector mockup. */
   /**
    * Product image for a colourway. view: '' (default, back for quote pieces,
    * flips to the front on hover), 'front', 'back' or 'life' (lifestyle photo).
+   * Physical pieces with no lifestyle photos show a tech sketch.
    */
   const storeOf = (p) => (C.stores || []).find((x) => x.id === (p.store || 'kiosk'));
 
@@ -154,6 +154,10 @@
     if ((view === 'life' || view === 'life2') && life.length) {
       const i = view === 'life2' && life[1] ? 1 : 0;
       return `<img class="k-product-img k-product-img--photo" src="${esc(life[i])}" alt="${alt}, ${i ? 'in the terminal' : 'on the street'}" loading="lazy" decoding="async">`;
+    }
+    // No real photos yet: a factory tech sketch instead of a render
+    if (!life.length && !isDigitalP(p) && window.KioskMockup) {
+      return window.KioskMockup.render(p.mockup || { type: 'tee' }, way, { sketch: true, code: flightOf(p), title: p.title });
     }
     if (view === 'front' && way.imageFront) return `<img class="k-product-img" src="${esc(way.imageFront)}" alt="${alt}, front" loading="lazy" decoding="async">`;
     const src = way.image || p.image;
@@ -1950,6 +1954,7 @@
   function pdpImages(p, cw) {
     const w = wayOf(p, cw);
     const out = [];
+    if (!lifeOf(p, cw).length && !isDigitalP(p)) return out;   // the stage shows the tech sketch
     lifeOf(p, cw).forEach((src, i) => out.push({ src, alt: `${p.title}, ${w.name || ''}, ${i ? 'in the terminal' : 'on the street'}` }));
     if (w.image) out.push({ src: w.image, alt: `${p.title}, ${w.name || ''}${w.imageFront ? ', back' : ''}`, flat: true });
     if (w.imageFront) out.push({ src: w.imageFront, alt: `${p.title}, ${w.name || ''}, front`, flat: true });

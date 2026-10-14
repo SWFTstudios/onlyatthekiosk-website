@@ -2725,6 +2725,8 @@ html.is-reading .k-gates { top: 6px; }
 .k-tcard__media:hover .k-tcard__img { transform: scale(1.03); }
 .k-tcard__flat { position: absolute; inset: 0; display: grid; place-items: center; padding: 10%; }
 .k-tcard__flat > * { max-width: 100%; max-height: 100%; }
+.k-tcard__flat:has(.k-mockup--sketch) { padding: 0; }
+.k-tcard__flat .k-mockup--sketch { width: 100%; height: 100%; }
 .k-tcard__status { position: absolute; top: 10px; left: 10px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); background: rgba(10,10,12,.62); }
 .k-tcard__gate { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(10,10,12,.72); color: var(--signal); font-weight: 600; font-size: 15px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .k-tcard__pass { position: relative; display: grid; gap: 4px; padding: 14px 14px 12px; border-top: 1.5px dashed var(--line-2); }
