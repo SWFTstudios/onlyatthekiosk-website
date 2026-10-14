@@ -1,0 +1,20 @@
+---
+description: Backend, auth and integrations rules for KIOSK (Supabase, Twilio, Cloudflare, Shopify)
+globs: functions/**,supabase/**,js/kiosk-auth*.js,wrangler.jsonc
+alwaysApply: false
+---
+
+# KIOSK backend rules
+
+Read `docs/AGENT_PLAN.md` first. It holds the architecture, the workstreams (A–F) and their done-when criteria.
+
+- **Dev first.** MCP connectors point at the `kiosk-dev` Supabase project, read-only. Never touch `kiosk-prod` or production Cloudflare resources without the owner's explicit OK.
+- **Migrations live in git.** Add new files under `supabase/migrations/`. Do not edit the existing 2025 products migration or anything in `archive/`. Never change the schema through the MCP or the dashboard.
+- **RLS on every table.** Deny by default, add owner-only policies, and test them with two users plus an anonymous client.
+- **No secrets in code, commits or chat.** The service role key, Twilio and Shopify secrets go in Worker secrets (`npx wrangler secret put NAME`) and local `.dev.vars`. Only the Supabase URL and anon key may ship to the browser.
+- **SMS safety.** Phone codes need Turnstile in front of them. Rate-limit them, and keep Twilio geo permissions to the countries we serve. Use Supabase test phone numbers in dev. Never send SMS in loops or tests.
+- **Shopify stays the checkout.** Validate every Storefront/Admin query with the Shopify Dev MCP (`introspect_admin_schema`, `search_dev_docs`). Verify webhook HMACs. Do not use any other Shopify connector: one is linked to the wrong store.
+- **Match the site.** Use vanilla JS IIFEs like `js/kiosk-glass.js`, no frameworks, and pinned CDN versions (e.g. `@supabase/supabase-js@2.x.y`). New UI strings go through the existing i18n.
+- **Workers.** Verify the Supabase JWT on every `/api/*` route that reads user data. Return JSON errors, never stack traces. Run `npm run build:worker` before pushing.
+- **Small PRs.** One workstream per PR, with tests (Playwright for UI, SQL/RLS checks for the database).
+- **Ask before** anything that costs money, sends real messages, deletes data, or changes production.
