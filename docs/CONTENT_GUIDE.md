@@ -13,7 +13,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
 | Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
 
-The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. In the new nav they appear as **Supply**.
+The older Shopify apparel pages (classic store, `collections/*`) have been removed; the shop now lives in `vault.html`.
 
 ---
 
@@ -258,7 +258,21 @@ For stores, partner payouts, pickup-only Hunt pieces and quote merch, see **`doc
 
 ## 4. Add or sell a product (KIOSK Supply)
 
-The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real product photo, each product renders as a **vector mockup** on a light tile.
+The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an airport terminal:
+- a frosted header with search across products, Hunt pieces and stores
+- a split-flap **departures board** of the newest drops
+- categories as lettered **gates**
+- boarding-pass product cards
+- the **lounge**: every terminal photo, each one opens its colourway
+- **in-flight** films and LUTs
+- the **concourse** of partner stores
+
+**Lifestyle photos:** set two photos per colourway, a street shot and a terminal shot:
+`lifestyle: ['images/product-lifestyle/tees/001-black-street-01.webp', 'images/product-lifestyle/tees/001-black-airport-01.webp']`.
+- **On cards:** the street shot leads and the terminal shot shows on hover.
+- **In the product panel:** both photos lead the gallery, followed by the 3D renders.
+- **Without photos:** a product falls back to its 3D render or a **vector mockup**.
+- **Current set:** the 36 lookbook photos are in `images/product-lifestyle/`; see `docs/APPAREL_LIFESTYLE_LOOKBOOK.md`.
 
 ```js
 {
@@ -293,7 +307,15 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 1. Create it in Shopify, one product per colourway. For films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
 2. Put each handle on its colourway (`shopifyHandle`) and set `status: 'available'`.
 
-The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, and the existing `product.html` page handles checkout. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
+**What Buy does:** the button in the product panel finds the Shopify variant for the chosen colourway and size (`/api/shopify`), creates a cart (`/api/shopify-cart`) and opens Shopify checkout. This needs `SHOPIFY_STOREFRONT_TOKEN` and `SHOPIFY_STORE` on the Worker.
+
+**Colourway status:** a colourway can override the product with `status: 'soon'` (for example a new colour that isn't in Shopify yet).
+
+**Linked handles:** the "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
+
+**Shareable links:**
+- `vault.html?p=<product id>` opens a product's full page; `&cw=<n>` opens a specific colourway.
+- `/products/<handle>` lands on the matching product.
 
 "Notify me" sends the email to `/api/subscribe`, which writes to the Airtable "Incoming Interest" table. It stores the email only, not the product.
 

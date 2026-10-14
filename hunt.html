@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <title>The Hunt — Pickup-only KIOSK pieces on the map</title>
+  <meta name="description" content="The Hunt: pickup-only KIOSK pieces placed around the globe. Search the map, zoom in to the drop zone and travel to collect.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbfaf8">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KIOSK">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
+  <link rel="canonical" href="https://onlyatthekiosk.com/hunt.html">
+  <meta property="og:title" content="The Hunt — Pickup-only KIOSK pieces on the map">
+  <meta property="og:image" content="https://onlyatthekiosk.com/images/KiosKBoxLogo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="css/kiosk-glass.css" rel="stylesheet">
+  <link href="images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MCKHRGGYRJ');</script>
+</head>
+<body class="k" data-page="hunt">
+  <a class="k-skip" href="#main">Skip to content</a>
+  <main id="main" class="k-hunt-app k-dark">
+    <h1 class="k-sr">The Hunt: pickup-only pieces on the map</h1>
+    <div class="k-hmap" data-mount="hunt-map" role="region" aria-label="Hunt map. Drag to turn the globe, scroll or pinch to zoom."></div>
+    <div class="k-hmap__veil" aria-hidden="true"></div>
+
+    <!-- HUD ------------------------------------------------------------ -->
+    <div class="k-hud">
+      <div class="k-hud__top">
+        <div class="k-hud__title">
+          <p class="k-hud__kicker"><span class="k-live" aria-hidden="true"></span>The Hunt · live map</p>
+          <p class="k-hud__h">Some things you have to <em>go and get.</em></p>
+        </div>
+        <div class="k-hud__search k-hud-glass" data-search-scope>
+          <label class="k-term__field">
+            <span class="k-sr">Search Hunt pieces, products and stores</span>
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="search" data-mount="hunt-q" placeholder="Search drops, pieces, stores, cities…" autocomplete="off" enterkeyhint="search">
+            <button type="button" class="k-hud__clear" data-hunt-clear aria-label="Clear search" hidden>×</button>
+          </label>
+          <div class="k-sr-list" data-mount="hunt-results" role="listbox" aria-label="Results" hidden></div>
+          <div class="k-hud__filters" role="group" aria-label="Show on the map">
+            <button type="button" class="k-hud__chip" data-hunt-layer="hunt" aria-pressed="true"><i class="k-beacon-dot"></i>Drops</button>
+            <button type="button" class="k-hud__chip" data-hunt-layer="store" aria-pressed="true"><i class="k-beacon-dot k-beacon-dot--store"></i>Stores</button>
+            <button type="button" class="k-hud__chip" data-hunt-depth aria-pressed="true">Depth map</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="k-hud__tele k-hud-glass" aria-label="Map readout">
+        <dl>
+          <div><dt>Lat</dt><dd data-hud="lat">—</dd></div>
+          <div><dt>Lon</dt><dd data-hud="lon">—</dd></div>
+          <div><dt>Alt</dt><dd data-hud="alt">—</dd></div>
+          <div><dt>Zoom</dt><dd data-hud="zoom">—</dd></div>
+          <div><dt>View</dt><dd data-hud="mode">Globe</dd></div>
+        </dl>
+        <div class="k-hud__ctrl">
+          <button type="button" data-hunt-zoom="1" aria-label="Zoom in">+</button>
+          <button type="button" data-hunt-zoom="-1" aria-label="Zoom out">−</button>
+          <button type="button" data-hunt-north aria-label="Point north"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" data-hud="compass"><path d="M8 1.5l3 7H5z" fill="currentColor"/><path d="M8 14.5l-3-6h6z" stroke="currentColor" stroke-width="1.1"/></svg></button>
+          <button type="button" data-hunt-tilt aria-label="Tilt the map" aria-pressed="false">3D</button>
+          <button type="button" data-hunt-locate aria-label="Show where I am"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2.5M8 12.5V15M1 8h2.5M12.5 8H15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <button type="button" data-hunt-home aria-label="Back to the globe"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 8h12.4M8 1.8c2 2 2 10.4 0 12.4M8 1.8c-2 2-2 10.4 0 12.4" stroke="currentColor" stroke-width="1.1"/></svg></button>
+        </div>
+      </aside>
+
+      <div class="k-hud__bottom">
+        <p class="k-hud__status" data-mount="hunt-status" aria-live="polite"></p>
+        <div class="k-hud__drops" data-mount="hunt-drops" role="list" aria-label="Drops"></div>
+      </div>
+    </div>
+
+    <div class="k-hunt-fallback" data-mount="hunt-fallback" hidden></div>
+  </main>
+  <script src="js/kiosk-content.js"></script>
+  <script src="js/kiosk-mockups.js"></script>
+  <script src="js/kiosk-glass.js"></script>
+</body>
+</html>

@@ -794,8 +794,26 @@ window.KIOSK_CONTENT = {
    * own Shopify (see docs/CONTENT_GUIDE.md › Marketplace); products
    * point at a store with `store: '<id>'` (default 'kiosk').
    * -------------------------------------------------------- */
+  /* Each store gets a page at store.html?s=<id> and shows up in search and
+   * on the Hunt map (lat/lon). Fields:
+   *   id, name, city, country, lat, lon
+   *   url      the store's own site (its Shopify). "Visit store" goes through
+   *            /go/<id>, which counts the visit and adds KIOSK referral tags
+   *            (functions/go/[store].js). Leave empty for the KIOSK itself.
+   *   note     one line for cards · about: a paragraph for the store page
+   *   cover    wide image for the store page · tags: words people search for
+   * Example partner (fill in for real before adding):
+   *   { id: 'example', name: 'Example Vintage', city: 'Osaka', country: 'JP', lat: 34.69, lon: 135.5,
+   *     url: 'https://example-vintage.myshopify.com', note: '…', about: '…', cover: 'images/stores/example.webp', tags: ['vintage', 'denim'] },
+   */
   stores: [
-    { id: 'kiosk', name: 'KIOSK', city: 'New York', country: 'US', note: 'Our own label. Pieces you can only find at the kiosk.' },
+    {
+      id: 'kiosk', name: 'KIOSK', city: 'New York', country: 'US', lat: 40.7128, lon: -74.006, url: '',
+      note: 'Our own label. Pieces you can only find at the kiosk.',
+      about: 'The kiosk’s own label, cut from the shoots: prints named after the cars, colourways pulled from each story’s palette, and Hunt pieces you have to travel to collect.',
+      cover: 'images/product-lifestyle/hoodies/001-black-airport-01.webp',
+      tags: ['streetwear', 'tees', 'hoodies', 'travel', 'luts', 'films'],
+    },
   ],
 
   categories: [
@@ -963,7 +981,8 @@ window.KIOSK_CONTENT = {
       mockup: { type: 'hoodie', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },
       colorways: [{ name: 'Oak Brown', garment: '#6e5034', ink: '#ece9e1', image: 'images/shop/3d/hunt-hudson-hoodie-0-back.webp', imageFront: 'images/shop/3d/hunt-hudson-hoodie-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
-      pickup: { place: 'Hudson Valley, NY', coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
+      // area: the map shows this zone until the exact coordinates drop
+      pickup: { place: 'Hudson Valley, NY', area: { lat: 41.71, lon: -73.93, radiusKm: 40 }, coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['fall', 'winter'], vibes: ['travel', 'adventure'], colors: [],
     },
@@ -975,7 +994,7 @@ window.KIOSK_CONTENT = {
       mockup: { type: 'tee', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif' },
       colorways: [{ name: 'Racing Blue', garment: '#364679', ink: '#f2f0eb', image: 'images/shop/3d/hunt-bridge-tee-0-back.webp', imageFront: 'images/shop/3d/hunt-bridge-tee-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
-      pickup: { place: 'George Washington Bridge, NY / NJ', coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
+      pickup: { place: 'George Washington Bridge, NY / NJ', area: { lat: 40.8517, lon: -73.9527, radiusKm: 2 }, coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['spring', 'summer'], vibes: ['travel', 'adventure'], colors: [],
     },
@@ -1045,29 +1064,94 @@ window.KIOSK_CONTENT = {
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['summer', 'spring'], vibes: ['urban', 'clean', 'dusk'], colors: [],
     },
+    /* ---- Lookbook: six prints shot on the street and in the terminal
+     * (images/product-lifestyle/, docs/APPAREL_LIFESTYLE_LOOKBOOK.md).
+     * Colourways marked status: 'soon' aren't in Shopify yet. ---- */
     {
-      id: 'ess-hoodie', category: 'apparel', title: 'Essential Hoodie #001', price: 89.99, badge: 'Classic', added: '2025-11-01',
-      detail: 'The original KIOSK hoodie',
+      id: 'ess-hoodie', category: 'apparel', title: 'Essential Hoodie #001', design: 'Emblem', price: 89.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'Brushed fleece · large KIOSK monogram and wordmark across the chest',
+      description: 'The original KIOSK hoodie. The full double-K monogram and wordmark, printed big across the chest of a heavy brushed fleece, the same mark as the Box Mark tee scaled up for the hood. Shot on the street and in the terminal.',
       mockup: { type: 'hoodie', print: 'kmark', printW: 56 },
       colorways: [
-        { name: 'Black', garment: '#141414', ink: '#f2f0eb', shopifyHandle: '001-black-hoodie', image: 'images/shop/3d/ess-hoodie-0.webp' },
+        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-hoodie', image: 'images/shop/3d/ess-hoodie-0.webp', lifestyle: ['images/product-lifestyle/hoodies/001-black-street-01.webp', 'images/product-lifestyle/hoodies/001-black-airport-01.webp'] },
         { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-hoodie', image: 'images/shop/3d/ess-hoodie-1.webp' },
+        { name: 'Oat', garment: '#c4b5a0', ink: '#141414', shopifyHandle: '001-oat-hoodie', status: 'soon', lifestyle: ['images/product-lifestyle/hoodies/001-oat-street-01.webp', 'images/product-lifestyle/hoodies/001-oat-airport-01.webp'] },
+        { name: 'Charcoal', garment: '#2c2c2c', ink: '#ece9e1', shopifyHandle: '001-charcoal-hoodie', status: 'soon', lifestyle: ['images/product-lifestyle/hoodies/001-charcoal-street-01.webp', 'images/product-lifestyle/hoodies/001-charcoal-airport-01.webp'] },
       ],
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'available', shopifyHandle: '001-black-hoodie', href: '', image: '',
-      seasons: ['fall', 'winter'], vibes: ['clean', 'urban', 'night'], colors: ['Obsidian', 'Carbon'],
+      seasons: ['fall', 'winter'], vibes: ['clean', 'urban', 'night', 'travel'], colors: ['Obsidian', 'Carbon'],
     },
     {
-      id: 'ess-tee', category: 'apparel', title: 'Essential Tee #001', price: 39.99, badge: 'Classic', added: '2025-11-01',
-      detail: 'The original KIOSK tee',
+      id: 'ess-tee', category: 'apparel', title: 'Essential Tee #001', design: 'Box Mark', price: 39.99, badge: 'Classic', added: '2025-11-01',
+      detail: 'Heavyweight cotton · KIOSK box mark centred on the chest',
+      description: 'The original KIOSK tee. The double-K monogram over the wordmark, centred on the chest in a heavy, high-contrast print from the box-logo family. Shot on the street and in the terminal.',
       mockup: { type: 'tee', print: 'wordmark' },
       colorways: [
-        { name: 'Black', garment: '#141414', ink: '#f2f0eb', shopifyHandle: '001-black-tshirt', image: 'images/shop/3d/ess-tee-0.webp' },
+        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-tshirt', image: 'images/shop/3d/ess-tee-0.webp', lifestyle: ['images/product-lifestyle/tees/001-black-street-01.webp', 'images/product-lifestyle/tees/001-black-airport-01.webp'] },
         { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-tshirt', image: 'images/shop/3d/ess-tee-1.webp' },
+        { name: 'Oat', garment: '#c4b5a0', ink: '#141414', shopifyHandle: '001-oat-tshirt', status: 'soon', lifestyle: ['images/product-lifestyle/tees/001-oat-street-01.webp', 'images/product-lifestyle/tees/001-oat-airport-01.webp'] },
+        { name: 'Charcoal', garment: '#2c2c2c', ink: '#cfcdc8', shopifyHandle: '001-charcoal-tshirt', status: 'soon', lifestyle: ['images/product-lifestyle/tees/001-charcoal-street-01.webp', 'images/product-lifestyle/tees/001-charcoal-airport-01.webp'] },
       ],
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       status: 'available', shopifyHandle: '001-black-tshirt', href: '', image: '',
-      seasons: ['summer', 'spring'], vibes: ['clean', 'urban', 'daylight'], colors: ['Obsidian', 'Hudson Haze'],
+      seasons: ['summer', 'spring'], vibes: ['clean', 'urban', 'daylight', 'travel'], colors: ['Obsidian', 'Hudson Haze'],
+    },
+    {
+      id: 'tee-002-stack', category: 'apparel', title: 'Wordmark Stack Tee #002', design: 'Wordmark Stack', price: 39.99, badge: 'Lookbook', added: '2026-10-14',
+      detail: 'Heavyweight cotton · stacked KIOSK wordmark, left of centre',
+      description: 'A small-to-medium stacked KIOSK wordmark set just off-centre on the chest. Quiet enough for the flight, loud enough for the street. Shot on the street and in the terminal.',
+      mockup: { type: 'tee', print: 'wordmark' },
+      colorways: [
+        { name: 'White', garment: '#f5f5f5', ink: '#141414', shopifyHandle: '002-white-tshirt', lifestyle: ['images/product-lifestyle/tees/002-white-street-01.webp', 'images/product-lifestyle/tees/002-white-airport-01.webp'] },
+        { name: 'Stone', garment: '#9a9690', ink: '#141414', shopifyHandle: '002-stone-tshirt', lifestyle: ['images/product-lifestyle/tees/002-stone-street-01.webp', 'images/product-lifestyle/tees/002-stone-airport-01.webp'] },
+        { name: 'Bone', garment: '#e8e0d4', ink: '#4b5a32', shopifyHandle: '002-bone-tshirt', lifestyle: ['images/product-lifestyle/tees/002-bone-street-01.webp', 'images/product-lifestyle/tees/002-bone-airport-01.webp'] },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'soon', shopifyHandle: '002-white-tshirt', href: '', image: '',
+      seasons: ['spring', 'summer'], vibes: ['clean', 'travel', 'daylight'], colors: ['Hudson Haze'],
+    },
+    {
+      id: 'tee-003-terminal', category: 'apparel', title: 'Terminal Code Tee #003', design: 'Terminal Code', price: 39.99, badge: 'Lookbook', added: '2026-10-14',
+      detail: 'Heavyweight cotton · minimal left-chest departures-board type',
+      description: 'Ultra-minimal: thin horizontal rules and tiny “ONLY AT THE KIOSK” type on the left chest, set like a departures board. Made for the terminal. Shot on the street and in the terminal.',
+      mockup: { type: 'tee', print: 'wordmark' },
+      colorways: [
+        { name: 'Black', garment: '#0a0a0a', ink: '#9a9690', shopifyHandle: '003-black-tshirt', lifestyle: ['images/product-lifestyle/tees/003-black-street-01.webp', 'images/product-lifestyle/tees/003-black-airport-01.webp'] },
+        { name: 'Sand', garment: '#d2c4b0', ink: '#141414', shopifyHandle: '003-sand-tshirt', lifestyle: ['images/product-lifestyle/tees/003-sand-street-01.webp', 'images/product-lifestyle/tees/003-sand-airport-01.webp'] },
+        { name: 'Slate', garment: '#4a5560', ink: '#7a2430', shopifyHandle: '003-slate-tshirt', lifestyle: ['images/product-lifestyle/tees/003-slate-street-01.webp', 'images/product-lifestyle/tees/003-slate-airport-01.webp'] },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'soon', shopifyHandle: '003-black-tshirt', href: '', image: '',
+      seasons: ['fall', 'spring'], vibes: ['travel', 'urban', 'clean'], colors: ['Carbon', 'Bridge Grey'],
+    },
+    {
+      id: 'hoodie-002-stamp', category: 'apparel', title: 'Travel Stamp Hoodie #002', design: 'Travel Stamp', price: 89.99, badge: 'Lookbook', added: '2026-10-14',
+      detail: 'Brushed fleece · passport-stamp KIOSK mark, mid-chest',
+      description: 'A KIOSK mark set like a passport stamp in the middle of the chest: the airport hoodie, for long-haul seats and early gates. Shot on the street and in the terminal.',
+      mockup: { type: 'hoodie', print: 'kmark', printW: 50 },
+      colorways: [
+        { name: 'Heather', garment: '#8e8e8e', ink: '#141414', shopifyHandle: '002-heather-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-heather-street-01.webp', 'images/product-lifestyle/hoodies/002-heather-airport-01.webp'] },
+        { name: 'Sand', garment: '#d2c4b0', ink: '#141414', shopifyHandle: '002-sand-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-sand-street-01.webp', 'images/product-lifestyle/hoodies/002-sand-airport-01.webp'] },
+        { name: 'Bone', garment: '#e8e0d4', ink: '#4b5a32', shopifyHandle: '002-bone-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-bone-street-01.webp', 'images/product-lifestyle/hoodies/002-bone-airport-01.webp'] },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'soon', shopifyHandle: '002-heather-hoodie', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['travel', 'clean', 'warm'], colors: ['Bridge Grey'],
+    },
+    {
+      id: 'hoodie-003-bar', category: 'apparel', title: 'Quiet Bar Hoodie #003', design: 'Quiet Bar', price: 89.99, badge: 'Lookbook', added: '2026-10-14',
+      detail: 'Brushed fleece · one bar across the chest, tiny wordmark below',
+      description: 'A single horizontal bar across the chest with a tiny KIOSK wordmark underneath. Quiet luxury for the lounge and the long way home. Shot on the street and in the terminal.',
+      mockup: { type: 'hoodie', print: 'kmark', printW: 40 },
+      colorways: [
+        { name: 'Black', garment: '#0a0a0a', ink: '#6b6b6b', shopifyHandle: '003-black-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-black-street-01.webp', 'images/product-lifestyle/hoodies/003-black-airport-01.webp'] },
+        { name: 'White', garment: '#f5f5f5', ink: '#141414', shopifyHandle: '003-white-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-white-street-01.webp', 'images/product-lifestyle/hoodies/003-white-airport-01.webp'] },
+        { name: 'Taupe', garment: '#8b7e6e', ink: '#141414', shopifyHandle: '003-taupe-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-taupe-street-01.webp', 'images/product-lifestyle/hoodies/003-taupe-airport-01.webp'] },
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      status: 'soon', shopifyHandle: '003-black-hoodie', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['clean', 'warm', 'travel'], colors: ['Carbon'],
     },
 
     /* ---- Headwear ---- */

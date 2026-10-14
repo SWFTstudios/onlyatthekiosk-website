@@ -19,14 +19,7 @@ const PAGES = [
   'shipping-returns.html',
   'terms-conditions.html',
   'do-not-sell.html',
-  'shop-tshirts-hoodies.html',
-  'shop-bracelets-chains.html',
-  'carousel-template.html',
   'kiosk-styleguide.html',
-  'collections/t-shirts.html',
-  'collections/hoodies.html',
-  'collections/chains.html',
-  'collections/bracelets.html',
 ];
 
 const VIEWPORTS = [

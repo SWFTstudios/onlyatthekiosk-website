@@ -1,24 +1,4 @@
 {
-  "heroCategories": [
-    {
-      "label": "Hoodies",
-      "href": "collections/hoodies.html",
-      "image": "/images/store/hero-hoodies.webp",
-      "lifestyleHandle": "001-black-hoodie"
-    },
-    {
-      "label": "Chains",
-      "href": "collections/chains.html",
-      "image": "/images/store/hero-chains.webp",
-      "lifestyleHandle": "001-gold-chain"
-    },
-    {
-      "label": "Bracelets",
-      "href": "collections/bracelets.html",
-      "image": "/images/store/hero-bracelets.webp",
-      "lifestyleHandle": "001-gold-bracelet"
-    }
-  ],
   "featuredSections": {
     "Chains & Bracelets": {
       "handles": [

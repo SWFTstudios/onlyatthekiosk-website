@@ -15,12 +15,6 @@ const PAGES = [
   // index.html, garage.html, story.html, radio.html and vault.html use the
   // KIOSK Glass chrome rendered by js/kiosk-glass.js — not this partial.
   {
-    file: 'store.html',
-    base: '',
-    mainClass: 'is-interior',
-    wrapStart: '<div data-w-id="20698eeb',
-  },
-  {
     file: 'about.html',
     base: '',
     mainClass: 'is-interior',
@@ -31,18 +25,6 @@ const PAGES = [
     base: '',
     mainClass: 'is-interior',
     wrapStart: '<div class="old-main"',
-  },
-  {
-    file: 'shop-tshirts-hoodies.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'shop-bracelets-chains.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
   },
   {
     file: 'contact.html',
@@ -87,40 +69,10 @@ const PAGES = [
     transformMain: true,
   },
   {
-    file: 'carousel-template.html',
-    base: '',
-    mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
-  },
-  {
     file: 'kiosk-styleguide.html',
     base: '',
     mainClass: 'is-interior',
     transformMain: true,
-  },
-  {
-    file: 'collections/t-shirts.html',
-    base: '../',
-    mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
-  },
-  {
-    file: 'collections/hoodies.html',
-    base: '../',
-    mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
-  },
-  {
-    file: 'collections/chains.html',
-    base: '../',
-    mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
-  },
-  {
-    file: 'collections/bracelets.html',
-    base: '../',
-    mainClass: 'is-interior',
-    wrapStart: '<!-- Collection Title',
   },
 ];
 

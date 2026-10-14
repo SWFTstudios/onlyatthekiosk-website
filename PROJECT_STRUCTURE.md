@@ -5,7 +5,8 @@
 ```
 onlyatthekiosk-website/
 ├── index.html                      # Landing/Coming Soon page
-├── store.html                      # Store page
+├── vault.html                      # Shop (KIOSK Glass)
+├── store.html                      # Partner store directory
 ├── 401.html                        # 401 error page
 ├── build.sh                        # Build script (no-op for Cloudflare Pages)
 ├── README.md                       # Main project README
@@ -59,7 +60,8 @@ onlyatthekiosk-website/
 
 ### Website
 - `index.html` - Main landing page
-- `store.html` - Store page
+- `vault.html` - Shop
+- `store.html` - Partner store directory
 - `css/` - All stylesheets
 - `js/` - All JavaScript files
 - `images/` - Image assets

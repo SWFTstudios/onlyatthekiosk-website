@@ -40,31 +40,31 @@
   ],
   "categories": [
     {
-      "label": "Essential Tees",
-      "path": "collections/t-shirts.html",
+      "label": "Apparel",
+      "path": "vault.html?c=apparel",
       "match": [
-        "collections/t-shirts.html"
+        "vault.html?c=apparel"
       ]
     },
     {
-      "label": "Hoodies",
-      "path": "collections/hoodies.html",
+      "label": "Words to wear",
+      "path": "vault.html?c=quotes",
       "match": [
-        "collections/hoodies.html"
+        "vault.html?c=quotes"
       ]
     },
     {
-      "label": "Chains",
-      "path": "collections/chains.html",
+      "label": "Accessories",
+      "path": "vault.html?c=accessories",
       "match": [
-        "collections/chains.html"
+        "vault.html?c=accessories"
       ]
     },
     {
-      "label": "Bracelets",
-      "path": "collections/bracelets.html",
+      "label": "The Hunt",
+      "path": "hunt.html",
       "match": [
-        "collections/bracelets.html"
+        "hunt.html"
       ]
     }
   ],

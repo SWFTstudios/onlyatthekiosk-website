@@ -87,8 +87,8 @@ This project creates a completely custom frontend and user experience while leve
 ```
 /
 ├── index.html              # Landing/coming soon page
-├── store.html              # Store page (if different from carousel)
-├── carousel-template.html  # 3D carousel product showcase
+├── vault.html              # Shop (rendered by js/kiosk-glass.js)
+├── store.html              # Partner store directory
 ├── css/
 │   ├── normalize.css      # CSS reset
 │   ├── components.css     # Reusable components
@@ -117,7 +117,6 @@ This project creates a completely custom frontend and user experience while leve
 .
 ├── 401.html
 ├── build.sh
-├── carousel-template.html
 ├── css
 │   ├── components.css
 │   ├── media.css

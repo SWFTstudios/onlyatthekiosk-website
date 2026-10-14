@@ -27,7 +27,8 @@ Set these in Cloudflare Pages → Settings → Environment Variables:
 ```
 /
 ├── index.html              # Landing page
-├── store.html              # Store page
+├── vault.html              # Shop
+├── store.html              # Partner store directory
 ├── css/                    # Stylesheets
 ├── js/                     # JavaScript
 ├── images/                 # Images
@@ -42,7 +43,8 @@ Set these in Cloudflare Pages → Settings → Environment Variables:
 ## Key Files
 
 - `index.html` - Main landing/coming soon page
-- `store.html` - Store page
+- `vault.html` - Shop
+- `store.html` - Partner store directory
 - `js/email-signup.js` - Email signup form handler
 - `functions/api/subscribe.js` - Email signup API endpoint
 - `css/onlyatthekiosk.css` - Main stylesheet
