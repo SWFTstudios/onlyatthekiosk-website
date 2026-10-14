@@ -56,8 +56,27 @@
 
   <main id="main">
 
-    <!-- COVER: full-screen video ------------------------------------- -->
-    <section class="k-cover k-dark" aria-labelledby="cover-title">
+    <!-- ABOVE THE CLOUDS: around the globe, up into the sky, ꓘIOSK rises.
+         Scroll to descend through the clouds onto the page (js/kiosk-sky.js) -->
+    <section class="k-sky is-boot" data-sky aria-labelledby="sky-title">
+      <div class="k-sky__layer">
+        <div class="k-sky__air" aria-hidden="true"></div>
+        <div class="k-sky__space" aria-hidden="true"></div>
+        <canvas class="k-sky__globe" aria-hidden="true"></canvas>
+        <div class="k-sky__logo">
+          <p class="k-sky__kicker">Only at the</p>
+          <h1 class="k-sky__word" id="sky-title" aria-label="KIOSK"><span class="k-rk">K</span>IOSK</h1>
+          <p class="k-sky__line">A global travel magazine · Issue 01</p>
+        </div>
+        <canvas class="k-sky__fog" aria-hidden="true"></canvas>
+        <div class="k-sky__fogcss" aria-hidden="true"></div>
+        <p class="k-sky__route" data-sky-route aria-hidden="true">KSK 001</p>
+        <p class="k-sky__hint" aria-hidden="true"><span>Scroll to descend</span><i></i></p>
+      </div>
+    </section>
+
+    <!-- COVER: full-screen video (below the clouds) -------------------- -->
+    <section class="k-cover k-dark" aria-label="Now showing">
       <div class="k-cover__media" data-mount="hero-bg"></div>
       <div class="k-cover__shade" aria-hidden="true"></div>
       <div class="k-cover__inner">
@@ -66,7 +85,7 @@
           <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
           <p class="k-eyebrow k-cover__edition"><span class="k-term__t k-term__t--sm">T0</span> Main concourse · <span data-clock>--:--</span> <span data-clock-zone></span></p>
         </div>
-        <h1 class="k-cover__title" id="cover-title"><span class="k-cover__kicker">Only at the</span><span class="k-cover__word" aria-label="KIOSK"><span class="k-rk">K</span>IOSK</span></h1>
+        <p class="k-cover__title" aria-hidden="true"><span class="k-cover__kicker">Only at the</span><span class="k-cover__word"><span class="k-rk">K</span>IOSK</span></p>
         <p class="k-cover__dek">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, told through films, interviews, vlogs and photo diaries from the road. Read the story, shop the pieces, find the stores and rare finds worth the trip.</p>
         <div class="k-cover__cta">
           <a class="k-cover__pill" href="#garage">Open the issue <span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>

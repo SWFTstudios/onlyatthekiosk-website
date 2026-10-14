@@ -2261,35 +2261,6 @@ html { transition: background-color 0.5s var(--ease); }
   .k-cover__cta [data-mount='hero-watch'] { display: none; }
 }
 
-/* ------------------------------------------------------------ globe intro */
-.k-intro {
-  position: fixed; inset: 0; z-index: 400;
-  display: grid; place-items: center;
-  background: var(--bg); color: var(--ink);
-  transition: opacity 0.8s var(--ease), transform 0.9s var(--ease);
-}
-html.is-intro, html.is-intro body { overflow: hidden; }
-.k-intro.is-out { opacity: 0; transform: scale(1.12); pointer-events: none; }
-.k-intro__globe { position: absolute; inset: 0; width: 100%; height: 100%; }
-.k-intro__copy { position: absolute; z-index: 1; left: var(--gutter); bottom: max(var(--gutter), env(safe-area-inset-bottom)); pointer-events: none; display: grid; justify-items: start; gap: 4px; }
-.k-intro__kicker { font-family: var(--f-serif); font-style: italic; font-size: calc(clamp(22px, 3vw, 36px) * var(--type, 1)); }
-.k-intro__word { font-size: calc(clamp(64px, 12vw, 180px) * var(--type, 1)); line-height: 0.82; letter-spacing: -0.06em; font-weight: 500; color: var(--ink); margin-left: -0.04em; }
-.k-intro__line { font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 10px; font-variant-numeric: tabular-nums; }
-.k-intro__skip { position: absolute; right: var(--gutter); bottom: max(var(--gutter), env(safe-area-inset-bottom)); padding: 10px 16px; border-radius: var(--r-pill); border: 1px solid var(--line-2); font-size: calc(13px * var(--type, 1)); color: var(--ink); background: var(--glass); }
-
-/* K-flight intro (js/kiosk-intro.js): clouds, flights drawing a K, KIOSK */
-.k-kfly { background: #1d2a26; color: #fff; overflow: hidden; }
-.k-kfly.is-out { transform: scale(1.18); }
-.k-kfly__sky { position: absolute; inset: 0; width: 100%; height: 100%; }
-.k-kfly__shade { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 50%, rgba(6,10,12,0) 30%, rgba(6,10,12,.55) 100%), linear-gradient(0deg, rgba(6,10,12,.35), rgba(6,10,12,0) 40%); pointer-events: none; }
-.k-kfly__svg { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0 var(--gutter); filter: drop-shadow(0 10px 28px rgba(0,0,0,.35)); overflow: visible; }
-.k-kfly .k-intro__copy, .k-kfly .k-intro__globe { display: none; }
-.k-kfly__pass { position: absolute; z-index: 1; top: calc(max(var(--gutter), env(safe-area-inset-top)) + 8px); right: var(--gutter); display: grid; gap: 2px; min-width: 200px; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2); background: rgba(10,14,16,.42); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .12em; }
-.k-kfly__pass span { font-size: 10px; color: rgba(255,255,255,.6); }
-.k-kfly__pass b { font-weight: 500; font-size: 17px; letter-spacing: .08em; }
-.k-kfly__pass small { font-size: 10px; color: rgba(255,255,255,.7); }
-.k-kfly .k-intro__skip { color: #fff; border-color: rgba(255,255,255,.35); background: rgba(0,0,0,.28); z-index: 2; }
-.k-intro.is-loading .k-intro__copy { opacity: 0; }
 
 /* --------------------------------------------------- marketplace: hunt + stores */
 .k-pickup { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 4px 10px 4px 8px; border-radius: var(--r-pill); border: 1px dashed var(--ink-3); font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
@@ -3277,5 +3248,41 @@ a.k-board__row { display: grid; text-decoration: none; }
 /* the mirrored K carries its context's letter-spacing on the right */
 .k-logo .k-rk { margin-right: 0.14em; }
 .k-cover__word .k-rk { margin-right: -0.065em; }
-.k-intro__word .k-rk { margin-right: -0.06em; }
 .k-footer__mark .k-rk { margin-right: -0.07em; }
+
+/* ------------------------------------------------------- above the clouds
+ * Home opening (js/kiosk-sky.js). Without JS it is a plain first screen;
+ * with it (.is-live) the layer is fixed and the section is the scroll
+ * runway for the descent into the clouds. */
+.k-sky { position: relative; height: 100svh; }
+.k-sky.is-live { height: 175svh; }
+.k-sky__layer { position: absolute; left: 0; right: 0; top: 0; height: 100svh; overflow: hidden; z-index: 50; background: #8db6e4; color: #fff; }
+.k-sky.is-live .k-sky__layer { position: fixed; inset: 0; height: auto; }
+.k-sky__air { position: absolute; inset: 0; background:
+  radial-gradient(60% 40% at 72% 58%, rgba(255,236,200,.95) 0%, rgba(255,214,160,.55) 18%, rgba(255,200,150,0) 55%),
+  linear-gradient(180deg, #2c5fae 0%, #6f9fd8 34%, #b7cfe9 56%, #f4dcb6 70%, #f8e6c8 100%); }
+.k-sky__space { position: absolute; inset: 0; opacity: 0; background:
+  radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 84% 44%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 72%, #fff 50%, transparent 51%),
+  radial-gradient(1px 1px at 52% 34%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 22% 52%, rgba(255,255,255,.6) 50%, transparent 51%),
+  radial-gradient(1px 1px at 91% 82%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 6% 88%, rgba(255,255,255,.6) 50%, transparent 51%),
+  radial-gradient(120% 90% at 50% 50%, #0b1630 0%, #04070f 70%); }
+.k-sky.is-boot .k-sky__space { opacity: 1; }
+.k-sky__globe, .k-sky__fog { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-sky__fogcss { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 52%; pointer-events: none; display: none;
+  background: radial-gradient(40% 60% at 20% 70%, #fff 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, #f6f3ee 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, #fff 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, #f3f1ec 0%, rgba(243,241,236,.9) 45%, rgba(243,241,236,0) 100%);
+  filter: blur(6px); }
+.k-sky.is-nogl .k-sky__fogcss, .k-sky:not(.is-live) .k-sky__fogcss { display: block; }
+.k-sky__logo { position: absolute; left: 0; right: 0; top: 36%; transform: translateY(-50%); display: grid; justify-items: center; text-align: center; padding: 0 var(--gutter); text-shadow: 0 8px 40px rgba(20,40,80,.25); will-change: transform, opacity; }
+.k-sky.is-boot .k-sky__logo { opacity: 0; }
+.k-sky__kicker { margin: 0; font-family: var(--f-serif); font-style: italic; font-size: calc(clamp(24px, 3.6vw, 52px) * var(--type, 1)); }
+.k-sky__word { margin: 0; font-size: calc(clamp(96px, 24vw, 400px) * var(--type, 1)); line-height: .8; letter-spacing: -0.065em; font-weight: 500; white-space: nowrap; }
+.k-sky__word .k-rk { margin-right: -0.065em; }
+.k-sky__line { margin: 14px 0 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+.k-sky__route { position: absolute; left: var(--gutter); top: calc(var(--nav-h) + 12px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
+.k-sky__hint { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #3c4a60; opacity: 0; transition: opacity .8s var(--ease); }
+.k-sky.is-settled .k-sky__hint { opacity: .8; }
+.k-sky__hint i { width: 1px; height: 28px; background: currentColor; animation: k-sky-hint 1.6s var(--ease-io) infinite; transform-origin: top; }
+@keyframes k-sky-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+/* the cover below takes the logo's place: no second wordmark */
+.k-sky ~ .k-cover .k-cover__title { display: none; }

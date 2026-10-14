@@ -2555,6 +2555,7 @@
       ? `<div class="k-media k-media--clean" style="position:absolute;inset:0"><video autoplay muted loop playsinline preload="auto"${issue.reelPoster ? ` poster="${esc(issue.reelPoster)}"` : ''} aria-label="KIOSK reel">${issue.reelWebm ? `<source src="${esc(issue.reelWebm)}" type="video/webm">` : ''}<source src="${esc(issue.reel)}" type="video/mp4"></video></div>`
       : featureMedia(lead, { meta: '', mark: '', eager: true, ...fullBleed }));
 
+    mountSky();
     mountWorldLibrary();
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
     fill('hero-dek', esc(issue.dek || ''));
@@ -4027,14 +4028,37 @@
     });
   }
 
-  /* ------------------------------------------------------ K-flight intro
-   * First visit to the home page each session. Above the clouds, flights
-   * hop airport to airport and their contrails draw a K; the camera pulls
-   * back to KIOSK, the letters fill in and it flies through the clouds into
-   * the hero slideshow (js/kiosk-intro.js, GSAP loaded only here). If the
-   * scripts are slow or fail, the 2D wireframe globe plays instead.
-   * Skippable; skipped for reduced motion.
+  /* ------------------------------------------------------ above the clouds
+   * Top of the home page: around the globe, up into a golden sky over a
+   * bank of low clouds, ꓘIOSK rises from behind them; scrolling sinks the
+   * camera into the clouds and dissolves onto the page (js/kiosk-sky.js,
+   * GSAP + the world dots loaded only here). The globe journey plays once
+   * per session (Settings › Intro animation: Off skips it).
    * -------------------------------------------------------------------- */
+  function mountSky() {
+    const sec = $('[data-sky]');
+    if (!sec || sec.dataset.on) return;
+    sec.dataset.on = '1';
+    const signal = pageAbort.signal;
+    let seen = false;
+    try { seen = sessionStorage.getItem('kiosk:sky') === '1'; sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { seen = true; }
+    const quick = seen || prefs.intro === 'off';
+    const fail = setTimeout(() => sec.classList.remove('is-boot'), 3500);
+    Promise.all([loadGsap(), window.KIOSK_WORLD ? null : loadScript('js/kiosk-world.js')])
+      .then(() => (window.KioskSky ? null : loadScript('js/kiosk-sky.js')))
+      .then(() => {
+        clearTimeout(fail);
+        if (signal.aborted) return;
+        window.gsap.registerPlugin(window.ScrollTrigger);
+        sec.classList.add('is-live');
+        const sky = window.KioskSky.mount(sec, { gsap: window.gsap, ScrollTrigger: window.ScrollTrigger, world: window.KIOSK_WORLD, quick, reduced: REDUCED });
+        sec.classList.remove('is-boot');
+        window.ScrollTrigger.refresh();
+        signal.addEventListener('abort', () => sky.stop());
+      })
+      .catch((err) => { clearTimeout(fail); sec.classList.remove('is-boot'); console.warn('[KIOSK] sky unavailable', err); });
+  }
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
@@ -4050,72 +4074,6 @@
       const c = document.createElement('canvas');
       return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
     } catch (e) { return false; }
-  }
-
-  function runIntro() {
-    let seen = false;
-    try { seen = sessionStorage.getItem('kiosk:intro') === '1'; sessionStorage.setItem('kiosk:intro', '1'); } catch (e) { seen = true; }
-    if (seen || REDUCED || prefs.intro === 'off') return;
-    const issue = esc((C.issue || {}).number || '01');
-    const el = document.createElement('div');
-    el.className = 'k-intro is-loading';
-    el.setAttribute('role', 'presentation');
-    el.innerHTML = `
-      <canvas class="k-intro__globe" aria-hidden="true"></canvas>
-      <div class="k-intro__copy">
-        <p class="k-intro__kicker">Only at the</p>
-        <p class="k-intro__word" aria-label="KIOSK"><span class="k-rk">K</span>IOSK</p>
-        <p class="k-intro__line" data-intro-line>World traveler edition · Issue ${issue}</p>
-      </div>
-      <button class="k-intro__skip" type="button">Skip intro</button>`;
-    document.body.append(el);
-    document.documentElement.classList.add('is-intro');
-
-    let done = false;
-    let player = null;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      el.classList.add('is-out');
-      document.documentElement.classList.remove('is-intro');
-      setTimeout(() => { if (player) player.stop(); el.remove(); }, 900);
-    };
-    $('.k-intro__skip', el).addEventListener('click', finish);
-    el.addEventListener('click', (e) => { if (e.target === el || e.target.tagName === 'CANVAS') finish(); });
-
-    // 2D wireframe globe: the original intro, kept as the fallback
-    const play2D = () => {
-      if (done || player) return;
-      el.classList.remove('k-kfly', 'is-loading');
-      $$('.k-kfly__sky, .k-kfly__shade, .k-kfly__svg, .k-kfly__pass', el).forEach((n) => n.remove());
-      // A failed WebGL start can leave the canvas unusable for 2D
-      const canvas = document.createElement('canvas');
-      canvas.className = 'k-intro__globe'; canvas.setAttribute('aria-hidden', 'true');
-      $('canvas', el).replaceWith(canvas);
-      let n = 0;
-      const line = $('[data-intro-line]', el);
-      line.innerHTML = `<span data-intro-count>00</span> flights · ${pad(GLOBE_PLACES.length)} cities · Issue ${issue}`;
-      player = createGlobe(canvas, {
-        scale: 0.34, max: 9, homeBias: 0.8,
-        onFlight: () => { n += 1; const c = $('[data-intro-count]', el); if (c) c.textContent = pad(n); },
-      });
-      setTimeout(finish, 3200);
-    };
-
-    // Slow connections shouldn't sit on a blank screen
-    const slow = setTimeout(play2D, 2500);
-    loadGsap().then(() => (window.KioskIntro ? null : loadScript('js/kiosk-intro.js')))
-      .then(() => {
-        clearTimeout(slow);
-        if (done || player) return;
-        el.classList.remove('is-loading');
-        player = window.KioskIntro.run(el, { onDone: finish });
-      })
-      .catch((err) => {
-        console.warn('[KIOSK] K-flight intro unavailable, using 2D globe', err);
-        clearTimeout(slow);
-        play2D();
-      });
   }
 
   /* --------------------------------------------------------- terminal
@@ -4219,7 +4177,6 @@
     }
   }
 
-  if (PAGE === 'home') runIntro();
   renderChrome();
   bindThemeAndClock();
   bindGlobal();
