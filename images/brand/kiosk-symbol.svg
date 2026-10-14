@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 318 822 424" role="img" aria-label="KIOSK">
+  <!-- The KIOSK symbol: a backwards K and a forward K joined at the stem,
+       which is the I; inside the I an O, inside the O an S. -->
+  <defs>
+    <mask id="kiosk-symbol-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <rect x="479" y="364" width="65" height="328" rx="10" fill="#000"/>
+      <rect x="493" y="392" width="36" height="282" rx="6" fill="#fff"/>
+      <path d="M521,423 H508 Q503,423 503,428 V505 Q503,512 510,512 H514 Q520,512 520,519 V645 Q520,652 513,652 H501" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <g fill="currentColor" mask="url(#kiosk-symbol-cut)">
+    <rect x="454" y="323" width="114" height="413"/>
+    <path d="M769,323 H907 L726,506 Q717,515 725,524 L917,736 H766 L594,546 Q580,550 568,560 V496 Q579,502 586,506 Z"/>
+    <path d="M253,323 H115 L296,506 Q305,515 297,524 L105,736 H256 L428,546 Q442,550 454,560 V496 Q443,502 436,506 Z"/>
+  </g>
+</svg>

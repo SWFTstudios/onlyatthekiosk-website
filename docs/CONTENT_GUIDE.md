@@ -351,3 +351,13 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 - **Radio** (`radio.html`): curated playlists from Spotify (`spotify`), SoundCloud (`soundcloud`), Apple Music (`apple`) or a self-hosted MP3 (`audio`). The player docks at the bottom and keeps playing while people browse.
 - **Lost & Found** (`lost-and-found.html`, was The Hunt): rare finds and pickup-only pieces on the map.
 - The Garage page is gone; `/garage` redirects to the library and `/hunt` to Lost & Found (`_redirects`).
+
+## Brand marks
+
+- **Symbol** (`images/brand/kiosk-symbol.svg`): a backwards K and a forward K joined at the stem, which forms the I; inside the I an O, inside the O an S. It uses `currentColor`, so it takes the text colour where it's placed. PNGs: `kiosk-symbol-white-1024.png`, `kiosk-symbol-black-1024.png`. The original artwork is kept as `kiosk-symbol-reference.png` and `kiosk-lockup-reference.png`.
+- **Favicon and app icons** are generated from the symbol: `images/favicon.svg`, `favicon.ico`, `favicon-32.png`, `favicon-48.png`, `images/app/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`.
+- **Wordmark**: ꓘIOSK, with the first K facing backwards (`.k-rk`).
+
+## The sky at the top of the home page
+
+The opening sky follows the visitor's local time: first light, sunrise, noon, evening, sunset and midnight, blended smoothly in between (stars and moonlit clouds at night). Palettes and the hour keyframes are `PALETTES` and `DAY` in `js/kiosk-sky.js`. Preview any mood with `index.html?sky=firstlight` (or `sunrise`, `noon`, `evening`, `sunset`, `midnight`), or a clock time with `?hour=19.5`.

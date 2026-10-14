@@ -494,11 +494,9 @@ body.k::after {
   border-radius: 50%;
   background: var(--bone);
   color: var(--bone-ink);
-  font-family: var(--f-serif);
-  font-style: italic;
-  font-size: calc(19px * var(--type, 1));
-  letter-spacing: 0;
 }
+.k-logo__mark .k-symbol { width: 24px; height: auto; display: block; }
+.k-symbol { display: block; fill: currentColor; }
 
 .k-nav__links {
   display: none;
@@ -3258,9 +3256,15 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-sky.is-live { height: 175svh; }
 .k-sky__layer { position: absolute; left: 0; right: 0; top: 0; height: 100svh; overflow: hidden; z-index: 50; background: #8db6e4; color: #fff; }
 .k-sky.is-live .k-sky__layer { position: fixed; inset: 0; height: auto; }
+.k-sky { --sky-top: #154aa6; --sky-mid: #2a68c9; --sky-low: #6c9fe0; --sky-hor: #dbe7f4; --sky-sun: rgba(255,255,255,.32); --sky-sun-x: 78%; --sky-sun-y: 8%; --sky-sun-s: 70%; --sky-streak: rgba(255,255,255,.7); --sky-fog: #eef1f5; }
 .k-sky__air { position: absolute; inset: 0; background:
-  radial-gradient(60% 40% at 72% 58%, rgba(255,236,200,.95) 0%, rgba(255,214,160,.55) 18%, rgba(255,200,150,0) 55%),
-  linear-gradient(180deg, #2c5fae 0%, #6f9fd8 34%, #b7cfe9 56%, #f4dcb6 70%, #f8e6c8 100%); }
+  radial-gradient(var(--sky-sun-s) calc(var(--sky-sun-s) * .7) at var(--sky-sun-x) var(--sky-sun-y), var(--sky-sun) 0%, rgba(255,255,255,0) 60%),
+  linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 30%, var(--sky-low) 50%, var(--sky-hor) 58%, var(--sky-hor) 100%); }
+.k-sky__streaks { position: absolute; left: -10%; right: -10%; top: 42%; height: 15%; pointer-events: none; background:
+  radial-gradient(38% 9% at 70% 40%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%),
+  radial-gradient(30% 6% at 28% 62%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%),
+  radial-gradient(45% 7% at 55% 80%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%);
+  filter: blur(2px); }
 .k-sky__space { position: absolute; inset: 0; opacity: 0; background:
   radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
   radial-gradient(1.2px 1.2px at 84% 44%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 72%, #fff 50%, transparent 51%),
@@ -3270,17 +3274,17 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-sky.is-boot .k-sky__space { opacity: 1; }
 .k-sky__globe, .k-sky__fog { position: absolute; inset: 0; width: 100%; height: 100%; }
 .k-sky__fogcss { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 52%; pointer-events: none; display: none;
-  background: radial-gradient(40% 60% at 20% 70%, #fff 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, #f6f3ee 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, #fff 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, #f3f1ec 0%, rgba(243,241,236,.9) 45%, rgba(243,241,236,0) 100%);
+  background: radial-gradient(40% 60% at 20% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, var(--sky-fog) 0%, var(--sky-fog) 45%, rgba(255,255,255,0) 100%);
   filter: blur(6px); }
 .k-sky.is-nogl .k-sky__fogcss, .k-sky:not(.is-live) .k-sky__fogcss { display: block; }
-.k-sky__logo { position: absolute; left: 0; right: 0; top: 36%; transform: translateY(-50%); display: grid; justify-items: center; text-align: center; padding: 0 var(--gutter); text-shadow: 0 8px 40px rgba(20,40,80,.25); will-change: transform, opacity; }
+.k-sky__logo { position: absolute; left: 0; right: 0; top: 37%; transform: translateY(-50%); display: grid; justify-items: center; text-align: center; padding: 0 var(--gutter); filter: drop-shadow(0 10px 30px rgba(10,30,70,.28)); will-change: transform, opacity; }
 .k-sky.is-boot .k-sky__logo { opacity: 0; }
-.k-sky__kicker { margin: 0; font-family: var(--f-serif); font-style: italic; font-size: calc(clamp(24px, 3.6vw, 52px) * var(--type, 1)); }
-.k-sky__word { margin: 0; font-size: calc(clamp(96px, 24vw, 400px) * var(--type, 1)); line-height: .8; letter-spacing: -0.065em; font-weight: 500; white-space: nowrap; }
-.k-sky__word .k-rk { margin-right: -0.065em; }
+.k-sky__symbol { width: clamp(150px, 24vw, 420px); height: auto; color: #fff; }
+.k-sky__word { margin: clamp(10px, 1.6vw, 22px) 0 0; font-size: calc(clamp(52px, 10.5vw, 180px) * var(--type, 1)); line-height: .8; letter-spacing: -0.06em; font-weight: 600; white-space: nowrap; }
+.k-sky__word .k-rk { margin-right: -0.06em; }
 .k-sky__line { margin: 14px 0 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
 .k-sky__route { position: absolute; left: var(--gutter); top: calc(var(--nav-h) + 12px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
-.k-sky__hint { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #3c4a60; opacity: 0; transition: opacity .8s var(--ease); }
+.k-sky__hint { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px rgba(20,40,80,.45); opacity: 0; transition: opacity .8s var(--ease); }
 .k-sky.is-settled .k-sky__hint { opacity: .8; }
 .k-sky__hint i { width: 1px; height: 28px; background: currentColor; animation: k-sky-hint 1.6s var(--ease-io) infinite; transform-origin: top; }
 @keyframes k-sky-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }

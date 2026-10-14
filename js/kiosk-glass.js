@@ -207,6 +207,9 @@
     ...extra,
   });
 
+  /** The KIOSK symbol (images/brand/kiosk-symbol.svg): ꓘ and K joined at the stem, which is the I; an O inside it, an S inside that. */
+  const KIOSK_SYMBOL = '<svg class="k-symbol" viewBox="100 318 822 424" aria-hidden="true" focusable="false"><defs><mask id="kiosk-symbol-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="#fff"/><rect x="479" y="364" width="65" height="328" rx="10" fill="#000"/><rect x="493" y="392" width="36" height="282" rx="6" fill="#fff"/><path d="M521,423 H508 Q503,423 503,428 V505 Q503,512 510,512 H514 Q520,512 520,519 V645 Q520,652 513,652 H501" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></mask></defs><g fill="currentColor" mask="url(#kiosk-symbol-cut)"><rect x="454" y="323" width="114" height="413"/><path d="M769,323 H907 L726,506 Q717,515 725,524 L917,736 H766 L594,546 Q580,550 568,560 V496 Q579,502 586,506 Z"/><path d="M253,323 H115 L296,506 Q305,515 297,524 L105,736 H256 L428,546 Q442,550 454,560 V496 Q443,502 436,506 Z"/></g></svg>';
+
   /* ----------------------------------------------------------- chrome */
 
   const NAV = [
@@ -299,7 +302,7 @@
     // Glass header: logo · local clock · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
-        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span><span class="k-wm"><span class="k-rk">K</span>IOSK</span></a>
+        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">${KIOSK_SYMBOL}</span><span class="k-wm"><span class="k-rk">K</span>IOSK</span></a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
         <div class="k-nav__actions">

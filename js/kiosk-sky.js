@@ -35,6 +35,46 @@
     return [a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2];
   }
 
+  /* ------------------------------------------------------- time of day
+   * The sky follows the visitor's local clock: first light, sunrise, noon,
+   * evening, sunset and midnight, blended smoothly between keyframes.
+   * Preview any of them with ?sky=firstlight|sunrise|noon|evening|sunset|midnight
+   * (or ?hour=19.5). */
+  const PALETTES = {
+    midnight:   { top: '#02040b', mid: '#071026', low: '#14234a', hor: '#2a3a63', sun: 'rgba(214,226,255,.42)', sx: 76, sy: 16, ss: 30, lit: [0.56, 0.63, 0.82], shade: [0.09, 0.12, 0.21], haze: [0.2, 0.27, 0.42], gnd: [0.02, 0.04, 0.05], dir: [-0.3, 0.7, 0.5], stars: 1, streak: 'rgba(160,180,230,.25)' },
+    firstlight: { top: '#0b1430', mid: '#28305f', low: '#8a6f9c', hor: '#f2b5a7', sun: 'rgba(255,190,170,.7)', sx: 26, sy: 58, ss: 55, lit: [0.96, 0.8, 0.84], shade: [0.29, 0.29, 0.44], haze: [0.8, 0.67, 0.73], gnd: [0.1, 0.12, 0.14], dir: [0.62, 0.12, 0.6], stars: 0.45, streak: 'rgba(255,200,210,.5)' },
+    sunrise:    { top: '#234a8f', mid: '#6a8cc8', low: '#f0b48c', hor: '#ffd29a', sun: 'rgba(255,206,130,1)', sx: 26, sy: 55, ss: 50, lit: [1.0, 0.86, 0.69], shade: [0.44, 0.42, 0.55], haze: [0.98, 0.83, 0.71], gnd: [0.16, 0.22, 0.18], dir: [0.66, 0.24, 0.6], stars: 0, streak: 'rgba(255,225,190,.65)' },
+    noon:       { top: '#154aa6', mid: '#2a68c9', low: '#6c9fe0', hor: '#dbe7f4', sun: 'rgba(255,255,255,.32)', sx: 78, sy: 8, ss: 70, lit: [1.0, 0.995, 0.98], shade: [0.44, 0.52, 0.66], haze: [0.8, 0.87, 0.95], gnd: [0.17, 0.29, 0.21], dir: [-0.45, 0.8, 0.4], stars: 0, streak: 'rgba(255,255,255,.7)' },
+    evening:    { top: '#1d4f9e', mid: '#4f86c9', low: '#b9c9d8', hor: '#f5dcb2', sun: 'rgba(255,214,150,.95)', sx: 74, sy: 44, ss: 60, lit: [1.0, 0.93, 0.8], shade: [0.48, 0.5, 0.6], haze: [0.93, 0.87, 0.78], gnd: [0.18, 0.26, 0.18], dir: [-0.6, 0.42, 0.6], stars: 0, streak: 'rgba(255,240,215,.7)' },
+    sunset:     { top: '#23305f', mid: '#6a4a86', low: '#e2766a', hor: '#ffb36b', sun: 'rgba(255,150,80,1)', sx: 70, sy: 56, ss: 55, lit: [1.0, 0.7, 0.5], shade: [0.37, 0.29, 0.45], haze: [0.98, 0.66, 0.53], gnd: [0.12, 0.1, 0.12], dir: [-0.7, 0.17, 0.7], stars: 0.1, streak: 'rgba(255,190,150,.7)' },
+  };
+  const NAMES = { midnight: 'Midnight', firstlight: 'First light', sunrise: 'Sunrise', noon: 'Noon', evening: 'Evening', sunset: 'Sunset' };
+  // [hour, palette]: linear blends between neighbours
+  const DAY = [[0, 'midnight'], [4, 'midnight'], [5.1, 'firstlight'], [6.0, 'firstlight'], [6.8, 'sunrise'], [7.6, 'sunrise'], [9.2, 'noon'], [15.4, 'noon'], [16.6, 'evening'], [18.1, 'evening'], [19.0, 'sunset'], [20.1, 'sunset'], [21.4, 'midnight'], [24, 'midnight']];
+  const phaseAt = (h) => (h >= 4.5 && h < 6.25 ? 'firstlight' : h < 8 && h >= 6.25 ? 'sunrise' : h >= 8 && h < 16 ? 'noon' : h >= 16 && h < 18.5 ? 'evening' : h >= 18.5 && h < 20.75 ? 'sunset' : 'midnight');
+  const rgb = (c) => { if (Array.isArray(c)) return c; if (c[0] === '#') { const n = parseInt(c.slice(1), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; } const m = c.match(/[\d.]+/g).map(Number); return [m[0] / 255, m[1] / 255, m[2] / 255, m[3] == null ? 1 : m[3]]; };
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const mixArr = (a, b, k) => a.map((v, i) => lerp(v, b[i] == null ? v : b[i], k));
+  const css = (c) => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${(c[3] == null ? 1 : c[3]).toFixed(3)})`;
+  function skyAt(h) {
+    let i = 0; while (i < DAY.length - 2 && DAY[i + 1][0] <= h) i += 1;
+    const [h0, p0] = DAY[i]; const [h1, p1] = DAY[i + 1];
+    const k = h1 === h0 ? 0 : clamp((h - h0) / (h1 - h0), 0, 1);
+    const A = PALETTES[p0]; const B = PALETTES[p1];
+    const out = { phase: phaseAt(h) };
+    ['top', 'mid', 'low', 'hor', 'sun', 'streak'].forEach((key) => { out[key] = css(mixArr(rgb(A[key]), rgb(B[key]), k)); });
+    ['lit', 'shade', 'haze', 'gnd', 'dir'].forEach((key) => { out[key] = mixArr(A[key], B[key], k); });
+    ['sx', 'sy', 'ss', 'stars'].forEach((key) => { out[key] = lerp(A[key], B[key], k); });
+    return out;
+  }
+  function localHour() {
+    const q = new URLSearchParams(location.search);
+    const named = { midnight: 1, firstlight: 5.4, sunrise: 7.0, noon: 12, evening: 17.2, sunset: 19.5 }[q.get('sky')];
+    if (named != null) return named;
+    if (q.get('hour') != null && !Number.isNaN(Number(q.get('hour')))) return ((Number(q.get('hour')) % 24) + 24) % 24;
+    const d = new Date(); return d.getHours() + d.getMinutes() / 60;
+  }
+
   /* ------------------------------------------------------------ globe */
   function globe(canvas, G, world) {
     const ctx = canvas.getContext('2d');
@@ -113,44 +153,116 @@
     return { draw, resize };
   }
 
-  /* -------------------------------------------------------------- fog */
+  /* ----------------------------------------------------------- clouds
+   * A sea of cumulus seen from above, ray-marched as a heightfield in one
+   * full-screen WebGL pass: billowing tops lit by the sun, blue-grey
+   * hollows, haze toward the horizon, green fields through the gaps and
+   * loose wisps drifting past the camera. Noise is baked once into a small
+   * tileable texture, so each step is a texture read, not noise maths.
+   *   F.hz   horizon height on screen (0 bottom … 1 top; < 0 looks up at sky)
+   *   F.cam  camera altitude above the cloud tops
+   *   F.dive 0 … 1 descending into the clouds (white-out at 1)
+   */
+  function bakeNoise(size) {
+    const perm = new Uint8Array(512); const base = new Uint8Array(256);
+    for (let i = 0; i < 256; i += 1) base[i] = i;
+    for (let i = 255; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); const t = base[i]; base[i] = base[j]; base[j] = t; }
+    for (let i = 0; i < 512; i += 1) perm[i] = base[i & 255];
+    const lat = (x, y, p) => perm[(perm[((x % p) + p) % p] + (((y % p) + p) % p)) & 511] / 255;
+    const vnoise = (x, y, p) => {
+      const xi = Math.floor(x); const yi = Math.floor(y); let xf = x - xi; let yf = y - yi;
+      xf = xf * xf * (3 - 2 * xf); yf = yf * yf * (3 - 2 * yf);
+      const a = lat(xi, yi, p); const b = lat(xi + 1, yi, p); const c = lat(xi, yi + 1, p); const d = lat(xi + 1, yi + 1, p);
+      return a + (b - a) * xf + (c - a) * yf + (a - b - c + d) * xf * yf;
+    };
+    const fbm = (x, y, cells, oct) => { let v = 0; let amp = 0.5; let f = cells; let norm = 0; for (let o = 0; o < oct; o += 1) { v += amp * vnoise(x * f, y * f, f); norm += amp; amp *= 0.5; f *= 2; } return v / norm; };
+    const data = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
+      const u = x / size; const v = y / size; const i = (y * size + x) * 4;
+      data[i] = Math.round(fbm(u, v, 4, 5) * 255);       // big cloud masses
+      data[i + 1] = Math.round(fbm(u, v, 16, 4) * 255);  // billows
+      data[i + 2] = Math.round(fbm(u, v, 8, 3) * 255);   // ground and wisps
+      data[i + 3] = 255;
+    }
+    return data;
+  }
   const VERT = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
-  const FRAG = (oct) => `
+  const FRAG = (steps) => `
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+    #else
     precision mediump float;
-    uniform vec2 r; uniform float t; uniform float level; uniform float dive;
-    float h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
-    float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
-      return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }
-    float fbm(vec2 p){ float v = 0.0, a = 0.5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
-      for (int i = 0; i < ${oct}; i++){ v += a * n(p); p = m * p; a *= 0.5; } return v; }
-    void main(){
+    #endif
+    uniform vec2 r; uniform float t; uniform float hz; uniform float cam; uniform float dive; uniform sampler2D nz;
+    uniform vec3 lit; uniform vec3 shade; uniform vec3 hazeC; uniform vec3 gnd; uniform vec3 sunv;
+    const float FOV = 1.15;
+    vec2 wind;
+    float H(vec2 xz) {
+      float a = texture2D(nz, xz * 0.028 + wind).r;          // big cloud heads
+      float b = texture2D(nz, xz * 0.085 + wind * 1.5).g;    // billows on them
+      float s = clamp((a * 1.0 + b * 0.24 - 0.44) * 2.4, 0.0, 1.0);
+      return -1.0 + pow(s, 0.55);                    // rounded, cauliflower tops; layer top at 0
+    }
+    void main() {
       vec2 uv = gl_FragCoord.xy / r;
       float asp = r.x / r.y;
-      float x = (uv.x - 0.5) * asp;
-      // Billowing top edge of the cloud bank
-      float edge = fbm(vec2(x * 1.4 + t * 0.018, t * 0.03)) - 0.5;
-      float top = level + edge * 0.2 + fbm(vec2(x * 4.0 - t * 0.03, 3.0)) * 0.05;
-      float inside = top - uv.y;
-      // Perspective: the bank stretches toward the horizon
-      float depth = 1.0 / max(0.08, top + 0.35 - uv.y);
-      vec2 q = vec2(x * depth * 1.1, depth * 1.6 - t * 0.05) * (1.0 + dive * 2.2);
-      float body = fbm(q + vec2(t * 0.015, 0.0));
-      float puff = fbm(q * 2.7 - vec2(t * 0.03, t * 0.01));
-      float shape = inside + (body - 0.5) * 0.3 + (puff - 0.5) * 0.1;
-      float a = smoothstep(-0.015, 0.16, shape);
-      // Light from the low sun above: bright crowns, blue-grey hollows
-      float lightK = smoothstep(0.28, 0.92, body * 0.85 + puff * 0.45 - inside * 0.9 + 0.2);
-      vec3 lit = vec3(1.0, 0.96, 0.9);
-      vec3 shade = vec3(0.55, 0.62, 0.75);
-      vec3 col = mix(shade, lit, lightK);
-      col += vec3(1.0, 0.78, 0.5) * smoothstep(0.09, 0.0, abs(shape - 0.03)) * 0.22;   // golden rim
-      // Loose wisps drifting above the bank
-      float wisp = smoothstep(0.55, 0.85, fbm(vec2(x * 2.2 + t * 0.05, uv.y * 3.0 - t * 0.02))) * smoothstep(top + 0.25, top - 0.05, uv.y) * 0.35;
-      a = max(a, wisp);
-      // Diving in: the fog closes over everything
-      a = clamp(a + smoothstep(0.0, 1.0, dive * 1.4 - (1.0 - uv.y) * 0.4) , 0.0, 1.0);
-      col = mix(col, vec3(0.93, 0.94, 0.96), clamp(dive * 1.3 - 0.2, 0.0, 1.0));
-      gl_FragColor = vec4(col * a, a);
+      wind = vec2(t * 0.0012, t * 0.0075);
+      vec3 d = normalize(vec3((uv.x - 0.5) * asp * FOV, (uv.y - hz) * FOV, 1.0));
+      vec3 col = vec3(0.0); float a = 0.0;
+      vec3 haze = hazeC;
+      if (d.y < -0.0005) {
+        float t0 = cam / -d.y; float t1 = (cam + 1.0) / -d.y;
+        float far = 90.0;
+        if (t0 < far) {
+          t1 = min(t1, far);
+          float hit = -1.0; float prev = t0;
+          float jit = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+          for (int i = 0; i < ${steps}; i++) {
+            float tt = mix(t0, t1, (float(i) + jit) / float(${steps}));
+            vec3 p = vec3(0.0, cam, 0.0) + d * tt;
+            if (p.y < H(p.xz)) { hit = tt; break; }
+            prev = tt;
+          }
+          if (hit > 0.0) {
+            // one refinement step between the last miss and the hit
+            float mid = (prev + hit) * 0.5; vec3 pm = vec3(0.0, cam, 0.0) + d * mid;
+            if (pm.y < H(pm.xz)) hit = mid;
+            vec3 p = vec3(0.0, cam, 0.0) + d * hit;
+            float e = 0.06 + hit * 0.004;
+            vec3 n = normalize(vec3(H(p.xz - vec2(e, 0.0)) - H(p.xz + vec2(e, 0.0)), 2.0 * e, H(p.xz - vec2(0.0, e)) - H(p.xz + vec2(0.0, e))));
+            vec3 sun = normalize(sunv);
+            float diff = clamp(dot(n, sun), 0.0, 1.0);
+            float up = clamp(p.y + 1.0, 0.0, 1.0);                 // 0 deep in a hollow, 1 a crown
+            // neighbouring heads cast shade toward the sun-facing side
+            vec2 toward = normalize(sun.xz + 1e-4) * 0.45;
+            float occl = clamp((H(p.xz + toward) - p.y - sun.y * 0.45) * 2.5, 0.0, 1.0);
+            float lightK = clamp(diff * 0.75 + up * 0.5 - 0.15, 0.0, 1.0) * (1.0 - occl * 0.55);
+            col = mix(shade, lit, lightK);
+            col += lit * 0.08 * pow(1.0 - clamp(n.y, 0.0, 1.0), 2.0);   // bright rims
+            col = mix(col, haze, smoothstep(8.0, 82.0, hit));
+            a = smoothstep(0.0, 0.03, -d.y);                    // feather into the sky at the horizon
+          } else {
+            // A gap: fields far below, through the haze
+            float tg = (cam + 6.0) / -d.y; vec2 g = (d * tg).xz;
+            float k = texture2D(nz, g * 0.018 + wind * 0.4).b;
+            // A gap: a deep hollow with the ground faint far below
+            col = mix(shade * 0.72, gnd * 1.4, 0.3 + k * 0.25);
+            col = mix(col, mix(shade, haze, 0.5), smoothstep(6.0, 60.0, tg) * 0.8);
+            a = smoothstep(0.0, 0.03, -d.y);
+          }
+        } else {
+          col = haze; a = smoothstep(0.0, 0.03, -d.y);            // soft horizon
+        }
+      }
+      // Wisps drifting past the camera
+      float w = texture2D(nz, vec2(uv.x * asp * 0.55 + t * 0.012, uv.y * 0.7 - t * 0.004)).b;
+      float wa = smoothstep(0.52, 0.78, w) * 0.5 * smoothstep(hz + 0.35, hz - 0.2, uv.y);
+      col = col * a * (1.0 - wa) + mix(haze, lit, 0.6) * wa; a = a + wa * (1.0 - a);
+      // Descending into the clouds: white-out
+      float white = smoothstep(0.35, 0.95, dive);
+      vec3 fogc = mix(haze, lit, 0.55);
+      col = mix(col, fogc * max(a, white), white); a = max(a, white);
+      gl_FragColor = vec4(col, a);
     }`;
   function fog(canvas, F) {
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false, powerPreference: 'low-power' });
@@ -158,31 +270,56 @@
     const small = Math.min(window.innerWidth, window.innerHeight) < 700;
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
     const prog = gl.createProgram();
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG(small ? 4 : 5)));
-    gl.linkProgram(prog); gl.useProgram(prog);
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG(small ? 14 : 22)));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
     const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const U = { r: gl.getUniformLocation(prog, 'r'), t: gl.getUniformLocation(prog, 't'), level: gl.getUniformLocation(prog, 'level'), dive: gl.getUniformLocation(prog, 'dive') };
-    const scale = small ? 0.5 : 0.62;    // soft fog: render small, let CSS scale it up
+    const SIZE = 256;
+    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, SIZE, SIZE, 0, gl.RGBA, gl.UNSIGNED_BYTE, bakeNoise(SIZE));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    const U = {};
+    ['r', 't', 'hz', 'cam', 'dive', 'nz', 'lit', 'shade', 'hazeC', 'gnd', 'sunv'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
+    gl.uniform1i(U.nz, 0);
+    const scale = small ? 0.45 : 0.55;    // soft clouds: render small, CSS scales up
     const resize = () => { canvas.width = Math.max(2, Math.round(canvas.clientWidth * scale)); canvas.height = Math.max(2, Math.round(canvas.clientHeight * scale)); gl.viewport(0, 0, canvas.width, canvas.height); };
     resize();
     return {
       resize,
       draw(time) {
         gl.uniform2f(U.r, canvas.width, canvas.height); gl.uniform1f(U.t, time);
-        gl.uniform1f(U.level, F.level); gl.uniform1f(U.dive, F.dive);
+        gl.uniform1f(U.hz, F.hz); gl.uniform1f(U.cam, F.cam); gl.uniform1f(U.dive, F.dive);
+        const P = F.pal;
+        gl.uniform3fv(U.lit, P.lit); gl.uniform3fv(U.shade, P.shade); gl.uniform3fv(U.hazeC, P.haze); gl.uniform3fv(U.gnd, P.gnd); gl.uniform3fv(U.sunv, P.dir);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       },
     };
   }
+
+  const SETTLED_HZ = 0.42;   // horizon height once we're above the clouds
 
   /* ------------------------------------------------------------- mount */
   function mount(section, opts) {
     const { gsap, ScrollTrigger } = opts;
     const layer = section.querySelector('.k-sky__layer');
     const G = { yaw: 1.29, pitch: 0.55, zoom: 0.9, drop: 0, alpha: 1, leg: 0 };
-    const F = { level: -0.25, dive: 0 };
+    const F = { hz: -0.6, cam: 1.5, dive: 0, pal: skyAt(localHour()) };
+    const zone = (() => { try { return (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' '); } catch (e) { return ''; } })();
+    const paint = () => {
+      const P = F.pal;
+      [['--sky-top', P.top], ['--sky-mid', P.mid], ['--sky-low', P.low], ['--sky-hor', P.hor], ['--sky-sun', P.sun], ['--sky-sun-x', `${P.sx}%`], ['--sky-sun-y', `${P.sy}%`], ['--sky-sun-s', `${P.ss}%`], ['--sky-streak', P.streak]]
+        .forEach(([k, v]) => section.style.setProperty(k, v));
+      section.dataset.phase = P.phase;
+      const fogc = F.pal.haze.map((v, i) => v + (F.pal.lit[i] - v) * 0.55);
+      section.style.setProperty('--sky-fog', css(fogc));
+    };
+    paint();
+    const caption = () => `KSK 001 · ${NAMES[F.pal.phase]} above the clouds${zone ? ` · ${zone}` : ''} · 36,000 ft`;
+    const tick = setInterval(() => { F.pal = skyAt(localHour()); paint(); if (section.classList.contains('is-settled') && route) route.textContent = caption(); }, 60000);
     const gv = globe(section.querySelector('.k-sky__globe'), G, opts.world);
     let fv = null;
     try { fv = fog(section.querySelector('.k-sky__fog'), F); } catch (e) { fv = null; }
@@ -207,9 +344,9 @@
     const tl = gsap.timeline();
     const settled = () => { section.classList.add('is-settled'); };
     if (opts.quick || opts.reduced) {
-      Object.assign(G, { alpha: 0 }); F.level = 0.36;
-      gsap.set(space, { opacity: 0 }); gsap.set(logo, { y: 0, opacity: 1 });
-      if (route) route.textContent = 'KSK 001 · Above the clouds';
+      Object.assign(G, { alpha: 0 }); F.hz = SETTLED_HZ;
+      gsap.set(space, { opacity: F.pal.stars }); gsap.set(logo, { y: 0, opacity: 1 });
+      if (route) route.textContent = caption();
       settled();
     } else {
       // 1. Around the globe, in the dark above the atmosphere
@@ -225,9 +362,9 @@
       // 2. Up into the sky: the Earth drops away, golden hour fades in, the cloud bank rises
       tl.to(G, { zoom: 2.6, drop: 0.95, duration: 1.6, ease: 'power2.in' }, up)
         .to(G, { alpha: 0, duration: 0.6, ease: 'power1.in' }, up + 0.6)
-        .to(space, { opacity: 0, duration: 1.4, ease: 'power1.inOut' }, up + 0.4)
-        .to(F, { level: 0.36, duration: 1.8, ease: 'power3.out' }, up + 0.6)
-        .call(() => { if (route) route.textContent = 'KSK 001 · Above the clouds · 36,000 ft'; }, null, up + 0.8)
+        .to(space, { opacity: F.pal.stars, duration: 1.4, ease: 'power1.inOut' }, up + 0.4)
+        .to(F, { hz: SETTLED_HZ, duration: 2.0, ease: 'power3.out' }, up + 0.5)
+        .call(() => { if (route) route.textContent = caption(); }, null, up + 0.8)
       // 3. The logo rises from behind the clouds
         .fromTo(logo, { y: '42vh', opacity: 0 }, { y: 0, opacity: 1, duration: 2.0, ease: 'power3.out' }, up + 1.3)
         .call(settled, null, up + 2.6);
@@ -240,7 +377,7 @@
         const p = self.progress;
         if (p > 0.001 && tl.isActive()) tl.progress(1);
         F.dive = clamp(p / 0.8, 0, 1);
-        F.level = 0.36 + F.dive * 0.9;
+        if (!tl.isActive()) { F.hz = SETTLED_HZ + F.dive * 0.42; F.cam = 1.5 - F.dive * 1.55; }
         gsap.set(logo, { y: `${-p * 30}vh`, opacity: clamp(1 - p * 1.8, 0, 1), scale: 1 + p * 0.25 });
         layer.style.opacity = String(clamp((1 - p) / 0.22, 0, 1));
         const gone = p >= 0.999;
@@ -250,7 +387,7 @@
     });
     wake();
     return {
-      stop() { on = false; tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); },
+      stop() { on = false; clearInterval(tick); tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); },
     };
   }
 

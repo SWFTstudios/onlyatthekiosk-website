@@ -39,8 +39,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
   <link href="css/kiosk-glass.css" rel="stylesheet">
-  <link href="images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
-  <link href="images/webclip.jpg" rel="apple-touch-icon">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ"></script>
@@ -60,13 +62,13 @@
          Scroll to descend through the clouds onto the page (js/kiosk-sky.js) -->
     <section class="k-sky is-boot" data-sky aria-labelledby="sky-title">
       <div class="k-sky__layer">
-        <div class="k-sky__air" aria-hidden="true"></div>
+        <div class="k-sky__air" aria-hidden="true"><div class="k-sky__streaks"></div></div>
         <div class="k-sky__space" aria-hidden="true"></div>
         <canvas class="k-sky__globe" aria-hidden="true"></canvas>
         <div class="k-sky__logo">
-          <p class="k-sky__kicker">Only at the</p>
-          <h1 class="k-sky__word" id="sky-title" aria-label="KIOSK"><span class="k-rk">K</span>IOSK</h1>
-          <p class="k-sky__line">A global travel magazine · Issue 01</p>
+          <svg class="k-symbol k-sky__symbol" viewBox="100 318 822 424" aria-hidden="true" focusable="false"><defs><mask id="kiosk-sky-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="#fff"/><rect x="479" y="364" width="65" height="328" rx="10" fill="#000"/><rect x="493" y="392" width="36" height="282" rx="6" fill="#fff"/><path d="M521,423 H508 Q503,423 503,428 V505 Q503,512 510,512 H514 Q520,512 520,519 V645 Q520,652 513,652 H501" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></mask></defs><g fill="currentColor" mask="url(#kiosk-sky-cut)"><rect x="454" y="323" width="114" height="413"/><path d="M769,323 H907 L726,506 Q717,515 725,524 L917,736 H766 L594,546 Q580,550 568,560 V496 Q579,502 586,506 Z"/><path d="M253,323 H115 L296,506 Q305,515 297,524 L105,736 H256 L428,546 Q442,550 454,560 V496 Q443,502 436,506 Z"/></g></svg>
+          <h1 class="k-sky__word" id="sky-title" aria-label="Only at the KIOSK"><span class="k-rk">K</span>IOSK</h1>
+          <p class="k-sky__line">Only at the KIOSK · A global travel magazine · Issue 01</p>
         </div>
         <canvas class="k-sky__fog" aria-hidden="true"></canvas>
         <div class="k-sky__fogcss" aria-hidden="true"></div>
