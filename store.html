@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <title>Stores at the KIOSK — Partner Labels, Thrift Curators &amp; Makers</title>
+  <meta name="description" content="Partner stores at the KIOSK: labels, thrift curators and makers from around the world, each with a page at the kiosk.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbfaf8">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KIOSK">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
+  <link rel="canonical" href="https://onlyatthekiosk.com/store.html">
+  <meta property="og:title" content="Stores at the KIOSK — Partner Labels, Thrift Curators &amp; Makers">
+  <meta property="og:image" content="https://onlyatthekiosk.com/images/KiosKBoxLogo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="css/kiosk-glass.css" rel="stylesheet">
+  <link href="images/favicon.jpg" rel="shortcut icon" type="image/x-icon">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MCKHRGGYRJ');</script>
+</head>
+<body class="k" data-page="store">
+  <a class="k-skip" href="#main">Skip to content</a>
+  <main id="main" class="k-term k-storepage">
+
+    <!-- DIRECTORY (no ?s=) ------------------------------------------- -->
+    <section class="k-term__hero" data-store-view="directory">
+      <div class="k-wrap k-storedir">
+        <p class="k-term__strip"><span class="k-term__t">C</span><span>Concourse · Partner stores</span></p>
+        <h1 class="k-term__title">Stores at the <em>kiosk.</em></h1>
+        <p class="k-lede">Labels, thrift curators and makers from around the world, each with a page at the kiosk. Search by name or city.</p>
+        <div class="k-term__search k-glass-panel k-mt-m" data-search-scope>
+          <label class="k-term__field">
+            <span class="k-sr">Search stores</span>
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="search" data-mount="store-q" placeholder="Search stores, cities…" autocomplete="off" enterkeyhint="search">
+          </label>
+          <div class="k-sr-list" data-mount="store-results" role="listbox" aria-label="Stores" hidden></div>
+        </div>
+        <div class="k-storegrid k-mt-l" data-mount="store-grid"></div>
+      </div>
+    </section>
+
+    <!-- A STORE'S PAGE (?s=<id>) ------------------------------------ -->
+    <article data-store-view="page" hidden>
+      <header class="k-brand">
+        <div class="k-brand__cover" data-mount="brand-cover" aria-hidden="true"></div>
+        <div class="k-wrap k-brand__inner">
+          <a class="k-brand__back" href="store.html">← All stores</a>
+          <div class="k-brand__card k-glass-panel">
+            <span class="k-brand__logo" data-mount="brand-logo"></span>
+            <div class="k-brand__id">
+              <p class="k-eyebrow" data-mount="brand-where"></p>
+              <h1 class="k-brand__name" data-mount="brand-name"></h1>
+              <p class="k-brand__note" data-mount="brand-note"></p>
+            </div>
+            <div class="k-brand__cta" data-mount="brand-cta"></div>
+          </div>
+        </div>
+      </header>
+      <section class="k-section k-section--tight">
+        <div class="k-wrap">
+          <div class="k-brand__about" data-mount="brand-about"></div>
+          <div class="k-term__toolbar k-mt-l">
+            <div><p class="k-eyebrow">At the kiosk</p><h2 class="k-h2 k-mt-s">Pieces from <em class="k-serif" data-mount="brand-name-2"></em></h2></div>
+            <span class="k-small" data-mount="brand-count"></span>
+          </div>
+          <div class="k-term-grid" data-mount="brand-grid"></div>
+        </div>
+      </section>
+    </article>
+  </main>
+  <script src="js/kiosk-content.js"></script>
+  <script src="js/kiosk-mockups.js"></script>
+  <script src="js/kiosk-glass.js"></script>
+</body>
+</html>

@@ -2856,3 +2856,142 @@ html.is-pdp-open, html.is-pdp-open body { overflow: hidden; }
   .k-pdp:not(.is-full) .k-pdp__bar { padding-top: 16px; }
 }
 html[data-theme='dark'] .k-pdp__panel { background: rgba(18,18,21,.86); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), var(--elev-2); }
+
+/* ------------------------------------------------------- partner stores */
+.k-storedir .k-term__search { max-width: 720px; }
+.k-mt-l { margin-top: clamp(28px, 4vw, 48px); }
+.k-storegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.k-scard { display: grid; overflow: hidden; padding: 0; color: var(--ink); text-align: left; transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+.k-scard:hover { transform: translateY(-3px); box-shadow: var(--elev-2); }
+.k-scard__cover { display: block; aspect-ratio: 16 / 9; background: var(--bg-3) linear-gradient(135deg, color-mix(in srgb, var(--signal) 30%, transparent), transparent); overflow: hidden; }
+.k-scard__cover img { width: 100%; height: 100%; object-fit: cover; }
+.k-scard__body { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: center; padding: 14px 16px 6px; }
+.k-scard__body .k-sr-row__img { width: 44px; height: 44px; margin-top: -34px; box-shadow: 0 0 0 3px var(--bg); }
+.k-scard__body b { display: block; font-weight: 500; font-size: calc(17px * var(--type, 1)); }
+.k-scard__body small { display: block; color: var(--ink-3); font-size: calc(12.5px * var(--type, 1)); }
+.k-scard__note { display: block; padding: 0 16px 16px; font-size: calc(13.5px * var(--type, 1)); color: var(--ink-2); }
+.k-scard--join { align-content: start; gap: 10px; padding: 22px; border-radius: var(--r-lg); border: 1.5px dashed var(--line-2); background: none; min-height: 200px; }
+
+.k-brand { position: relative; isolation: isolate; padding: calc(var(--nav-h) + 30px) 0 0; }
+.k-brand__cover { position: absolute; inset: 0 0 30% 0; z-index: -1; overflow: hidden; background: #111; }
+.k-brand__cover img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.k-brand__cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25), transparent 40%, var(--bg)); }
+.k-brand__inner { display: grid; gap: 14px; padding-top: clamp(120px, 22vw, 260px); }
+.k-brand__back { justify-self: start; padding: 8px 14px; border-radius: var(--r-pill); font-size: 13px; color: #fff; background: rgba(10,10,12,.45); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); position: absolute; top: calc(var(--nav-h) + 26px); }
+.k-brand__card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 22px; align-items: center; padding: clamp(18px, 2.6vw, 30px); }
+@media (min-width: 900px) { .k-brand__card { grid-template-columns: auto minmax(0, 1fr) auto; } }
+.k-brand__logo { display: grid; place-items: center; width: clamp(64px, 8vw, 96px); height: clamp(64px, 8vw, 96px); border-radius: 22px; background: var(--bone); color: var(--bone-ink); font-family: var(--f-serif); font-style: italic; font-size: clamp(34px, 4.6vw, 54px); }
+.k-brand__name { margin: 2px 0 4px; font-size: calc(clamp(34px, 5vw, 64px) * var(--type, 1)); font-weight: 500; letter-spacing: -0.04em; line-height: 0.95; }
+.k-brand__note { margin: 0; color: var(--ink-2); }
+.k-brand__cta { display: grid; gap: 8px; justify-items: start; grid-column: 1 / -1; }
+@media (min-width: 900px) { .k-brand__cta { grid-column: auto; justify-items: end; text-align: right; } }
+.k-brand__cta small { font-size: 12px; color: var(--ink-3); }
+.k-brand__cta .k-btn { display: inline-flex; gap: 10px; align-items: center; }
+.k-brand__about .k-lede { max-width: 60ch; }
+
+/* ==========================================================================
+   The Hunt: full-screen globe with a HUD
+   ========================================================================== */
+html.is-hunt, html.is-hunt body { overflow: hidden; height: 100%; }
+html.is-hunt .k-footer, html.is-hunt .k-guides { display: none; }
+html.is-hunt body.k { padding-bottom: 0; background: #06070a; }
+.k-hunt-app { position: fixed; inset: 0; z-index: 0; background: #06070a; color: #eef0f4; --ink: #eef0f4; --ink-2: rgba(238,240,244,.7); --ink-3: rgba(238,240,244,.48); }
+.k-hunt-app .k-hmap { position: absolute; inset: 0; }   /* beats maplibregl-map{position:relative} */
+.k-hmap .maplibregl-canvas { outline: none; }
+.k-hmap__veil { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.55)); }
+.k-hunt-app:not(.is-ready) .k-hmap { opacity: 0; }
+.k-hmap { transition: opacity 1s var(--ease); }
+.k-hmap .maplibregl-ctrl-attrib { background: rgba(10,10,12,.6) !important; color: rgba(255,255,255,.6); font-size: 10px; }
+.k-hmap .maplibregl-ctrl-attrib a { color: rgba(255,255,255,.75); }
+.k-hmap .maplibregl-ctrl-attrib-button { filter: invert(1); }
+.k-hmap .maplibregl-ctrl-bottom-right { bottom: calc(var(--tabbar-h) + 4px); }
+
+.k-hud-glass { border-radius: 18px; border: 1px solid rgba(255,255,255,.12); background: rgba(14,15,19,.55); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 20px 50px -20px rgba(0,0,0,.7); }
+.k-hud { position: absolute; inset: 0; pointer-events: none; display: grid; grid-template-rows: auto 1fr auto; padding: calc(var(--nav-h) + 14px) var(--gutter) calc(var(--tabbar-h) + 14px); gap: 12px; }
+.k-hud > * { pointer-events: none; }
+.k-hud__top { display: grid; gap: 12px; align-items: start; }
+@media (min-width: 960px) { .k-hud__top { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); } }
+.k-hud__title { pointer-events: none; text-shadow: 0 2px 20px rgba(0,0,0,.8); }
+.k-hud__kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.16em; text-transform: uppercase; color: var(--signal); }
+.k-hud__h { margin: 6px 0 0; font-size: calc(clamp(26px, 3.4vw, 46px) * var(--type, 1)); line-height: 0.98; letter-spacing: -0.04em; font-weight: 500; max-width: 14ch; }
+.k-hud__h em { font-family: var(--f-serif); font-weight: 400; }
+.k-hud__search { pointer-events: auto; position: relative; padding: 6px; }
+.k-hud__search .k-term__field { height: 50px; background: rgba(255,255,255,.07); }
+.k-hud__search .k-term__field input { color: #fff; }
+.k-hud__search { z-index: 3; }
+html .k-hunt-app .k-hud__search .k-sr-list { background: rgba(14,15,19,.94); color: #eef0f4; border-color: rgba(255,255,255,.1); --glass-3: rgba(255,255,255,.08); --bg-3: #1a1b20; }
+.k-hud__clear { width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 18px; line-height: 1; }
+.k-hud__filters { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 2px 0; }
+.k-hud__chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: rgba(238,240,244,.85); font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.08em; text-transform: uppercase; }
+.k-hud__chip[aria-pressed='false'] { opacity: 0.45; }
+.k-beacon-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 8px var(--signal); }
+.k-beacon-dot--store { background: #7dd3fc; box-shadow: 0 0 8px #7dd3fc; }
+
+.k-hud__tele { pointer-events: auto; justify-self: end; align-self: start; width: 188px; padding: 12px; }
+.k-hud__tele dl { margin: 0 0 10px; display: grid; gap: 5px; }
+.k-hud__tele dl div { display: flex; justify-content: space-between; gap: 8px; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); font-variant-numeric: tabular-nums; }
+.k-hud__tele dt { color: rgba(238,240,244,.45); letter-spacing: 0.12em; text-transform: uppercase; }
+.k-hud__tele dd { margin: 0; color: #fff; }
+.k-hud__ctrl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.k-hud__ctrl button { display: grid; place-items: center; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: #fff; font-family: var(--f-mono); font-size: 15px; transition: background 0.2s; }
+.k-hud__ctrl button:hover { background: rgba(255,255,255,.14); }
+.k-hud__ctrl button[aria-pressed='true'] { background: var(--signal); color: #111; border-color: var(--signal); }
+.k-hud__ctrl svg { width: 16px; height: 16px; transition: transform 0.3s; }
+.k-hud__bottom { display: grid; gap: 8px; align-self: end; }
+.k-hud__status { margin: 0; justify-self: start; max-width: min(100%, 640px); padding: 7px 12px; border-radius: 10px; background: rgba(10,10,12,.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: 0.04em; color: rgba(238,240,244,.85); }
+.k-hud__drops { pointer-events: auto; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.k-hud__drops::-webkit-scrollbar { display: none; }
+.k-drop { flex: 0 0 auto; display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: min(320px, 78vw); padding: 7px 12px 7px 7px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(14,15,19,.62); -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%); color: #eef0f4; text-align: left; transition: transform 0.25s var(--ease), border-color 0.2s; }
+.k-drop:hover { border-color: var(--signal); transform: translateY(-2px); }
+.k-drop img, .k-drop .k-beacon__logo { width: 46px; height: 46px; border-radius: 11px; object-fit: cover; }
+.k-drop b { display: block; font-weight: 500; font-size: calc(14px * var(--type, 1)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-drop small { display: block; font-size: calc(11.5px * var(--type, 1)); color: rgba(238,240,244,.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-drop i { font-style: normal; font-family: var(--f-mono); font-size: 12px; color: var(--signal); }
+.k-drop--store i { color: #7dd3fc; }
+.k-beacon__logo { display: grid; place-items: center; background: #f2f0eb; color: #111; font-family: var(--f-serif); font-style: italic; font-size: 22px; }
+
+/* Beacons: glowing icons on the map */
+.k-beacon { position: relative; width: 22px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; --c: var(--signal); }
+.k-beacon--store { --c: #7dd3fc; }
+.k-beacon__core { position: absolute; inset: 6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px 2px var(--c), 0 0 22px 6px color-mix(in srgb, var(--c) 55%, transparent); }
+.k-beacon__pulse { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--c); animation: k-beacon 2.2s var(--ease-io) infinite; }
+@keyframes k-beacon { from { transform: scale(0.5); opacity: 1; } to { transform: scale(2.6); opacity: 0; } }
+.k-beacon__card { position: absolute; left: 50%; bottom: calc(100% + 10px); display: none; grid-template-columns: 40px auto; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; transform: translateX(-50%); border-radius: 14px; border: 1px solid color-mix(in srgb, var(--c) 60%, transparent); background: rgba(12,13,16,.78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #eef0f4; text-align: left; white-space: nowrap; box-shadow: 0 0 24px -6px var(--c); }
+.k-beacon__card img, .k-beacon__card .k-beacon__logo { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; font-size: 18px; }
+.k-beacon__card b { display: block; font-weight: 500; font-size: 13px; }
+.k-beacon__card small { display: block; font-family: var(--f-mono); font-size: 10.5px; color: rgba(238,240,244,.6); }
+.k-hunt-app.is-near .k-beacon__card { display: grid; animation: k-pop 0.4s var(--ease); }
+.k-hunt-app.is-near .k-beacon { width: 30px; height: 30px; }
+.k-hunt-app.is-near .k-beacon__core { inset: 8px; }
+@keyframes k-pop { from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); } }
+
+/* Search cards around the globe */
+.k-tip { position: relative; width: 0; height: 0; }
+.k-tip__line { position: absolute; left: 0; top: 0; }
+.k-tip__line line { stroke: var(--signal); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.8; }
+.k-tip::before { content: ''; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 10px var(--signal); }
+.k-tip__card { position: absolute; left: 0; top: 0; display: grid; grid-template-columns: 34px auto; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background: rgba(14,15,19,.8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: #eef0f4; text-align: left; white-space: nowrap; animation: k-tip-in 0.45s var(--ease) both; box-shadow: 0 12px 30px -12px rgba(0,0,0,.8); }
+.k-tip__card:hover { border-color: var(--signal); }
+.k-tip__card img, .k-tip__card .k-beacon__logo { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; font-size: 16px; }
+.k-tip__card b { display: block; font-weight: 500; font-size: 12.5px; }
+.k-tip__card small { display: block; font-family: var(--f-mono); font-size: 10px; color: rgba(238,240,244,.6); }
+@keyframes k-tip-in { from { opacity: 0; scale: 0.9; } }
+.k-hunt-app.is-near .k-tip { display: none; }
+.k-me { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid #2f6bff; box-shadow: 0 0 0 6px rgba(47,107,255,.25); }
+
+.k-hunt-fallback { position: absolute; inset: 0; overflow-y: auto; padding: calc(var(--nav-h) + 200px) var(--gutter) calc(var(--tabbar-h) + 40px); }
+.k-hunt-app.is-fallback .k-hud__tele, .k-hunt-app.is-fallback .k-hud__bottom { display: none; }
+
+@media (max-width: 760px) {
+  .k-hud { padding-top: calc(var(--nav-h) + 4px); grid-template-rows: auto 1fr auto; }
+  .k-hud__title { display: none; }
+  .k-hud__tele { width: auto; justify-self: end; padding: 8px; }
+  .k-hud__tele dl { display: none; }
+  .k-hud__ctrl { grid-template-columns: 1fr; }
+  .k-hud__ctrl button { width: 42px; height: 40px; }
+  .k-hud__filters { display: none; }
+  .k-hud__search:focus-within + * { display: none; }
+}
+.k-hud__search input::-webkit-search-cancel-button { display: none; }
+@media (max-width: 760px) { html .k-hunt-app .k-hud__search .k-sr-list { max-height: 32vh; } }
+.k-term__field input, .k-term__field input:focus, .k-term__field input:focus-visible { border: 0; outline: none; box-shadow: none; padding: 0; background: none; height: auto; }

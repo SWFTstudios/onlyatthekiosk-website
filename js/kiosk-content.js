@@ -794,8 +794,26 @@ window.KIOSK_CONTENT = {
    * own Shopify (see docs/CONTENT_GUIDE.md › Marketplace); products
    * point at a store with `store: '<id>'` (default 'kiosk').
    * -------------------------------------------------------- */
+  /* Each store gets a page at store.html?s=<id> and shows up in search and
+   * on the Hunt map (lat/lon). Fields:
+   *   id, name, city, country, lat, lon
+   *   url      the store's own site (its Shopify). "Visit store" goes through
+   *            /go/<id>, which counts the visit and adds KIOSK referral tags
+   *            (functions/go/[store].js). Leave empty for the KIOSK itself.
+   *   note     one line for cards · about: a paragraph for the store page
+   *   cover    wide image for the store page · tags: words people search for
+   * Example partner (fill in for real before adding):
+   *   { id: 'example', name: 'Example Vintage', city: 'Osaka', country: 'JP', lat: 34.69, lon: 135.5,
+   *     url: 'https://example-vintage.myshopify.com', note: '…', about: '…', cover: 'images/stores/example.webp', tags: ['vintage', 'denim'] },
+   */
   stores: [
-    { id: 'kiosk', name: 'KIOSK', city: 'New York', country: 'US', note: 'Our own label. Pieces you can only find at the kiosk.' },
+    {
+      id: 'kiosk', name: 'KIOSK', city: 'New York', country: 'US', lat: 40.7128, lon: -74.006, url: '',
+      note: 'Our own label. Pieces you can only find at the kiosk.',
+      about: 'The kiosk’s own label, cut from the shoots: prints named after the cars, colourways pulled from each story’s palette, and Hunt pieces you have to travel to collect.',
+      cover: 'images/product-lifestyle/hoodies/001-black-airport-01.webp',
+      tags: ['streetwear', 'tees', 'hoodies', 'travel', 'luts', 'films'],
+    },
   ],
 
   categories: [
@@ -963,7 +981,8 @@ window.KIOSK_CONTENT = {
       mockup: { type: 'hoodie', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },
       colorways: [{ name: 'Oak Brown', garment: '#6e5034', ink: '#ece9e1', image: 'images/shop/3d/hunt-hudson-hoodie-0-back.webp', imageFront: 'images/shop/3d/hunt-hudson-hoodie-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
-      pickup: { place: 'Hudson Valley, NY', coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
+      // area: the map shows this zone until the exact coordinates drop
+      pickup: { place: 'Hudson Valley, NY', area: { lat: 41.71, lon: -73.93, radiusKm: 40 }, coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['fall', 'winter'], vibes: ['travel', 'adventure'], colors: [],
     },
@@ -975,7 +994,7 @@ window.KIOSK_CONTENT = {
       mockup: { type: 'tee', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif' },
       colorways: [{ name: 'Racing Blue', garment: '#364679', ink: '#f2f0eb', image: 'images/shop/3d/hunt-bridge-tee-0-back.webp', imageFront: 'images/shop/3d/hunt-bridge-tee-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
-      pickup: { place: 'George Washington Bridge, NY / NJ', coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
+      pickup: { place: 'George Washington Bridge, NY / NJ', area: { lat: 40.8517, lon: -73.9527, radiusKm: 2 }, coords: '', window: 'Date announced in the Dispatch', note: 'Packed and cleared by us. You travel to the coordinates to collect it.' },
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['spring', 'summer'], vibes: ['travel', 'adventure'], colors: [],
     },

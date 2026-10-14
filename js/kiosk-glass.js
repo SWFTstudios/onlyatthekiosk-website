@@ -3391,6 +3391,128 @@
     }
   }
 
+  /* --------------------------------------------------- partner stores
+   * store.html: the directory of stores at the kiosk, or one store's page
+   * (?s=<id>) with its pieces and a tracked "Visit store" link.
+   * -------------------------------------------------------------------- */
+  function storeCard(st) {
+    const n = (C.products || []).filter((p) => (p.store || 'kiosk') === st.id).length;
+    return `
+      <a class="k-scard k-glass-panel" href="${storeHref(st)}" data-reveal>
+        <span class="k-scard__cover">${st.cover ? `<img src="${esc(st.cover)}" alt="" loading="lazy" decoding="async">` : ''}</span>
+        <span class="k-scard__body">
+          <span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span>
+          <span><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))} · ${n} ${n === 1 ? 'piece' : 'pieces'}</small></span>
+        </span>
+        ${st.note ? `<span class="k-scard__note">${esc(st.note)}</span>` : ''}
+      </a>`;
+  }
+  function pageStore() {
+    const id = new URLSearchParams(location.search).get('s');
+    const st = id && storeById(id);
+    const dir = $('[data-store-view="directory"]');
+    const page = $('[data-store-view="page"]');
+    if (!st) {
+      if (page) page.hidden = true;
+      if (dir) dir.hidden = false;
+      const all = C.stores || [];
+      const grid = mount('store-grid');
+      const show = (list) => { if (grid) grid.innerHTML = list.map(storeCard).join('') + `
+        <button class="k-scard k-scard--join" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK" data-reveal>
+          <span class="k-eyebrow">Your store here</span>
+          <b class="k-h3">Sell at the <span class="k-serif">KIOSK</span></b>
+          <span class="k-small">Get a page at the kiosk, your pieces in search and on the Hunt map, and visitors sent to your own store.</span>
+        </button>`; reveal(grid); };
+      show(all);
+      bindSearch(mount('store-q'), mount('store-results'), { kinds: ['store'], inline: false, onResults: (res, q) => show(q ? res.map((r) => r.st) : all) });
+      if (id) toast('That store isn’t at the kiosk (yet).');
+      return;
+    }
+    if (dir) dir.hidden = true;
+    if (page) page.hidden = false;
+    document.title = st.id === 'kiosk' ? 'KIOSK — our own label' : `${st.name} at the KIOSK`;
+    const pieces = (C.products || []).filter((p) => (p.store || 'kiosk') === st.id);
+    fill('brand-cover', st.cover ? `<img src="${esc(st.cover)}" alt="" decoding="async">` : '');
+    fill('brand-logo', esc(st.name.slice(0, 1)));
+    fill('brand-where', esc([st.city, st.country].filter(Boolean).join(', ')));
+    fill('brand-name', esc(st.name));
+    fill('brand-name-2', esc(st.name));
+    fill('brand-note', esc(st.note || ''));
+    fill('brand-about', st.about ? `<p class="k-lede">${esc(st.about)}</p>` : '');
+    fill('brand-count', `${pieces.length} ${pieces.length === 1 ? 'piece' : 'pieces'}`);
+    const host = st.url ? (() => { try { return new URL(st.url).hostname.replace(/^www\./, ''); } catch (e) { return ''; } })() : '';
+    fill('brand-cta', st.url
+      ? `<a class="k-btn k-btn--solid" href="${visitHref(st)}" rel="noopener" data-visit="${esc(st.id)}" data-hard>Visit store <span class="k-arrow">${icon.arrow}</span></a><small>Opens ${esc(host)} · you’ll arrive as a KIOSK visitor</small>`
+      : `<a class="k-btn k-btn--solid" href="vault.html">Shop the kiosk <span class="k-arrow">${icon.arrow}</span></a>${pieces.some((p) => p.pickup) ? '<a class="k-btn" href="hunt.html">On the Hunt map</a>' : ''}`);
+    const grid = mount('brand-grid');
+    if (grid) { grid.innerHTML = pieces.map((p) => termCard(p)).join(''); reveal(grid); }
+    document.addEventListener('click', (e) => {
+      const v = e.target.closest('[data-visit]');
+      if (v && typeof window.gtag === 'function') window.gtag('event', 'partner_visit', { store_id: v.dataset.visit, link_url: v.href, transport_type: 'beacon' });
+    }, { signal: pageAbort.signal });
+  }
+
+  /* ------------------------------------------------------------- hunt
+   * hunt.html: the Hunt map. MapLibre and the map module load only here.
+   * Search shows cards around the globe; drops open the product panel.
+   * -------------------------------------------------------------------- */
+  const HUNT_SCRIPTS = ['js/vendor/maplibre/maplibre-gl.js', 'js/kiosk-world.js', 'js/kiosk-hunt.js'];
+  function loadCss(href) {
+    if ($(`link[href="${href}"]`)) return;
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l);
+  }
+  function pageHunt() {
+    const root = $('.k-hunt-app');
+    if (!root) return;
+    const signal = pageAbort.signal;
+    const items = (C.products || []).filter((p) => p.pickup);
+    const thumb = (p) => lifeOf(p, 0)[0] || wayOf(p, 0).image || p.image || 'images/KiosKBoxLogo.png';
+    const status = (t) => { const el = mount('hunt-status'); if (el) el.textContent = t; };
+    status(`${items.length} ${items.length === 1 ? 'drop' : 'drops'} · ${(C.stores || []).length} ${(C.stores || []).length === 1 ? 'store' : 'stores'} · drag to turn the globe, zoom in to a drop zone`);
+    document.documentElement.classList.add('is-hunt');
+    signal.addEventListener('abort', () => document.documentElement.classList.remove('is-hunt'));
+
+    const fallback = (why) => {
+      const fb = mount('hunt-fallback');
+      if (!fb) return;
+      fb.hidden = false;
+      fb.innerHTML = `<p class="k-eyebrow">${esc(why)}</p><div class="k-term-grid k-mt-m">${items.map((p) => termCard(p)).join('')}</div>`;
+      root.classList.add('is-fallback');
+    };
+    if (!hasWebGL()) { fallback('This device can’t draw the 3D map. Here are the drops.'); return; }
+
+    loadCss('js/vendor/maplibre/maplibre-gl.css');
+    let hunt = null;
+    const q = mount('hunt-q');
+    const clearBtn = $('[data-hunt-clear]');
+    HUNT_SCRIPTS.reduce((pr, src) => pr.then(() => (src.includes('kiosk-world') && window.KIOSK_WORLD) || (src.includes('maplibre') && window.maplibregl) ? null : loadScript(src)), Promise.resolve())
+      .then(() => {
+        if (signal.aborted) return;
+        hunt = window.KioskHunt.mount({ root, map: mount('hunt-map'), drops: mount('hunt-drops') }, {
+          products: items, stores: C.stores || [], esc, price, thumb, reduced: REDUCED, status,
+          openPDP: (id) => openPDP(id), storeHref,
+        });
+        signal.addEventListener('abort', () => hunt.destroy());
+        const params = new URLSearchParams(location.search);
+        const go = params.get('item') || params.get('store');
+        if (go) { const it = hunt.find(go); if (it) setTimeout(() => hunt.flyTo(it), 600); }
+        if (params.get('q') && q) { q.value = params.get('q'); q.dispatchEvent(new Event('input')); }
+      })
+      .catch((err) => { console.warn('[KIOSK] hunt map unavailable', err); fallback('The map couldn’t load. Here are the drops.'); });
+
+    // Search: results list in the HUD, cards around the globe
+    bindSearch(q, mount('hunt-results'), {
+      onResults: (res, text) => {
+        if (clearBtn) clearBtn.hidden = !text;
+        if (!hunt) return;
+        if (!text) { hunt.clearTips(); return; }
+        const n = hunt.showTips(res);
+        status(res.length ? `${res.length} ${res.length === 1 ? 'match' : 'matches'}${n ? ` · ${n} on the map. Tap a card to fly there` : ''}` : `Nothing matches “${text}”.`);
+      },
+    });
+    if (clearBtn) clearBtn.addEventListener('click', () => { q.value = ''; q.dispatchEvent(new Event('input')); q.focus(); }, { signal });
+  }
+
   /* ------------------------------------------------------------ globe
    * A wireframe globe (parallels + meridians every 15°) that turns on its
    * own and can be dragged. Flights arc between coordinates along great
@@ -3692,7 +3814,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal };
+  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
