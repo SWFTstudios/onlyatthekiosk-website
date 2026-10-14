@@ -2,8 +2,8 @@
 <html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
-  <title>The Garage — Films, Photo Stories &amp; Interviews · KIOSK</title>
-  <meta name="description" content="The KIOSK Garage: cinematic films, photo stories and owner interviews featuring cars and motorcycles from Tokyo to Lisbon. Filter by machine, era, season and city.">
+  <title>Films — The KIOSK screening room</title>
+  <meta name="description" content="Films, cinematic edits, interviews, travel diaries and home movies from KIOSK, a global travel magazine.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf8">
   <link rel="manifest" href="site.webmanifest">
@@ -13,9 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="KIOSK">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
-  <link rel="canonical" href="https://onlyatthekiosk.com/garage.html">
-  <meta property="og:title" content="The Garage · KIOSK">
-  <meta property="og:description" content="Films, photo stories and owner interviews — cars and motorcycles, scored in phonk.">
+  <link rel="canonical" href="https://onlyatthekiosk.com/films.html">
+  <meta property="og:title" content="Films · KIOSK">
+  <meta property="og:description" content="The KIOSK screening room: films, edits, interviews and home movies.">
   <meta property="og:image" content="https://onlyatthekiosk.com/images/KiosKBoxLogo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,39 +25,14 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MCKHRGGYRJ');</script>
 </head>
-<body class="k" data-page="garage">
+<body class="k" data-page="films">
   <a class="k-skip" href="#main">Skip to content</a>
-  <main id="main">
-    <header class="k-page-head">
-      <div class="k-wrap">
-        <p class="k-eyebrow">The Garage · Archive · Gate A</p>
-        <h1 class="k-display k-stagger k-mt-m" data-mount="garage-title">
-          <span>Cars, bikes</span>
-          <span>&amp; their <em class="k-serif">people.</em></span>
-        </h1>
-        <p class="k-lede k-mt-m">Every film, photo story and interview we’ve made. Filter by machine, format, season or place, and save what you like to your garage.</p>
-        <div class="k-page-board k-mt-l" data-mount="term-page-board"></div>
-      </div>
-    </header>
+  <main id="main" class="k-films">
+    <!-- BILLBOARD: the featured film -------------------------------- -->
+    <section class="k-billboard" data-mount="films-billboard" aria-label="Featured film"></section>
 
-    <section class="k-section k-section--tight" style="padding-top:0" data-vimeo-section aria-label="Films on Vimeo">
-      <div class="k-wrap k-vimeo">
-        <p class="k-eyebrow">On Vimeo</p>
-        <div class="k-vimeo__grid k-mt-m" data-mount="garage-vimeo"></div>
-      </div>
-    </section>
-
-    <section class="k-section" style="padding-top:0">
-      <div class="k-wrap k-archive">
-        <aside class="k-filters k-glass" data-mount="filters" aria-label="Filters"></aside>
-        <div>
-          <div class="k-results-head">
-            <h2 data-mount="results-count" aria-live="polite"></h2>
-          </div>
-          <div class="k-grid" data-mount="results"></div>
-        </div>
-      </div>
-    </section>
+    <!-- ROWS --------------------------------------------------------- -->
+    <section class="k-films__rows" data-mount="films-rows" aria-label="Films"></section>
   </main>
   <script src="js/kiosk-content.js"></script>
   <script src="js/kiosk-mockups.js"></script>

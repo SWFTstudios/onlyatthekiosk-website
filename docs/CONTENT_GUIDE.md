@@ -8,7 +8,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | --- | --- | --- |
 | Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
 | Journal | `journal.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
-| Garage | `garage.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
+| Garage | `journal.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
 | Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
 | Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
@@ -342,3 +342,12 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 - Theme: white by default. Photo and film surfaces (heroes, story cards, radio deck, player, lightbox) use a dark token scope so footage stays cinematic. Add class `k-dark` or `k-light` to flip any block.
 - Colour: graphite, bone and glass. A single signal orange (`--signal`) appears only on "live" and "now playing" dots and the "Issue 01" sticker.
 - Placeholder **plates** (tones `sodium`, `chrome`, `desert`, `ice`, `ember`, `graphite`, `moss`) stand in for any missing image, so pages never look broken while footage is in post.
+
+## Site map (2026-10)
+
+- **Home** (`index.html`): the K-flight intro (first visit per session), the hero slideshow, then the **World Library** globe: up to four featured stories (`issue.featured`) pinned at their `geo: { lat, lon }`. Scrolling past the hero flips the hero video into the first pin (GSAP Flip, `js/vendor/gsap`).
+- **World Library** (`journal.html`): every post, video or written. Search any word (titles, places, story text, chapters, tags); sort by date, title, location or author; filter by type (video / photos / article), desk, author, location and tags. Filters live in the URL, e.g. `journal.html?type=video&tag=Film`.
+- **Films** (`films.html`): the screening room, a billboard and streaming-style rows from `filmRows` and `films` in `js/kiosk-content.js`. Add `vimeo`, `youtube` or `video` to a film to make it playable; without one it shows "Coming soon".
+- **Radio** (`radio.html`): curated playlists from Spotify (`spotify`), SoundCloud (`soundcloud`), Apple Music (`apple`) or a self-hosted MP3 (`audio`). The player docks at the bottom and keeps playing while people browse.
+- **Lost & Found** (`lost-and-found.html`, was The Hunt): rare finds and pickup-only pieces on the map.
+- The Garage page is gone; `/garage` redirects to the library and `/hunt` to Lost & Found (`_redirects`).

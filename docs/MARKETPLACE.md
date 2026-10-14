@@ -1,4 +1,4 @@
-# KIOSK marketplace: stores, the Hunt and words to wear
+# KIOSK marketplace: stores, Lost & Found and words to wear
 
 The shop (`vault.html`) is a hub. KIOSK sells its own label, and partner stores (thrift curators, independent labels, makers) can sell there too. All of it is configured in `js/kiosk-content.js`.
 
@@ -16,8 +16,8 @@ stores: [
 
 **Each store gets:**
 - **A page at the kiosk.** `store.html?s=<id>` shows the cover, about text and the store's pieces, with a **Visit store** button. `store.html` on its own is a searchable directory of all stores.
-- **Search.** The store shows up in search on the shop, the Hunt and the directory, matched by name, city, country or tags.
-- **A beacon on the Hunt map** at its `lat`/`lon`.
+- **Search.** The store shows up in search on the shop, Lost & Found and the directory, matched by name, city, country or tags.
+- **A beacon on Lost & Found map** at its `lat`/`lon`.
 
 **The "Sell at the KIOSK" buttons** (shop, directory and menu) collect a stockist's email through `/api/subscribe`, filed under the interest `stockist`.
 
@@ -53,7 +53,7 @@ The site doesn't move money itself. Payments go through Shopify. Choose one of t
 
 Check Shopify's current terms and supported countries before you promise payouts to partners.
 
-## The Hunt (pickup-only pieces)
+## Lost & Found (pickup-only pieces)
 
 ```js
 pickup: {
@@ -66,9 +66,9 @@ pickup: {
 ```
 **Where pickup pieces show up:**
 - **Card and panel:** any product with `pickup` gets a "Pickup only" status and a "Reserve · get the coordinates" button.
-- **The Hunt page:** the product appears on `hunt.html` as a glowing beacon at the centre of its `area`, with a dashed circle `radiusKm` wide. When you fill in `coords` (for example `'40.8517, -73.9527'`), the beacon moves to the exact spot and the label changes from "Drop zone" to "Exact spot".
+- **Lost & Found page:** the product appears on `lost-and-found.html` as a glowing beacon at the centre of its `area`, with a dashed circle `radiusKm` wide. When you fill in `coords` (for example `'40.8517, -73.9527'`), the beacon moves to the exact spot and the label changes from "Drop zone" to "Exact spot".
 
-**The Hunt map** (`hunt.html`, `js/kiosk-hunt.js`):
+**Lost & Found map** (`lost-and-found.html`, `js/kiosk-hunt.js`):
 - **Globe:** a MapLibre globe (`js/vendor/maplibre/`, BSD licence) with the KIOSK land dots.
 - **Search:** finds Hunt pieces, products and stores. Matches with a location appear as small cards around the globe.
 - **Flying in:** tapping a card or zooming in flies down to a top-down depth map. It combines:
@@ -81,7 +81,7 @@ pickup: {
   - zoom, north, tilt (3D terrain), locate me and back to the globe
   - drop and store toggles, and a depth-map toggle
   - a strip of drops with their distance from you
-- **Links:** `hunt.html?item=<product id>` or `?store=<id>` flies straight to that item, and `?q=<words>` pre-fills the search.
+- **Links:** `lost-and-found.html?item=<product id>` or `?store=<id>` flies straight to that item, and `?q=<words>` pre-fills the search.
 - **Offline:** if the online map layers can't load, the globe, land, beacons and zones still work from local data (`data/land-110m.geojson`, Natural Earth).
 
 The two Hunt pieces in the file are **examples to edit**: their places come from your shoots, they're marked `status: 'soon'`, and they have no exact coordinates yet.

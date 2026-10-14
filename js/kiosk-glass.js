@@ -3,7 +3,7 @@
  * Renders the shared chrome (nav, footer, player, lightbox) and each
  * page's content from window.KIOSK_CONTENT (js/kiosk-content.js).
  *
- * Pages declare themselves with <body class="k" data-page="home|garage|story|radio|vault">
+ * Pages declare themselves with <body class="k" data-page="home|films|journal|story|radio|vault|hunt|store">
  * and provide empty mount points (data-mount="...") that this file fills.
  */
 (function () {
@@ -101,9 +101,10 @@
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
   const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
-  const sourceName = (m) => (m.soundcloud ? 'SoundCloud' : m.spotify ? 'Spotify' : '');
+  const sourceName = (m) => (m.soundcloud ? 'SoundCloud' : m.apple ? 'Apple Music' : m.spotify ? 'Spotify' : '');
+  const appleEmbed = (url) => String(url || '').replace('://music.apple.com', '://embed.music.apple.com');
   /** Where the playlist lives (button under each deck / card). */
-  const sourceLink = (m) => (m.soundcloud ? { href: m.soundcloud, label: 'Open on SoundCloud' } : m.spotify ? { href: spotifyUrl(m), label: 'Open in Spotify' } : null);
+  const sourceLink = (m) => (m.soundcloud ? { href: m.soundcloud, label: 'Open on SoundCloud' } : m.apple ? { href: m.apple, label: 'Open in Apple Music' } : m.spotify ? { href: spotifyUrl(m), label: 'Open in Spotify' } : null);
   const mixMeta = (m) => [m.bpm && `${m.bpm} BPM`, m.length].filter(Boolean).join(' · ') || sourceName(m);
   const categoryLabel = (id) => ((C.categories || []).find((c) => c.id === id) || {}).label || id;
 
@@ -209,9 +210,8 @@
   /* ----------------------------------------------------------- chrome */
 
   const NAV = [
-    { id: 'garage', label: 'Garage', href: 'garage.html' },
-    { id: 'journal', label: 'Journal', href: 'journal.html' },
-    { id: 'films', label: 'Films', href: 'garage.html?format=film' },
+    { id: 'journal', label: 'Library', href: 'journal.html' },
+    { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
@@ -222,19 +222,19 @@
     journal: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4.5h10.5L19 8v11.5H5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 10h8M8 13.5h8M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
     radio: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12v-1a8 8 0 0 1 16 0v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="16.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>',
     shop: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 11.5H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    films: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M10 9.3v5.4l4.6-2.7z" fill="currentColor"/></svg>',
     more: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
   };
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
-    { id: 'garage', label: 'Garage', href: 'garage.html', icon: TAB_ICONS.garage },
-    { id: 'journal', label: 'Journal', href: 'journal.html', icon: TAB_ICONS.journal },
+    { id: 'journal', label: 'Library', href: 'journal.html', icon: TAB_ICONS.journal },
+    { id: 'films', label: 'Films', href: 'films.html', icon: TAB_ICONS.films },
     { id: 'radio', label: 'Radio', href: 'radio.html', icon: TAB_ICONS.radio },
     { id: 'vault', label: 'Shop', href: 'vault.html', icon: TAB_ICONS.shop },
   ];
 
   function currentNav() {
     const params = new URLSearchParams(location.search);
-    if (PAGE === 'garage' && params.get('format') === 'film') return 'films';
     if (PAGE === 'story') return 'journal';
     if (PAGE === 'hunt' || PAGE === 'store') return 'vault';   // both live under Shop
     return PAGE;
@@ -324,7 +324,7 @@
       <ul class="k-sheet__links">
         <li><a href="index.html">Home <span>00</span></a></li>
         ${NAV.map((n, i) => `<li><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
-        <li><a href="hunt.html">The Hunt <span>${pad(NAV.length + 1)}</span></a></li>
+        <li><a href="lost-and-found.html">Lost &amp; Found <span>${pad(NAV.length + 1)}</span></a></li>
         <li><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
       </ul>
       <div class="k-sheet__foot">
@@ -380,10 +380,10 @@
         <div class="k-footer__grid">
           <div>
             <p class="k-eyebrow">Only at the KIOSK</p>
-            <p class="k-lede k-mt-s">A global magazine and marketplace. Cars, motorcycles, skate, travel and the people behind them, plus pieces you can only find at the kiosk.</p>
+            <p class="k-lede k-mt-s">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, plus pieces and rare finds you can only get at the kiosk.</p>
           </div>
-          <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="hunt.html">The Hunt</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
+          <div><h4>Watch + Listen</h4><ul><li><a href="journal.html">World Library</a></li><li><a href="films.html">Films</a></li><li><a href="journal.html?type=photo">Photo stories</a></li><li><a href="journal.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -590,7 +590,7 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
         ${id === 'dispatch'
-          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists, Supply drops and Hunt coordinates — one email per release.</p>`
+          ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists, Supply drops and Lost &amp; Found coordinates — one email per release.</p>`
           : id === 'stockist'
           ? `<p class="k-h3">Sell at <span class="k-serif">the KIOSK.</span></p><p class="k-body k-mt-s">Independent stores, thrift curators and makers: stock your pieces here. You sell through your own Shopify and keep your store; the kiosk takes a small share of each sale. Leave your email and we’ll send the stockist pack.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
@@ -836,7 +836,7 @@
   const player = {
     el: null,
     mix: null,
-    source: '',          // 'audio' | 'spotify' | 'soundcloud'
+    source: '',          // 'audio' | 'spotify' | 'soundcloud' | 'apple'
     playing: false,
     buffering: false,
     audio: null,
@@ -852,6 +852,8 @@
         <div class="k-dock__panel" id="k-dock-panel" aria-hidden="true">
           <div class="k-dock__embed" data-embed="spotify"><div data-spotify-slot></div></div>
           <div class="k-dock__embed" data-embed="soundcloud" hidden></div>
+          <div class="k-dock__embed" data-embed="apple" hidden></div>
+          <p class="k-dock__note k-small" data-embed="apple" hidden>Press play in the Apple Music player. Sign in to Apple Music in this browser for full tracks; otherwise it plays previews. It keeps playing while you browse.</p>
           <p class="k-dock__note k-small" data-embed="spotify">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
         </div>
         <div class="k-dock__bar">
@@ -902,7 +904,7 @@
       const mix = mixBySlug(slug);
       if (!mix) return;
       if (this.mix === mix && this.active()) { this.toggle(); return; }
-      if (!mix.audio && !mix.spotify && !mix.soundcloud) { toast(`${mix.title} drops soon.`); return; }
+      if (!mix.audio && !mix.spotify && !mix.soundcloud && !mix.apple) { toast(`${mix.title} drops soon.`); return; }
       this.pauseAll();
       this.show(mix);
       if (mix.audio) {
@@ -930,6 +932,20 @@
           toast('SoundCloud couldn’t load. Opening it in a new tab.');
           window.open(mix.soundcloud, '_blank', 'noopener');
         }
+      } else if (mix.apple) {
+        // Apple Music's embed has no control API: it plays from its own button
+        this.source = 'apple';
+        $('.k-dock__progress', this.el).hidden = true;
+        this.showEmbed('apple');
+        const box = $('[data-embed="apple"].k-dock__embed', this.el);
+        const src = appleEmbed(mix.apple);
+        if (box.dataset.src !== src) {
+          box.dataset.src = src;
+          box.innerHTML = `<iframe src="${esc(src)}" title="${esc(mix.title)} on Apple Music" height="450" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" style="width:100%;overflow:hidden;border:0;border-radius:12px;background:transparent"></iframe>`;
+        }
+        this.playing = true;
+        this.buffering = false;
+        this.expand(true);
       } else {
         this.source = 'spotify';
         this.showEmbed('spotify');
@@ -1013,19 +1029,29 @@
         spotify.ctrl.togglePlay();
       } else if (this.source === 'soundcloud' && soundcloud.widget) {
         soundcloud.widget.toggle();
+      } else if (this.source === 'apple') {
+        this.expand(!this.el.classList.contains('is-expanded'));
       }
+    },
+    /** Apple Music can't be paused from outside its iframe: unload it instead. */
+    stopApple() {
+      const box = this.el && $('[data-embed="apple"].k-dock__embed', this.el);
+      if (box && box.dataset.src) { box.innerHTML = ''; box.dataset.src = ''; }
+      if (this.source === 'apple') this.playing = false;
     },
 
     pause() {
       if (this.audio && !this.audio.paused) this.audio.pause();
       if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
       if (soundcloud.widget && this.source === 'soundcloud' && this.playing) soundcloud.widget.pause();
+      if (this.source === 'apple') { this.stopApple(); this.sync(); }
     },
 
     pauseAll() {
       if (this.audio) this.audio.pause();
       if (spotify.ctrl) spotify.ctrl.pause();
       if (soundcloud.widget) soundcloud.widget.pause();
+      this.stopApple();
       this.playing = false;
     },
 
@@ -1067,7 +1093,7 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'garage', 'journal', 'story', 'radio', 'vault', 'hunt', 'store']);
+  const SOFT_PAGES = new Set(['', 'index', 'films', 'journal', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
   let pageAbort = new AbortController();
   // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
   const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
@@ -1089,7 +1115,7 @@
       const item = NAV.find((n) => n.href === a.getAttribute('href'));
       if (item && item.id === cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    const tab = cur === 'films' ? 'garage' : cur;
+    const tab = cur;
     $$('[data-tab]').forEach((a) => {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -1172,7 +1198,7 @@
     if (on) saved.add(slug); else saved.delete(slug);
     store.set(SAVE_KEY, Array.from(saved));
     $$(`[data-save="${CSS.escape(slug)}"]`).forEach((b) => b.setAttribute('aria-pressed', String(saved.has(slug))));
-    if (btn) toast(saved.has(slug) ? 'Saved to your garage' : 'Removed from your garage');
+    if (btn) toast(saved.has(slug) ? 'Saved to your library' : 'Removed from your library');
     // Let kiosk-account.js sync to D1 when signed in
     document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { ref: slug, kind: 'story', on } }));
   }
@@ -1598,7 +1624,7 @@
    * Opened from the gear in the header, "Settings" in the menu or #settings.
    * -------------------------------------------------------------------- */
   const HOME_SECTIONS = [
-    ['garage', 'Garage stories'], ['departments', 'The Departments'], ['globe', 'The globe'], ['about', 'About'],
+    ['garage', 'Latest stories'], ['departments', 'The Departments'], ['globe', 'The globe'], ['about', 'About'],
     ['make', 'What we make'], ['films', 'Films'], ['mosaic', 'The Mosaic'], ['radio', 'Radio'], ['shop', 'Supply & co.'], ['dispatch', 'The Dispatch'],
   ];
   const ACCENTS = [['signal', 'Signal', '#ff5b23'], ['cobalt', 'Cobalt', '#2f5bff'], ['acid', 'Acid', '#b6f500'], ['rose', 'Rose', '#ff3d8b'], ['gold', 'Gold', '#e2a72e'], ['mono', 'Mono', 'currentColor']];
@@ -2072,7 +2098,7 @@
             </div>
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
             ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
-            ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="hunt.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
+            ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="lost-and-found.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
             ${guideHtml(p, cw)}
 
             <div class="k-pdp__more"${pdpState.full ? '' : ' hidden'}>
@@ -2083,7 +2109,7 @@
                 ${ways.length ? `<div><dt>Colourways</dt><dd>${ways.map((w) => esc(w.name) + (w.status === 'soon' ? ' (soon)' : '')).join(' · ')}</dd></div>` : ''}
                 ${sizes.length ? `<div><dt>Sizes</dt><dd>${sizes.map(esc).join(' · ')}</dd></div>` : ''}
                 <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from the KIOSK store'}</dd></div>
-                ${p.pickup ? `<div><dt>The Hunt</dt><dd>${esc(p.pickup.coords || 'Exact coordinates drop in the Dispatch')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
+                ${p.pickup ? `<div><dt>Lost &amp; Found</dt><dd>${esc(p.pickup.coords || 'Exact coordinates drop in the Dispatch')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
                 <div><dt>Flight</dt><dd>${esc(flightOf(p))} · Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</dd></div>
               </dl>
               ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
@@ -2326,6 +2352,7 @@
       set('[data-hero-title]', s.title || (f && f.title));
       set('[data-hero-caption]', s.caption);
       set('[data-hero-count]', `${pad(cur + 1)} / ${pad(slides.length)}`);
+      document.dispatchEvent(new CustomEvent('kiosk:hero-slide', { detail: { story: s.story, title: s.title || (f && f.title), kicker: s.kicker } }));
     };
     const paint = () => {
       bars.forEach((b, i) => {
@@ -2389,7 +2416,7 @@
 
     if ('IntersectionObserver' in window) {
       const io2 = new IntersectionObserver(([en]) => { visible = en.isIntersecting; run(); }, { threshold: 0.15 });
-      io2.observe(cover);
+      io2.observe(bg);   // the media itself: it flips onto the World Library globe
       signal.addEventListener('abort', () => io2.disconnect());
     }
     document.addEventListener('visibilitychange', run, { signal });
@@ -2397,6 +2424,123 @@
 
     caption();
     run();
+  }
+
+  /* --------------------------------------------------- world library globe
+   * Home page, right under the hero. Up to four featured stories are pinned
+   * to a spinning wireframe globe at their coordinates (story `geo`). Each
+   * pin carries a thumbnail; the first one carries the hero slideshow
+   * itself: scrolling past the hero, GSAP Flip shrinks the hero video into
+   * that thumbnail (and back when you scroll up). Drag to spin, tap a pin.
+   * -------------------------------------------------------------------- */
+  const HOME_GEO = { lat: 40.71, lon: -74.0 };
+  const geoOf = (f) => (f && f.geo) || HOME_GEO;
+  const fmtGeo = (g) => `${Math.abs(g.lat).toFixed(2)}° ${g.lat >= 0 ? 'N' : 'S'}, ${Math.abs(g.lon).toFixed(2)}° ${g.lon >= 0 ? 'E' : 'W'}`;
+  const GSAP_SCRIPTS = ['js/vendor/gsap/gsap.min.js', 'js/vendor/gsap/Flip.min.js', 'js/vendor/gsap/ScrollTrigger.min.js'];
+  let gsapReady = null;
+  function loadGsap() {
+    if (window.gsap && window.Flip && window.ScrollTrigger) return Promise.resolve();
+    if (!gsapReady) gsapReady = GSAP_SCRIPTS.reduce((pr, src) => pr.then(() => loadScript(src)), Promise.resolve()).catch((err) => { gsapReady = null; throw err; });
+    return gsapReady;
+  }
+  function worldFeatured() {
+    const issue = C.issue || {};
+    const slugs = (issue.featured && issue.featured.length) ? issue.featured : [issue.lead].concat((issue.heroSlides || []).map((x) => x.story));
+    const list = [];
+    slugs.concat(byNewest(features).map((f) => f.slug)).forEach((sl) => { const f = featureBySlug(sl); if (f && !list.includes(f)) list.push(f); });
+    return list.slice(0, 4);
+  }
+  // Thumbnails fan out from their pins so nearby stories never stack
+  const NODE_FAN = [[-0.62, -0.5], [0.66, -0.42], [-0.6, 0.48], [0.64, 0.52]];
+  function mountWorldLibrary() {
+    const sec = $('[data-world-library]');
+    if (!sec || sec.dataset.on) return;
+    sec.dataset.on = '1';
+    const signal = pageAbort.signal;
+    const posts = worldFeatured();
+    if (!posts.length) { sec.hidden = true; return; }
+    const stage = $('[data-wl-stage]', sec);
+    const nodesEl = $('[data-wl-nodes]', sec);
+    const hasHero = !!mount('hero-bg');
+    nodesEl.innerHTML = posts.map((f, i) => `
+      <a class="k-wl-node${i === 0 ? ' k-wl-node--hero' : ''}" href="${storyHref(f)}" data-wl-node="${i}" aria-label="${esc(f.title || featureName(f))}, ${esc(fmtGeo(geoOf(f)))}">
+        <span class="k-wl-node__line" aria-hidden="true"></span>
+        <span class="k-wl-node__pin" aria-hidden="true"></span>
+        <span class="k-wl-node__card">
+          <span class="k-wl-node__thumb" data-wl-thumb="${i}">${featureMedia(f, { meta: '', mark: f.code, cls: 'k-media--clean', style: 'position:absolute;inset:0' })}</span>
+          <span class="k-wl-node__label"><b data-wl-title="${i}">${esc(f.title || featureName(f))}</b><small>${esc(fmtGeo(geoOf(f)))}</small></span>
+        </span>
+      </a>`).join('');
+    fill('wl-list', posts.map((f, i) => `<li><a href="${storyHref(f)}" data-wl-item="${i}"><span class="k-wl__n">${pad(i + 1)}</span><span><b>${esc(f.title || featureName(f))}</b><small>${esc([place(f) || f.location, fmtGeo(geoOf(f))].filter(Boolean).join(' · '))}</small></span><span class="k-wl__go" aria-hidden="true">${icon.arrow}</span></a></li>`).join(''));
+    const nodes = $$('[data-wl-node]', sec);
+    const geos = posts.map(geoOf);
+
+    const first = geos[0];
+    const globe = createGlobe($('canvas', stage), {
+      interactive: true, max: 3, homeBias: 0.6, scale: 0.36, speed: 0.00012,
+      yaw: -first.lon * Math.PI / 180, pitch: Math.max(0.2, first.lat * Math.PI / 180 * 0.8),
+      onFrame: ({ project, R }) => {
+        nodes.forEach((n, i) => {
+          const g = geos[i];
+          const [x, y, z] = project(g.lat, g.lon);
+          const d = R * 0.78;
+          const ox = NODE_FAN[i][0] * d; const oy = NODE_FAN[i][1] * d;
+          const vis = Math.max(0, Math.min(1, (z - 0.05) * 4));
+          n.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+          n.style.setProperty('--ox', `${ox.toFixed(1)}px`); n.style.setProperty('--oy', `${oy.toFixed(1)}px`);
+          n.style.setProperty('--len', `${Math.hypot(ox, oy).toFixed(1)}px`);
+          n.style.setProperty('--ang', `${Math.atan2(oy, ox).toFixed(4)}rad`);
+          n.style.opacity = n.classList.contains('is-holding') ? 1 : vis.toFixed(3);
+          n.style.pointerEvents = vis > 0.4 ? '' : 'none';
+          n.style.zIndex = String(Math.round(z * 100) + 100);
+        });
+      },
+    });
+    signal.addEventListener('abort', () => globe.stop());
+    sec.addEventListener('pointerover', (e) => { const it = e.target.closest('[data-wl-item]'); if (it) { const g = geos[Number(it.dataset.wlItem)]; globe.face(g.lat, g.lon); } }, { signal });
+    sec.addEventListener('focusin', (e) => { const it = e.target.closest('[data-wl-item], [data-wl-node]'); if (it) { const g = geos[Number(it.dataset.wlItem || it.dataset.wlNode)]; globe.face(g.lat, g.lon); } }, { signal });
+
+    // The hero pin follows the slideshow: title and coordinates of the slide on screen
+    document.addEventListener('kiosk:hero-slide', (e) => {
+      const f = featureBySlug(e.detail.story);
+      if (!f) return;
+      const n = nodes[0];
+      geos[0] = geoOf(f);
+      n.setAttribute('href', storyHref(f));
+      n.setAttribute('aria-label', `${e.detail.title || f.title}, ${fmtGeo(geos[0])}`);
+      const t = $('[data-wl-title="0"]', n); if (t) t.textContent = e.detail.title || f.title || featureName(f);
+      const c = $('.k-wl-node__label small', n); if (c) c.textContent = fmtGeo(geos[0]);
+    }, { signal });
+
+    // GSAP Flip: hero ⇄ the first pin's thumbnail
+    if (!hasHero || REDUCED) return;
+    loadGsap().then(() => {
+      if (signal.aborted) return;
+      const { gsap, Flip, ScrollTrigger } = window;
+      gsap.registerPlugin(Flip, ScrollTrigger);
+      const hero = mount('hero-bg');
+      const cover = hero.closest('.k-cover');
+      const slot = $('[data-wl-thumb="0"]', sec);
+      const node = nodes[0];
+      let inThumb = false; let tween = null;
+      const move = (toThumb) => {
+        if (toThumb === inThumb || !hero.isConnected) return;
+        inThumb = toThumb;
+        if (tween) tween.progress(1);
+        if (toThumb) { globe.face(geos[0].lat, geos[0].lon); globe.hold(true); }
+        node.classList.add('is-holding');
+        const state = Flip.getState(hero);
+        if (toThumb) slot.prepend(hero); else cover.prepend(hero);
+        hero.classList.toggle('is-thumb', toThumb);
+        sec.classList.toggle('has-hero', toThumb);
+        tween = Flip.from(state, {
+          duration: 1.1, ease: 'power3.inOut', absolute: true, zIndex: 60,
+          onComplete: () => { tween = null; node.classList.remove('is-holding'); globe.hold(false); $$('video', hero).forEach((v) => { if (v.closest('.is-active') && v.paused) v.play().catch(() => {}); }); },
+        });
+      };
+      const st = ScrollTrigger.create({ trigger: sec, start: 'top 65%', onEnter: () => move(true), onLeaveBack: () => move(false) });
+      signal.addEventListener('abort', () => { st.kill(); if (tween) tween.kill(); });
+    }).catch((err) => console.warn('[KIOSK] GSAP unavailable, hero stays put', err));
   }
 
   function pageHome() {
@@ -2411,6 +2555,7 @@
       ? `<div class="k-media k-media--clean" style="position:absolute;inset:0"><video autoplay muted loop playsinline preload="auto"${issue.reelPoster ? ` poster="${esc(issue.reelPoster)}"` : ''} aria-label="KIOSK reel">${issue.reelWebm ? `<source src="${esc(issue.reelWebm)}" type="video/webm">` : ''}<source src="${esc(issue.reel)}" type="video/mp4"></video></div>`
       : featureMedia(lead, { meta: '', mark: '', eager: true, ...fullBleed }));
 
+    mountWorldLibrary();
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
     fill('hero-dek', esc(issue.dek || ''));
     fill('hero-stats', `
@@ -2424,7 +2569,7 @@
         <p class="k-feature-card__sub">${[formatLabel(lead), place(lead), lead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
         ${featureMedia(lead, { meta: '' })}
       </a>
-      <a class="k-bar" href="garage.html">Enter the Garage<span class="k-arrow">${icon.arrow}</span></a>`);
+      <a class="k-bar" href="journal.html">Open the World Library<span class="k-arrow">${icon.arrow}</span></a>`);
     fill('hero-watch', `
       <button class="k-watch" type="button" data-film="${esc(lead.slug)}">
         <span class="k-watch__thumb">${featureMedia(lead, { meta: '', mark: '', cls: 'k-media--clean', style: 'position:absolute;inset:0' })}<span class="k-play">${icon.play}</span></span>
@@ -2491,168 +2636,83 @@
     if (wall) wall.innerHTML = wallHtml();
   }
 
-  /* ----------------------------------------------------------- garage */
-
-  function pageGarage() {
-    fillVimeo('garage-vimeo');
-    const params = new URLSearchParams(location.search);
-    const state = {
-      q: params.get('q') || '',
-      type: params.get('type') || 'all',
-      format: params.get('format') || 'all',
-      eras: new Set((params.get('era') || '').split(',').filter(Boolean)),
-      seasons: new Set((params.get('season') || '').split(',').filter(Boolean)),
-      city: params.get('city') || '',
-      saved: params.get('saved') === '1',
-    };
-
-    const eras = Array.from(new Set(features.map((f) => f.era).filter(Boolean))).sort();
-    const seasons = ['spring', 'summer', 'fall', 'winter'].filter((s) => features.some((f) => f.season === s));
-    const cities = Array.from(new Set(features.map((f) => f.city).filter(Boolean))).sort();
-
-    const filters = mount('filters');
-    filters.innerHTML = `
-      <div class="k-filters__head">
-        <h2>Filter</h2>
-        <div class="k-row-flex">
-          <button class="k-filters__reset" type="button" data-reset>Reset all</button>
-          <button class="k-btn k-btn--sm k-filters-toggle" type="button" data-toggle-filters aria-expanded="false">Show filters</button>
-        </div>
-      </div>
-      <div class="k-filter">
-        <label class="k-search"><span class="k-sr">Search</span>${icon.search}<input type="search" placeholder="Search make, city, owner…" value="${esc(state.q)}" data-q></label>
-      </div>
-      <div class="k-filter">
-        <span class="k-filter__label">Machine</span>
-        <div class="k-seg" data-group="type">
-          ${[['all', 'Any'], ['car', 'Cars'], ['motorcycle', 'Motorcycles'], ['meet', 'Meets']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${state.type === v}">${l}</button>`).join('')}
-        </div>
-      </div>
-      <div class="k-filter">
-        <span class="k-filter__label">Format</span>
-        <div class="k-chips" data-group="format">
-          ${[['all', 'Everything'], ['film', 'Films'], ['gallery', 'Photo stories'], ['interview', 'Interviews']].map(([v, l]) => `<button class="k-chip" type="button" data-v="${v}" aria-pressed="${state.format === v}">${l}</button>`).join('')}
-        </div>
-      </div>
-      ${eras.length ? `<div class="k-filter">
-        <span class="k-filter__label">Era</span>
-        <div class="k-chips" data-group="era">
-          ${eras.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.eras.has(v)}">${esc(v)}<span class="k-count">${features.filter((f) => f.era === v).length}</span></button>`).join('')}
-        </div>
-      </div>` : ''}
-      <div class="k-filter">
-        <span class="k-filter__label">Season</span>
-        <div class="k-chips" data-group="season">
-          ${seasons.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.seasons.has(v)}" style="text-transform:capitalize">${esc(v)}</button>`).join('')}
-        </div>
-      </div>
-      <div class="k-filter"${cities.length ? '' : ' hidden'}>
-        <span class="k-filter__label">Location</span>
-        <div class="k-chips" data-group="city">
-          ${cities.map((v) => `<button class="k-chip" type="button" data-v="${esc(v)}" aria-pressed="${state.city === v}">${esc(v)}</button>`).join('')}
-        </div>
-      </div>
-      <div class="k-filter">
-        <span class="k-filter__label">Your garage</span>
-        <div class="k-chips"><button class="k-chip" type="button" data-saved aria-pressed="${state.saved}">${icon.heart.replace('<svg', '<svg width="14" height="14"')} Saved only</button></div>
-      </div>`;
-    if (window.matchMedia('(max-width: 999px)').matches) filters.dataset.collapsed = 'true';
-
-    const results = mount('results');
-    const count = mount('results-count');
-
-    const matches = (f) => {
-      if (state.type !== 'all' && f.type !== state.type) return false;
-      if (state.format !== 'all' && f.format !== state.format && !(state.format === 'film' && (f.media || []).includes('film'))) return false;
-      if (state.eras.size && !state.eras.has(f.era)) return false;
-      if (state.seasons.size && !state.seasons.has(f.season)) return false;
-      if (state.city && f.city !== state.city) return false;
-      if (state.saved && !saved.has(f.slug)) return false;
-      if (state.q) {
-        const hay = [f.make, f.model, f.code, f.title, f.city, f.country, f.location, f.tagline, (f.owner || {}).name, (f.tags || []).join(' '), (f.vibes || []).join(' ')].join(' ').toLowerCase();
-        if (!state.q.toLowerCase().split(/\s+/).every((t) => hay.includes(t))) return false;
-      }
-      return true;
-    };
-
-    const syncUrl = () => {
-      const p = new URLSearchParams();
-      if (state.q) p.set('q', state.q);
-      if (state.type !== 'all') p.set('type', state.type);
-      if (state.format !== 'all') p.set('format', state.format);
-      if (state.eras.size) p.set('era', Array.from(state.eras).join(','));
-      if (state.seasons.size) p.set('season', Array.from(state.seasons).join(','));
-      if (state.city) p.set('city', state.city);
-      if (state.saved) p.set('saved', '1');
-      const qs = p.toString();
-      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
-    };
-
-    const render = () => {
-      const list = features.filter(matches);
-      const nouns = { film: ['film', 'films'], gallery: ['photo story', 'photo stories'], interview: ['interview', 'interviews'] };
-      const [one, many] = nouns[state.format] || ['story', 'stories'];
-      count.textContent = `${list.length} ${list.length === 1 ? one : many} in the garage`;
-      results.innerHTML = list.length
-        ? list.map(featureCard).join('')
-        : `<div class="k-empty" style="grid-column:1/-1"><p class="k-h3">Nothing in the garage matches that.</p><p class="k-small k-mt-s">Try removing a filter.</p></div>`;
-      reveal(results);
-      syncUrl();
-    };
-
-    filters.addEventListener('click', (e) => {
-      if (e.target.closest('[data-toggle-filters]')) {
-        const collapsed = filters.dataset.collapsed === 'true';
-        filters.dataset.collapsed = String(!collapsed);
-        const t = e.target.closest('[data-toggle-filters]');
-        t.setAttribute('aria-expanded', String(collapsed));
-        t.textContent = collapsed ? 'Hide filters' : 'Show filters';
-        return;
-      }
-      if (e.target.closest('[data-reset]')) {
-        state.q = ''; state.type = 'all'; state.format = 'all'; state.eras.clear(); state.seasons.clear(); state.city = ''; state.saved = false;
-        $('[data-q]', filters).value = '';
-        $$('[data-group] button', filters).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === 'all')));
-        $('[data-saved]', filters).setAttribute('aria-pressed', 'false');
-        render();
-        return;
-      }
-      if (e.target.closest('[data-saved]')) {
-        state.saved = !state.saved;
-        e.target.closest('[data-saved]').setAttribute('aria-pressed', String(state.saved));
-        render();
-        return;
-      }
-      const b = e.target.closest('[data-group] button');
-      if (!b) return;
-      const group = b.closest('[data-group]').dataset.group;
-      const v = b.dataset.v;
-      if (group === 'type' || group === 'format') {
-        state[group] = v;
-        $$('button', b.parentElement).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      } else if (group === 'era' || group === 'season') {
-        const set = group === 'era' ? state.eras : state.seasons;
-        if (set.has(v)) set.delete(v); else set.add(v);
-        b.setAttribute('aria-pressed', String(set.has(v)));
-      } else if (group === 'city') {
-        state.city = state.city === v ? '' : v;
-        $$('button', b.parentElement).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === state.city)));
-      }
-      render();
+  /* ------------------------------------------------------------ films
+   * films.html: the screening room. A billboard for the featured film and
+   * streaming-style rows (C.filmRows / C.films). Films with no video yet
+   * are "Coming soon" placeholders that sign people up for the drop.
+   * -------------------------------------------------------------------- */
+  const filmStory = (fm) => (fm.story ? featureBySlug(fm.story) : null);
+  const filmPlayable = (fm) => { const f = filmStory(fm); return !!(fm.vimeo || fm.youtube || fm.video || (f && (f.vimeo || f.embed || f.video))); };
+  function playFilm(fm) {
+    const f = filmStory(fm);
+    if (fm.vimeo) return openVimeo({ ...fm.vimeo, title: fm.title, story: fm.story, aspect: fm.aspect });
+    if (fm.youtube || fm.video) {
+      player.pause();
+      const screen = fm.youtube
+        ? `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(fm.youtube)}?autoplay=1&rel=0" title="${esc(fm.title)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
+        : `<video src="${esc(fm.video)}" ${fm.poster ? `poster="${esc(fm.poster)}"` : ''} controls autoplay playsinline></video>`;
+      return openLightbox(`<div class="k-lightbox__head"><div><p class="k-eyebrow">Screening room</p><p class="k-h3 k-mt-s">${esc(fm.title)}</p></div><button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button></div><div class="k-lightbox__screen">${screen}</div>`, fm.title);
+    }
+    if (f && (f.vimeo || f.embed || f.video)) return f.vimeo ? openVimeo({ ...f.vimeo, title: fm.title, story: f.slug, aspect: fm.aspect }) : openFilm(f);
+    return openNotify(`film:${fm.id}`, fm.title);
+  }
+  function filmTile(fm, i) {
+    const f = filmStory(fm);
+    const img = fm.poster || (f && f.image) || '';
+    const vid = fm.vimeo || (f && f.vimeo);
+    const ready = filmPlayable(fm);
+    return `<button type="button" class="k-ftile" data-film-id="${esc(fm.id)}" aria-label="${esc(fm.title)}${ready ? '' : ', coming soon'}" style="--i:${i}">
+      <span class="k-ftile__media">${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async">`
+        : `<span class="plate plate--${esc(fm.tone || 'graphite')}"${vid ? ` data-film-cover="${esc(vid.id)}" data-film-hash="${esc(vid.hash || '')}"` : ''}><span class="plate__mark">${esc(fm.title.split(/[\s:·]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase())}</span></span>`}
+        <span class="k-ftile__play" aria-hidden="true">${ready ? '▶' : '+'}</span>
+        ${ready ? '' : '<span class="k-ftile__soon">Coming soon</span>'}
+      </span>
+      <span class="k-ftile__info"><b>${esc(fm.title)}</b><small>${esc([fm.runtime, fm.year || (f && f.published ? String(f.published).slice(0, 4) : ''), f ? f.city : ''].filter(Boolean).join(' · ') || (ready ? 'Now showing' : 'In production'))}</small></span>
+    </button>`;
+  }
+  function hydrateFilmCovers(root) {
+    $$('[data-film-cover]', root).forEach((plate) => {
+      vimeoInfo({ id: plate.dataset.filmCover, hash: plate.dataset.filmHash }).then((d) => {
+        if (!d || !d.thumbnail_url || !plate.isConnected) return;
+        const img = document.createElement('img'); img.src = d.thumbnail_url; img.alt = ''; img.decoding = 'async';
+        plate.replaceWith(img);
+      }).catch(() => {});
     });
-
-    let t;
-    $('[data-q]', filters).addEventListener('input', (e) => {
-      clearTimeout(t);
-      t = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 160);
-    });
-
-    // Saved toggles should refresh the list when filtering by saved
-    document.addEventListener('click', (e) => { if (state.saved && e.target.closest('[data-save]')) setTimeout(render, 0); }, { signal: pageAbort.signal });
-
-    const head = mount('garage-title');
-    if (head && state.format === 'film') head.innerHTML = '<span>Films,</span><span>scored in <em class="k-serif">phonk.</em></span>';
-    render();
+  }
+  function pageFilms() {
+    const films = C.films || [];
+    const signal = pageAbort.signal;
+    const lead = films.find((x) => x.featured && filmPlayable(x)) || films.find(filmPlayable) || films[0];
+    if (lead) {
+      const f = filmStory(lead);
+      const img = lead.poster || (f && f.image) || '';
+      fill('films-billboard', `
+        <div class="k-billboard__media">${img ? `<img src="${esc(img)}" alt="" decoding="async">` : `<span class="plate plate--${esc(lead.tone || 'graphite')}"${lead.vimeo ? ` data-film-cover="${esc(lead.vimeo.id)}" data-film-hash="${esc(lead.vimeo.hash || '')}"` : ''}></span>`}</div>
+        <div class="k-billboard__shade" aria-hidden="true"></div>
+        <div class="k-wrap k-billboard__inner">
+          <p class="k-term__strip"><span class="k-term__t">T2</span><span>Screening room · now showing</span><span class="k-term__clock"><span data-clock>--:--:--</span> <small data-clock-zone></small></span></p>
+          <h1 class="k-billboard__title">${esc(lead.title)}</h1>
+          <p class="k-billboard__meta">${esc([lead.runtime, f && f.published ? String(f.published).slice(0, 4) : '', f ? f.city : '', 'KIOSK Films'].filter(Boolean).join(' · '))}</p>
+          ${lead.blurb ? `<p class="k-billboard__blurb">${esc(lead.blurb)}</p>` : ''}
+          <div class="k-billboard__cta">
+            <button class="k-btn k-btn--solid" type="button" data-film-id="${esc(lead.id)}"><span aria-hidden="true">▶</span> Play</button>
+            ${f ? `<a class="k-btn" href="${storyHref(f)}">Read the story</a>` : ''}
+          </div>
+        </div>`);
+    }
+    const rows = (C.filmRows || []).map((r) => ({ ...r, list: films.filter((x) => (x.rows || []).includes(r.id)) })).filter((r) => r.list.length);
+    fill('films-rows', rows.map((r) => `
+      <div class="k-wrap k-frow" data-reveal>
+        <div class="k-frow__head"><h2 class="k-frow__title">${esc(r.title)}</h2><span class="k-frow__count">${r.list.length}</span></div>
+        ${railShell(r.list.map(filmTile).join(''), r.title, 'k-hscroll-wrap--films')}
+      </div>`).join(''));
+    hydrateFilmCovers($('main') || document);
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-film-id]');
+      if (!t) return;
+      const fm = films.find((x) => x.id === t.dataset.filmId);
+      if (fm) playFilm(fm);
+    }, { signal });
   }
 
   /* ------------------------------------------------------------ story */
@@ -3001,7 +3061,7 @@
             ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
             <div class="k-row-flex">
               ${mixButton(m)}
-              ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">${m.soundcloud ? 'Follow on SoundCloud' : 'Follow on Spotify'}</a>` : ''}
+              ${sourceLink(m) ? `<a class="k-btn" href="${esc(sourceLink(m).href)}" target="_blank" rel="noopener">Follow on ${esc(sourceName(m) || 'Spotify')}</a>` : ''}
             </div>
           </div>
         </article>`;
@@ -3269,7 +3329,7 @@
     const hoodie = (C.products || []).find((p) => (p.colorways || []).some((w) => w.image) && (p.mockup || {}).type === 'hoodie');
     const mix = (C.mixes || [])[0];
     const desks = [
-      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'garage.html', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
+      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'journal.html?desk=automotive', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
       { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'journal.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
       { id: 'music', n: '03', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
       { id: 'fashion', n: '04', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
@@ -3309,31 +3369,124 @@
 
   /* ---------------------------------------------------------- journal */
 
-  function pageJournal() {
-    fill('journal-departments', railShell(departmentsHtml(), 'Departments', 'k-hscroll-wrap--depts'));
-    fillMosaic('journal-mosaic', mosaicItems(), { label: 'The archive' });
-    const posts = features.slice().sort((a, b) => String(b.published).localeCompare(String(a.published)));
-    fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
-    fill('journal', posts.map((f, n) => {
-      const total = (f.chapters || []).length;
-      const done = written(f).length;
-      const status = (f.tags || []).includes('In the edit') ? 'In the edit' : formatLabel(f);
-      return `
-        <article class="k-post" data-reveal>
-          <a class="k-post__media" href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}" aria-label="${esc(f.title || featureName(f))}">
-            ${media({ image: f.image, tone: f.tone, mark: f.code, alt: featureName(f), focus: f.focus })}
-          </a>
-          <div class="k-post__body">
-            <p class="k-eyebrow">${[pad(posts.length - n), longDate(f.published), status].filter(Boolean).map(esc).join(' · ')}</p>
-            <h2 class="k-h2"><a href="${storyHref(f)}${DRAFT ? '&draft=1' : ''}">${esc(f.title || featureName(f))}</a></h2>
-            <p class="k-small">${esc(featureName(f))}${place(f) ? ` · ${esc(place(f))}` : ''}</p>
-            <p class="k-body k-mt-s">${esc(f.excerpt || f.tagline || '')}</p>
-            ${total ? `<ol class="k-post__chapters" aria-label="Chapters">${(f.chapters || []).map((c) => `<li class="${(c.body || '').trim() ? 'is-done' : ''}">${esc(c.heading)}</li>`).join('')}</ol>` : ''}
-            <p class="k-byline">By ${esc(f.author || 'KIOSK')} · ${readMinutes(f)} min read${total ? ` · ${done} of ${total} chapters written` : ''}</p>
-          </div>
-        </article>`;
-    }).join(''));
+  /* ---------------------------------------------------- world library
+   * journal.html: every post, video or written, in one searchable library.
+   * Search covers titles, places, tags and every word in the story and its
+   * chapters. Filters: type, desk, author, tag, location. URL-synced.
+   * -------------------------------------------------------------------- */
+  const POST_TYPES = { video: 'Video', photo: 'Photos', article: 'Article' };
+  const postType = (f) => (f.format === 'film' ? 'video' : f.format === 'gallery' ? 'photo' : 'article');
+  const postText = (f) => [f.title, f.make, f.model, f.code, f.tagline, f.excerpt, f.city, f.location, f.country, f.author, (f.tags || []).join(' '),
+    ...(f.story || []).map((b) => `${b.lead || ''} ${b.body || b.text || ''}`), ...written(f).map((c) => `${c.heading || ''} ${c.body}`),
+    ...((f.interview || []).map ? (f.interview || []).map((q) => `${q.q || q.question || ''} ${q.a || q.answer || ''}`) : [])].filter(Boolean).join(' ');
+  const postPlace = (f) => f.city || f.location || '';
+  function snippet(text, q) {
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return '';
+    const a = Math.max(0, i - 60); const b = Math.min(text.length, i + q.length + 80);
+    return `${a ? '…' : ''}${esc(text.slice(a, i))}<mark>${esc(text.slice(i, i + q.length))}</mark>${esc(text.slice(i + q.length, b))}${b < text.length ? '…' : ''}`;
   }
+  function libraryCard(f, q) {
+    const type = postType(f);
+    const title = f.title || featureName(f);
+    const text = q ? postText(f) : '';
+    const hit = q && !title.toLowerCase().includes(q.toLowerCase()) ? snippet(text, q) : '';
+    const meta = type === 'video' ? (f.runtime || 'Film') : type === 'photo' ? `${(f.gallery || []).length || ''} photos`.trim() : `${readMinutes(f)} min read`;
+    return `<article class="k-lib-card" data-reveal>
+      <a class="k-lib-card__media" href="${storyHref(f)}" aria-label="${esc(title)}">
+        ${media({ image: f.image, tone: f.tone, mark: f.code, alt: title, focus: f.focus, vimeo: f.vimeo })}
+        <span class="k-lib-card__type k-lib-card__type--${type}">${type === 'video' ? '▶ ' : ''}${esc(POST_TYPES[type])}</span>
+      </a>
+      <div class="k-lib-card__body">
+        <p class="k-lib-card__meta"><span>${esc(shortDate(f.published))}${f.published ? ` ${esc(String(f.published).slice(0, 4))}` : ''}</span>${postPlace(f) ? `<span>${esc(postPlace(f))}</span>` : ''}<span>${esc(meta)}</span></p>
+        <h3 class="k-lib-card__title"><a href="${storyHref(f)}">${esc(title)}</a></h3>
+        ${f.make || f.model ? `<p class="k-lib-card__sub">${esc([f.make, f.model].filter(Boolean).join(' '))}</p>` : ''}
+        ${hit ? `<p class="k-lib-card__hit">${hit}</p>` : f.tagline ? `<p class="k-lib-card__dek">${esc(f.tagline)}</p>` : ''}
+        <p class="k-lib-card__foot"><span>By ${esc(f.author || 'KIOSK')}</span>${(f.tags || []).slice(0, 3).map((t) => `<button type="button" class="k-lib-tag" data-lib-tag="${esc(t)}">#${esc(t)}</button>`).join('')}</p>
+      </div>
+    </article>`;
+  }
+  function pageJournal() {
+    const posts = features.slice();
+    const params = new URLSearchParams(location.search);
+    const st = {
+      q: params.get('q') || '', sort: params.get('sort') || 'new', type: params.get('type') || '',
+      desk: params.get('desk') || '', author: params.get('author') || '', loc: params.get('loc') || '',
+      tags: new Set((params.get('tag') || '').split(',').filter(Boolean)),
+    };
+    const signal = pageAbort.signal;
+    const uniq = (arr) => Array.from(new Set(arr.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    const authors = uniq(posts.map((f) => f.author || 'KIOSK'));
+    const tags = uniq([].concat(...posts.map((f) => f.tags || [])));
+    const locs = uniq(posts.map(postPlace));
+    const desks = uniq(posts.map((f) => f.desk));
+    fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
+
+    const chip = (key, val, label, on) => `<button type="button" class="k-chip" data-lib="${key}" data-val="${esc(val)}" aria-pressed="${on}">${esc(label)}</button>`;
+    const controls = () => `
+      <div class="k-lib__bar">
+        <label class="k-term__field k-lib__search"><span class="k-sr">Search the library</span>${icon.search}<input type="search" data-lib-q value="${esc(st.q)}" placeholder="Search titles, places, people, any word…" autocomplete="off" enterkeyhint="search"></label>
+        <label class="k-sr" for="lib-sort">Sort</label>
+        <select class="k-select" id="lib-sort" data-lib-sort>
+          ${[['new', 'Newest first'], ['old', 'Oldest first'], ['title', 'Title A–Z'], ['place', 'Location A–Z'], ['author', 'Author A–Z']].map(([v, l]) => `<option value="${v}"${st.sort === v ? ' selected' : ''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="k-lib__filters">
+        <div class="k-lib__group" role="group" aria-label="Type"><span class="k-lib__label">Type</span>${chip('type', '', 'All', !st.type)}${Object.keys(POST_TYPES).map((t) => chip('type', t, POST_TYPES[t], st.type === t)).join('')}</div>
+        ${desks.length > 1 ? `<div class="k-lib__group" role="group" aria-label="Desk"><span class="k-lib__label">Desk</span>${chip('desk', '', 'All', !st.desk)}${desks.map((d) => chip('desk', d, DESKS[d] || d, st.desk === d)).join('')}</div>` : ''}
+        <div class="k-lib__group" role="group" aria-label="Author"><span class="k-lib__label">Author</span>${chip('author', '', 'All', !st.author)}${authors.map((a) => chip('author', a, a, st.author === a)).join('')}</div>
+        <details class="k-lib__more"${st.loc || st.tags.size ? ' open' : ''}><summary>Location &amp; tags${st.loc || st.tags.size ? ` · ${[st.loc, ...[...st.tags].map((t) => `#${t}`)].filter(Boolean).map(esc).join(' ')}` : ''}</summary>
+          ${locs.length ? `<div class="k-lib__group" role="group" aria-label="Location"><span class="k-lib__label">Location</span>${chip('loc', '', 'Anywhere', !st.loc)}${locs.map((l) => chip('loc', l, l, st.loc === l)).join('')}</div>` : ''}
+          <div class="k-lib__group" role="group" aria-label="Tags"><span class="k-lib__label">Tags</span>${tags.map((t) => chip('tag', t, `#${t}`, st.tags.has(t))).join('')}</div>
+        </details>
+      </div>`;
+    const results = () => {
+      const q = st.q.trim().toLowerCase();
+      let list = posts.filter((f) => (!st.type || postType(f) === st.type) && (!st.desk || f.desk === st.desk)
+        && (!st.author || (f.author || 'KIOSK') === st.author) && (!st.loc || postPlace(f) === st.loc)
+        && [...st.tags].every((t) => (f.tags || []).includes(t))
+        && (!q || q.split(/\s+/).every((w) => postText(f).toLowerCase().includes(w))));
+      const by = {
+        new: (a, b) => String(b.published || '').localeCompare(String(a.published || '')),
+        old: (a, b) => String(a.published || '9999').localeCompare(String(b.published || '9999')),
+        title: (a, b) => (a.title || featureName(a)).localeCompare(b.title || featureName(b)),
+        place: (a, b) => (postPlace(a) || '~').localeCompare(postPlace(b) || '~'),
+        author: (a, b) => (a.author || 'KIOSK').localeCompare(b.author || 'KIOSK'),
+      }[st.sort] || (() => 0);
+      list = list.sort(by);
+      const n = mount('lib-count'); if (n) n.textContent = `${list.length} of ${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
+      const grid = mount('journal');
+      grid.innerHTML = list.length ? list.map((f) => libraryCard(f, st.q.trim())).join('')
+        : `<div class="k-empty" style="grid-column:1/-1"><p class="k-h3">Nothing in the library matches that.</p><p class="k-small k-mt-s">Try another word or clear a filter.</p><button class="k-btn k-mt-m" type="button" data-lib-clear>Clear filters</button></div>`;
+      reveal(grid); hydrateCovers(grid);
+      const qs = new URLSearchParams();
+      if (st.q) qs.set('q', st.q); if (st.sort !== 'new') qs.set('sort', st.sort); if (st.type) qs.set('type', st.type);
+      if (st.desk) qs.set('desk', st.desk); if (st.author) qs.set('author', st.author); if (st.loc) qs.set('loc', st.loc); if (st.tags.size) qs.set('tag', [...st.tags].join(','));
+      const str = qs.toString();
+      history.replaceState(history.state, '', location.pathname + (str ? `?${str}` : '') + location.hash);
+      renderedKey = pageKey();
+    };
+    const paint = () => { fill('lib-controls', controls()); results(); };
+    paint();
+    let t = 0;
+    document.addEventListener('input', (e) => {
+      if (!e.target.matches('[data-lib-q]')) return;
+      clearTimeout(t); t = setTimeout(() => { st.q = e.target.value; results(); }, 140);
+    }, { signal });
+    document.addEventListener('change', (e) => { if (e.target.matches('[data-lib-sort]')) { st.sort = e.target.value; results(); } }, { signal });
+    document.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-lib]');
+      const tg = e.target.closest('[data-lib-tag]');
+      if (e.target.closest('[data-lib-clear]')) { Object.assign(st, { q: '', type: '', desk: '', author: '', loc: '' }); st.tags.clear(); paint(); return; }
+      if (tg) { e.preventDefault(); st.tags.add(tg.dataset.libTag); paint(); return; }
+      if (!c) return;
+      const k = c.dataset.lib; const v = c.dataset.val;
+      if (k === 'tag') { if (st.tags.has(v)) st.tags.delete(v); else st.tags.add(v); } else st[k] = v;
+      paint();
+    }, { signal });
+    fillMosaic('journal-mosaic', mosaicItems(), { label: 'The archive' });
+  }
+
 
   /* ------------------------------------------------------------ vault */
 
@@ -3560,7 +3713,7 @@
         <button class="k-scard k-scard--join" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK" data-reveal>
           <span class="k-eyebrow">Your store here</span>
           <b class="k-h3">Sell at the <span class="k-serif">KIOSK</span></b>
-          <span class="k-small">Get a page at the kiosk, your pieces in search and on the Hunt map, and visitors sent to your own store.</span>
+          <span class="k-small">Get a page at the kiosk, your pieces in search and on the Lost &amp; Found map, and visitors sent to your own store.</span>
         </button>`; reveal(grid); };
       show(all);
       bindSearch(mount('store-q'), mount('store-results'), { kinds: ['store'], inline: false, onResults: (res, q) => show(q ? res.map((r) => r.st) : all) });
@@ -3582,7 +3735,7 @@
     const host = st.url ? (() => { try { return new URL(st.url).hostname.replace(/^www\./, ''); } catch (e) { return ''; } })() : '';
     fill('brand-cta', st.url
       ? `<a class="k-btn k-btn--solid" href="${visitHref(st)}" rel="noopener" data-visit="${esc(st.id)}" data-hard>Visit store <span class="k-arrow">${icon.arrow}</span></a><small>Opens ${esc(host)} · you’ll arrive as a KIOSK visitor</small>`
-      : `<a class="k-btn k-btn--solid" href="vault.html">Shop the kiosk <span class="k-arrow">${icon.arrow}</span></a>${pieces.some((p) => p.pickup) ? '<a class="k-btn" href="hunt.html">On the Hunt map</a>' : ''}`);
+      : `<a class="k-btn k-btn--solid" href="vault.html">Shop the kiosk <span class="k-arrow">${icon.arrow}</span></a>${pieces.some((p) => p.pickup) ? '<a class="k-btn" href="lost-and-found.html">On the Hunt map</a>' : ''}`);
     const grid = mount('brand-grid');
     if (grid) { grid.innerHTML = pieces.map((p) => termCard(p)).join(''); reveal(grid); }
     document.addEventListener('click', (e) => {
@@ -3592,7 +3745,7 @@
   }
 
   /* ------------------------------------------------------------- hunt
-   * hunt.html: the Hunt map. MapLibre and the map module load only here.
+   * lost-and-found.html: the Lost & Found map (data-page="hunt"). MapLibre and the map module load only here.
    * Search shows cards around the globe; drops open the product panel.
    * -------------------------------------------------------------------- */
   const HUNT_SCRIPTS = ['js/vendor/maplibre/maplibre-gl.js', 'js/kiosk-world.js', 'js/kiosk-hunt.js'];
@@ -3688,7 +3841,7 @@
     const ctx = canvas.getContext('2d');
     const places = (opts.places || GLOBE_PLACES).map((p) => ({ ...p, v: toVec(p.la, p.lo) }));
     const home = places.find((p) => p.home) || places[0];
-    const st = { yaw: opts.yaw != null ? opts.yaw : 0.9, /* New York (74° W) starts just left of centre */ pitch: 0.38, spin: 0, drag: null, flights: [], spawnAt: 0, last: 0, raf: 0, visible: true, stopped: false };
+    const st = { yaw: opts.yaw != null ? opts.yaw : 0.9, /* New York (74° W) starts just left of centre */ pitch: opts.pitch != null ? opts.pitch : 0.38, spin: 0, drag: null, flights: [], spawnAt: 0, last: 0, raf: 0, visible: true, stopped: false };
     const scale = opts.scale || 0.42;
 
     const rot = (v) => {
@@ -3791,13 +3944,20 @@
       const [hx, hy, hz] = P(home.v);
       if (hz > 0) { ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(hx, hy, 3.5 + 1.5 * Math.sin(now / 260), 0, Math.PI * 2); ctx.fill(); }
       ctx.globalAlpha = 1;
+      if (opts.onFrame) opts.onFrame({ project: (la, lo) => P(toVec(la, lo)), R, cx, cy, w, h });
     }
 
     function frame(now) {
       st.raf = 0;
       if (st.stopped || !canvas.isConnected) return;
       const dt = Math.min(64, now - (st.last || now)); st.last = now;
-      if (!st.drag) { st.yaw += dt * 0.00018 + st.spin; st.spin *= 0.95; }
+      if (!st.drag) {
+        if (st.target) {
+          // Turn to face a point, then carry on spinning
+          st.yaw += (st.target.yaw - st.yaw) * 0.08; st.pitch += (st.target.pitch - st.pitch) * 0.08;
+          if (Math.abs(st.target.yaw - st.yaw) < 0.002 && Math.abs(st.target.pitch - st.pitch) < 0.002) st.target = null;
+        } else if (!st.held) { st.yaw += dt * (opts.speed || 0.00018) + st.spin; st.spin *= 0.95; }
+      }
       if (now >= st.spawnAt && st.flights.length < (opts.max || 6)) { spawn(now); st.spawnAt = now + 250 + Math.random() * 600; }
       draw(now);
       if (st.visible) st.raf = requestAnimationFrame(frame);
@@ -3823,7 +3983,7 @@
       const now = performance.now();
       for (let i = 0; i < 5; i += 1) { spawn(now); st.flights[i].t0 = now - st.flights[i].dur * 0.99; }
       requestAnimationFrame(() => draw(now));
-      return { stop() { st.stopped = true; } };
+      return { stop() { st.stopped = true; }, hold() {}, face(la, lo) { st.yaw = -lo * Math.PI / 180; st.pitch = Math.max(-1.1, Math.min(1.1, la * Math.PI / 180)); draw(performance.now()); } };
     }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(([en]) => {
@@ -3832,7 +3992,18 @@
       }).observe(canvas);
     }
     st.raf = requestAnimationFrame(frame);
-    return { stop() { st.stopped = true; if (st.raf) cancelAnimationFrame(st.raf); } };
+    return {
+      stop() { st.stopped = true; if (st.raf) cancelAnimationFrame(st.raf); },
+      /** Pause or resume the auto-spin. */
+      hold(on) { st.held = !!on; },
+      /** Turn the globe to bring a latitude/longitude to the front. */
+      face(la, lo) {
+        let yaw = -lo * Math.PI / 180;
+        while (yaw - st.yaw > Math.PI) yaw -= Math.PI * 2;
+        while (st.yaw - yaw > Math.PI) yaw += Math.PI * 2;
+        st.spin = 0; st.target = { yaw, pitch: Math.max(-1.1, Math.min(1.1, la * Math.PI / 180 * 0.8)) };
+      },
+    };
   }
 
   /** Home page section: the globe plus a live "now flying" route readout. */
@@ -3856,16 +4027,14 @@
     });
   }
 
-  /* ------------------------------------------------- world traveler intro
-   * First visit to the home page each session. With WebGL, a 3D dotted
-   * Earth (js/kiosk-intro3d.js, three.js loaded only here) follows a
-   * traveler New York → Reykjavík → London → Marrakesh → Dubai → Tokyo,
-   * stamping each stop, then pulls back to the title. Without WebGL, or if
-   * the scripts are slow or fail, the 2D wireframe globe plays instead.
+  /* ------------------------------------------------------ K-flight intro
+   * First visit to the home page each session. Above the clouds, flights
+   * hop airport to airport and their contrails draw a K; the camera pulls
+   * back to KIOSK, the letters fill in and it flies through the clouds into
+   * the hero slideshow (js/kiosk-intro.js, GSAP loaded only here). If the
+   * scripts are slow or fail, the 2D wireframe globe plays instead.
    * Skippable; skipped for reduced motion.
    * -------------------------------------------------------------------- */
-  const INTRO_3D = ['js/vendor/three-r149.min.js', 'js/kiosk-world.js', 'js/kiosk-intro3d.js'];
-
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
@@ -3889,12 +4058,10 @@
     if (seen || REDUCED || prefs.intro === 'off') return;
     const issue = esc((C.issue || {}).number || '01');
     const el = document.createElement('div');
-    el.className = 'k-intro k-i3d is-loading';
+    el.className = 'k-intro is-loading';
     el.setAttribute('role', 'presentation');
     el.innerHTML = `
       <canvas class="k-intro__globe" aria-hidden="true"></canvas>
-      <div class="k-i3d__labels" data-i3d-labels aria-hidden="true"></div>
-      <div class="k-i3d__pass" data-i3d-pass aria-hidden="true"></div>
       <div class="k-intro__copy">
         <p class="k-intro__kicker">Only at the</p>
         <p class="k-intro__word">KIOSK</p>
@@ -3919,7 +4086,8 @@
     // 2D wireframe globe: the original intro, kept as the fallback
     const play2D = () => {
       if (done || player) return;
-      el.classList.remove('k-i3d', 'is-loading', 'is-landed');
+      el.classList.remove('k-kfly', 'is-loading');
+      $$('.k-kfly__sky, .k-kfly__shade, .k-kfly__svg, .k-kfly__pass', el).forEach((n) => n.remove());
       // A failed WebGL start can leave the canvas unusable for 2D
       const canvas = document.createElement('canvas');
       canvas.className = 'k-intro__globe'; canvas.setAttribute('aria-hidden', 'true');
@@ -3934,18 +4102,17 @@
       setTimeout(finish, 3200);
     };
 
-    if (!hasWebGL()) { play2D(); return; }
     // Slow connections shouldn't sit on a blank screen
     const slow = setTimeout(play2D, 2500);
-    INTRO_3D.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+    loadGsap().then(() => (window.KioskIntro ? null : loadScript('js/kiosk-intro.js')))
       .then(() => {
         clearTimeout(slow);
         if (done || player) return;
         el.classList.remove('is-loading');
-        player = window.KioskIntro3D.run(el, { onDone: finish });
+        player = window.KioskIntro.run(el, { onDone: finish });
       })
       .catch((err) => {
-        console.warn('[KIOSK] 3D intro unavailable, using 2D globe', err);
+        console.warn('[KIOSK] K-flight intro unavailable, using 2D globe', err);
         clearTimeout(slow);
         play2D();
       });
@@ -3959,10 +4126,10 @@
   const TERMINALS = [
     { id: 'home', t: 'T0', name: 'Main concourse', href: 'index.html', note: 'Departures from every desk' },
     { id: 'vault', t: 'T1', name: 'Supply terminal', href: 'vault.html', note: 'Clothing, travel goods and rare finds' },
-    { id: 'garage', t: 'T2', name: 'The Hangar', href: 'garage.html', note: 'Cars, bikes and the people who ride them' },
-    { id: 'journal', t: 'T3', name: 'Arrivals', href: 'journal.html', note: 'Stories, interviews and vlogs as they land' },
+    { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
+    { id: 'journal', t: 'T3', name: 'World Library', href: 'journal.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
-    { id: 'hunt', t: 'T5', name: 'Ground transport', href: 'hunt.html', note: 'The Hunt: pieces you collect in person' },
+    { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
   ];
   const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
@@ -4016,12 +4183,6 @@
           .concat(byNewest((C.products || []).filter((p) => !isDigitalP(p))).slice(0, 2).map((p) => ({ pdp: p.id, flight: flightOf(p), dest: p.title, gate: gateOf(p.category), time: price(p), status: statusOf(p, 0) })))
           .concat((C.mixes || []).slice(0, 1).map((m) => ({ play: m.slug, flight: 'KR 001', dest: m.title, gate: 'C', time: 'LIVE', status: { key: 'boarding', label: 'On air' } })));
         html = boardHtml({ id: 'home-board', title: 'Departures', sub: 'Every desk · latest first · tap a flight', cols: ['Flight', 'Destination', 'Gate', 'Time', 'Status'], rows: rows });
-      } else if (PAGE === 'garage') {
-        const rows = byNewest(features.filter((f) => f.desk === 'automotive' || f.make)).map((f) => ({ ...storyRow(f), dest: [f.make, f.model].filter(Boolean).join(' ') || featureName(f), time: f.year || shortDate(f.published) }));
-        html = boardHtml({ id: 'hangar-board', title: 'Hangar', sub: 'Machines on the floor · tap to open', cols: ['Tail no.', 'Machine', 'Gate', 'Year', 'Status'], rows: deskBoard(rows) });
-      } else if (PAGE === 'journal') {
-        const rows = byNewest(features).map((f) => ({ ...storyRow(f), status: (f.tags || []).includes('In the edit') ? { key: 'soon', label: 'Delayed' } : { key: 'landed', label: 'Landed' } }));
-        html = boardHtml({ id: 'arrivals-board', title: 'Arrivals', sub: 'Stories, interviews and vlogs · newest first', icon: LANDING, cols: ['Flight', 'Arriving from', 'Gate', 'Landed', 'Status'], rows: deskBoard(rows) });
       } else if (PAGE === 'radio') {
         const rows = (C.mixes || []).map((m, i) => ({ play: m.slug, flight: `KR ${String(i + 1).padStart(3, '0')}`, dest: m.title, gate: 'C', time: m.duration || (i ? 'NEXT' : 'LIVE'), status: i ? { key: 'landed', label: 'Up next' } : { key: 'boarding', label: 'On air' } }));
         html = boardHtml({ id: 'radio-board', title: 'In-flight', sub: 'Channels on board · tap to play', cols: ['Channel', 'Programme', 'Gate', 'Time', 'Status'], rows: deskBoard(rows) });
@@ -4042,7 +4203,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
+  const PAGES = { home: pageHome, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();

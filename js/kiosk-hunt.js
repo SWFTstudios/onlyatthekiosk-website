@@ -1,5 +1,5 @@
 /**
- * KIOSK — The Hunt map
+ * KIOSK — Lost & Found map
  *
  * A dark globe (MapLibre GL, js/vendor/maplibre/) with the KIOSK land dots,
  * glowing beacons for Hunt drops and partner stores, and a HUD. Zooming in

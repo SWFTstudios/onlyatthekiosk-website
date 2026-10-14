@@ -9,7 +9,7 @@ The home page and the new sections run on the **KIOSK Glass** design system:
 | Page | What it is |
 | --- | --- |
 | `index.html` | Issue home: hero film, Garage rail, films, KIOSK Radio, Vault, Dispatch signup |
-| `garage.html` | Archive of films, photo stories and interviews with filters |
+| `journal.html` | Archive of films, photo stories and interviews with filters |
 | `story.html?s=<slug>` | A story page: specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
 | `radio.html` | KIOSK Radio: phonk playlists (Spotify) in a site-wide player with a live waveform |
 | `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories, films and LUT packs |

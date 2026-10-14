@@ -49,6 +49,10 @@ window.KIOSK_CONTENT = {
       { src: 'videos/hero/bts.mp4', webm: 'videos/hero/bts.webm', poster: 'videos/hero/bts-poster.webp', story: 'andy-q50', kicker: 'On set', title: 'Behind the scenes · Hudson Line', caption: 'Raw footage from the Q50 shoot' },
     ],
     lead: 'andy-q50',
+    // World Library globe on the home page: up to 4 featured stories, each
+    // pinned at its `geo` ({ lat, lon } on the story). The first one carries
+    // the hero slideshow. Empty → the lead and hero-slide stories.
+    featured: ['andy-q50', 'moses-r1m', 'l0st-tapes', 'ksenia-r3-moses-r1m'],
   },
 
   /* ----------------------------------------------------------
@@ -73,6 +77,7 @@ window.KIOSK_CONTENT = {
       vibes: ['daylight', 'clean', 'urban', 'autumn'],
       location: 'Bridge + parkway rollers',
       city: 'Hudson Valley',
+      geo: { lat: 41.71, lon: -73.93 },   // pin on the World Library globe
       country: 'NY',
       coords: '',
       shotOn: 'Sony A7C II',
@@ -197,6 +202,7 @@ window.KIOSK_CONTENT = {
       vibes: ['urban', 'moody', 'clean', 'dusk'],
       location: 'George Washington Bridge',
       city: 'Hudson River',
+      geo: { lat: 40.85, lon: -73.95 },   // pin on the World Library globe
       country: 'NY / NJ',
       coords: '',
       shotOn: 'iPhone 14 Pro',
@@ -595,6 +601,7 @@ window.KIOSK_CONTENT = {
       vibes: ['night', 'vintage', 'urban', 'neon'],
       location: 'Chinatown to the highways',
       city: 'New York',
+      geo: { lat: 40.71, lon: -74.0 },   // pin on the World Library globe
       country: 'NY',
       coords: '',
       shotOn: 'VHS camcorder',
@@ -722,10 +729,52 @@ window.KIOSK_CONTENT = {
   ],
 
   /* ----------------------------------------------------------
-   * RADIO — your phonk playlists on Spotify.
-   * `spotify` is the playlist ID from its share link
-   * (open.spotify.com/playlist/<ID>) and renders Spotify's player.
-   * Add `audio` (an MP3 URL) to play a self-hosted mix instead.
+   * FILMS — the screening room (films.html), laid out like a streaming
+   * service: a billboard and rows. Each film:
+   *   { id, title, rows: ['new', …], year, runtime, blurb, tone,
+   *     vimeo: { id, hash } | youtube: '<video id>' | video: 'file.mp4',
+   *     poster: 'image', story: '<story slug>', featured: true }
+   * Leave the video fields empty and the film shows as "Coming soon".
+   * `featured: true` puts it on the billboard (first one wins).
+   * -------------------------------------------------------- */
+  filmRows: [
+    { id: 'new', title: 'New on KIOSK' },
+    { id: 'machines', title: 'Cars & motorcycles' },
+    { id: 'travel', title: 'Travel diaries' },
+    { id: 'interviews', title: 'Interviews' },
+    { id: 'edits', title: 'Cinematic edits' },
+    { id: 'home', title: 'Home movies' },
+    { id: 'bts', title: 'Behind the scenes' },
+  ],
+  films: [
+    { id: 'friends-garage', title: 'A Friend’s Garage', rows: ['new', 'machines'], story: 'honda-f4i-shop', vimeo: { id: '1212483051', hash: 'f428c5372f' }, featured: true, blurb: 'A Honda F4i, a cramped shop and the friends who keep it running.' },
+    { id: 'l0st-tapes', title: 'L0ST TAPES', rows: ['new', 'edits', 'home'], story: 'l0st-tapes', vimeo: { id: '1066971784', hash: '' }, aspect: '4/3', blurb: 'Found footage from nights that never made the edit.' },
+    { id: 'r3-r1m', title: 'Ksenia’s R3 × Moses’ R1M', rows: ['machines', 'edits'], story: 'ksenia-r3-moses-r1m', vimeo: { id: '1019207124', hash: '' }, aspect: '4/3', blurb: 'Two riders, two Yamahas and one long evening on the river roads.' },
+    { id: 'real-slummy', title: 'Real Slummy', rows: ['new', 'machines'], story: 'andy-q50', blurb: 'Andy’s Q50, low and black, rolling across the Hudson.' },
+    // Placeholders: swap in a vimeo / youtube / video link when each one is ready
+    { id: 'tokyo-after-midnight', title: 'Tokyo After Midnight', rows: ['travel', 'edits'], runtime: '18 min', tone: 'sodium', blurb: 'Convenience-store coffee, Daikoku and the city at 3 a.m.' },
+    { id: 'long-way-to-lisbon', title: 'The Long Way to Lisbon', rows: ['travel'], runtime: '24 min', tone: 'desert', blurb: 'A coastal road trip with no plan past the next tank of fuel.' },
+    { id: 'night-market', title: 'Night Market, Bangkok', rows: ['travel', 'home'], runtime: '9 min', tone: 'ember', blurb: 'Smoke, neon and the best food we have eaten standing up.' },
+    { id: 'kiosk-conversations-1', title: 'Conversations at the Kiosk · Ep. 1', rows: ['interviews', 'new'], runtime: '32 min', tone: 'graphite', blurb: 'Builders, riders and makers on how they ended up here.' },
+    { id: 'kiosk-conversations-2', title: 'Conversations at the Kiosk · Ep. 2', rows: ['interviews'], runtime: '28 min', tone: 'chrome', blurb: 'A thrift curator on finding the one piece in a thousand.' },
+    { id: 'garage-talk', title: 'Garage Talk', rows: ['interviews', 'machines'], runtime: '21 min', tone: 'moss', blurb: 'What owners wish they had known before the first build.' },
+    { id: 'sunday-at-the-track', title: 'Sunday at the Track', rows: ['machines', 'edits'], runtime: '12 min', tone: 'ice', blurb: 'Track day from the paddock to the last session.' },
+    { id: 'mountain-pass', title: 'Mountain Pass, No Map', rows: ['machines', 'travel'], runtime: '15 min', tone: 'moss', blurb: 'Two bikes, one pass and a forecast nobody checked.' },
+    { id: 'thrift-run', title: 'Thrift Run: Brooklyn', rows: ['travel', 'bts'], runtime: '11 min', tone: 'desert', blurb: 'Six shops, one afternoon and what made the cut.' },
+    { id: 'home-movies-1', title: 'Home Movies · Vol. 1', rows: ['home'], runtime: '8 min', tone: 'ember', blurb: 'Camcorder tapes from the road, unedited and unfiltered.' },
+    { id: 'rooftop-session', title: 'Rooftop Session', rows: ['edits', 'home'], runtime: '6 min', tone: 'chrome', blurb: 'Skate, sunset and a borrowed rooftop.' },
+    { id: 'making-real-slummy', title: 'Behind the Lens: Real Slummy', rows: ['bts'], runtime: '14 min', tone: 'graphite', blurb: 'Rigs, rollers and the shots we almost lost.' },
+    { id: 'making-the-kiosk', title: 'Making the Kiosk', rows: ['bts', 'interviews'], runtime: '19 min', tone: 'sodium', blurb: 'From sketch to sample: how the first pieces got made.' },
+  ],
+
+  /* ----------------------------------------------------------
+   * RADIO — curated playlists that keep playing while people browse.
+   * Each mix uses ONE source:
+   *   spotify:    the playlist ID from its share link (open.spotify.com/playlist/<ID>)
+   *   soundcloud: any SoundCloud track, playlist or likes link
+   *   apple:      an Apple Music playlist link (music.apple.com/…/playlist/…/pl.…)
+   *   audio:      an MP3 URL for a self-hosted mix
+   * Leave every source empty and the mix shows as "drops soon".
    * Radio is free to listen to: nothing here is sold.
    * -------------------------------------------------------- */
   mixes: [
@@ -764,6 +813,19 @@ window.KIOSK_CONTENT = {
       mood: 'Phonk likes · curated on SoundCloud',
       tone: 'ember',
       soundcloud: 'https://on.soundcloud.com/hZrsAbhlhyPSPwlry1',   // any SoundCloud track, playlist or likes link
+      audio: '',
+      cover: '',
+      tracks: [],
+    },
+    {
+      slug: 'apple-in-rotation',
+      title: 'In Rotation',
+      volume: 'Playlist 04',
+      length: '',
+      bpm: '',
+      mood: 'What we’re playing on the road · curated on Apple Music',
+      tone: 'sodium',
+      apple: '',   // paste an Apple Music playlist link, e.g. https://music.apple.com/us/playlist/name/pl.xxxx
       audio: '',
       cover: '',
       tracks: [],
@@ -810,7 +872,7 @@ window.KIOSK_CONTENT = {
     {
       id: 'kiosk', name: 'KIOSK', city: 'New York', country: 'US', lat: 40.7128, lon: -74.006, url: '',
       note: 'Our own label. Pieces you can only find at the kiosk.',
-      about: 'The kiosk’s own label, cut from the shoots: prints named after the cars, colourways pulled from each story’s palette, and Hunt pieces you have to travel to collect.',
+      about: 'The kiosk’s own label, cut from the shoots: prints named after the cars, colourways pulled from each story’s palette, and Lost & Found pieces you have to travel to collect.',
       cover: 'images/product-lifestyle/hoodies/001-black-airport-01.webp',
       tags: ['streetwear', 'tees', 'hoodies', 'travel', 'luts', 'films'],
     },
@@ -885,7 +947,7 @@ window.KIOSK_CONTENT = {
   categories: [
     { id: 'quotes', label: 'Words to wear', kind: 'physical' },
     { id: 'travel', label: 'Travel goods', kind: 'physical' },
-    { id: 'hunt', label: 'The Hunt', kind: 'physical' },
+    { id: 'hunt', label: 'Lost & Found', kind: 'physical' },
     { id: 'apparel', label: 'Apparel', kind: 'physical' },
     { id: 'headwear', label: 'Headwear', kind: 'physical' },
     { id: 'skate', label: 'Skate', kind: 'physical' },
@@ -1029,10 +1091,10 @@ window.KIOSK_CONTENT = {
       status: 'soon', shopifyHandle: '', href: '', image: '',
       seasons: ['spring', 'summer', 'fall', 'winter'], vibes: ['travel', 'urban'], colors: [],
     },
-    /* ---- The Hunt: pickup-only pieces. Travel to the coordinates to collect.
+    /* ---- Lost & Found: pickup-only pieces. Travel to the coordinates to collect.
      * pickup.coords stays empty until you announce the drop. ---- */
     {
-      id: 'hunt-hudson-hoodie', category: 'hunt', store: 'kiosk', title: 'Hudson Valley Hunt Hoodie', price: 120, badge: 'Pickup only', added: '2026-10-13',
+      id: 'hunt-hudson-hoodie', category: 'hunt', store: 'kiosk', title: 'Hudson Valley Find Hoodie', price: 120, badge: 'Pickup only', added: '2026-10-13',
       detail: 'Numbered run · collect in person · the quote changes with every drop',
       quote: 'Focus on direction, not speed.',
       mockup: { type: 'hoodie', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif', quoteFont: 'quill', quoteFinish: 'stitch' },
@@ -1044,7 +1106,7 @@ window.KIOSK_CONTENT = {
       seasons: ['fall', 'winter'], vibes: ['travel', 'adventure'], colors: [],
     },
     {
-      id: 'hunt-bridge-tee', category: 'hunt', store: 'kiosk', title: 'Under the Bridge Hunt Tee', price: 60, badge: 'Pickup only', added: '2026-10-13',
+      id: 'hunt-bridge-tee', category: 'hunt', store: 'kiosk', title: 'Under the Bridge Find Tee', price: 60, badge: 'Pickup only', added: '2026-10-13',
       detail: 'Numbered run · collect in person at the bridge',
       quote: 'When fishermen cannot go to sea, they repair nets.',
       mockup: { type: 'tee', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif', quoteFont: 'fell' },

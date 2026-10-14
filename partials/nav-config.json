@@ -9,10 +9,10 @@
       ]
     },
     {
-      "label": "Garage",
-      "path": "garage.html",
+      "label": "Films",
+      "path": "films.html",
       "match": [
-        "garage.html"
+        "films.html"
       ]
     },
     {
@@ -61,10 +61,10 @@
       ]
     },
     {
-      "label": "The Hunt",
-      "path": "hunt.html",
+      "label": "Lost & Found",
+      "path": "lost-and-found.html",
       "match": [
-        "hunt.html"
+        "lost-and-found.html"
       ]
     }
   ],
