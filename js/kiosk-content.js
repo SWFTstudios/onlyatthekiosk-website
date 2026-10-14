@@ -49,7 +49,7 @@ window.KIOSK_CONTENT = {
       { src: 'videos/hero/bts.mp4', webm: 'videos/hero/bts.webm', poster: 'videos/hero/bts-poster.webp', story: 'andy-q50', kicker: 'On set', title: 'Behind the scenes · Hudson Line', caption: 'Raw footage from the Q50 shoot' },
     ],
     lead: 'andy-q50',
-    // World Library globe on the home page: up to 4 featured stories, each
+    // Atlas globe on the home page: up to 4 featured stories, each
     // pinned at its `geo` ({ lat, lon } on the story). The first one carries
     // the hero slideshow. Empty → the lead and hero-slide stories.
     featured: ['andy-q50', 'moses-r1m', 'l0st-tapes', 'ksenia-r3-moses-r1m'],
@@ -77,7 +77,7 @@ window.KIOSK_CONTENT = {
       vibes: ['daylight', 'clean', 'urban', 'autumn'],
       location: 'Bridge + parkway rollers',
       city: 'Hudson Valley',
-      geo: { lat: 41.71, lon: -73.93 },   // pin on the World Library globe
+      geo: { lat: 41.71, lon: -73.93 },   // pin on the Atlas globe
       country: 'NY',
       coords: '',
       shotOn: 'Sony A7C II',
@@ -202,7 +202,7 @@ window.KIOSK_CONTENT = {
       vibes: ['urban', 'moody', 'clean', 'dusk'],
       location: 'George Washington Bridge',
       city: 'Hudson River',
-      geo: { lat: 40.85, lon: -73.95 },   // pin on the World Library globe
+      geo: { lat: 40.85, lon: -73.95 },   // pin on the Atlas globe
       country: 'NY / NJ',
       coords: '',
       shotOn: 'iPhone 14 Pro',
@@ -601,7 +601,7 @@ window.KIOSK_CONTENT = {
       vibes: ['night', 'vintage', 'urban', 'neon'],
       location: 'Chinatown to the highways',
       city: 'New York',
-      geo: { lat: 40.71, lon: -74.0 },   // pin on the World Library globe
+      geo: { lat: 40.71, lon: -74.0 },   // pin on the Atlas globe
       country: 'NY',
       coords: '',
       shotOn: 'VHS camcorder',

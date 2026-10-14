@@ -345,8 +345,8 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 
 ## Site map (2026-10)
 
-- **Home** (`index.html`): the K-flight intro (first visit per session), the hero slideshow, then the **World Library** globe: up to four featured stories (`issue.featured`) pinned at their `geo: { lat, lon }`. Scrolling past the hero flips the hero video into the first pin (GSAP Flip, `js/vendor/gsap`).
-- **World Library** (`journal.html`): every post, video or written. Search any word (titles, places, story text, chapters, tags); sort by date, title, location or author; filter by type (video / photos / article), desk, author, location and tags. Filters live in the URL, e.g. `journal.html?type=video&tag=Film`.
+- **Home** (`index.html`): the K-flight intro (first visit per session), the hero slideshow, then the **The Atlas** globe: up to four featured stories (`issue.featured`) pinned at their `geo: { lat, lon }`. Scrolling past the hero flips the hero video into the first pin (GSAP Flip, `js/vendor/gsap`).
+- **The Atlas** (`journal.html`): every post, video or written. Search any word (titles, places, story text, chapters, tags); sort by date, title, location or author; filter by type (video / photos / article), desk, author, location and tags. Filters live in the URL, e.g. `journal.html?type=video&tag=Film`.
 - **Films** (`films.html`): the screening room, a billboard and streaming-style rows from `filmRows` and `films` in `js/kiosk-content.js`. Add `vimeo`, `youtube` or `video` to a film to make it playable; without one it shows "Coming soon".
 - **Radio** (`radio.html`): curated playlists from Spotify (`spotify`), SoundCloud (`soundcloud`), Apple Music (`apple`) or a self-hosted MP3 (`audio`). The player docks at the bottom and keeps playing while people browse.
 - **Lost & Found** (`lost-and-found.html`, was The Hunt): rare finds and pickup-only pieces on the map.

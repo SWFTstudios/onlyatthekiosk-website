@@ -3199,7 +3199,7 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-ftile__info small { display: block; margin-top: 2px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 @media (hover: none) { .k-ftile__play { opacity: 1; transform: none; } }
 
-/* ----------------------------------------------------- world library */
+/* ------------------------------------------------------------- atlas */
 .k-lib__bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .k-lib__search { flex: 1 1 320px; border: 1px solid var(--line); background: var(--bg-2); }
 .k-lib__search svg { width: 18px; height: 18px; color: var(--ink-3); flex-shrink: 0; }
@@ -3227,7 +3227,7 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-lib-tag { border: 0; background: none; padding: 0; font: inherit; color: var(--ink-2); cursor: pointer; }
 .k-lib-tag:hover { color: var(--ink); text-decoration: underline; }
 
-/* ------------------------------------------------ world library (home) */
+/* ------------------------------------------------ atlas (home) */
 .k-wl { overflow: hidden; }
 .k-wl__inner { display: grid; gap: clamp(24px, 4vw, 56px); align-items: center; }
 @media (min-width: 1000px) { .k-wl__inner { grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr); } }
