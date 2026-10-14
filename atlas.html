@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="KIOSK">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
-  <link rel="canonical" href="https://onlyatthekiosk.com/journal.html">
+  <link rel="canonical" href="https://onlyatthekiosk.com/atlas.html">
   <meta property="og:title" content="The Atlas · KIOSK">
   <meta property="og:description" content="The story behind every KIOSK film and photo set.">
   <meta property="og:image" content="https://onlyatthekiosk.com/images/KiosKBoxLogo.png">

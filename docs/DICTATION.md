@@ -1,6 +1,6 @@
 # Dictating the Journal
 
-Every film and photo set is also a blog post in the **Journal** (`journal.html`). Each post is split into **chapters**. Until a chapter has words it stays hidden from visitors, so posts can go live now and fill in over time.
+Every film and photo set is also a blog post in the **Journal** (`atlas.html`). Each post is split into **chapters**. Until a chapter has words it stays hidden from visitors, so posts can go live now and fill in over time.
 
 ## How to send a chapter
 
@@ -16,7 +16,7 @@ Claude cleans up the transcript (filler words, false starts, punctuation) withou
 
 ## Preview what's left
 
-Add `&draft=1` to any story URL, e.g. `story.html?s=andy-q50&draft=1`, or open `journal.html?draft=1`. Draft view shows every unwritten chapter as a dashed box with its prompt, plus a "3 of 6 chapters written" counter. Visitors never see the prompts.
+Add `&draft=1` to any story URL, e.g. `story.html?s=andy-q50&draft=1`, or open `atlas.html?draft=1`. Draft view shows every unwritten chapter as a dashed box with its prompt, plus a "3 of 6 chapters written" counter. Visitors never see the prompts.
 
 ## Chapters by post
 

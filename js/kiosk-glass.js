@@ -210,7 +210,7 @@
   /* ----------------------------------------------------------- chrome */
 
   const NAV = [
-    { id: 'journal', label: 'Atlas', href: 'journal.html' },
+    { id: 'journal', label: 'Atlas', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
@@ -227,7 +227,7 @@
   };
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
-    { id: 'journal', label: 'Atlas', href: 'journal.html', icon: TAB_ICONS.journal },
+    { id: 'journal', label: 'Atlas', href: 'atlas.html', icon: TAB_ICONS.journal },
     { id: 'films', label: 'Films', href: 'films.html', icon: TAB_ICONS.films },
     { id: 'radio', label: 'Radio', href: 'radio.html', icon: TAB_ICONS.radio },
     { id: 'vault', label: 'Shop', href: 'vault.html', icon: TAB_ICONS.shop },
@@ -382,7 +382,7 @@
             <p class="k-eyebrow">Only at the KIOSK</p>
             <p class="k-lede k-mt-s">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, plus pieces and rare finds you can only get at the kiosk.</p>
           </div>
-          <div><h4>Watch + Listen</h4><ul><li><a href="journal.html">The Atlas</a></li><li><a href="films.html">Films</a></li><li><a href="journal.html?type=photo">Photo stories</a></li><li><a href="journal.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
+          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Atlas</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
           <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
@@ -1093,7 +1093,7 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'films', 'journal', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
+  const SOFT_PAGES = new Set(['', 'index', 'films', 'atlas', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
   let pageAbort = new AbortController();
   // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
   const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
@@ -2569,7 +2569,7 @@
         <p class="k-feature-card__sub">${[formatLabel(lead), place(lead), lead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
         ${featureMedia(lead, { meta: '' })}
       </a>
-      <a class="k-bar" href="journal.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
+      <a class="k-bar" href="atlas.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
     fill('hero-watch', `
       <button class="k-watch" type="button" data-film="${esc(lead.slug)}">
         <span class="k-watch__thumb">${featureMedia(lead, { meta: '', mark: '', cls: 'k-media--clean', style: 'position:absolute;inset:0' })}<span class="k-play">${icon.play}</span></span>
@@ -3172,7 +3172,7 @@
         if ((p.lifestyle || [])[0]) push('fashion', { kind: 'photo', src: p.lifestyle[0], thumb: p.lifestyle[0], caption: `${p.title}: “${p.quote}”`, meta: 'Words to wear · on location', place: 'Only at the KIOSK', story: '' });
       });
       push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'KIOSK Radio' });
-      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'journal.html', cta: 'The Journal' });
+      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'atlas.html', cta: 'The Journal' });
     }
     return out;
   }
@@ -3329,8 +3329,8 @@
     const hoodie = (C.products || []).find((p) => (p.colorways || []).some((w) => w.image) && (p.mockup || {}).type === 'hoodie');
     const mix = (C.mixes || [])[0];
     const desks = [
-      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'journal.html?desk=automotive', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
-      { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'journal.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
+      { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'atlas.html?desk=automotive', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
+      { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'atlas.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
       { id: 'music', n: '03', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
       { id: 'fashion', n: '04', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
     ];
@@ -3370,7 +3370,7 @@
   /* ---------------------------------------------------------- journal */
 
   /* ------------------------------------------------------------ atlas
-   * journal.html: every post, video or written, in one searchable library.
+   * atlas.html: every post, video or written, in one searchable library.
    * Search covers titles, places, tags and every word in the story and its
    * chapters. Filters: type, desk, author, tag, location. URL-synced.
    * -------------------------------------------------------------------- */
@@ -4127,7 +4127,7 @@
     { id: 'home', t: 'T0', name: 'Main concourse', href: 'index.html', note: 'Departures from every desk' },
     { id: 'vault', t: 'T1', name: 'Supply terminal', href: 'vault.html', note: 'Clothing, travel goods and rare finds' },
     { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
-    { id: 'journal', t: 'T3', name: 'The Atlas', href: 'journal.html', note: 'Every story, interview, vlog and gallery' },
+    { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
   ];

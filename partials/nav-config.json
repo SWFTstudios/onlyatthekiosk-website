@@ -17,9 +17,9 @@
     },
     {
       "label": "Journal",
-      "path": "journal.html",
+      "path": "atlas.html",
       "match": [
-        "journal.html",
+        "atlas.html",
         "story.html"
       ]
     },

@@ -1,5 +1,7 @@
-/garage.html  /journal  301
-/garage  /journal  301
+/garage.html  /atlas  301
+/garage  /atlas  301
+/journal.html  /atlas  301
+/journal  /atlas  301
 /hunt.html  /lost-and-found  301
 /hunt  /lost-and-found  301
 /products/:handle  /vault?handle=:handle  302

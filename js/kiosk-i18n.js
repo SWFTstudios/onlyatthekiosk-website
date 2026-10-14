@@ -483,7 +483,7 @@ window.KIOSK_I18N = {
     'One email per release. First access to film downloads, LUT packs and limited Supply drops.': { es: 'Un email por lanzamiento. Acceso anticipado a descargas de películas, packs de LUT y drops limitados de Supply.', fr: 'Un e-mail par sortie. Accès en avant-première aux films à télécharger, packs de LUT et drops Supply limités.', pt: 'Um e-mail por lançamento. Acesso antecipado a downloads de filmes, pacotes de LUT e drops limitados da Supply.', de: 'Eine E-Mail pro Release. Früher Zugang zu Film-Downloads, LUT-Packs und limitierten Supply-Drops.', it: 'Una email per uscita. Accesso in anteprima a download dei film, pacchetti LUT e drop Supply limitati.', ja: 'リリースごとにメール1通。フィルムのダウンロード、LUTパック、限定Supplyドロップにいち早くアクセス。', ko: '릴리스마다 이메일 한 통. 필름 다운로드, LUT 팩, 한정 Supply 드롭을 가장 먼저 만나요.', zh: '每次发布只发一封邮件。抢先获取影片下载、LUT 预设包和限量 Supply 上新。' },
     'Mixes': { es: 'Mezclas', fr: 'Mixes', pt: 'Mixes', de: 'Mixe', it: 'Mix', ja: 'ミックス', ko: '믹스', zh: '混音' },
 
-    /* ---- garage.html + journal.html ---- */
+    /* ---- garage.html + atlas.html ---- */
     'The Garage · Archive': { es: 'El garaje · Archivo', fr: 'Le garage · Archives', pt: 'A garagem · Arquivo', de: 'Die Garage · Archiv', it: 'Il garage · Archivio', ja: 'ガレージ · アーカイブ', ko: '개러지 · 아카이브', zh: '车库 · 档案' },
     'Cars, bikes': { es: 'Coches, motos', fr: 'Voitures, motos', pt: 'Carros, motos', de: 'Autos, Bikes', it: 'Auto, moto', ja: 'クルマ、バイク、', ko: '자동차, 바이크', zh: '汽车、摩托' },
     '& their': { es: 'y su', fr: '& leur', pt: 'e sua', de: '& ihre', it: 'e la loro', ja: 'そしてその', ko: '그리고 그', zh: '和它们的' },
