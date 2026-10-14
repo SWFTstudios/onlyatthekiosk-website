@@ -11,3 +11,6 @@ artifacts/screenshots/after/
 # Worker build output
 dist/
 .wrangler/
+
+# Cursor MCP config (holds local tokens; copy from .cursor/mcp.example.json)
+.cursor/mcp.json

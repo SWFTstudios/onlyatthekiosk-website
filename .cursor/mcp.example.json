@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=<DEV_PROJECT_REF>&read_only=true"
+    },
+    "cloudflare-docs": {
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-bindings": {
+      "url": "https://bindings.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-builds": {
+      "url": "https://builds.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-observability": {
+      "url": "https://observability.mcp.cloudflare.com/mcp"
+    },
+    "shopify-dev": {
+      "command": "npx",
+      "args": ["-y", "@shopify/dev-mcp@latest"],
+      "env": { "OPT_OUT_INSTRUMENTATION": "true" }
+    },
+    "twilio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@twilio-alpha/mcp",
+        "<ACCOUNT_SID>/<RESTRICTED_API_KEY>:<API_SECRET>",
+        "--services",
+        "<VERIFY_SERVICE_NAME_FROM_README>"
+      ]
+    }
+  }
+}
