@@ -19,7 +19,7 @@ The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. I
 
 ## 1. Add a story (film, photo story or interview)
 
-The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (`lunar-new-year-meet` is hidden for now).
+The stories are real shoots: `andy-q50`, `moses-r1m`, `honda-f4i-shop`, `l0st-tapes` and `doom-racing-prospect-meet`. Copy one of them to start a new story. Add `hidden: true` to take a story off the site without deleting it (the optional `hidden: true` keeps a story off the site).
 
 **Films from Google Drive:** set `embed` to `https://drive.google.com/file/d/<FILE_ID>/preview`. It only plays for visitors once the Drive file is shared as **Anyone with the link → Viewer**. For the best playback, upload to YouTube or Vimeo and use that embed URL instead.
 
@@ -185,6 +185,14 @@ For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in
 
 ---
 
+## 3d. Raw footage played from Google Drive
+
+For footage too big to host on the site (each file over 25 MB), list the Drive clips on a story and they play from Drive in the site's viewer, with no download:
+```js
+bts: { driveClips: [ { id: '<DRIVE_FILE_ID>', clip: '0066', time: '11:15:59' } ] }
+```
+The file must be shared **Anyone with the link** (viewer is enough). Your Lunar New Year clips are currently shared as *editor*, which lets anyone with the link change them. Switch them to **Viewer** in Drive. The reel only needs viewing access.
+
 ## 3a. Magazine layouts: departments, mosaics and rails
 
 The site is organised like a magazine with four **desks**: Travel, Automotive, Music and Fashion.
@@ -215,7 +223,12 @@ The title, thumbnail and length load from Vimeo automatically. `title` overrides
 ## 3c. Look and feel: cover, intro, day/night
 
 - **Cover video:** `issue.reel` / `issue.reelWebm` / `issue.reelPoster` play full screen behind the giant KIOSK on the home page. `videos/kiosk-reel.*` is cut from the Q50 and R1M shoots. Replace it with any 10–20 s muted clip under about 8 MB.
-- **Globe intro:** plays once per visit on the home page (skippable). It's skipped for visitors who have reduced motion turned on.
+- **World traveler intro:** plays once per visit on the home page (skippable).
+  - **The flight:** a 3D dotted Earth where a traveler flies New York → Reykjavík → London → Marrakesh → Dubai → Tokyo. Each stop gets a passport stamp, and a boarding pass shows the current leg and that city's local time. The camera then pulls back and the KIOSK title lands.
+  - **Changing the route:** edit `ROUTE` at the top of `js/kiosk-intro3d.js`.
+  - **Loading:** three.js (`js/vendor/`) and the land dots (`js/kiosk-world.js`) load only for this intro.
+  - **Fallback:** without WebGL, or if loading takes over 2.5 seconds, the 2D wireframe globe plays instead.
+  - **Reduced motion:** visitors who have reduced motion turned on skip the intro.
 - **Day / night:** follows the visitor's local time (day 06:00–18:59). The header button cycles auto → day → night, and the choice is remembered. The digital clock in the header and menu shows the visitor's local time and city.
 
 For stores, partner payouts, pickup-only Hunt pieces and quote merch, see **`docs/MARKETPLACE.md`**.

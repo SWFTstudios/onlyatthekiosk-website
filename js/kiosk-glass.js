@@ -395,8 +395,14 @@
         <div><p class="k-eyebrow">${esc(formatLabel(f))} · ${esc(f.runtime || '—')}</p><p class="k-h3 k-mt-s">${esc(f.title || featureName(f))} <span class="k-serif" style="color:var(--ink-3)">— ${esc(featureName(f))}</span></p></div>
         <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
       </div>
-      <div class="k-lightbox__screen">${screen}</div>`, `${featureName(f)} film`);
+      <div class="k-lightbox__screen"${f.aspect ? ` style="${screenFit(f.aspect)}"` : ''}>${screen}</div>`, `${featureName(f)} film`);
   }
+
+  /** Film screen for a non-16:9 film ('4/3'): keep the ratio and fit the window height. */
+  const screenFit = (aspect) => {
+    const [w, h] = String(aspect).split('/').map(Number);
+    return w && h ? `aspect-ratio:${w}/${h};width:min(100%, calc(78svh * ${w} / ${h}));margin:0 auto` : '';
+  };
 
   /* ------------------------------------------------------------ vimeo */
 
@@ -468,7 +474,7 @@
           <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
         </div>
       </div>
-      <div class="k-lightbox__screen"><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
+      <div class="k-lightbox__screen"${v.aspect ? ` style="${screenFit(v.aspect)}"` : ''}><iframe src="${esc(vimeoSrc(v))}" title="${esc(v.title || 'Film')}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`, 'Film');
     vimeoInfo(v).then((d) => { const t = $('.k-lightbox.is-open [data-vimeo-title]'); if (t && !v.title && d.title) t.textContent = d.title; });
   }
 
@@ -478,6 +484,18 @@
     if (!(C.vimeo || []).length) { const sec = el.closest('[data-vimeo-section]'); if (sec) sec.hidden = true; return; }
     el.innerHTML = vimeoCards();
     hydrateVimeo(el);
+  }
+
+  /** Play a raw clip straight from Google Drive (needs the file shared "Anyone with the link"). */
+  function openDriveClip(id, title) {
+    player.pause();
+    openLightbox(`
+      <div class="k-lightbox__head">
+        <div><p class="k-eyebrow">Raw footage</p><p class="k-h3 k-mt-s">${esc(title)}</p></div>
+        <button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button>
+      </div>
+      <div class="k-lightbox__screen"><iframe src="https://drive.google.com/file/d/${encodeURIComponent(id)}/preview" title="${esc(title)}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+      <p class="k-small k-mt-s"><a href="https://drive.google.com/file/d/${encodeURIComponent(id)}/view" target="_blank" rel="noopener" style="text-decoration:underline;text-underline-offset:3px">Open in Google Drive</a></p>`, 'Raw footage clip');
   }
 
   function openNotify(id, title) {
@@ -1380,6 +1398,8 @@
       }
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save, save); return; }
+      const dclip = e.target.closest('[data-drive-clip]');
+      if (dclip) { openDriveClip(dclip.dataset.driveClip, dclip.dataset.driveTitle); return; }
       const vim = e.target.closest('[data-vimeo]');
       if (vim) { const v = vimeoById(vim.dataset.vimeo); if (v) openVimeo(v); return; }
       const film = e.target.closest('[data-film]');
@@ -1807,6 +1827,15 @@
     if ((bts.gear || []).length) btsCards.push(`<div class="k-bts__card k-bts__gear k-glass" data-reveal data-reveal-delay="1"><h3>Kit</h3><ul>${bts.gear.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></div>`);
     if ((bts.conditions || []).length) btsCards.push(`<div class="k-bts__card k-glass" data-reveal data-reveal-delay="2"><h3>Conditions</h3><ul>${bts.conditions.map((c) => `<li><span>${esc(c.label)}</span>${esc(c.value)}</li>`).join('')}</ul></div>`);
     if (bts.notes) btsCards.push(`<div class="k-bts__card k-bts__notes k-glass" data-reveal><h3>Notes from set</h3><p class="k-prose__text" style="font-size:clamp(16px,1.4vw,19px)">${esc(bts.notes)}</p></div>`);
+    if ((bts.driveClips || []).length) {
+      const dc = bts.driveClips;
+      btsCards.push(`<div class="k-bts__notes"><h3 class="k-bts__label">Raw footage · ${dc.length} clips · ${esc(dc[0].time.slice(0, 5))}–${esc(dc[dc.length - 1].time.slice(0, 5))}</h3>${railShell(dc.map((c, i) => `
+        <button class="k-reel__clip" type="button" data-drive-clip="${esc(c.id)}" data-drive-title="${esc(`Clip ${c.clip} · ${c.time}`)}" aria-label="Play clip ${esc(c.clip)} from ${esc(c.time)}">
+          <span class="k-reel__time">${esc(c.time.slice(0, 5))}<small>${esc(c.time.slice(6))}s</small></span>
+          <span class="k-reel__play" aria-hidden="true">${icon.play}</span>
+          <span class="k-reel__meta">Clip ${esc(c.clip)}<small>${pad(i + 1)} / ${pad(dc.length)}</small></span>
+        </button>`).join(''), 'Raw footage', 'k-hscroll-wrap--reel')}</div>`);
+    }
     if ((bts.clips || []).length) btsCards.push(`<div class="k-bts__notes"><h3 class="k-bts__label">Raw footage</h3><div class="k-grid">${bts.clips.map((c) => `<figure class="k-bts__clip"><div class="k-card"><div class="k-media" style="aspect-ratio:16/9"><video${c.poster ? ` poster="${esc(c.poster)}"` : ''} autoplay muted loop playsinline preload="metadata" aria-label="${esc(c.caption || 'Behind the scenes clip')}">${c.webm ? `<source src="${esc(c.webm)}" type="video/webm">` : ''}<source src="${esc(c.src)}" type="video/mp4"></video></div></div>${c.caption || c.meta ? `<figcaption>${esc(c.caption || '')}${c.meta ? `<span>${esc(c.meta)}</span>` : ''}</figcaption>` : ''}</figure>`).join('')}</div></div>`);
     if ((bts.frames || []).length) btsCards.push(`<div class="k-bts__notes"><div class="k-grid">${bts.frames.map((src) => `<div class="k-card"><div class="k-media" style="aspect-ratio:4/3"><img src="${esc(src)}" alt="Behind the scenes" loading="lazy"></div></div>`).join('')}</div></div>`);
     if (btsCards.length) fill('story-bts', btsCards.join('')); else hideSection('bts');
@@ -2428,135 +2457,303 @@
     }
   }
 
-  /* ------------------------------------------------------------ globe intro
-   * First visit to the home page each session: a dotted globe turns,
-   * flight arcs leave New York for cities around the world, then the
-   * cover video takes over. Skippable; skipped for reduced motion.
+  /* ------------------------------------------------------------ globe
+   * A wireframe globe (parallels + meridians every 15°) that turns on its
+   * own and can be dragged. Flights arc between coordinates along great
+   * circles, leave a fading trail and pulse where they land.
+   * Used by the intro and the "Around the globe" section on the home page.
    * -------------------------------------------------------------------- */
-  const INTRO_CITIES = [
-    ['New York', 40.71, -74.0], ['Tokyo', 35.68, 139.69], ['London', 51.5, -0.12], ['Lisbon', 38.72, -9.14],
-    ['Lagos', 6.52, 3.38], ['Mexico City', 19.43, -99.13], ['Seoul', 37.57, 126.98], ['Dubai', 25.2, 55.27],
-    ['São Paulo', -23.55, -46.63], ['Cape Town', -33.92, 18.42], ['Sydney', -33.87, 151.21], ['Marrakesh', 31.63, -7.99],
+  const GLOBE_PLACES = [
+    { n: 'New York', la: 40.71, lo: -74.0, home: true }, { n: 'Tokyo', la: 35.68, lo: 139.69 }, { n: 'London', la: 51.5, lo: -0.12 },
+    { n: 'Lisbon', la: 38.72, lo: -9.14 }, { n: 'Lagos', la: 6.52, lo: 3.38 }, { n: 'Mexico City', la: 19.43, lo: -99.13 },
+    { n: 'Seoul', la: 37.57, lo: 126.98 }, { n: 'Dubai', la: 25.2, lo: 55.27 }, { n: 'São Paulo', la: -23.55, lo: -46.63 },
+    { n: 'Cape Town', la: -33.92, lo: 18.42 }, { n: 'Sydney', la: -33.87, lo: 151.21 }, { n: 'Marrakesh', la: 31.63, lo: -7.99 },
+    { n: 'Paris', la: 48.86, lo: 2.35 }, { n: 'Los Angeles', la: 34.05, lo: -118.24 }, { n: 'Reykjavík', la: 64.15, lo: -21.94 },
+    { n: 'Mumbai', la: 19.08, lo: 72.88 }, { n: 'Bangkok', la: 13.76, lo: 100.5 }, { n: 'Istanbul', la: 41.01, lo: 28.98 },
+    { n: 'Kingston', la: 17.97, lo: -76.79 }, { n: 'Buenos Aires', la: -34.6, lo: -58.38 },
   ];
+
+  const toVec = (la, lo) => {
+    const a = (la * Math.PI) / 180; const b = (lo * Math.PI) / 180;
+    return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)];
+  };
+  const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  function slerp(a, b, u) {
+    const d = Math.acos(Math.max(-1, Math.min(1, dot3(a, b))));
+    if (d < 1e-6) return a;
+    const s = Math.sin(d); const k1 = Math.sin((1 - u) * d) / s; const k2 = Math.sin(u * d) / s;
+    return [a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2];
+  }
+
+  /**
+   * createGlobe(canvas, { scale, max, homeBias, interactive, yaw, onFlight })
+   * Returns { stop }. Stops by itself when the canvas leaves the page.
+   */
+  function createGlobe(canvas, opts = {}) {
+    const ctx = canvas.getContext('2d');
+    const places = (opts.places || GLOBE_PLACES).map((p) => ({ ...p, v: toVec(p.la, p.lo) }));
+    const home = places.find((p) => p.home) || places[0];
+    const st = { yaw: opts.yaw != null ? opts.yaw : 0.9, /* New York (74° W) starts just left of centre */ pitch: 0.38, spin: 0, drag: null, flights: [], spawnAt: 0, last: 0, raf: 0, visible: true, stopped: false };
+    const scale = opts.scale || 0.42;
+
+    const rot = (v) => {
+      const cy = Math.cos(st.yaw); const sy = Math.sin(st.yaw);
+      const x1 = v[0] * cy + v[2] * sy; const z1 = -v[0] * sy + v[2] * cy;
+      const cp = Math.cos(st.pitch); const sp = Math.sin(st.pitch);
+      return [x1, v[1] * cp - z1 * sp, v[1] * sp + z1 * cp];
+    };
+
+    function spawn(now) {
+      let a; let b; let tries = 0;
+      do {
+        a = Math.random() < (opts.homeBias != null ? opts.homeBias : 0.45) ? home : places[Math.floor(Math.random() * places.length)];
+        b = places[Math.floor(Math.random() * places.length)];
+        tries += 1;
+      } while ((a === b || dot3(a.v, b.v) > 0.9 || (tries < 30 && Math.max(rot(a.v)[2], rot(b.v)[2]) < 0.25)) && tries < 40);
+      const d = Math.acos(Math.max(-1, Math.min(1, dot3(a.v, b.v))));
+      st.flights.push({ a, b, d, t0: now, dur: 1400 + d * 1100 });
+      if (opts.onFlight) opts.onFlight(a, b);
+    }
+
+    function draw(now) {
+      const w = canvas.clientWidth; const h = canvas.clientHeight;
+      if (!w || !h) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      const ink = getComputedStyle(canvas).color;
+      const R = Math.min(w, h) * scale; const cx = w / 2; const cy = h / 2;
+      const P = (v, lift = 1) => { const r = rot(v); return [cx + r[0] * R * lift, cy - r[1] * R * lift, r[2]]; };
+      ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
+
+      // Wireframe: back half faint, front half crisp
+      const line = (pts, front, back, width) => {
+        ctx.lineWidth = width;
+        for (let i = 1; i < pts.length; i += 1) {
+          const p = pts[i - 1]; const q = pts[i];
+          const z = (p[2] + q[2]) / 2;
+          ctx.globalAlpha = z > 0 ? front * (0.45 + 0.55 * z) : back;
+          ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+        }
+      };
+      for (let la = -75; la <= 75; la += 15) {
+        const pts = [];
+        for (let lo = -180; lo <= 180; lo += 5) pts.push(P(toVec(la, lo)));
+        line(pts, la === 0 ? 0.6 : 0.32, 0.06, la === 0 ? 1.1 : 0.8);
+      }
+      for (let lo = -180; lo < 180; lo += 15) {
+        const pts = [];
+        for (let la = -90; la <= 90; la += 5) pts.push(P(toVec(la, lo)));
+        line(pts, lo === 0 ? 0.5 : 0.28, 0.05, 0.8);
+      }
+      ctx.globalAlpha = 0.7; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      // Places
+      const active = new Set();
+      st.flights.forEach((f) => { active.add(f.a); active.add(f.b); });
+      ctx.font = '10px ui-monospace, "SF Mono", Menlo, monospace';
+      places.forEach((p) => {
+        const [x, y, z] = P(p.v);
+        if (z < 0) return;
+        const on = active.has(p) || p === home;
+        ctx.globalAlpha = (on ? 1 : 0.45) * Math.min(1, z * 2.5);
+        const s = on ? 5 : 3;
+        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+        if (on && z > 0.12) ctx.fillText(p.n.toUpperCase(), x + 8, y + 3.5);
+      });
+
+      // Flights
+      st.flights = st.flights.filter((f) => now - f.t0 < f.dur * 1.45);
+      st.flights.forEach((f) => {
+        const u = (now - f.t0) / f.dur;
+        const head = Math.min(1, u);
+        const tail = Math.max(0, Math.min(1, u > 1 ? (u - 1) * 2.2 + 0.6 : head - 0.6));
+        const alt = 0.05 + f.d * 0.11;
+        const N = 56; let prev = null;
+        ctx.lineWidth = 2;
+        for (let i = 0; i <= N; i += 1) {
+          const sU = tail + ((head - tail) * i) / N;
+          const pt = P(slerp(f.a.v, f.b.v, sU), 1 + alt * Math.sin(Math.PI * sU));
+          if (prev) {
+            const vis = (pt[2] + prev[2]) / 2 > -0.15 ? 1 : 0.15;
+            ctx.globalAlpha = vis * (0.1 + 0.9 * (i / N));
+            ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke();
+          }
+          prev = pt;
+        }
+        if (u <= 1 && prev && prev[2] > -0.15) {
+          ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(prev[0], prev[1], 8, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(prev[0], prev[1], 3, 0, Math.PI * 2); ctx.fill();
+        }
+        if (u > 1) {                                // landing pulse
+          const [x, y, z] = P(f.b.v);
+          if (z > 0) { const k = (u - 1) / 0.45; ctx.globalAlpha = 1 - k; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, 4 + k * 16, 0, Math.PI * 2); ctx.stroke(); }
+        }
+      });
+      // Home pulse
+      const [hx, hy, hz] = P(home.v);
+      if (hz > 0) { ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(hx, hy, 3.5 + 1.5 * Math.sin(now / 260), 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+
+    function frame(now) {
+      st.raf = 0;
+      if (st.stopped || !canvas.isConnected) return;
+      const dt = Math.min(64, now - (st.last || now)); st.last = now;
+      if (!st.drag) { st.yaw += dt * 0.00018 + st.spin; st.spin *= 0.95; }
+      if (now >= st.spawnAt && st.flights.length < (opts.max || 6)) { spawn(now); st.spawnAt = now + 250 + Math.random() * 600; }
+      draw(now);
+      if (st.visible) st.raf = requestAnimationFrame(frame);
+    }
+
+    if (opts.interactive) {
+      canvas.style.touchAction = 'pan-y';
+      canvas.addEventListener('pointerdown', (e) => { st.drag = { x: e.clientX, y: e.clientY, yaw: st.yaw, pitch: st.pitch, lx: e.clientX, t: performance.now() }; canvas.setPointerCapture(e.pointerId); canvas.classList.add('is-dragging'); });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!st.drag) return;
+        const k = 1 / (Math.min(canvas.clientWidth, canvas.clientHeight) * scale);
+        st.yaw = st.drag.yaw + (e.clientX - st.drag.x) * k;
+        st.pitch = Math.max(-1.1, Math.min(1.1, st.drag.pitch + (e.clientY - st.drag.y) * k));
+        const t = performance.now(); st.spin = ((e.clientX - st.drag.lx) * k) / Math.max(1, (t - st.drag.t) / 16); st.drag.lx = e.clientX; st.drag.t = t;
+        if (REDUCED) draw(t);
+      });
+      const end = () => { st.drag = null; canvas.classList.remove('is-dragging'); };
+      canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+    }
+
+    if (REDUCED) {
+      // One still frame: a few finished routes, no motion
+      const now = performance.now();
+      for (let i = 0; i < 5; i += 1) { spawn(now); st.flights[i].t0 = now - st.flights[i].dur * 0.99; }
+      requestAnimationFrame(() => draw(now));
+      return { stop() { st.stopped = true; } };
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => {
+        st.visible = en.isIntersecting;
+        if (st.visible && !st.raf && !st.stopped) { st.last = 0; st.raf = requestAnimationFrame(frame); }
+      }).observe(canvas);
+    }
+    st.raf = requestAnimationFrame(frame);
+    return { stop() { st.stopped = true; if (st.raf) cancelAnimationFrame(st.raf); } };
+  }
+
+  /** Home page section: the globe plus a live "now flying" route readout. */
+  function mountGlobes(root = document) {
+    $$('[data-globe]', root).forEach((wrap) => {
+      if (wrap.dataset.globeOn) return;
+      wrap.dataset.globeOn = '1';
+      const canvas = $('canvas', wrap);
+      const now = $('[data-globe-now]', root) || $('[data-globe-now]');
+      let flown = 0;
+      createGlobe(canvas, {
+        interactive: true,
+        max: 7,
+        onFlight: (a, b) => {
+          flown += 1;
+          if (now) now.innerHTML = `<b>${esc(a.n)}</b> → <b>${esc(b.n)}</b>`;
+          const c = $('[data-globe-count]');
+          if (c) c.textContent = String(flown).padStart(3, '0');
+        },
+      });
+    });
+  }
+
+  /* ------------------------------------------------- world traveler intro
+   * First visit to the home page each session. With WebGL, a 3D dotted
+   * Earth (js/kiosk-intro3d.js, three.js loaded only here) follows a
+   * traveler New York → Reykjavík → London → Marrakesh → Dubai → Tokyo,
+   * stamping each stop, then pulls back to the title. Without WebGL, or if
+   * the scripts are slow or fail, the 2D wireframe globe plays instead.
+   * Skippable; skipped for reduced motion.
+   * -------------------------------------------------------------------- */
+  const INTRO_3D = ['js/vendor/three-r149.min.js', 'js/kiosk-world.js', 'js/kiosk-intro3d.js'];
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = false;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error(`failed to load ${src}`));
+      document.head.append(s);
+    });
+  }
+
+  function hasWebGL() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
 
   function runIntro() {
     let seen = false;
     try { seen = sessionStorage.getItem('kiosk:intro') === '1'; sessionStorage.setItem('kiosk:intro', '1'); } catch (e) { seen = true; }
     if (seen || REDUCED) return;
+    const issue = esc((C.issue || {}).number || '01');
     const el = document.createElement('div');
-    el.className = 'k-intro';
+    el.className = 'k-intro k-i3d is-loading';
     el.setAttribute('role', 'presentation');
     el.innerHTML = `
       <canvas class="k-intro__globe" aria-hidden="true"></canvas>
+      <div class="k-i3d__labels" data-i3d-labels aria-hidden="true"></div>
+      <div class="k-i3d__pass" data-i3d-pass aria-hidden="true"></div>
       <div class="k-intro__copy">
         <p class="k-intro__kicker">Only at the</p>
         <p class="k-intro__word">KIOSK</p>
-        <p class="k-intro__line"><span data-intro-count>00</span> / ${pad(INTRO_CITIES.length)} cities · Issue ${esc((C.issue || {}).number || '01')}</p>
+        <p class="k-intro__line" data-intro-line>World traveler edition · Issue ${issue}</p>
       </div>
       <button class="k-intro__skip" type="button">Skip intro</button>`;
     document.body.append(el);
     document.documentElement.classList.add('is-intro');
-    const c = $('canvas', el);
-    const ctx = c.getContext('2d');
-    const color = () => getComputedStyle(el).color;
-    const pts = [];
-    const N = 1400;
-    for (let i = 0; i < N; i += 1) {           // Fibonacci sphere
-      const y = 1 - (i / (N - 1)) * 2;
-      const r = Math.sqrt(1 - y * y);
-      const th = i * 2.399963;
-      pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
-    }
-    const ll = (lat, lon) => { const a = (lat * Math.PI) / 180; const b = (lon * Math.PI) / 180; return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)]; };
-    const cities = INTRO_CITIES.map(([n, la, lo]) => ({ n, v: ll(la, lo) }));
-    const t0 = performance.now();
-    const DUR = 3000;
-    let raf = 0;
+
     let done = false;
+    let player = null;
     const finish = () => {
       if (done) return;
       done = true;
       el.classList.add('is-out');
       document.documentElement.classList.remove('is-intro');
-      setTimeout(() => { cancelAnimationFrame(raf); el.remove(); }, 900);
+      setTimeout(() => { if (player) player.stop(); el.remove(); }, 900);
     };
     $('.k-intro__skip', el).addEventListener('click', finish);
-    el.addEventListener('click', (e) => { if (e.target === el) finish(); });
+    el.addEventListener('click', (e) => { if (e.target === el || e.target.tagName === 'CANVAS') finish(); });
 
-    const frame = (now) => {
-      const t = (now - t0) / 1000;
-      const w = c.clientWidth; const h = c.clientHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-      const ink = color();
-      const ease = 1 - Math.pow(1 - Math.min(1, t / 1.2), 3);
-      const R = Math.min(w, h) * (0.27 + 0.05 * ease);
-      const cx = w / 2; const cy = h / 2;
-      const rot = -1.3 + t * 0.55;               // start facing the Atlantic
-      const tilt = 0.32;
-      const proj = ([x, y, z]) => {
-        const x1 = x * Math.cos(rot) + z * Math.sin(rot);
-        const z1 = -x * Math.sin(rot) + z * Math.cos(rot);
-        const y2 = y * Math.cos(tilt) - z1 * Math.sin(tilt);
-        const z2 = y * Math.sin(tilt) + z1 * Math.cos(tilt);
-        return [cx + x1 * R, cy - y2 * R, z2];
-      };
-      ctx.fillStyle = ink;
-      pts.forEach((p) => {
-        const [x, y, z] = proj(p);
-        ctx.globalAlpha = (z > 0 ? 0.25 + 0.6 * z : 0.06) * ease;
-        const s = z > 0 ? 1.3 : 0.9;
-        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+    // 2D wireframe globe: the original intro, kept as the fallback
+    const play2D = () => {
+      if (done || player) return;
+      el.classList.remove('k-i3d', 'is-loading', 'is-landed');
+      // A failed WebGL start can leave the canvas unusable for 2D
+      const canvas = document.createElement('canvas');
+      canvas.className = 'k-intro__globe'; canvas.setAttribute('aria-hidden', 'true');
+      $('canvas', el).replaceWith(canvas);
+      let n = 0;
+      const line = $('[data-intro-line]', el);
+      line.innerHTML = `<span data-intro-count>00</span> flights · ${pad(GLOBE_PLACES.length)} cities · Issue ${issue}`;
+      player = createGlobe(canvas, {
+        scale: 0.34, max: 9, homeBias: 0.8,
+        onFlight: () => { n += 1; const c = $('[data-intro-count]', el); if (c) c.textContent = pad(n); },
       });
-      // Outline + equator
-      ctx.globalAlpha = 0.5 * ease;
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
-      // Flight arcs from New York, drawn one after another
-      const home = cities[0];
-      cities.slice(1).forEach((city, i) => {
-        const start = 0.5 + i * 0.16;
-        const k = Math.max(0, Math.min(1, (t - start) / 0.7));
-        if (!k) return;
-        const a = home.v; const b = city.v;
-        const steps = 40;
-        ctx.beginPath();
-        let drawn = false;
-        for (let j = 0; j <= steps * k; j += 1) {
-          const u = j / steps;
-          const m = [a[0] * (1 - u) + b[0] * u, a[1] * (1 - u) + b[1] * u, a[2] * (1 - u) + b[2] * u];
-          const len = Math.hypot(...m) || 1;
-          const lift = 1 + 0.22 * Math.sin(Math.PI * u);
-          const [x, y, z] = proj(m.map((q) => (q / len) * lift));
-          if (z < -0.1) { drawn = false; continue; }
-          if (!drawn) { ctx.moveTo(x, y); drawn = true; } else ctx.lineTo(x, y);
-        }
-        ctx.globalAlpha = 0.85;
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-        if (k >= 1) {
-          const [x, y, z] = proj(b);
-          if (z > 0) {
-            ctx.globalAlpha = Math.min(1, z * 2);
-            ctx.fillRect(x - 3, y - 3, 6, 6);
-            ctx.font = '10px ui-monospace, Menlo, monospace';
-            ctx.fillText(city.n.toUpperCase(), x + 8, y + 3);
-          }
-        }
-      });
-      const [hx, hy, hz] = proj(home.v);
-      if (hz > 0) { ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(hx, hy, 4 + 2 * Math.sin(t * 6), 0, Math.PI * 2); ctx.fill(); }
-      ctx.globalAlpha = 1;
-      const count = Math.min(INTRO_CITIES.length, Math.max(1, Math.floor((t - 0.5) / 0.16) + 2));
-      const cnt = $('[data-intro-count]', el);
-      if (cnt) cnt.textContent = pad(count);
-      if (now - t0 > DUR) finish();
-      if (!done || el.isConnected) raf = requestAnimationFrame(frame);
+      setTimeout(finish, 3200);
     };
-    raf = requestAnimationFrame(frame);
+
+    if (!hasWebGL()) { play2D(); return; }
+    // Slow connections shouldn't sit on a blank screen
+    const slow = setTimeout(play2D, 2500);
+    INTRO_3D.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+      .then(() => {
+        clearTimeout(slow);
+        if (done || player) return;
+        el.classList.remove('is-loading');
+        player = window.KioskIntro3D.run(el, { onDone: finish });
+      })
+      .catch((err) => {
+        console.warn('[KIOSK] 3D intro unavailable, using 2D globe', err);
+        clearTimeout(slow);
+        play2D();
+      });
   }
 
   /* ------------------------------------------------------------- boot */
@@ -2567,6 +2764,7 @@
       (PAGES[PAGE] || (() => {}))();
       hydrateCovers();
       bindRails();
+      mountGlobes();
     } catch (err) {
       // Never leave a blank page if content has a typo
       console.error('[KIOSK] render error', err);

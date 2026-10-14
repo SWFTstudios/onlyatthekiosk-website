@@ -2277,6 +2277,41 @@ html.is-intro, html.is-intro body { overflow: hidden; }
 .k-intro__line { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 10px; font-variant-numeric: tabular-nums; }
 .k-intro__skip { position: absolute; right: var(--gutter); bottom: max(var(--gutter), env(safe-area-inset-bottom)); padding: 10px 16px; border-radius: var(--r-pill); border: 1px solid var(--line-2); font-size: 13px; color: var(--ink); background: var(--glass); }
 
+/* 3D world traveler intro (js/kiosk-intro3d.js) */
+.k-i3d .k-intro__copy { opacity: 0; transform: translateY(24px); transition: opacity 0.9s var(--ease), transform 1.1s var(--ease); }
+.k-i3d.is-landed .k-intro__copy { opacity: 1; transform: none; }
+.k-i3d.is-loading .k-intro__globe { opacity: 0; }
+.k-i3d .k-intro__globe { transition: opacity 0.6s var(--ease); }
+.k-i3d__labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.k-i3d__stamp {
+  position: absolute; left: 0; top: 0; margin: -54px 0 0 14px;
+  display: grid; gap: 2px; padding: 6px 10px 5px;
+  border: 1.5px solid var(--signal); border-radius: 6px; color: var(--signal);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+  opacity: 0; rotate: -7deg; scale: 1.5; transition: opacity 0.25s ease, scale 0.35s cubic-bezier(.2,1.6,.4,1);
+  will-change: transform;
+}
+.k-i3d__stamp b { font-family: var(--f-serif); font-style: italic; font-weight: 400; font-size: 19px; letter-spacing: 0; text-transform: none; line-height: 1; }
+.k-i3d__stamp.is-on { opacity: 1; scale: 1; }
+.k-i3d__pass {
+  position: absolute; z-index: 1; top: calc(max(var(--gutter), env(safe-area-inset-top)) + 8px); right: var(--gutter);
+  display: grid; gap: 6px; min-width: 220px; padding: 12px 14px;
+  border-radius: 14px; border: 1px solid var(--line-2); background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3);
+  transition: opacity 0.6s var(--ease);
+}
+.k-i3d__pass:empty, .k-i3d.is-landed .k-i3d__pass { opacity: 0; }
+.k-i3d__pass-row { display: flex; align-items: baseline; gap: 10px; color: var(--ink); }
+.k-i3d__pass-row b { font-family: var(--f-sans, inherit); font-size: 26px; font-weight: 500; letter-spacing: -0.02em; }
+.k-i3d__pass-row i { font-style: normal; color: var(--signal); font-size: 14px; }
+.k-i3d__pass-meta { display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .k-i3d__pass { left: var(--gutter); right: var(--gutter); min-width: 0; }
+  .k-i3d__stamp b { font-size: 16px; }
+}
+
 /* --------------------------------------------------- marketplace: hunt + stores */
 .k-pickup { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 4px 10px 4px 8px; border-radius: var(--r-pill); border: 1px dashed var(--ink-3); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
 .k-pickup svg { width: 13px; height: 13px; }
@@ -2292,3 +2327,34 @@ html.is-intro, html.is-intro body { overflow: hidden; }
 .k-store { display: block; padding: 22px; border-radius: var(--r-lg); text-align: left; min-height: 200px; }
 .k-store--join { border: 1px dashed var(--line-2); background: transparent; color: var(--ink); width: 100%; }
 .k-store--join:hover { background: var(--glass-3); }
+
+/* ------------------------------------------------- around the globe section */
+.k-globe-wrap { display: grid; gap: clamp(24px, 4vw, 56px); align-items: center; }
+@media (min-width: 1000px) { .k-globe-wrap { grid-template-columns: 0.8fr 1.2fr; } }
+.k-globe { position: relative; aspect-ratio: 1; width: 100%; max-width: 760px; justify-self: center; color: var(--ink);
+  background-image: radial-gradient(circle at 1px 1px, var(--ink-4) 1px, transparent 0); background-size: 22px 22px;
+  border-radius: 50%; }
+.k-globe canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; }
+.k-globe canvas.is-dragging { cursor: grabbing; }
+.k-globe-stats { display: grid; gap: 0; border-top: 1px solid var(--line-2); }
+.k-globe-stats div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.k-globe-stats dt { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.k-globe-stats dd { margin: 0; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+.k-globe-stats dd b { font-weight: 500; }
+.k-globe-stats small { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* Raw footage reel (clips played from Google Drive) */
+.k-hscroll-wrap--reel .k-hscroll { grid-auto-columns: 148px; gap: 8px; }
+.k-reel__clip { position: relative; display: grid; align-content: space-between; aspect-ratio: 16 / 11; padding: 12px; border-radius: var(--r-md); text-align: left; color: #f4f2ee; background: linear-gradient(160deg, #1b1b1e, #0d0d0e); border: 1px solid var(--line-2); overflow: hidden; transition: transform 0.4s var(--ease), border-color 0.2s; }
+.k-reel__clip:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.4); }
+.k-reel__time { font-family: var(--f-mono); font-size: 20px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 6px; }
+.k-reel__time small { font-size: 10px; color: rgba(244,242,238,.5); }
+.k-reel__play { position: absolute; right: 10px; top: 10px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #f4f2ee; color: #0d0d0e; }
+.k-reel__play svg { width: 10px; height: 10px; }
+.k-reel__meta { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: rgba(244,242,238,.8); }
+.k-reel__meta small { font-family: var(--f-mono); font-size: 10px; color: rgba(244,242,238,.45); }
+
+/* Rails inside grids must not stretch their container */
+.k-bts__notes, .k-hscroll-wrap, .k-bts > * { min-width: 0; }
+.k-bts { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .k-bts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
