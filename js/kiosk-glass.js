@@ -1097,6 +1097,7 @@
 
     const swap = () => {
       $('main').replaceWith(document.importNode(main, true));
+      document.documentElement.classList.remove('is-reading');
       markNav();
       window.scrollTo({ top: 0, behavior: 'instant' });
       runPage();
