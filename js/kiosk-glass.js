@@ -2013,7 +2013,12 @@
     if (!pdpEl || !p) return;
     const info = $('.k-pdp__info', pdpEl); const top = info ? info.scrollTop : 0;
     const body = $('.k-pdp__body', pdpEl); const btop = body ? body.scrollTop : 0;
+    // Keep keyboard focus on the same control across the re-render
+    const act = pdpEl.contains(document.activeElement) ? document.activeElement : null;
+    const keep = act && ['data-pdp-cw', 'data-pdp-size', 'data-pdp-img', 'data-pdp-full', 'data-pdp-buy'].find((a) => act.hasAttribute(a));
+    const keepSel = keep ? `[${keep}${act.getAttribute(keep) ? `="${act.getAttribute(keep)}"` : ''}]` : '';
     pdpEl.innerHTML = pdpHtml(p);
+    if (keepSel) { const again = $(keepSel, pdpEl) || $('.k-pdp__icon', pdpEl); if (again) again.focus({ preventScroll: true }); }
     pdpEl.classList.toggle('is-full', pdpState.full);
     const ni = $('.k-pdp__info', pdpEl); if (ni) ni.scrollTop = top;
     const nb = $('.k-pdp__body', pdpEl); if (nb) nb.scrollTop = btop;
@@ -2075,6 +2080,12 @@
     }
     if (!id && pdpEl && pdpEl.classList.contains('is-open') && pdpState.full) closePDP({ fromHistory: true });
   }
+  // Escape works wherever focus is while the panel is open
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !pdpEl || !pdpEl.classList.contains('is-open') || pdpEl.contains(e.target)) return;
+    if (document.documentElement.classList.contains('is-settings-open')) return;
+    if (pdpState.full) setPDPFull(false); else closePDP();
+  });
   function bindPDP(root) {
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
@@ -2346,9 +2357,9 @@
     // Shop preview — the newest physical drop
     const picks = (C.products || [])
       .filter((p) => !['mixes', 'films', 'luts'].includes(p.category))
-      .slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')))
+      .slice().sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0) || String(b.added || '').localeCompare(String(a.added || '')))
       .slice(0, 8);
-    fill('vault', picks.map((p) => productCard(p)).join(''));
+    fill('vault', picks.map((p) => termCard(p)).join(''));
     const wall = mount('home-wall');
     if (wall) wall.innerHTML = wallHtml();
   }
