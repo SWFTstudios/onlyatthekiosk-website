@@ -3270,3 +3270,12 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-lib__more[open] > summary { margin-bottom: 10px; }
 .k-lib__more { display: grid; gap: 10px; }
 .k-films__rows > * { min-width: 0; }
+
+/* The KIOSK wordmark's first K faces backwards (ꓘIOSK) */
+.k-wm { white-space: nowrap; }
+.k-rk { display: inline-block; transform: scaleX(-1); letter-spacing: 0; margin-right: 0; }
+/* the mirrored K carries its context's letter-spacing on the right */
+.k-logo .k-rk { margin-right: 0.14em; }
+.k-cover__word .k-rk { margin-right: -0.065em; }
+.k-intro__word .k-rk { margin-right: -0.06em; }
+.k-footer__mark .k-rk { margin-right: -0.07em; }

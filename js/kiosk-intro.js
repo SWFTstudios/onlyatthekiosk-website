@@ -2,7 +2,7 @@
  * KIOSK — K-flight intro (first home visit per session)
  *
  * Above the clouds, flights hop airport to airport: JFK → KEF → LIS draws
- * the stem of a K, then KEF → HND and KEF → CPT draw its arm and leg. The
+ * the stem of a backwards K (the KIOSK wordmark's first letter), then KEF → HND and KEF → CPT draw its arm and leg. The
  * contrails turn into the outline of the K, the camera pulls back to show
  * it is the first letter of KIOSK, I-O-S-K draw in, every letter fills
  * solid, and the overlay flies through the clouds into the hero slideshow.
@@ -21,7 +21,7 @@
 
   // Monoline letters on a 1180 × 400 board. K, I, O, S, K.
   const LETTERS = [
-    { id: 'K1', paths: ['M70,50 L70,350', 'M74,218 L250,50', 'M74,212 L262,350'] },
+    { id: 'K1', paths: ['M262,50 L262,350', 'M258,218 L82,50', 'M258,212 L70,350'] },   // backwards K
     { id: 'I', paths: ['M330,50 L330,350'] },
     { id: 'O', paths: ['M495,50 C553,50 600,117 600,200 C600,283 553,350 495,350 C437,350 390,283 390,200 C390,117 437,50 495,50 Z'] },
     { id: 'S', paths: ['M846,96 C820,58 772,48 734,58 C694,70 676,110 694,146 C712,180 770,186 808,204 C850,224 866,268 846,306 C824,346 762,358 718,340 C694,330 680,314 672,298'] },
@@ -29,11 +29,11 @@
   ];
   // The flights that draw the first K (airport → airport)
   const AIRPORTS = {
-    JFK: { x: 70, y: 50, city: 'New York' },
-    KEF: { x: 70, y: 215, city: 'Reykjavík' },
-    LIS: { x: 70, y: 350, city: 'Lisbon' },
-    HND: { x: 250, y: 50, city: 'Tokyo' },
-    CPT: { x: 262, y: 350, city: 'Cape Town' },
+    JFK: { x: 262, y: 50, city: 'New York' },
+    KEF: { x: 262, y: 215, city: 'Reykjavík' },
+    LIS: { x: 262, y: 350, city: 'Lisbon' },
+    HND: { x: 82, y: 50, city: 'Tokyo' },
+    CPT: { x: 70, y: 350, city: 'Cape Town' },
   };
   const FLIGHTS = [['JFK', 'KEF'], ['KEF', 'LIS'], ['KEF', 'HND'], ['KEF', 'CPT']];
 
@@ -192,7 +192,8 @@
       const g = el('g', { transform: `translate(${a.x} ${a.y})`, opacity: 0 }, ports);
       el('circle', { r: 9, fill: 'none', stroke: '#fff', 'stroke-width': 1.4, opacity: 0.6 }, g);
       el('circle', { r: 3.6, fill: '#ff5a1f' }, g);
-      const tx = el('text', { x: code === 'HND' || code === 'CPT' ? 14 : -14, y: 4, 'text-anchor': code === 'HND' || code === 'CPT' ? 'start' : 'end', fill: '#fff', 'font-size': 13, 'font-family': 'ui-monospace, "SF Mono", Menlo, monospace', 'letter-spacing': 1.5 }, g);
+      const left = code === 'HND' || code === 'CPT';
+      const tx = el('text', { x: left ? -14 : 14, y: 4, 'text-anchor': left ? 'end' : 'start', fill: '#fff', 'font-size': 13, 'font-family': 'ui-monospace, "SF Mono", Menlo, monospace', 'letter-spacing': 1.5 }, g);
       tx.textContent = code;
       portEls[code] = g;
     });

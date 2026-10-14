@@ -30,13 +30,25 @@
   const star = (x, y, r, fill) =>
     `<path d="M${x},${y - r} Q${x + r * 0.18},${y - r * 0.18} ${x + r},${y} Q${x + r * 0.18},${y + r * 0.18} ${x},${y + r} Q${x - r * 0.18},${y + r * 0.18} ${x - r},${y} Q${x - r * 0.18},${y - r * 0.18} ${x},${y - r}Z" fill="${fill}"/>`;
 
+  /**
+   * The KIOSK wordmark with its first K facing backwards (ꓘIOSK), as SVG.
+   * Centred on (x, y) unless anchor is 'start'. Glyph widths approximate
+   * General Sans caps so the mirrored K sits tight against "IOSK".
+   */
+  function wordmark(x, y, size, ls, attrs, anchor = 'middle') {
+    const kw = size * 0.66;
+    const total = size * (0.66 + 0.27 + 0.8 + 0.64 + 0.66) + ls * 4;
+    const x0 = anchor === 'start' ? x : x - total / 2;
+    return `<g transform="translate(${(x0).toFixed(2)} ${y})"><text transform="scale(-1 1)" x="${(-kw).toFixed(2)}" y="0" font-size="${size}" ${attrs}>K</text><text x="${(kw + ls).toFixed(2)}" y="0" font-size="${size}" letter-spacing="${ls}" ${attrs}>IOSK</text></g>`;
+  }
+
   /* ------------------------------------------------------------- prints
    * Each print is drawn on a 100-unit-wide canvas centred on (0,0) and
    * scaled into place by the garment.                                    */
   const PRINTS = {
     wordmark: (ink) => `
       <text x="0" y="-14" text-anchor="middle" font-family="${SANS}" font-size="6.2" letter-spacing="2.6" fill="${ink}" opacity=".8">ONLY AT THE</text>
-      <text x="0" y="12" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="31" letter-spacing="-1.6" fill="${ink}">KIOSK</text>`,
+      ${wordmark(0, 12, 31, -1.6, `font-family="${SANS}" font-weight="600" fill="${ink}"`)}`,
 
     kmark: (ink, bg) => `
       <circle cx="0" cy="0" r="30" fill="${ink}"/>
@@ -81,7 +93,7 @@
     checker: (ink, bg) => {
       let squares = '';
       for (let r = 0; r < 3; r += 1) for (let c = 0; c < 10; c += 1) if ((r + c) % 2 === 0) squares += `<rect x="${-50 + c * 10}" y="${-26 + r * 10}" width="10" height="10" fill="${ink}"/>`;
-      return `${squares}<text x="0" y="22" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="15" letter-spacing="3" fill="${ink}">KIOSK</text>`;
+      return `${squares}${wordmark(0, 22, 15, 3, `font-family="${SANS}" font-weight="600" fill="${ink}"`)}`;
     },
   };
 
@@ -346,9 +358,9 @@
       if (spec.print === 'checker') {
         for (let r = 0; r < 42; r += 1) for (let k = 0; k < 8; k += 1) if ((r + k) % 2 === 0) graphic += `<rect x="${176 + k * 12}" y="${30 + r * 10}" width="12" height="10" fill="${c.ink}"/>`;
         graphic = `<clipPath id="dk${id}"><rect x="176" y="30" width="96" height="420" rx="48"/></clipPath><g clip-path="url(#dk${id})">${graphic}<rect x="176" y="180" width="96" height="120" fill="${c.garment}"/></g>
-          <text transform="translate(224 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="34" letter-spacing="-1" fill="${c.ink}">KIOSK</text>`;
+          <g transform="translate(224 240) rotate(-90)">${wordmark(0, 12, 34, -1, `font-family="${SANS}" font-weight="600" fill="${c.ink}"`)}</g>`;
       } else {
-        graphic = `<text transform="translate(232 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="58" letter-spacing="-2" fill="${c.ink}">${esc(spec.deckText || 'KIOSK')}</text>
+        graphic = `${spec.deckText ? `<text transform="translate(232 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SANS}" font-weight="600" font-size="58" letter-spacing="-2" fill="${c.ink}">${esc(spec.deckText)}</text>` : `<g transform="translate(232 240) rotate(-90)">${wordmark(0, 20, 58, -2, `font-family="${SANS}" font-weight="600" fill="${c.ink}"`)}</g>`}
           <text transform="translate(198 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="${SERIF}" font-style="italic" font-size="16" fill="${c.ink}">${esc(spec.deckSub || 'issue 01')}</text>
           <circle cx="224" cy="96" r="14" fill="${c.ink}"/><text x="224.5" y="104" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="22" fill="${c.garment}">K</text>`;
       }
@@ -377,7 +389,7 @@
       const sticker = (x, y, rot, body) => `<g transform="translate(${x} ${y}) rotate(${rot})">${body}</g>`;
       return `${shadow(id, 200, 430, 150, 12)}
         ${sticker(140, 170, -10, `<circle r="70" fill="#fff"/><circle r="62" fill="${c.ink}"/><text x="2" y="22" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="68" fill="${c.garment}">K</text>`)}
-        ${sticker(250, 230, 9, `<rect x="-92" y="-38" width="184" height="76" rx="18" fill="#fff"/><rect x="-84" y="-30" width="168" height="60" rx="12" fill="${c.garment}"/><text y="12" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="34" letter-spacing="-1.4" fill="${c.ink}">KIOSK</text>`)}
+        ${sticker(250, 230, 9, `<rect x="-92" y="-38" width="184" height="76" rx="18" fill="#fff"/><rect x="-84" y="-30" width="168" height="60" rx="12" fill="${c.garment}"/>${wordmark(0, 12, 34, -1.4, `font-family="${SANS}" font-weight="600" fill="${c.ink}"`)}`)}
         ${sticker(170, 330, -4, `<rect x="-86" y="-36" width="172" height="72" rx="10" fill="#fff"/><rect x="-78" y="-28" width="156" height="56" rx="6" fill="#141414"/>${print('hudson', '#f2f0eb', '#141414', 0, 2, 120, id)}`)}
         ${sticker(300, 360, 14, `<circle r="44" fill="#fff"/><circle r="37" fill="#e8892b"/>${star(0, 0, 20, '#141414')}`)}`;
     },

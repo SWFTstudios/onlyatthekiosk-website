@@ -299,7 +299,7 @@
     // Glass header: logo · local clock · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
-        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span>KIOSK</a>
+        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">K</span><span class="k-wm"><span class="k-rk">K</span>IOSK</span></a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
         <div class="k-nav__actions">
@@ -386,7 +386,7 @@
           <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
-        <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
+        <div class="k-footer__mark" aria-hidden="true"><span class="k-rk">K</span>IOSK</div>
         <div class="k-footer__base">
           <span>© ${new Date().getFullYear()} Only at the KIOSK</span>
           <span><a href="terms-conditions.html">Terms</a> · <a href="privacy-cookies.html">Privacy</a> · <a href="do-not-sell.html">Do not sell my info</a></span>
@@ -4064,7 +4064,7 @@
       <canvas class="k-intro__globe" aria-hidden="true"></canvas>
       <div class="k-intro__copy">
         <p class="k-intro__kicker">Only at the</p>
-        <p class="k-intro__word">KIOSK</p>
+        <p class="k-intro__word" aria-label="KIOSK"><span class="k-rk">K</span>IOSK</p>
         <p class="k-intro__line" data-intro-line>World traveler edition · Issue ${issue}</p>
       </div>
       <button class="k-intro__skip" type="button">Skip intro</button>`;
