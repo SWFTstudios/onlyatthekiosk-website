@@ -1191,6 +1191,7 @@
           <button class="k-save" type="button" data-save="${esc(f.slug)}" aria-pressed="${saved.has(f.slug)}" aria-label="Save ${esc(featureName(f))}">${icon.heart}</button>
         </div>
         <a class="k-card__caption k-glass k-glass--dark" href="${storyHref(f)}" tabindex="-1">
+          <p class="k-card__pass"><span>KSK ${esc(f.code || '')}</span><span>Gate ${esc(DESK_GATE[f.desk] || 'A')}</span><span>${esc(shortDate(f.published))}</span></p>
           <h3 class="k-card__title">${esc([f.make, f.model].filter(Boolean).join(' '))}</h3>
           <p class="k-card__sub">${[f.year, typeLabel(f.type), f.shotOn].filter(Boolean).map(esc).join(' · ')}</p>
           ${f.palette && f.palette.length ? `<div class="k-palette-strip k-mt-s" aria-hidden="true">${f.palette.map((c) => `<i style="--swatch:${esc(c.hex)}"></i>`).join('')}</div>` : ''}
@@ -2676,6 +2677,7 @@
       <div class="k-story-hero__frame">
         <div class="k-story-hero__bg">${featureMedia(f, { meta: '', mark: '', eager: true, cls: 'k-media--clean', style: 'position:absolute;inset:0' })}</div>
         <div class="k-story-hero__head">
+          <p class="k-pass" aria-label="Boarding pass"><span class="k-pass__t">T3</span><span><small>Flight</small>KSK ${esc(f.code || '')}</span><span><small>From</small>${esc(f.city || f.location || '—')}</span><span><small>Gate</small>${esc(DESK_GATE[f.desk] || 'A')}</span><span><small>Date</small>${esc(shortDate(f.published))}</span><span><small>Class</small>${esc(formatLabel(f))}</span></p>
           <p class="k-eyebrow">${[f.year, f.make].filter(Boolean).length ? `<b>${esc([f.year, f.make].filter(Boolean).join(' '))}</b> · ` : ''}${esc(formatLabel(f))}</p>
           <h1 class="k-story-hero__code">${esc(f.code)}</h1>
           <p class="k-story-hero__tagline">${f.make ? `${esc(f.model)} — ` : ''}<span class="k-serif">${esc(f.tagline)}</span></p>
@@ -3949,12 +3951,102 @@
       });
   }
 
+  /* --------------------------------------------------------- terminal
+   * The whole magazine is an airport. Every page is a terminal with its
+   * own sign and split-flap board, stories travel as boarding passes, and
+   * the home page is the main concourse with a directory to the rest.
+   * -------------------------------------------------------------------- */
+  const TERMINALS = [
+    { id: 'home', t: 'T0', name: 'Main concourse', href: 'index.html', note: 'Departures from every desk' },
+    { id: 'vault', t: 'T1', name: 'Supply terminal', href: 'vault.html', note: 'Clothing, travel goods and rare finds' },
+    { id: 'garage', t: 'T2', name: 'The Hangar', href: 'garage.html', note: 'Cars, bikes and the people who ride them' },
+    { id: 'journal', t: 'T3', name: 'Arrivals', href: 'journal.html', note: 'Stories, interviews and vlogs as they land' },
+    { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
+    { id: 'hunt', t: 'T5', name: 'Ground transport', href: 'hunt.html', note: 'The Hunt: pieces you collect in person' },
+  ];
+  const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
+  const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
+  const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
+  const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
+  const termStrip = (t, label) => `<p class="k-term__strip"><span class="k-term__t">${esc(t.t)}</span><span>${esc(label || t.name)}</span><span class="k-term__clock"><span data-clock>--:--:--</span> <small data-clock-zone></small></span></p>`;
+  const PLANE = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 16.5l19-6.5-1.2-2.6-6.6 1.8L8.3 3.5 6.6 4.2l3 6.1-4.4 1.3-2.2-2-1.4.5 1.4 3.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  const LANDING = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9.5l17.6 6.2.6-2.8-6.4-2.6-1.4-7-1.8-.4.6 6.7-4.3-1.7-1.3-2.7-1.5-.3.2 3.7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
+  /** A split-flap board. rows: { href | pdp | play, flight, dest, gate, time, status: { key, label } } */
+  function boardHtml({ title, sub, icon: ic = PLANE, cols, rows, id }) {
+    return `<section class="k-board k-glass-panel" aria-labelledby="${id}">
+      <div class="k-board__head"><h2 class="k-board__title" id="${id}">${ic}${esc(title)}</h2><p class="k-board__sub">${esc(sub)}</p></div>
+      <div class="k-board__cols" aria-hidden="true">${cols.map((c) => `<span>${esc(c)}</span>`).join('')}</div>
+      <ol class="k-board__rows">${rows.map((r) => {
+        const inner = `<span class="k-board__flight">${flapText(r.flight, 7)}</span>
+          <span class="k-board__dest">${flapText(r.dest, 22)}</span>
+          <span class="k-board__gate">${flapText(r.gate, 1)}</span>
+          <span class="k-board__fare">${esc(r.time)}</span>
+          <span class="k-board__status k-board__status--${esc(r.status.key)}">${esc(r.status.label)}</span>`;
+        return `<li>${r.href ? `<a class="k-board__row" href="${esc(r.href)}">${inner}</a>`
+          : `<button type="button" class="k-board__row"${r.pdp ? ` data-pdp="${esc(r.pdp)}"` : ''}${r.play ? ` data-mix-play="${esc(r.play)}"` : ''}>${inner}</button>`}</li>`;
+      }).join('')}</ol>
+    </section>`;
+  }
+  const storyStatus = (f) => (f.format === 'film' ? { key: 'boarding', label: 'Now showing' }
+    : (f.tags || []).includes('In the edit') ? { key: 'soon', label: 'In the edit' }
+      : { key: 'landed', label: formatLabel(f) });
+  const storyRow = (f) => ({ href: storyHref(f), flight: `KSK ${f.code || ''}`, dest: f.city || f.location || featureName(f), gate: DESK_GATE[f.desk] || 'A', time: shortDate(f.published), status: storyStatus(f) });
+  const byNewest = (list) => list.slice().sort((a, b) => String(b.published || b.added || '').localeCompare(String(a.published || a.added || '')));
+  const deskBoard = (rows) => rows.slice(0, 8);
+
+  function terminalize() {
+    const t = termFor(PAGE);
+    if (t) {
+      // Every page header becomes terminal signage
+      $$('.k-page-head').forEach((head) => {
+        head.classList.add('k-page-head--term');
+        const wrap = $('.k-wrap', head);
+        if (wrap && !$('.k-term__strip', wrap)) wrap.insertAdjacentHTML('afterbegin', termStrip(t));
+      });
+      const acct = $('.k-acct-page');
+      if (acct && !$('.k-term__strip', acct)) acct.insertAdjacentHTML('afterbegin', termStrip({ t: 'PC' }, 'Passport control · your account'));
+    }
+    const mountB = mount('term-page-board');
+    if (mountB && !mountB.dataset.done) {
+      mountB.dataset.done = '1';
+      let html = '';
+      if (PAGE === 'home') {
+        const rows = byNewest(features).slice(0, 5).map(storyRow)
+          .concat(byNewest((C.products || []).filter((p) => !isDigitalP(p))).slice(0, 2).map((p) => ({ pdp: p.id, flight: flightOf(p), dest: p.title, gate: gateOf(p.category), time: price(p), status: statusOf(p, 0) })))
+          .concat((C.mixes || []).slice(0, 1).map((m) => ({ play: m.slug, flight: 'KR 001', dest: m.title, gate: 'C', time: 'LIVE', status: { key: 'boarding', label: 'On air' } })));
+        html = boardHtml({ id: 'home-board', title: 'Departures', sub: 'Every desk · latest first · tap a flight', cols: ['Flight', 'Destination', 'Gate', 'Time', 'Status'], rows: rows });
+      } else if (PAGE === 'garage') {
+        const rows = byNewest(features.filter((f) => f.desk === 'automotive' || f.make)).map((f) => ({ ...storyRow(f), dest: [f.make, f.model].filter(Boolean).join(' ') || featureName(f), time: f.year || shortDate(f.published) }));
+        html = boardHtml({ id: 'hangar-board', title: 'Hangar', sub: 'Machines on the floor · tap to open', cols: ['Tail no.', 'Machine', 'Gate', 'Year', 'Status'], rows: deskBoard(rows) });
+      } else if (PAGE === 'journal') {
+        const rows = byNewest(features).map((f) => ({ ...storyRow(f), status: (f.tags || []).includes('In the edit') ? { key: 'soon', label: 'Delayed' } : { key: 'landed', label: 'Landed' } }));
+        html = boardHtml({ id: 'arrivals-board', title: 'Arrivals', sub: 'Stories, interviews and vlogs · newest first', icon: LANDING, cols: ['Flight', 'Arriving from', 'Gate', 'Landed', 'Status'], rows: deskBoard(rows) });
+      } else if (PAGE === 'radio') {
+        const rows = (C.mixes || []).map((m, i) => ({ play: m.slug, flight: `KR ${String(i + 1).padStart(3, '0')}`, dest: m.title, gate: 'C', time: m.duration || (i ? 'NEXT' : 'LIVE'), status: i ? { key: 'landed', label: 'Up next' } : { key: 'boarding', label: 'On air' } }));
+        html = boardHtml({ id: 'radio-board', title: 'In-flight', sub: 'Channels on board · tap to play', cols: ['Channel', 'Programme', 'Gate', 'Time', 'Status'], rows: deskBoard(rows) });
+      }
+      if (html) { mountB.innerHTML = html; flipBoard(mountB); }
+    }
+    const dir = mount('term-directory');
+    if (dir && !dir.dataset.done) {
+      dir.dataset.done = '1';
+      dir.innerHTML = TERMINALS.filter((x) => x.id !== 'home').map((x) => `
+        <a class="k-dir__sign" href="${x.href}">
+          <span class="k-dir__t">${esc(x.t)}</span>
+          <span class="k-dir__name"><b>${esc(x.name)}</b><small>${esc(x.note)}</small></span>
+          <span class="k-dir__arrow" aria-hidden="true">${icon.arrow}</span>
+        </a>`).join('');
+    }
+  }
+
   /* ------------------------------------------------------------- boot */
 
   const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
+      terminalize();
       applyHome();
       markRise();
       hydrateCovers();

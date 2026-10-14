@@ -64,10 +64,10 @@
         <div class="k-heroshow__bars" data-mount="hero-bars"></div>
         <div class="k-cover__top">
           <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
-          <p class="k-eyebrow k-cover__edition">Global edition · <span data-clock>--:--</span> <span data-clock-zone></span></p>
+          <p class="k-eyebrow k-cover__edition"><span class="k-term__t k-term__t--sm">T0</span> Main concourse · <span data-clock>--:--</span> <span data-clock-zone></span></p>
         </div>
         <h1 class="k-cover__title" id="cover-title"><span class="k-cover__kicker">Only at the</span><span class="k-cover__word">KIOSK</span></h1>
-        <p class="k-cover__dek">A global magazine and marketplace. Cars, motorcycles, skate, travel and the people behind them, plus rare pieces sourced around the world. Some you can only collect in person.</p>
+        <p class="k-cover__dek">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, told through films, interviews, vlogs and photo diaries from the road. Read the story, shop the pieces, find the stores and rare finds worth the trip.</p>
         <div class="k-cover__cta">
           <a class="k-cover__pill" href="#garage">Open the issue <span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           <a class="k-btn" href="vault.html">Shop the kiosk</a>
@@ -87,10 +87,23 @@
     <!-- MARQUEE ------------------------------------------------------- -->
     <div class="k-marquee" aria-hidden="true">
       <div class="k-marquee__track">
-        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Skate</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Rare finds</span><span>Phonk</span><span class="k-serif">Culture</span>
-        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Skate</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Rare finds</span><span>Phonk</span><span class="k-serif">Culture</span>
+        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Sports</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Vlogs</span><span>Fashion</span><span class="k-serif">Culture</span><span>Audio notes</span><span class="k-serif">Rare finds</span>
+        <span>Cars</span><span class="k-serif">Motorcycles</span><span>Sports</span><span class="k-serif">Travel</span><span>Interviews</span><span class="k-serif">Vlogs</span><span>Fashion</span><span class="k-serif">Culture</span><span>Audio notes</span><span class="k-serif">Rare finds</span>
       </div>
     </div>
+
+    <!-- MAIN CONCOURSE: departures from every desk + terminal directory -->
+    <section class="k-section k-section--tight k-concourse-home" aria-labelledby="concourse-title">
+      <div class="k-wrap k-concourse-home__inner">
+        <div class="k-concourse-home__sign">
+          <p class="k-term__strip"><span class="k-term__t">T0</span><span>Main concourse</span><span class="k-term__clock"><span data-clock>--:--:--</span> <small data-clock-zone></small></span></p>
+          <h2 class="k-h2" id="concourse-title">Where to <em class="k-serif">next?</em></h2>
+          <p class="k-lede k-mt-s">Every desk leaves from here. Films, interviews, vlogs, audio notes and the pieces we make and source along the way.</p>
+          <nav class="k-dir k-mt-m" data-mount="term-directory" aria-label="Terminal directory"></nav>
+        </div>
+        <div data-mount="term-page-board"></div>
+      </div>
+    </section>
 
     <!-- 01 / GARAGE --------------------------------------------------- -->
     <section class="k-section" id="garage" aria-labelledby="garage-title" data-home="garage">
