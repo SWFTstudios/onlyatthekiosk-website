@@ -3,11 +3,13 @@
  *
  *   1. Around the globe: a dotted Earth turns while a flight hops
  *      New York → Reykjavík → Lisbon → Lagos → Dubai → Tokyo.
- *   2. Up into the sky: the Earth drops away beneath us and we rise into a
- *      golden-hour sky over a heavy bank of clouds sitting low like fog.
- *   3. The ꓘIOSK logo rises up from behind the clouds.
- *   4. Scroll: the camera sinks into the fog until it whites out, then the
- *      layer dissolves onto the rest of the home page (below the clouds).
+ *   2. Re-entry: the camera locks onto Tokyo and drops out of orbit, the
+ *      land streaming past, the air thickening into the sky of the hour,
+ *      until we break out high over the cloud sea and level off above it.
+ *   3. The spelled-out ꓘIOSK rises from behind the clouds, tagline below.
+ *   4. Scroll: ꓘIOSK flies up into the nav icon while the camera sinks into
+ *      the fog until it whites out, then the layer dissolves onto the rest
+ *      of the home page (below the clouds).
  *
  * Light on purpose: the globe is ~4k dots on a 2D canvas, the fog is one
  * full-screen WebGL pass of value noise rendered at reduced resolution,
@@ -41,12 +43,12 @@
    * Preview any of them with ?sky=firstlight|sunrise|noon|evening|sunset|midnight
    * (or ?hour=19.5). */
   const PALETTES = {
-    midnight:   { top: '#02040b', mid: '#071026', low: '#14234a', hor: '#2a3a63', sun: 'rgba(214,226,255,.42)', sx: 76, sy: 16, ss: 30, lit: [0.56, 0.63, 0.82], shade: [0.09, 0.12, 0.21], haze: [0.2, 0.27, 0.42], gnd: [0.02, 0.04, 0.05], dir: [-0.3, 0.7, 0.5], stars: 1, streak: 'rgba(160,180,230,.25)' },
-    firstlight: { top: '#0b1430', mid: '#28305f', low: '#8a6f9c', hor: '#f2b5a7', sun: 'rgba(255,190,170,.7)', sx: 26, sy: 58, ss: 55, lit: [0.96, 0.8, 0.84], shade: [0.29, 0.29, 0.44], haze: [0.8, 0.67, 0.73], gnd: [0.1, 0.12, 0.14], dir: [0.62, 0.12, 0.6], stars: 0.45, streak: 'rgba(255,200,210,.5)' },
-    sunrise:    { top: '#234a8f', mid: '#6a8cc8', low: '#f0b48c', hor: '#ffd29a', sun: 'rgba(255,206,130,1)', sx: 26, sy: 55, ss: 50, lit: [1.0, 0.86, 0.69], shade: [0.44, 0.42, 0.55], haze: [0.98, 0.83, 0.71], gnd: [0.16, 0.22, 0.18], dir: [0.66, 0.24, 0.6], stars: 0, streak: 'rgba(255,225,190,.65)' },
-    noon:       { top: '#154aa6', mid: '#2a68c9', low: '#6c9fe0', hor: '#dbe7f4', sun: 'rgba(255,255,255,.32)', sx: 78, sy: 8, ss: 70, lit: [1.0, 0.995, 0.98], shade: [0.44, 0.52, 0.66], haze: [0.8, 0.87, 0.95], gnd: [0.17, 0.29, 0.21], dir: [-0.45, 0.8, 0.4], stars: 0, streak: 'rgba(255,255,255,.7)' },
-    evening:    { top: '#1d4f9e', mid: '#4f86c9', low: '#b9c9d8', hor: '#f5dcb2', sun: 'rgba(255,214,150,.95)', sx: 74, sy: 44, ss: 60, lit: [1.0, 0.93, 0.8], shade: [0.48, 0.5, 0.6], haze: [0.93, 0.87, 0.78], gnd: [0.18, 0.26, 0.18], dir: [-0.6, 0.42, 0.6], stars: 0, streak: 'rgba(255,240,215,.7)' },
-    sunset:     { top: '#23305f', mid: '#6a4a86', low: '#e2766a', hor: '#ffb36b', sun: 'rgba(255,150,80,1)', sx: 70, sy: 56, ss: 55, lit: [1.0, 0.7, 0.5], shade: [0.37, 0.29, 0.45], haze: [0.98, 0.66, 0.53], gnd: [0.12, 0.1, 0.12], dir: [-0.7, 0.17, 0.7], stars: 0.1, streak: 'rgba(255,190,150,.7)' },
+    midnight:   { top: '#02040b', mid: '#071026', low: '#14234a', hor: '#2a3a63', sun: 'rgba(214,226,255,.42)', sx: 76, sy: 16, ss: 30, lit: [0.56, 0.63, 0.82], shade: [0.09, 0.12, 0.21], haze: [0.2, 0.27, 0.42], gnd: [0.02, 0.04, 0.05], dir: [-0.3, 0.7, 0.5], stars: 1, streak: 'rgba(160,180,230,.25)', ink: '#e9eeff' },
+    firstlight: { top: '#0b1430', mid: '#28305f', low: '#8a6f9c', hor: '#f2b5a7', sun: 'rgba(255,190,170,.7)', sx: 26, sy: 58, ss: 55, lit: [0.96, 0.8, 0.84], shade: [0.29, 0.29, 0.44], haze: [0.8, 0.67, 0.73], gnd: [0.1, 0.12, 0.14], dir: [0.62, 0.12, 0.6], stars: 0.45, streak: 'rgba(255,200,210,.5)', ink: '#2a2140' },
+    sunrise:    { top: '#234a8f', mid: '#6a8cc8', low: '#f0b48c', hor: '#ffd29a', sun: 'rgba(255,206,130,1)', sx: 26, sy: 55, ss: 50, lit: [1.0, 0.86, 0.69], shade: [0.44, 0.42, 0.55], haze: [0.98, 0.83, 0.71], gnd: [0.16, 0.22, 0.18], dir: [0.66, 0.24, 0.6], stars: 0, streak: 'rgba(255,225,190,.65)', ink: '#3a2826' },
+    noon:       { top: '#154aa6', mid: '#2a68c9', low: '#6c9fe0', hor: '#dbe7f4', sun: 'rgba(255,255,255,.32)', sx: 78, sy: 8, ss: 70, lit: [1.0, 0.995, 0.98], shade: [0.44, 0.52, 0.66], haze: [0.8, 0.87, 0.95], gnd: [0.17, 0.29, 0.21], dir: [-0.45, 0.8, 0.4], stars: 0, streak: 'rgba(255,255,255,.7)', ink: '#13223d' },
+    evening:    { top: '#1d4f9e', mid: '#4f86c9', low: '#b9c9d8', hor: '#f5dcb2', sun: 'rgba(255,214,150,.95)', sx: 74, sy: 44, ss: 60, lit: [1.0, 0.93, 0.8], shade: [0.48, 0.5, 0.6], haze: [0.93, 0.87, 0.78], gnd: [0.18, 0.26, 0.18], dir: [-0.6, 0.42, 0.6], stars: 0, streak: 'rgba(255,240,215,.7)', ink: '#2f2a24' },
+    sunset:     { top: '#23305f', mid: '#6a4a86', low: '#e2766a', hor: '#ffb36b', sun: 'rgba(255,150,80,1)', sx: 70, sy: 56, ss: 55, lit: [1.0, 0.7, 0.5], shade: [0.37, 0.29, 0.45], haze: [0.98, 0.66, 0.53], gnd: [0.12, 0.1, 0.12], dir: [-0.7, 0.17, 0.7], stars: 0.1, streak: 'rgba(255,190,150,.7)', ink: '#2b1735' },
   };
   const NAMES = { midnight: 'Midnight', firstlight: 'First light', sunrise: 'Sunrise', noon: 'Noon', evening: 'Evening', sunset: 'Sunset' };
   // [hour, palette]: linear blends between neighbours
@@ -62,7 +64,7 @@
     const k = h1 === h0 ? 0 : clamp((h - h0) / (h1 - h0), 0, 1);
     const A = PALETTES[p0]; const B = PALETTES[p1];
     const out = { phase: phaseAt(h) };
-    ['top', 'mid', 'low', 'hor', 'sun', 'streak'].forEach((key) => { out[key] = css(mixArr(rgb(A[key]), rgb(B[key]), k)); });
+    ['top', 'mid', 'low', 'hor', 'sun', 'streak', 'ink'].forEach((key) => { out[key] = css(mixArr(rgb(A[key]), rgb(B[key]), k)); });
     ['lit', 'shade', 'haze', 'gnd', 'dir'].forEach((key) => { out[key] = mixArr(A[key], B[key], k); });
     ['sx', 'sy', 'ss', 'stars'].forEach((key) => { out[key] = lerp(A[key], B[key], k); });
     return out;
@@ -83,42 +85,104 @@
     const P = new Float32Array(n * 3);
     for (let i = 0; i < n; i += 1) { const v = vec(raw[i * 2], raw[i * 2 + 1]); P[i * 3] = v[0]; P[i * 3 + 1] = v[1]; P[i * 3 + 2] = v[2]; }
     const cities = ROUTE.map((c) => ({ ...c, v: vec(c.la, c.lo) }));
+    // Close-up detail: land near the last stop gets extra jittered dots,
+    // faded in as we drop toward it, so the ground never thins out
+    const goal = cities[cities.length - 1].v; const near = [];
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (let i = 0; i < n; i += 1) {
+      if (P[i * 3] * goal[0] + P[i * 3 + 1] * goal[1] + P[i * 3 + 2] * goal[2] < Math.cos(0.3)) continue;
+      for (let j = 0; j < 8; j += 1) {
+        const la = raw[i * 2] + (rnd() - 0.5) * 1.6; const lo = raw[i * 2 + 1] + (rnd() - 0.5) * 1.6;
+        near.push(...vec(la, lo));
+      }
+    }
+    const Q = new Float32Array(near);
+    // A fine lat/long survey grid around the last stop: on the way down it
+    // sweeps outward and keeps the sense of speed over open ocean
+    const grid = [];
+    const gl0 = ROUTE[ROUTE.length - 1];
+    for (let k = -12; k <= 12; k += 1) {
+      const la = Math.round(gl0.la / 2) * 2 + k * 2; const lo = Math.round(gl0.lo / 2) * 2 + k * 2;
+      const par = []; const mer = [];
+      for (let j = -60; j <= 60; j += 1) { par.push(vec(la, gl0.lo + j * 0.5)); mer.push(vec(gl0.la + j * 0.4, lo)); }
+      grid.push(par, mer);
+    }
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     let w = 0; let h = 0;
     const resize = () => { w = canvas.clientWidth; h = canvas.clientHeight; canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); };
     resize();
 
+    /* Perspective camera D globe radii from the centre, looking at it.
+     * Far out (6) it reads as the flat dotted globe; diving toward 1 the
+     * surface rushes up and the land streams out past the edges. */
+    const D0 = 6; const K0 = Math.sqrt(D0 * D0 - 1); const ALT1 = 0.03;
+    // G.fall 0 … 1: altitude drops on a log scale, so the plunge never stalls
+    // or jumps; the globe swells to fill the screen, then the land skims past
+    const dist = () => 1 + (D0 - 1) * Math.pow(ALT1 / (D0 - 1), clamp(G.fall, 0, 1));
+    let lastD = dist();
     function draw(now) {
-      if (G.alpha <= 0.01) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+      if (G.alpha <= 0.01) { ctx.clearRect(0, 0, canvas.width, canvas.height); lastD = dist(); return; }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const R = Math.min(w, h) * 0.34 * G.zoom;
+      const D = dist();
+      const f = Math.min(w, h) * 0.34 * G.zoom * K0;           // focal length: disc radius f/sqrt(D²-1)
       const cx = w / 2; const cy = h / 2 + G.drop * h;
+      const R = f / Math.sqrt(D * D - 1);                        // apparent disc radius
+      const diag = Math.hypot(w, h);
       const cyw = Math.cos(G.yaw); const syw = Math.sin(G.yaw); const cp = Math.cos(G.pitch); const sp = Math.sin(G.pitch);
       const rot = (x, y, z) => { const x1 = x * cyw + z * syw; const z1 = -x * syw + z * cyw; return [x1, y * cp - z1 * sp, y * sp + z1 * cp]; };
+      // screen position of a rotated point at camera distance d (null when over the horizon)
+      const proj = (r, d) => { const q = r[0] * r[0] + r[1] * r[1] + r[2] * r[2]; if (r[2] * d <= q + 0.002) return null; const k = f / (d - r[2]); return [cx + r[0] * k, cy - r[1] * k, k]; };
       ctx.globalAlpha = G.alpha;
-      // Atmosphere
-      const glow = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.35);
-      glow.addColorStop(0, 'rgba(120,170,255,.28)'); glow.addColorStop(1, 'rgba(120,170,255,0)');
-      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, R * 1.35, 0, 6.283); ctx.fill();
-      const disc = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.1, cx, cy, R);
-      disc.addColorStop(0, 'rgba(26,40,74,.95)'); disc.addColorStop(1, 'rgba(6,10,22,.95)');
-      ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.fill();
-      // Land dots
-      const s = Math.max(1, R / 260);
-      for (let i = 0; i < n; i += 1) {
-        const r = rot(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]);
-        if (r[2] <= 0.02) continue;
-        ctx.globalAlpha = G.alpha * (0.25 + 0.75 * r[2]);
-        ctx.fillStyle = r[2] > 0.5 ? '#f3ead8' : '#c9c2b3';
-        ctx.fillRect(cx + r[0] * R - s / 2, cy - r[1] * R - s / 2, s, s);
+      // Atmosphere halo and the night-side disc
+      if (R < diag * 2) {
+        const glow = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.35);
+        glow.addColorStop(0, 'rgba(120,170,255,.28)'); glow.addColorStop(1, 'rgba(120,170,255,0)');
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, R * 1.35, 0, 6.283); ctx.fill();
+        const disc = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.1, cx, cy, R);
+        disc.addColorStop(0, 'rgba(26,40,74,.95)'); disc.addColorStop(1, 'rgba(6,10,22,.95)');
+        ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.fill();
+      } else { ctx.fillStyle = 'rgba(16,26,52,.95)'; ctx.fillRect(0, 0, w, h); }
+      // Land dots; while plunging each one draws a short streak outward
+      const streak = (lastD - D) / Math.max(D - 1, 0.02) > 0.004;
+      const dTrail = D + (lastD - D) * 2.2;
+      ctx.lineCap = 'round';
+      const dots = (A, fade) => {
+        for (let i = 0; i < A.length; i += 3) {
+          const r = rot(A[i], A[i + 1], A[i + 2]);
+          const a = proj(r, D); if (!a) continue;
+          if (a[0] < -40 || a[0] > w + 40 || a[1] < -40 || a[1] > h + 40) continue;
+          const s = clamp(a[2] / 260, 1, 3.4);
+          const facing = clamp((r[2] * D - 1) / (D - 1), 0, 1);  // 1 straight below us, 0 at the horizon
+          ctx.globalAlpha = G.alpha * fade * (0.25 + 0.75 * facing);
+          if (streak) {
+            const b = proj(r, dTrail);
+            if (b) { ctx.strokeStyle = '#f3ead8'; ctx.lineWidth = s; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(a[0], a[1]); ctx.stroke(); continue; }
+          }
+          ctx.fillStyle = facing > 0.5 ? '#f3ead8' : '#c9c2b3';
+          ctx.fillRect(a[0] - s / 2, a[1] - s / 2, s, s);
+        }
+      };
+      const gridA = clamp((2.2 - D) / 1.0, 0, 1) * 0.16;
+      if (gridA > 0) {
+        ctx.globalAlpha = G.alpha * gridA; ctx.strokeStyle = '#9fb8ff'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        grid.forEach((line) => {
+          let pen = false;
+          line.forEach((v) => { const q = proj(rot(v[0], v[1], v[2]), D); if (!q) { pen = false; return; } if (pen) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); pen = true; });
+        });
+        ctx.stroke();
       }
+      dots(P, 1);
+      const detail = clamp((1.6 - D) / 0.9, 0, 1);
+      if (detail > 0) dots(Q, detail * 0.9);
+      lastD = D;
       // Flight: trail from the previous city, glowing head, city pins
       const leg = Math.min(Math.floor(G.leg), cities.length - 2);
       const u = clamp(G.leg - leg, 0, 1);
       const pin = (c, on) => {
-        const r = rot(c.v[0], c.v[1], c.v[2]); if (r[2] < 0.05) return;
-        const x = cx + r[0] * R; const y = cy - r[1] * R;
+        const pp = proj(rot(c.v[0], c.v[1], c.v[2]), D); if (!pp) return;
+        const x = pp[0]; const y = pp[1];
         ctx.globalAlpha = G.alpha * (on ? 1 : 0.6);
         ctx.fillStyle = '#ff5a1f'; ctx.beginPath(); ctx.arc(x, y, on ? 4 : 2.5, 0, 6.283); ctx.fill();
         if (on) {
@@ -128,18 +192,18 @@
         }
       };
       cities.forEach((c, i) => { if (i <= leg) pin(c, i === leg && u < 0.2); });
+      ctx.lineWidth = 2;
       for (let k = 0; k <= leg; k += 1) {
         const a = cities[k].v; const b = cities[k + 1].v;
         const end = k < leg ? 1 : u;
         const d = Math.acos(clamp(a[0] * b[0] + a[1] * b[1] + a[2] * b[2], -1, 1));
         let prev = null;
-        ctx.lineWidth = 2; ctx.strokeStyle = '#ff7a3d';
+        ctx.strokeStyle = '#ff7a3d';
         for (let j = 0; j <= 40; j += 1) {
           const t = (j / 40) * end;
           const p = slerp(a, b, t); const lift = 1 + (0.06 + d * 0.08) * Math.sin(Math.PI * t);
-          const r = rot(p[0] * lift, p[1] * lift, p[2] * lift);
-          const pt = [cx + r[0] * R, cy - r[1] * R, r[2]];
-          if (prev && pt[2] > -0.1) { ctx.globalAlpha = G.alpha * (k < leg ? 0.45 : 0.95); ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke(); }
+          const pt = proj(rot(p[0] * lift, p[1] * lift, p[2] * lift), D);
+          if (prev && pt) { ctx.globalAlpha = G.alpha * (k < leg ? 0.45 : 0.95); ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke(); }
           prev = pt;
         }
         if (k === leg && prev && u < 1) {
@@ -148,6 +212,14 @@
         }
       }
       if (u >= 0.8 || G.leg >= cities.length - 1) pin(cities[Math.min(leg + 1, cities.length - 1)], true);
+      // Entry: the air thickens into the colour of the sky below
+      if (G.atmo > 0.001 && G.tint) {
+        const [lo, hi] = G.tint;
+        const air = ctx.createRadialGradient(cx, cy, 0, cx, cy, diag * 0.7);
+        air.addColorStop(0, css([hi[0], hi[1], hi[2], 1])); air.addColorStop(1, css([lo[0], lo[1], lo[2], 1]));
+        ctx.globalAlpha = G.alpha * clamp(G.atmo, 0, 1);
+        ctx.fillStyle = air; ctx.fillRect(0, 0, w, h);
+      }
       ctx.globalAlpha = 1;
     }
     return { draw, resize };
@@ -160,6 +232,7 @@
    * loose wisps drifting past the camera. Noise is baked once into a small
    * tileable texture, so each step is a texture read, not noise maths.
    *   F.hz   horizon height on screen (0 bottom … 1 top; < 0 looks up at sky)
+   *   F.pit  camera tilted down by this many radians (looking down on the sea)
    *   F.cam  camera altitude above the cloud tops
    *   F.dive 0 … 1 descending into the clouds (white-out at 1)
    */
@@ -193,7 +266,7 @@
     #else
     precision mediump float;
     #endif
-    uniform vec2 r; uniform float t; uniform float hz; uniform float cam; uniform float dive; uniform sampler2D nz;
+    uniform vec2 r; uniform float t; uniform float hz; uniform float pit; uniform float cam; uniform float dive; uniform sampler2D nz;
     uniform vec3 lit; uniform vec3 shade; uniform vec3 hazeC; uniform vec3 gnd; uniform vec3 sunv;
     const float FOV = 1.15;
     vec2 wind;
@@ -208,6 +281,7 @@
       float asp = r.x / r.y;
       wind = vec2(t * 0.0012, t * 0.0075);
       vec3 d = normalize(vec3((uv.x - 0.5) * asp * FOV, (uv.y - hz) * FOV, 1.0));
+      d = vec3(d.x, d.y * cos(pit) - d.z * sin(pit), d.y * sin(pit) + d.z * cos(pit));   // tilt the camera down
       vec3 col = vec3(0.0); float a = 0.0;
       vec3 haze = hazeC;
       if (d.y < -0.0005) {
@@ -256,7 +330,7 @@
       }
       // Wisps drifting past the camera
       float w = texture2D(nz, vec2(uv.x * asp * 0.55 + t * 0.012, uv.y * 0.7 - t * 0.004)).b;
-      float wa = smoothstep(0.52, 0.78, w) * 0.5 * smoothstep(hz + 0.35, hz - 0.2, uv.y);
+      float wa = smoothstep(0.52, 0.78, w) * 0.5 * smoothstep(hz + 0.35, hz - 0.2, uv.y) * (1.0 - smoothstep(0.1, 0.6, pit));
       col = col * a * (1.0 - wa) + mix(haze, lit, 0.6) * wa; a = a + wa * (1.0 - a);
       // Descending into the clouds: white-out
       float white = smoothstep(0.35, 0.95, dive);
@@ -283,7 +357,7 @@
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     const U = {};
-    ['r', 't', 'hz', 'cam', 'dive', 'nz', 'lit', 'shade', 'hazeC', 'gnd', 'sunv'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
+    ['r', 't', 'hz', 'pit', 'cam', 'dive', 'nz', 'lit', 'shade', 'hazeC', 'gnd', 'sunv'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
     gl.uniform1i(U.nz, 0);
     const scale = small ? 0.45 : 0.55;    // soft clouds: render small, CSS scales up
     const resize = () => { canvas.width = Math.max(2, Math.round(canvas.clientWidth * scale)); canvas.height = Math.max(2, Math.round(canvas.clientHeight * scale)); gl.viewport(0, 0, canvas.width, canvas.height); };
@@ -292,7 +366,7 @@
       resize,
       draw(time) {
         gl.uniform2f(U.r, canvas.width, canvas.height); gl.uniform1f(U.t, time);
-        gl.uniform1f(U.hz, F.hz); gl.uniform1f(U.cam, F.cam); gl.uniform1f(U.dive, F.dive);
+        gl.uniform1f(U.hz, F.hz); gl.uniform1f(U.pit, F.pit); gl.uniform1f(U.cam, F.cam); gl.uniform1f(U.dive, F.dive);
         const P = F.pal;
         gl.uniform3fv(U.lit, P.lit); gl.uniform3fv(U.shade, P.shade); gl.uniform3fv(U.hazeC, P.haze); gl.uniform3fv(U.gnd, P.gnd); gl.uniform3fv(U.sunv, P.dir);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -306,12 +380,12 @@
   function mount(section, opts) {
     const { gsap, ScrollTrigger } = opts;
     const layer = section.querySelector('.k-sky__layer');
-    const G = { yaw: 1.29, pitch: 0.55, zoom: 0.9, drop: 0, alpha: 1, leg: 0 };
-    const F = { hz: -0.6, cam: 1.5, dive: 0, pal: skyAt(localHour()) };
+    const G = { yaw: 1.29, pitch: 0.55, zoom: 0.9, drop: 0, alpha: 1, leg: 0, fall: 0, atmo: 0, tint: null };
+    const F = { hz: -0.6, pit: 0, cam: 1.5, dive: 0, pal: skyAt(localHour()) };
     const zone = (() => { try { return (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' '); } catch (e) { return ''; } })();
     const paint = () => {
       const P = F.pal;
-      [['--sky-top', P.top], ['--sky-mid', P.mid], ['--sky-low', P.low], ['--sky-hor', P.hor], ['--sky-sun', P.sun], ['--sky-sun-x', `${P.sx}%`], ['--sky-sun-y', `${P.sy}%`], ['--sky-sun-s', `${P.ss}%`], ['--sky-streak', P.streak]]
+      [['--sky-top', P.top], ['--sky-mid', P.mid], ['--sky-low', P.low], ['--sky-hor', P.hor], ['--sky-sun', P.sun], ['--sky-sun-x', `${P.sx}%`], ['--sky-sun-y', `${P.sy}%`], ['--sky-sun-s', `${P.ss}%`], ['--sky-streak', P.streak], ['--sky-ink', P.ink]]
         .forEach(([k, v]) => section.style.setProperty(k, v));
       section.dataset.phase = P.phase;
       const fogc = F.pal.haze.map((v, i) => v + (F.pal.lit[i] - v) * 0.55);
@@ -324,19 +398,62 @@
     let fv = null;
     try { fv = fog(section.querySelector('.k-sky__fog'), F); } catch (e) { fv = null; }
     if (!fv) section.classList.add('is-nogl');
-    const logo = section.querySelector('.k-sky__logo');
     const space = section.querySelector('.k-sky__space');
+    const fogEl = section.querySelector('.k-sky__fog');
     const route = section.querySelector('[data-sky-route]');
+    const tagline = section.querySelector('.k-sky__tagline');
+
+    /* The ꓘIOSK wordmark lives above everything (it flies into the nav), so
+     * the clouds that cover its feet are a mask that follows the horizon. */
+    const title = section.querySelector('.k-sky__title');
+    const word = title.querySelector('.k-sky__word');
+    const navMark = document.querySelector('.k-nav .k-logo__mark');
+    const T = { rise: 0, fly: 0, fade: 1 };     // rise: 0 → 1 out of the clouds; fly: 0 → 1 into the nav icon
+    let base = null;
+    const measure = () => {
+      word.style.transform = 'none';
+      const r = word.getBoundingClientRect();
+      base = { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, top: r.top };
+    };
+    const ease = (x) => x * x * (3 - 2 * x);
+    function applyTitle() {
+      if (!base) measure();
+      const vh = window.innerHeight;
+      const k = ease(clamp(T.fly, 0, 1));
+      let tx = 0; let ty = (1 - T.rise) * vh * 0.42; let sc = 1;
+      if (navMark && k > 0) {
+        const m = navMark.getBoundingClientRect();
+        const target = (m.width || 40) / base.w;
+        sc = Math.exp(Math.log(target) * k);
+        tx = (m.left + m.width / 2 - base.x) * k;
+        ty = ty * (1 - k) + (m.top + m.height / 2 - base.y) * k;
+      }
+      word.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
+      // Cloud line in the word's own (scaled) coordinates
+      const horizon = (1 - F.hz) * vh + vh * 0.015;
+      const topNow = base.y - (base.h / 2) * sc + ty;
+      word.style.setProperty('--cut', `${((horizon - topNow) / sc).toFixed(1)}px`);
+      word.style.setProperty('--feather', `${(vh * 0.05 / sc).toFixed(1)}px`);
+      const op = T.fade * clamp(T.rise * 3, 0, 1) * (1 - clamp((k - 0.78) / 0.2, 0, 1));
+      word.style.opacity = op.toFixed(3);
+      if (navMark) {
+        const n = clamp((k - 0.72) / 0.28, 0, 1);
+        navMark.style.opacity = n.toFixed(3);
+        navMark.style.transform = `scale(${(0.7 + 0.3 * n).toFixed(3)})`;
+      }
+    }
+
     let raf = 0; let on = true; let globeDirty = true; const t0 = performance.now();
     const frame = (now) => {
       raf = 0;
       if (!on) return;
       if (G.alpha > 0.01 || globeDirty) { gv.draw(now); globeDirty = G.alpha > 0.01; }
       if (fv) fv.draw((now - t0) / 1000);
+      applyTitle();
       raf = requestAnimationFrame(frame);
     };
     const wake = () => { if (on && !raf) raf = requestAnimationFrame(frame); };
-    const onResize = () => { gv.resize(); if (fv) fv.resize(); };
+    const onResize = () => { gv.resize(); if (fv) fv.resize(); measure(); applyTitle(); };
     window.addEventListener('resize', onResize);
 
     // Face a city: yaw/pitch that bring (la, lo) to the front
@@ -344,13 +461,14 @@
     const tl = gsap.timeline();
     const settled = () => { section.classList.add('is-settled'); };
     if (opts.quick || opts.reduced) {
-      Object.assign(G, { alpha: 0 }); F.hz = SETTLED_HZ;
-      gsap.set(space, { opacity: F.pal.stars }); gsap.set(logo, { y: 0, opacity: 1 });
+      Object.assign(G, { alpha: 0 }); F.hz = SETTLED_HZ; T.rise = 1;
+      gsap.set(space, { opacity: F.pal.stars });
+      gsap.set(tagline, { opacity: 1, y: 0 });
       if (route) route.textContent = caption();
       settled();
     } else {
       // 1. Around the globe, in the dark above the atmosphere
-      gsap.set(space, { opacity: 1 }); gsap.set(logo, { opacity: 0 });
+      gsap.set(space, { opacity: 1 }); gsap.set(tagline, { opacity: 0, y: 14 });
       Object.assign(G, face(ROUTE[0]));
       ROUTE.slice(0, -1).forEach((c, i) => {
         const b = ROUTE[i + 1];
@@ -359,35 +477,55 @@
         tl.to(G, { leg: i + 1, yaw: mid.yaw - 0.15, pitch: mid.pitch * 0.8, duration: 0.72, ease: 'power1.inOut' }, i * 0.72);
       });
       const up = (ROUTE.length - 1) * 0.72 + 0.1;
-      // 2. Up into the sky: the Earth drops away, golden hour fades in, the cloud bank rises
-      tl.to(G, { zoom: 2.6, drop: 0.95, duration: 1.6, ease: 'power2.in' }, up)
-        .to(G, { alpha: 0, duration: 0.6, ease: 'power1.in' }, up + 0.6)
-        .to(space, { opacity: F.pal.stars, duration: 1.4, ease: 'power1.inOut' }, up + 0.4)
-        .to(F, { hz: SETTLED_HZ, duration: 2.0, ease: 'power3.out' }, up + 0.5)
-        .call(() => { if (route) route.textContent = caption(); }, null, up + 0.8)
-      // 3. The logo rises from behind the clouds
-        .fromTo(logo, { y: '42vh', opacity: 0 }, { y: 0, opacity: 1, duration: 2.0, ease: 'power3.out' }, up + 1.3)
-        .call(settled, null, up + 2.6);
+      const last = ROUTE[ROUTE.length - 1];
+      const P = F.pal;
+      G.tint = [P.haze, P.lit.map((v, i) => v + (P.haze[i] - v) * 0.25)];
+      gsap.set(fogEl, { opacity: 0 });
+      // 2. Re-entry: lock onto the last stop and drop out of orbit toward it.
+      //    The land rushes past, the air thickens into the sky of the hour,
+      //    and we break out high above the cloud sea, looking down on it…
+      tl.call(() => { if (route) route.textContent = `KSK 006 · Descent · ${last.c} ${last.n}`; }, null, up)
+        .to(G, { ...face(last), duration: 1.3, ease: 'power2.inOut' }, up)
+        .to(G, { fall: 1, duration: 3.3, ease: 'sine.in' }, up + 0.1)
+        .to(G, { atmo: 1, duration: 1.0, ease: 'power2.in' }, up + 2.4)
+        .to(space, { opacity: P.stars, duration: 0.8, ease: 'power1.inOut' }, up + 2.6)
+        .set(F, { hz: 0.5, pit: 1.2, cam: 12 }, up + 2.9)
+        .to(fogEl, { opacity: 1, duration: 0.6, ease: 'power1.inOut' }, up + 3.0)
+        .to(G, { alpha: 0, duration: 0.4, ease: 'power1.in' }, up + 3.4)
+      //    …then pull up and level out just above the tops
+        .to(F, { cam: 1.5, duration: 2.8, ease: 'power3.out' }, up + 3.1)
+        .to(F, { pit: 0, hz: SETTLED_HZ, duration: 2.6, ease: 'power2.inOut' }, up + 3.1)
+        .call(() => { if (route) route.textContent = caption(); }, null, up + 3.9)
+      // 3. ꓘIOSK rises out of the clouds, the tagline settles in front of them
+        .to(T, { rise: 1, duration: 2.4, ease: 'power3.out' }, up + 4.7)
+        .to(tagline, { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, up + 6.1)
+        .call(settled, null, up + 6.3);
     }
 
-    // 4. Scroll: sink into the clouds, white out, dissolve onto the page
+    // 4. Scroll: ꓘIOSK flies up into the nav icon while the camera sinks into the clouds
     const st = ScrollTrigger.create({
       trigger: section, start: 'top top', end: 'bottom top', scrub: 0.6,
       onUpdate: (self) => {
         const p = self.progress;
         if (p > 0.001 && tl.isActive()) tl.progress(1);
+        T.fly = clamp(p / 0.5, 0, 1);
         F.dive = clamp(p / 0.8, 0, 1);
         if (!tl.isActive()) { F.hz = SETTLED_HZ + F.dive * 0.42; F.cam = 1.5 - F.dive * 1.55; }
-        gsap.set(logo, { y: `${-p * 30}vh`, opacity: clamp(1 - p * 1.8, 0, 1), scale: 1 + p * 0.25 });
+        tagline.style.opacity = String(clamp(1 - p * 6, 0, 1));
         layer.style.opacity = String(clamp((1 - p) / 0.22, 0, 1));
         const gone = p >= 0.999;
         layer.style.visibility = gone ? 'hidden' : '';
-        on = !gone; if (on) wake();
+        title.style.visibility = T.fly >= 1 ? 'hidden' : '';
+        on = !gone; if (on) wake(); else applyTitle();
       },
     });
+    measure(); applyTitle();
     wake();
     return {
-      stop() { on = false; clearInterval(tick); tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); },
+      stop() {
+        on = false; clearInterval(tick); tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
+        if (navMark) { navMark.style.opacity = ''; navMark.style.transform = ''; }
+      },
     };
   }
 

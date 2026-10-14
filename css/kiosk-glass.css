@@ -496,6 +496,13 @@ body.k::after {
   color: var(--bone-ink);
 }
 .k-logo__mark .k-symbol { width: 24px; height: auto; display: block; }
+/* Header: clock left, the symbol centred, controls right */
+.k-nav__inner { display: grid !important; grid-template-columns: 1fr auto 1fr; }
+.k-nav__inner > .k-nav__clock { grid-column: 1; justify-self: start; padding-left: 10px; }
+.k-nav__inner > .k-logo { grid-column: 2; justify-self: center; padding: 0 6px; height: 44px; }
+.k-nav__inner > .k-nav__actions { grid-column: 3; justify-self: end; }
+.k-nav .k-logo__mark { width: auto; height: auto; border-radius: 0; background: none; color: var(--ink); transition: opacity .2s; will-change: opacity, transform; }
+.k-nav .k-logo__mark .k-symbol { width: 54px; }
 .k-symbol { display: block; fill: currentColor; }
 
 .k-nav__links {
@@ -2461,10 +2468,11 @@ html[data-nav='back']::view-transition-new(root) { animation-name: k-vt-in-back;
 
   /* The top bar keeps just the logo (and tucks away as you read) */
   .k-nav__actions { display: none !important; }
-  .k-nav__inner { padding: 6px 14px 6px 8px; }
+  .k-nav__inner { padding: 4px 14px; }
   .k-nav { padding-top: max(10px, env(safe-area-inset-top)); }
-  .k-nav__inner { justify-content: center; width: max-content; }
-  .k-nav__clock { display: inline-flex; font-size: calc(12px * var(--type, 1)); }
+  .k-nav__inner { justify-content: center; width: max-content; grid-template-columns: auto; }
+  .k-nav__inner > .k-logo { grid-column: 1; }
+  .k-nav__clock { display: none !important; }
 
   body.k { padding-bottom: calc(var(--tabbar-h) + 8px); }
   .k-dock { bottom: calc(var(--tabbar-h) + 10px); }
@@ -3277,12 +3285,18 @@ a.k-board__row { display: grid; text-decoration: none; }
   background: radial-gradient(40% 60% at 20% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, var(--sky-fog) 0%, var(--sky-fog) 45%, rgba(255,255,255,0) 100%);
   filter: blur(6px); }
 .k-sky.is-nogl .k-sky__fogcss, .k-sky:not(.is-live) .k-sky__fogcss { display: block; }
-.k-sky__logo { position: absolute; left: 0; right: 0; top: 37%; transform: translateY(-50%); display: grid; justify-items: center; text-align: center; padding: 0 var(--gutter); filter: drop-shadow(0 10px 30px rgba(10,30,70,.28)); will-change: transform, opacity; }
-.k-sky.is-boot .k-sky__logo { opacity: 0; }
-.k-sky__symbol { width: clamp(150px, 24vw, 420px); height: auto; color: #fff; }
-.k-sky__word { margin: clamp(10px, 1.6vw, 22px) 0 0; font-size: calc(clamp(52px, 10.5vw, 180px) * var(--type, 1)); line-height: .8; letter-spacing: -0.06em; font-weight: 600; white-space: nowrap; }
-.k-sky__word .k-rk { margin-right: -0.06em; }
-.k-sky__line { margin: 14px 0 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+.k-sky__title { position: absolute; left: 0; right: 0; top: 0; height: 100svh; z-index: 105; pointer-events: none; }
+.k-sky.is-live .k-sky__title { position: fixed; }
+.k-sky__word { position: absolute; left: 50%; top: calc(64% - .76em); margin: 0; translate: -50% 0; color: #fff; font-size: calc(clamp(118px, 27vw, 470px) * var(--type, 1)); line-height: .8; letter-spacing: -0.065em; font-weight: 600; white-space: nowrap; transform-origin: 50% 50%; will-change: transform, opacity;
+  --cut: 200%; --feather: 40px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 var(--cut), transparent calc(var(--cut) + var(--feather)));
+  mask-image: linear-gradient(180deg, #000 0, #000 var(--cut), transparent calc(var(--cut) + var(--feather)));
+  text-shadow: 0 10px 50px rgba(10,30,70,.18); }
+.k-sky__word .k-rk { margin-right: -0.065em; }
+.k-sky.is-boot .k-sky__word { opacity: 0; }
+.k-sky__tagline { position: absolute; left: 0; right: 0; top: 70%; margin: 0; padding: 0 var(--gutter); text-align: center; color: var(--sky-ink, #13223d); font-family: var(--f-serif); font-style: italic; font-size: calc(clamp(22px, 2.6vw, 40px) * var(--type, 1)); line-height: 1.15; letter-spacing: -0.01em; }
+.k-sky[data-phase='midnight'] .k-sky__tagline { text-shadow: 0 2px 18px rgba(0,0,0,.45); }
+.k-sky:not([data-phase='midnight']) .k-sky__tagline { text-shadow: 0 1px 14px rgba(255,255,255,.55); }
 .k-sky__route { position: absolute; left: var(--gutter); top: calc(var(--nav-h) + 12px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
 .k-sky__hint { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px rgba(20,40,80,.45); opacity: 0; transition: opacity .8s var(--ease); }
 .k-sky.is-settled .k-sky__hint { opacity: .8; }

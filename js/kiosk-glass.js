@@ -299,12 +299,12 @@
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
-    // Glass header: logo · local clock · day/night · radio · menu. Everything else lives in the menu.
+    // Glass header: local clock · the KIOSK symbol (centre) · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
-        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">${KIOSK_SYMBOL}</span><span class="k-wm"><span class="k-rk">K</span>IOSK</span></a>
-        <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
+        <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">${KIOSK_SYMBOL}</span></a>
+        <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
           <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
           <button class="k-nav__theme k-nav__settings" type="button" data-settings-open aria-label="Open settings">${icon.gear}</button>
@@ -1860,7 +1860,10 @@
       ticking = false;
       const y = window.scrollY;
       d.classList.toggle('is-scrolled', y > 8);
-      if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', y > lastY && y > 160); lastY = y; }
+      // Not over the sky intro: ꓘIOSK flies into the nav icon there
+      const sky = $('.k-sky.is-live');
+      const inSky = sky && y < sky.offsetTop + sky.offsetHeight;
+      if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', !inSky && y > lastY && y > 160); lastY = y; }
       const cover = $('.k-cover');
       if (cover && !REDUCED && prefs.depth !== 'off') {
         const p = Math.min(1, Math.max(0, y / (cover.offsetHeight || window.innerHeight)));
