@@ -16,7 +16,7 @@
       ]
     },
     {
-      "label": "Journal",
+      "label": "Atlas",
       "path": "atlas.html",
       "match": [
         "atlas.html",
@@ -28,6 +28,13 @@
       "path": "radio.html",
       "match": [
         "radio.html"
+      ]
+    },
+    {
+      "label": "Flights",
+      "path": "flights.html",
+      "match": [
+        "flights.html"
       ]
     },
     {

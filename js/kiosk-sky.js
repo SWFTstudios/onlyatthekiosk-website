@@ -409,7 +409,7 @@
     const word = title.querySelector('.k-sky__word');
     const navMark = document.querySelector('.k-nav .k-logo__mark');
     const T = { rise: 0, fly: 0, fade: 1 };     // rise: 0 → 1 out of the clouds; fly: 0 → 1 into the nav icon
-    let base = null;
+    let base = null; let wasPending = null;
     const measure = () => {
       word.style.transform = 'none';
       const r = word.getBoundingClientRect();
@@ -440,6 +440,9 @@
         const n = clamp((k - 0.72) / 0.28, 0, 1);
         navMark.style.opacity = n.toFixed(3);
         navMark.style.transform = `scale(${(0.7 + 0.3 * n).toFixed(3)})`;
+        // the header pill only takes shape once the icon has formed inside it
+        const pending = n < 0.9;
+        if (pending !== wasPending) { document.documentElement.classList.toggle('is-mark-pending', pending); wasPending = pending; }
       }
     }
 
@@ -525,6 +528,7 @@
       stop() {
         on = false; clearInterval(tick); tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
         if (navMark) { navMark.style.opacity = ''; navMark.style.transform = ''; }
+        document.documentElement.classList.remove('is-mark-pending');
       },
     };
   }

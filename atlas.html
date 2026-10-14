@@ -5,7 +5,7 @@
   <title>The Atlas — Every KIOSK story, film and vlog</title>
   <meta name="description" content="The KIOSK Atlas: every film, interview, vlog, photo diary and story from the road. Search, sort and filter by place, date, type, author and tag.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fbfaf8">
+  <meta name="theme-color" content="#000000">
   <link rel="manifest" href="site.webmanifest">
   <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -30,25 +30,28 @@
 <body class="k" data-page="journal">
   <a class="k-skip" href="#main">Skip to content</a>
   <main id="main">
-    <header class="k-page-head k-lib-head">
-      <div class="k-wrap">
-        <p class="k-eyebrow">The Atlas · <span data-mount="journal-count"></span></p>
-        <h1 class="k-display k-stagger k-mt-m">
-          <span>The</span>
-          <span><em class="k-serif">Atlas.</em></span>
-        </h1>
-        <p class="k-lede k-mt-m">Every film, interview, vlog, photo diary and written story from the road, in one place. Search any word, sort by date or place, and filter by type, author, desk or tag.</p>
+    <section class="k-atlas-hero" data-atlas-hero aria-labelledby="atlas-title">
+      <canvas class="k-atlas-hero__earth" data-atlas-earth aria-hidden="true"></canvas>
+      <div class="k-atlas-hero__labels" data-atlas-labels aria-hidden="true"></div>
+      <div class="k-atlas-hero__pins" data-atlas-pins></div>
+      <div class="k-atlas-hero__shade" aria-hidden="true"></div>
+      <div class="k-wrap k-atlas-hero__inner">
+        <p class="k-term__strip"><span class="k-term__t">T3</span><span>The Atlas · <span data-mount="journal-count"></span></span></p>
+        <h1 class="k-atlas-hero__title" id="atlas-title">The <em class="k-serif">Atlas.</em></h1>
+        <p class="k-atlas-hero__lede">Every film, interview, vlog, photo diary and story from the road. Drag the globe, open a pin, or search any word.</p>
+        <label class="k-term__field k-lib__search k-atlas-hero__search"><span class="k-sr">Search the Atlas</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input type="search" data-lib-q placeholder="Search titles, places, people, any word…" autocomplete="off" enterkeyhint="search"></label>
       </div>
-    </header>
-
-    <section class="k-section k-section--tight k-lib" style="padding-top:0" aria-label="Library">
+    </section>
+    <section class="k-section k-section--tight k-lib k-atlas-browse" aria-label="Browse the Atlas">
       <div class="k-wrap">
         <div data-mount="lib-controls"></div>
+      </div>
+      <div class="k-atlas-rows" data-mount="atlas-rows"></div>
+      <div class="k-wrap" data-atlas-results hidden>
         <p class="k-small k-lib__count" data-mount="lib-count" aria-live="polite"></p>
         <div class="k-lib__grid" data-mount="journal"></div>
       </div>
     </section>
-
     <section class="k-section" id="archive" data-mosaic-section aria-labelledby="archive-title">
       <div class="k-wrap">
         <div class="k-section-head">

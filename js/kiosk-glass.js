@@ -329,6 +329,7 @@
         ${NAV.map((n, i) => `<li><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
         <li><a href="lost-and-found.html">Lost &amp; Found <span>${pad(NAV.length + 1)}</span></a></li>
         <li><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
+        <li><a href="flights.html">Flights <span>${pad(NAV.length + 3)}</span></a></li>
       </ul>
       <div class="k-sheet__foot">
         <button class="k-btn k-btn--sm" type="button" data-settings-open>${icon.gear}<span>Settings</span></button>
@@ -347,12 +348,17 @@
     guides.setAttribute('aria-hidden', 'true');
     guides.innerHTML = '<span></span><span></span><span></span><span></span>';
 
-    // Phones: primary navigation sits in a bottom tab bar, within reach of a thumb
+    // Phones: a floating, icon-only tab bar within reach of a thumb. A soft
+    // highlight glides to the current tab; More sits apart in its own circle.
     const tabbar = document.createElement('nav');
     tabbar.className = 'k-tabbar';
     tabbar.setAttribute('aria-label', 'Primary');
-    tabbar.innerHTML = `${TABS.map((t) => `<a class="k-tabbar__item" href="${t.href}" data-tab="${t.id}"${t.id === cur ? ' aria-current="page"' : ''}>${t.icon}<span>${t.label}</span></a>`).join('')}
-      <button class="k-tabbar__item" type="button" data-tab-more aria-expanded="false" aria-controls="k-sheet">${TAB_ICONS.more}<span>More</span></button>`;
+    const curTab = TABS.findIndex((t) => t.id === cur);
+    tabbar.innerHTML = `<div class="k-tabbar__pill" style="--n:${TABS.length};--i:${Math.max(0, curTab)}"${curTab < 0 ? ' data-idle' : ''}>
+        <span class="k-tabbar__glow" aria-hidden="true"></span>
+        ${TABS.map((t) => `<a class="k-tabbar__item" href="${t.href}" data-tab="${t.id}" aria-label="${t.label}" title="${t.label}"${t.id === cur ? ' aria-current="page"' : ''}>${t.icon}</a>`).join('')}
+      </div>
+      <button class="k-tabbar__item k-tabbar__more" type="button" data-tab-more aria-label="More" aria-expanded="false" aria-controls="k-sheet">${TAB_ICONS.more}</button>`;
 
     document.body.prepend(guides);
     document.body.prepend(sheet);
@@ -372,7 +378,15 @@
     };
     btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
     more.addEventListener('click', () => setOpen(more.getAttribute('aria-expanded') !== 'true'));
-    tabbar.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+    tabbar.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (!a) return;
+      setOpen(false);
+      // glide the highlight now; the page follows
+      const pill = $('.k-tabbar__pill', tabbar);
+      pill.style.setProperty('--i', String($$('.k-tabbar__item', pill).indexOf(a)));
+      pill.removeAttribute('data-idle');
+    });
     sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open]')) setOpen(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
@@ -1096,7 +1110,7 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'films', 'atlas', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
+  const SOFT_PAGES = new Set(['', 'index', 'films', 'flights', 'atlas', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
   let pageAbort = new AbortController();
   // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
   const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
@@ -1122,6 +1136,11 @@
     $$('[data-tab]').forEach((a) => {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
+    const pill = $('.k-tabbar__pill');
+    if (pill) {
+      const i = $$('[data-tab]', pill).findIndex((a) => a.dataset.tab === tab);
+      if (i >= 0) { pill.style.setProperty('--i', String(i)); pill.removeAttribute('data-idle'); } else pill.setAttribute('data-idle', '');
+    }
   }
 
   async function softNavigate(href, push) {
@@ -3413,6 +3432,430 @@
       </div>
     </article>`;
   }
+  /* ---------------------------------------------------------- flights
+   * Live flight status on a satellite globe (flights.html). Look a flight
+   * up by number or callsign, or let the KIOSK pick one somewhere on Earth.
+   * Data comes through /api/flights (functions/api/flights.js); if that
+   * can't be reached the page says so and shows sample traffic instead.
+   * -------------------------------------------------------------------- */
+  // IATA code → [ICAO callsign prefix, airline]
+  const AIRLINES = {
+    AA: ['AAL', 'American Airlines'], DL: ['DAL', 'Delta Air Lines'], UA: ['UAL', 'United Airlines'], WN: ['SWA', 'Southwest'], B6: ['JBU', 'JetBlue'],
+    AS: ['ASA', 'Alaska Airlines'], NK: ['NKS', 'Spirit'], F9: ['FFT', 'Frontier'], AC: ['ACA', 'Air Canada'], WS: ['WJA', 'WestJet'],
+    AM: ['AMX', 'Aeroméxico'], AV: ['AVA', 'Avianca'], LA: ['LAN', 'LATAM'], JJ: ['TAM', 'LATAM Brasil'], G3: ['GLO', 'GOL'],
+    BA: ['BAW', 'British Airways'], VS: ['VIR', 'Virgin Atlantic'], AF: ['AFR', 'Air France'], KL: ['KLM', 'KLM'], LH: ['DLH', 'Lufthansa'],
+    LX: ['SWR', 'SWISS'], OS: ['AUA', 'Austrian'], IB: ['IBE', 'Iberia'], TP: ['TAP', 'TAP Air Portugal'], AZ: ['ITY', 'ITA Airways'],
+    SK: ['SAS', 'SAS'], AY: ['FIN', 'Finnair'], FI: ['ICE', 'Icelandair'], EI: ['EIN', 'Aer Lingus'], FR: ['RYR', 'Ryanair'], U2: ['EZY', 'easyJet'],
+    TK: ['THY', 'Turkish Airlines'], EK: ['UAE', 'Emirates'], QR: ['QTR', 'Qatar Airways'], EY: ['ETD', 'Etihad'], ET: ['ETH', 'Ethiopian'],
+    KQ: ['KQA', 'Kenya Airways'], SA: ['SAA', 'South African'], AI: ['AIC', 'Air India'], '6E': ['IGO', 'IndiGo'], SQ: ['SIA', 'Singapore Airlines'],
+    CX: ['CPA', 'Cathay Pacific'], NH: ['ANA', 'ANA'], JL: ['JAL', 'Japan Airlines'], KE: ['KAL', 'Korean Air'], OZ: ['AAR', 'Asiana'],
+    CA: ['CCA', 'Air China'], MU: ['CES', 'China Eastern'], CZ: ['CSN', 'China Southern'], QF: ['QFA', 'Qantas'], NZ: ['ANZ', 'Air New Zealand'],
+    FX: ['FDX', 'FedEx'], '5X': ['UPS', 'UPS'],
+  };
+  const BY_ICAO = Object.fromEntries(Object.entries(AIRLINES).map(([iata, [icao, name]]) => [icao, { iata, name }]));
+  const FL_HUBS = [
+    ['New York', 40.64, -73.78], ['Los Angeles', 33.94, -118.41], ['Chicago', 41.98, -87.9], ['Atlanta', 33.64, -84.43], ['Toronto', 43.68, -79.63],
+    ['Mexico City', 19.44, -99.07], ['São Paulo', -23.43, -46.47], ['Bogotá', 4.7, -74.15], ['London', 51.47, -0.45], ['Paris', 49.01, 2.55],
+    ['Amsterdam', 52.31, 4.76], ['Frankfurt', 50.04, 8.56], ['Madrid', 40.47, -3.56], ['Istanbul', 41.26, 28.74], ['Reykjavík', 63.98, -22.6],
+    ['Lagos', 6.58, 3.32], ['Nairobi', -1.32, 36.93], ['Johannesburg', -26.14, 28.24], ['Cairo', 30.12, 31.41], ['Dubai', 25.25, 55.36],
+    ['Doha', 25.27, 51.61], ['Delhi', 28.56, 77.1], ['Mumbai', 19.09, 72.87], ['Singapore', 1.36, 103.99], ['Bangkok', 13.69, 100.75],
+    ['Hong Kong', 22.31, 113.91], ['Shanghai', 31.14, 121.81], ['Seoul', 37.46, 126.44], ['Tokyo', 35.55, 139.78], ['Sydney', -33.95, 151.18],
+    ['Auckland', -37.01, 174.79], ['Honolulu', 21.32, -157.92], ['Anchorage', 61.17, -149.99], ['Vancouver', 49.19, -123.18], ['Miami', 25.79, -80.29],
+    ['Lisbon', 38.77, -9.13],
+  ].map(([n, lat, lon]) => ({ n, lat, lon }));
+  const toCallsign = (raw) => {
+    const q = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const m = q.match(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/);
+    if (m && AIRLINES[m[1]] && !/^[A-Z]{3}/.test(q)) return AIRLINES[m[1]][0] + m[2].replace(/^0+(?=\d)/, '');
+    return q;
+  };
+  const airlineOf = (cs) => (BY_ICAO[String(cs || '').slice(0, 3)] || {}).name || '';
+  const prettyCs = (cs) => String(cs || '').replace(/^([A-Z]{3})(\d)/, '$1 $2');
+  const iataNo = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata} ${cs.slice(3)}` : ''; };
+  const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round((((deg || 0) % 360) + 360) % 360 / 22.5) % 16];
+  const kmBetween = (a, b) => {
+    const r = Math.PI / 180; const dLa = (b.lat - a.lat) * r; const dLo = (b.lon - a.lon) * r;
+    const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2;
+    return 12742 * Math.asin(Math.min(1, Math.sqrt(h)));
+  };
+  // Sample traffic for when the live feed can't be reached: the fictional KIOSK fleet
+  function sampleTraffic(c) {
+    let seed = Math.round((c.lat + 90) * 1000 + (c.lon + 180)); const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    return Array.from({ length: 42 }, (_, i) => {
+      const alt = rnd() < 0.2 ? 4000 + rnd() * 16000 : 30000 + Math.round(rnd() * 10) * 1000;
+      return {
+        hex: `k${String(100000 + i).slice(1)}`, callsign: `KSK${100 + Math.floor(rnd() * 899)}`, reg: '', type: ['A20N', 'B38M', 'B789', 'A359', 'A21N', 'E75L'][i % 6], sample: true,
+        lat: c.lat + (rnd() - 0.5) * 7, lon: c.lon + (rnd() - 0.5) * 9, alt, gs: alt > 20000 ? 420 + rnd() * 90 : 220 + rnd() * 120,
+        track: rnd() * 360, vs: alt > 20000 ? 0 : (rnd() < 0.5 ? -1 : 1) * (800 + rnd() * 1400), squawk: '', seen: rnd() * 8, ground: false,
+      };
+    });
+  }
+
+  function pageFlights() {
+    const root = $('[data-flights]');
+    if (!root) return;
+    const signal = pageAbort.signal;
+    const air = $('[data-fl-air]', root);
+    const status = $('[data-fl-status]', root);
+    const resEl = $('[data-fl-result]', root);
+    const listEl = $('[data-fl-list]', root);
+    const phone = () => window.innerWidth < 760;
+    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null };
+    const say = (t) => { status.textContent = t; };
+
+    const api = (qs) => fetch(`/api/flights?${qs}`, { signal, headers: { Accept: 'application/json' } }).then(async (r) => {
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw Object.assign(new Error(body.error || `HTTP ${r.status}`), { status: r.status });
+      return body;
+    });
+
+    // Where a plane is now: dead-reckon from its last fix along its track
+    const posOf = (a, now) => {
+      if (!a || a.ground || !a.gs || a.track == null) return { lat: a.lat, lon: a.lon };
+      const hours = Math.min(120, (now - a._at) / 1000 + (a.seen || 0)) / 3600;
+      const km = a.gs * 1.852 * hours; const r = Math.PI / 180;
+      const lat = a.lat + (km / 111.2) * Math.cos(a.track * r);
+      return { lat, lon: a.lon + (km / (111.2 * Math.max(0.2, Math.cos(a.lat * r)))) * Math.sin(a.track * r) };
+    };
+    const stamp = (list) => { const t = performance.now(); list.forEach((a) => { a._at = t; }); return list; };
+
+    // --- the globe and the air above it
+    let ctx = null; let dpr = 1;
+    const sizeAir = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); air.width = Math.round(air.clientWidth * dpr); air.height = Math.round(air.clientHeight * dpr); ctx = air.getContext('2d'); };
+    const frameView = (lat, lon, close) => (phone()
+      ? { lat: lat - (close ? 1.2 : 4), lon, alt: close ? 0.32 : 0.9, tilt: close ? 0.95 : 0.7, px: 0.5, py: close ? 0.3 : 0.32, fov: 0.62 }
+      : { lat: lat - (close ? 1 : 3), lon, alt: close ? 0.3 : 0.8, tilt: close ? 0.95 : 0.75, px: 0.64, py: 0.52, fov: 0.55 });
+    function plane(x, y, ang, size, color, glow) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(size / 24, size / 24);
+      if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 16; }
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(12, 0); ctx.lineTo(9, -1.4); ctx.lineTo(3, -1.6); ctx.lineTo(-3, -9.5); ctx.lineTo(-5.4, -9.5); ctx.lineTo(-2.2, -1.7); ctx.lineTo(-7.8, -1.6);
+      ctx.lineTo(-9.8, -4.6); ctx.lineTo(-11.4, -4.6); ctx.lineTo(-10.2, 0); ctx.lineTo(-11.4, 4.6); ctx.lineTo(-9.8, 4.6); ctx.lineTo(-7.8, 1.6);
+      ctx.lineTo(-2.2, 1.7); ctx.lineTo(-5.4, 9.5); ctx.lineTo(-3, 9.5); ctx.lineTo(3, 1.6); ctx.lineTo(9, 1.4); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    const screenAngle = (p, trk) => {
+      const r = Math.PI / 180; const e = S.earth;
+      const a = e.project(p.lat, p.lon); const b = e.project(p.lat + Math.cos(trk * r) * 0.3, p.lon + Math.sin(trk * r) * 0.3 / Math.max(0.2, Math.cos(p.lat * r)));
+      return Math.atan2(b.y - a.y, b.x - a.x);
+    };
+    function drawAir() {
+      if (!ctx || !S.earth) return;
+      const e = S.earth; const now = performance.now();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, air.clientWidth, air.clientHeight);
+      // route of the selected flight
+      if (S.route && S.route.stops && S.sel) {
+        const [o, d] = [S.route.stops[0], S.route.stops[S.route.stops.length - 1]];
+        if (o.lat != null && d.lat != null) {
+          const pts = window.KioskEarth.arc(o, d, 64, 0);
+          const here = posOf(S.sel, now);
+          const done = kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d));
+          ctx.lineWidth = 2; ctx.lineCap = 'round';
+          [[0, done, 'rgba(255,255,255,.95)', []], [done, 1, 'rgba(255,255,255,.55)', [5, 6]]].forEach(([t0, t1, col, dash]) => {
+            ctx.strokeStyle = col; ctx.setLineDash(dash); ctx.beginPath(); let pen = false;
+            pts.forEach((q) => { if (q.t < t0 || q.t > t1) return; const s = e.project(q.lat, q.lon); if (!s.front) { pen = false; return; } if (pen) ctx.lineTo(s.x, s.y); else ctx.moveTo(s.x, s.y); pen = true; });
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+          [o, d].forEach((ap) => {
+            const s = e.project(ap.lat, ap.lon); if (!s.front) return;
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, 4.5, 0, 6.283); ctx.fill();
+            ctx.fillStyle = '#0b0b0c'; ctx.beginPath(); ctx.arc(s.x, s.y, 2, 0, 6.283); ctx.fill();
+            ctx.font = '700 12px ui-monospace, "SF Mono", Menlo, monospace'; ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 4; ctx.fillText(ap.iata || ap.icao, s.x + 9, s.y + 4); ctx.shadowBlur = 0;
+          });
+        }
+      }
+      // everything else in the air
+      S.field.forEach((a) => {
+        if (S.sel && a.hex === S.sel.hex) return;
+        const p = posOf(a, now); const s = e.project(p.lat, p.lon);
+        if (!s.front || s.x < -20 || s.y < -20 || s.x > air.clientWidth + 20 || s.y > air.clientHeight + 20) return;
+        plane(s.x, s.y, screenAngle(p, a.track || 0), 13, a.ground ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.88)');
+      });
+      // the one we're watching
+      if (S.sel) {
+        const p = posOf(S.sel, now); const s = e.project(p.lat, p.lon);
+        if (s.front) {
+          const ang = screenAngle(p, S.sel.track || 0);
+          ctx.strokeStyle = 'rgba(255,122,61,.55)'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(s.x, s.y, 22 + 4 * Math.sin(now / 300), 0, 6.283); ctx.stroke();
+          plane(s.x, s.y, ang, 30, '#ff7a3d', 'rgba(255,122,61,.9)');
+        }
+      }
+    }
+    let raf = 0; let lastCam = 0;
+    const loop = (now) => {
+      raf = requestAnimationFrame(loop);
+      if (document.hidden || !S.earth) return;
+      if (S.follow && S.sel && now - lastCam > 50) {
+        lastCam = now; const p = posOf(S.sel, now); const v = frameView(p.lat, p.lon, true);
+        if (!S.flying) { S.earth.view.lat = v.lat; S.earth.view.lon = v.lon; S.earth.invalidate(); }
+      }
+      drawAir();
+    };
+
+    // --- panels
+    const fmt = (n, d = 0) => (n == null ? '—' : Number(n).toLocaleString(undefined, { maximumFractionDigits: d }));
+    const phase = (a) => (a.ground ? ['ground', 'On the ground'] : a.vs > 400 ? ['climb', 'Climbing'] : a.vs < -400 ? ['descend', 'Descending'] : a.alt > 18000 ? ['cruise', 'Cruising'] : ['level', 'In the air']);
+    function card() {
+      const a = S.sel; if (!a) { resEl.innerHTML = ''; return; }
+      const [pk, pl] = phase(a);
+      const stops = S.route && S.route.stops; const o = stops && stops[0]; const d = stops && stops[stops.length - 1];
+      let prog = '';
+      if (o && d && o.lat != null) {
+        const here = posOf(a, performance.now()); const k = kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d));
+        prog = `<div class="k-fcard__route"><div><b>${esc(o.iata || o.icao)}</b><small>${esc(o.city || o.name)}</small></div>
+          <div class="k-fcard__track" style="--p:${k.toFixed(3)}"><i></i><span aria-hidden="true">✈</span></div>
+          <div><b>${esc(d.iata || d.icao)}</b><small>${esc(d.city || d.name)}</small></div></div>
+          <p class="k-fcard__left">${fmt(kmBetween(here, d))} km to go${a.gs ? ` · about ${Math.max(1, Math.round(kmBetween(here, d) / (a.gs * 1.852) * 60))} min at this speed` : ''}${S.route.plausible ? '' : ' · route unconfirmed'}</p>`;
+      }
+      const ago = Math.max(0, Math.round((performance.now() - a._at) / 1000 + (a.seen || 0)));
+      resEl.innerHTML = `<article class="k-fcard" aria-live="polite">
+        <div class="k-fcard__top">
+          <div><p class="k-fcard__airline">${esc(airlineOf(a.callsign) || (a.sample ? 'KIOSK Air · sample' : a.desc || 'Flight'))}${iataNo(a.callsign) ? ` · ${esc(iataNo(a.callsign))}` : ''}</p>
+          <h2 class="k-fcard__cs">${esc(prettyCs(a.callsign) || a.hex.toUpperCase())}</h2></div>
+          <span class="k-fcard__state k-fcard__state--${pk}">${pl}</span>
+        </div>
+        ${prog}
+        <dl class="k-fcard__grid">
+          <div><dt>Altitude</dt><dd>${a.ground ? 'Ground' : `${fmt(a.alt)} ft`}</dd></div>
+          <div><dt>Ground speed</dt><dd>${fmt(a.gs)} kt<small>${fmt(a.gs * 1.852)} km/h</small></dd></div>
+          <div><dt>Heading</dt><dd>${fmt(a.track)}° ${compass(a.track)}</dd></div>
+          <div><dt>Vertical</dt><dd>${a.vs ? `${a.vs > 0 ? '+' : ''}${fmt(a.vs)} ft/min` : 'Level'}</dd></div>
+          <div><dt>Aircraft</dt><dd>${esc(a.type || '—')}${a.reg ? `<small>${esc(a.reg)}</small>` : ''}</dd></div>
+          <div><dt>Position</dt><dd class="k-mono">${esc(fmtGeo({ lat: a.lat, lon: a.lon }))}</dd></div>
+        </dl>
+        <p class="k-fcard__seen">${a.sample ? 'Sample traffic · live feed unavailable' : `Last fix ${ago} s ago · ${esc(S.source || 'ADS-B')}${a.squawk ? ` · squawk ${esc(a.squawk)}` : ''}`}</p>
+        <div class="k-fcard__cta">
+          <button class="k-btn k-btn--sm" type="button" data-fl-follow aria-pressed="${S.follow}">${S.follow ? 'Following' : 'Follow'}</button>
+          <button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button>
+          ${a.sample ? '' : '<button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button>'}
+        </div>
+      </article>`;
+    }
+    function list() {
+      const items = S.field.filter((a) => a.callsign && !a.ground && (!S.sel || a.hex !== S.sel.hex)).sort((x, y) => (y.alt || 0) - (x.alt || 0)).slice(0, 10);
+      listEl.innerHTML = items.length ? `<h3 class="k-flights__list-title">Also in the air${S.hub ? ` near ${esc(S.hub.n)}` : ''}</h3>
+        <ul>${items.map((a) => `<li><button type="button" data-fl-pick="${esc(a.hex)}"><span class="k-flights__cs">${esc(prettyCs(a.callsign))}</span><span class="k-flights__al">${esc(airlineOf(a.callsign) || a.type || '')}</span><span class="k-flights__alt">${fmt(a.alt)} ft</span></button></li>`).join('')}</ul>` : '';
+    }
+
+    // --- actions
+    async function loadField(hub) {
+      S.hub = hub;
+      try {
+        const d = await api(`near=${hub.lat.toFixed(2)},${hub.lon.toFixed(2)}`);
+        S.live = true; S.source = d.source; S.field = stamp(d.aircraft || []);
+      } catch (e) {
+        if (signal.aborted) throw e;
+        S.live = false; S.source = 'sample'; S.field = stamp(sampleTraffic(hub));
+      }
+      S.fieldAt = performance.now();
+      return S.field;
+    }
+    async function routeFor(a) {
+      S.route = null;
+      if (!a || a.sample || !a.callsign || !S.live) return;
+      try { const r = await api(`route=${encodeURIComponent(a.callsign)}&lat=${a.lat.toFixed(3)}&lon=${a.lon.toFixed(3)}`); if (S.sel === a) { S.route = r.route; card(); } } catch (e) { /* routes are a bonus */ }
+    }
+    async function select(a, why) {
+      S.sel = a; S.route = null; S.follow = true;
+      if (!a) { card(); return; }
+      card(); list();
+      const p = posOf(a, performance.now());
+      S.flying = true; await S.earth.flyTo(frameView(p.lat, p.lon, true), 1800); S.flying = false;
+      say(why || (S.live ? `${prettyCs(a.callsign) || 'This aircraft'} is ${phase(a)[1].toLowerCase()}${S.hub ? ` near ${S.hub.n}` : ''}.` : 'The live feed isn’t reachable right now, so this is sample traffic from the KIOSK fleet.'));
+      const qs = new URLSearchParams(location.search);
+      if (a.callsign && !a.sample) qs.set('f', a.callsign); else qs.delete('f');
+      history.replaceState(history.state, '', `${location.pathname}${qs.toString() ? `?${qs}` : ''}`);
+      routeFor(a);
+    }
+    async function random() {
+      say('Scanning the skies…');
+      const hub = FL_HUBS[Math.floor(Math.random() * FL_HUBS.length)];
+      S.flying = true; S.sel = null; card();
+      const flight = S.earth.flyTo(frameView(hub.lat, hub.lon, false), 1600);
+      const field = await loadField(hub).catch(() => []);
+      await flight; S.flying = false;
+      const pool = field.filter((a) => a.callsign && !a.ground && a.alt > 8000);
+      list();
+      if (!pool.length) { say(`Quiet skies over ${hub.n} right now. Try again.`); return; }
+      await select(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    async function search(raw) {
+      const cs = toCallsign(raw);
+      if (cs.length < 3) { say('Type a flight number like BA117 or a callsign like DAL1.'); return; }
+      say(`Looking for ${prettyCs(cs)}…`);
+      try {
+        const d = await api(`callsign=${encodeURIComponent(cs)}`);
+        S.live = true; S.source = d.source;
+        const hit = stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0];
+        if (!hit) { say(`${prettyCs(cs)} isn’t in the air right now, or it isn’t broadcasting. Check the number, or try another.`); return; }
+        S.hub = null;
+        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
+        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
+        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`);
+      } catch (e) {
+        if (signal.aborted) return;
+        say(e.status === 429 ? 'Too many lookups at once. Give it a few seconds.' : 'The live feed isn’t reachable right now. Try again shortly, or press Surprise me for sample traffic.');
+      }
+    }
+    function above() {
+      if (!navigator.geolocation) { say('Your browser can’t share a location.'); return; }
+      say('Finding you…');
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const hub = { n: 'you', lat: pos.coords.latitude, lon: pos.coords.longitude };
+        S.flying = true; S.sel = null; card();
+        await Promise.all([S.earth.flyTo(frameView(hub.lat, hub.lon, false), 1600), loadField(hub)]);
+        S.flying = false; list();
+        const pool = S.field.filter((a) => a.callsign && !a.ground);
+        if (!pool.length) { say('Nothing broadcasting overhead right now.'); return; }
+        const nearest = pool.sort((x, y) => kmBetween(x, hub) - kmBetween(y, hub))[0];
+        await select(nearest, `${prettyCs(nearest.callsign)} is the closest flight to you, ${fmt(kmBetween(nearest, hub))} km away.`);
+      }, () => say('Location is off, so we can’t look overhead. Try Surprise me instead.'), { timeout: 10000, maximumAge: 300000 });
+    }
+
+    // --- refresh the watched flight and its neighbours
+    const tick = setInterval(async () => {
+      if (document.hidden || !S.live) return;
+      if (S.sel && !S.sel.sample) {
+        try { const d = await api(`hex=${S.sel.hex}`); const n = stamp(d.aircraft || [])[0]; if (n) { Object.assign(S.sel, n); card(); } } catch (e) { /* keep dead-reckoning */ }
+      }
+      if (S.hub && performance.now() - S.fieldAt > 30000) { await loadField(S.hub).catch(() => {}); if (S.sel) { const n = S.field.find((a) => a.hex === S.sel.hex); if (n) Object.assign(S.sel, n); } list(); }
+    }, 15000);
+
+    $('[data-fl-form]', root).addEventListener('submit', (e) => { e.preventDefault(); search($('[data-fl-q]', root).value); }, { signal });
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-fl-random]')) { random(); return; }
+      if (e.target.closest('[data-fl-near]')) { above(); return; }
+      const f = e.target.closest('[data-fl-follow]');
+      if (f) { S.follow = !S.follow; card(); if (S.follow && S.sel) { const p = posOf(S.sel, performance.now()); S.earth.flyTo(frameView(p.lat, p.lon, true), 900); } return; }
+      if (e.target.closest('[data-fl-share]')) { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('Link copied')); return; }
+      const pk = e.target.closest('[data-fl-pick]');
+      if (pk) { const a = S.field.find((x) => x.hex === pk.dataset.flPick); if (a) select(a); }
+    }, { signal });
+
+    loadScript('js/kiosk-earth.js').then(() => {
+      if (signal.aborted || !window.KioskEarth) return;
+      const start = FL_HUBS[0];
+      let earth = null;
+      try { earth = window.KioskEarth.create($('[data-fl-earth]', root), { view: frameView(start.lat + 8, start.lon - 20, false), drag: true, relief: 0.9, onDrag: (on) => { if (on) S.follow = false; } }); } catch (e) { earth = null; }
+      if (!earth || !earth.gl) { root.classList.add('is-nogl'); return; }
+      S.earth = earth;
+      const lbl = window.KioskEarth.labels($('[data-fl-labels]', root), earth);
+      earth.onFrame = () => lbl.update();
+      earth.ready.then(() => root.classList.add('is-ready'), () => root.classList.add('is-nogl'));
+      sizeAir(); window.addEventListener('resize', sizeAir, { signal });
+      raf = requestAnimationFrame(loop);
+      const want = new URLSearchParams(location.search).get('f');
+      if (want) { $('[data-fl-q]', root).value = want; search(want); } else random();
+    }).catch(() => root.classList.add('is-nogl'));
+
+    signal.addEventListener('abort', () => { clearInterval(tick); cancelAnimationFrame(raf); if (S.earth) S.earth.destroy(); });
+  }
+
+  /* Netflix-style rows for the Atlas: featured up top, then by type and desk */
+  function atlasTile(f, big) {
+    const type = postType(f);
+    const title = f.title || featureName(f);
+    const meta = type === 'video' ? (f.runtime || 'Film') : type === 'photo' ? `${(f.gallery || []).length || ''} photos`.trim() : `${readMinutes(f)} min read`;
+    const sub = [postPlace(f), meta].filter(Boolean).join(' · ');
+    return `<a class="k-ftile k-atile${big ? ' k-atile--big' : ''}" href="${storyHref(f)}" aria-label="${esc(title)}${sub ? `, ${esc(sub)}` : ''}">
+      <span class="k-ftile__media">
+        ${media({ image: f.image, tone: f.tone, mark: f.code, alt: '', focus: f.focus, vimeo: f.vimeo })}
+        <span class="k-lib-card__type k-lib-card__type--${type}">${type === 'video' ? '▶ ' : ''}${esc(POST_TYPES[type])}</span>
+        ${big ? `<span class="k-atile__over"><small>${esc([f.published ? shortDate(f.published) : "", postPlace(f)].filter(Boolean).join(' · '))}</small><b>${esc(title)}</b>${f.tagline ? `<em>${esc(f.tagline)}</em>` : ''}</span>` : ''}
+      </span>
+      ${big ? '' : `<span class="k-ftile__info"><b>${esc(title)}</b><small>${esc(sub)}</small></span>`}
+    </a>`;
+  }
+  function atlasRows(posts) {
+    const newest = byNewest(posts);
+    const featured = worldFeatured();
+    const rows = [
+      { title: 'Featured', list: featured, big: true },
+      { title: 'Latest from the road', list: newest },
+      { title: 'Films & vlogs', list: newest.filter((f) => postType(f) === 'video') },
+      { title: 'Photo diaries', list: newest.filter((f) => postType(f) === 'photo') },
+      { title: 'Stories', list: newest.filter((f) => postType(f) === 'article') },
+      ...Object.keys(DESKS).map((d) => ({ title: `${DESKS[d]} desk`, list: newest.filter((f) => f.desk === d) })),
+    ].filter((r) => r.list.length);
+    return rows.map((r) => `
+      <div class="k-wrap k-frow k-arow${r.big ? ' k-arow--big' : ''}" data-reveal>
+        <div class="k-frow__head"><h2 class="k-frow__title">${esc(r.title)}</h2><span class="k-frow__count">${r.list.length}</span></div>
+        ${railShell(r.list.map((f) => atlasTile(f, r.big)).join(''), r.title, `k-hscroll-wrap--films${r.big ? ' k-hscroll-wrap--atlas-big' : ''}`)}
+      </div>`).join('');
+  }
+  /* The Atlas header: a satellite Earth in quarter view over the stories, with
+   * their pins fanned out, map labels, and drag to look around. */
+  function mountAtlasEarth(posts) {
+    const hero = $('[data-atlas-hero]');
+    const canvas = $('[data-atlas-earth]');
+    if (!hero || !canvas) return;
+    const signal = pageAbort.signal;
+    const pinned = worldFeatured().concat(posts).filter((f, i, a) => f.geo && a.indexOf(f) === i).slice(0, 4);
+    const pinsEl = $('[data-atlas-pins]', hero);
+    pinsEl.innerHTML = pinned.map((f, i) => `
+      <a class="k-wl-node k-atlas-pin" href="${storyHref(f)}" data-atlas-pin="${i}" aria-label="${esc(f.title || featureName(f))}, ${esc(postPlace(f) || fmtGeo(f.geo))}">
+        <span class="k-wl-node__line" aria-hidden="true"></span>
+        <span class="k-wl-node__pin" aria-hidden="true"></span>
+        <span class="k-wl-node__card">
+          <span class="k-wl-node__thumb">${featureMedia(f, { meta: '', mark: f.code, cls: 'k-media--clean', style: 'position:absolute;inset:0' })}</span>
+          <span class="k-wl-node__label"><b>${esc(f.title || featureName(f))}</b><small>${esc(postPlace(f) || fmtGeo(f.geo))}</small></span>
+        </span>
+      </a>`).join('');
+    const pins = $$('[data-atlas-pin]', pinsEl);
+    loadScript('js/kiosk-earth.js').then(() => {
+      if (signal.aborted || !window.KioskEarth) return;
+      const geos = pinned.map((f) => f.geo);
+      const c = geos.length ? { lat: geos.reduce((a, g) => a + g.lat, 0) / geos.length, lon: geos.reduce((a, g) => a + g.lon, 0) / geos.length } : HOME_GEO;
+      const phone = () => window.innerWidth < 760;
+      const home = () => (phone()
+        ? { lat: c.lat + 1, lon: c.lon - 9, alt: 1.05, tilt: 0.62, py: 0.42, fov: 0.62 }
+        : { lat: c.lat + 3, lon: c.lon - 14, alt: 0.62, tilt: 0.86, py: 0.56, fov: 0.55 });
+      let earth;
+      // Light staged for late afternoon over the stories, dusk coming in from the east
+      try { earth = window.KioskEarth.create(canvas, { view: home(), drag: true, relief: 1.1, sun: (v, real) => ({ lat: real.lat * 0.5 + 12, lon: v.lon - 38 }) }); } catch (e) { earth = null; }
+      if (!earth || !earth.gl) { hero.classList.add('is-nogl'); return; }
+      const lbl = window.KioskEarth.labels($('[data-atlas-labels]', hero), earth, { skip: pinned.map(postPlace) });
+      earth.onFrame = () => {
+        const W = hero.clientWidth;
+        const spread = Math.min(W, hero.clientHeight) * (phone() ? 0.2 : 0.17);
+        const avoid = [];
+        pins.forEach((n, i) => {
+          const p = earth.project(geos[i].lat, geos[i].lon);
+          const ox = NODE_FAN[i][0] * spread * (phone() ? 1.5 : 1.7); const oy = NODE_FAN[i][1] * spread * (phone() ? 1.55 : 1.3);
+          if (p.front) avoid.push({ x: p.x, y: p.y, r: 14 }, { x: p.x + ox, y: p.y + oy, r: phone() ? 56 : 84 });
+          n.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+          n.style.setProperty('--ox', `${ox.toFixed(1)}px`); n.style.setProperty('--oy', `${oy.toFixed(1)}px`);
+          n.style.setProperty('--len', `${Math.hypot(ox, oy).toFixed(1)}px`);
+          n.style.setProperty('--ang', `${Math.atan2(oy, ox).toFixed(4)}rad`);
+          n.style.opacity = p.front ? '' : '0';
+          n.style.pointerEvents = p.front ? '' : 'none';
+        });
+        lbl.update(avoid);
+      };
+      earth.ready.then(() => hero.classList.add('is-ready'), () => hero.classList.add('is-nogl'));
+      // A slow drift west to east until someone takes the controls
+      let drift = !REDUCED; let t0 = performance.now(); let raf = 0; let seen = true;
+      const base = earth.view.lon;
+      const spin = (now) => {
+        raf = 0;
+        if (!drift || !seen || signal.aborted) return;
+        earth.view.lon = base + Math.sin((now - t0) / 14000) * 6;
+        earth.invalidate();
+        raf = requestAnimationFrame(spin);
+      };
+      if (drift) raf = requestAnimationFrame(spin);
+      canvas.addEventListener('pointerdown', () => { drift = false; }, { signal });
+      const io = new IntersectionObserver(([en]) => { seen = en.isIntersecting; if (seen && drift && !raf) { t0 = performance.now() - 0; raf = requestAnimationFrame(spin); } });
+      io.observe(hero);
+      window.addEventListener('resize', () => { if (!drift) return; Object.assign(earth.view, home()); earth.invalidate(); }, { signal });
+      signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); earth.destroy(); });
+    }).catch(() => hero.classList.add('is-nogl'));
+  }
   function pageJournal() {
     const posts = features.slice();
     const params = new URLSearchParams(location.search);
@@ -3432,7 +3875,6 @@
     const chip = (key, val, label, on) => `<button type="button" class="k-chip" data-lib="${key}" data-val="${esc(val)}" aria-pressed="${on}">${esc(label)}</button>`;
     const controls = () => `
       <div class="k-lib__bar">
-        <label class="k-term__field k-lib__search"><span class="k-sr">Search the Atlas</span>${icon.search}<input type="search" data-lib-q value="${esc(st.q)}" placeholder="Search titles, places, people, any word…" autocomplete="off" enterkeyhint="search"></label>
         <label class="k-sr" for="lib-sort">Sort</label>
         <select class="k-select" id="lib-sort" data-lib-sort>
           ${[['new', 'Newest first'], ['old', 'Oldest first'], ['title', 'Title A–Z'], ['place', 'Location A–Z'], ['author', 'Author A–Z']].map(([v, l]) => `<option value="${v}"${st.sort === v ? ' selected' : ''}>${l}</option>`).join('')}
@@ -3449,6 +3891,11 @@
       </div>`;
     const results = () => {
       const q = st.q.trim().toLowerCase();
+      // Browsing (no search or filter): streaming rows. Otherwise: a results grid.
+      const active = !!(q || st.type || st.desk || st.author || st.loc || st.tags.size || st.sort !== 'new');
+      const rowsEl = mount('atlas-rows'); const resEl = $('[data-atlas-results]');
+      if (rowsEl) rowsEl.hidden = active;
+      if (resEl) resEl.hidden = !active;
       let list = posts.filter((f) => (!st.type || postType(f) === st.type) && (!st.desk || f.desk === st.desk)
         && (!st.author || (f.author || 'KIOSK') === st.author) && (!st.loc || postPlace(f) === st.loc)
         && [...st.tags].every((t) => (f.tags || []).includes(t))
@@ -3474,7 +3921,11 @@
       renderedKey = pageKey();
     };
     const paint = () => { fill('lib-controls', controls()); results(); };
+    $$('[data-lib-q]').forEach((el) => { el.value = st.q; });
+    fill('atlas-rows', atlasRows(posts));
+    hydrateCovers(mount('atlas-rows') || document);
     paint();
+    mountAtlasEarth(posts);
     let t = 0;
     document.addEventListener('input', (e) => {
       if (!e.target.matches('[data-lib-q]')) return;
@@ -4049,7 +4500,11 @@
     let seen = false;
     try { seen = sessionStorage.getItem('kiosk:sky') === '1'; sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { seen = true; }
     const quick = seen || prefs.intro === 'off';
-    const fail = setTimeout(() => sec.classList.remove('is-boot'), 3500);
+    const root = document.documentElement;
+    root.classList.add('is-mark-pending');
+    const giveUp = () => { sec.classList.remove('is-boot'); root.classList.remove('is-mark-pending'); };
+    signal.addEventListener('abort', () => root.classList.remove('is-mark-pending'));
+    const fail = setTimeout(giveUp, 3500);
     Promise.all([loadGsap(), window.KIOSK_WORLD ? null : loadScript('js/kiosk-world.js')])
       .then(() => (window.KioskSky ? null : loadScript('js/kiosk-sky.js')))
       .then(() => {
@@ -4062,7 +4517,7 @@
         window.ScrollTrigger.refresh();
         signal.addEventListener('abort', () => sky.stop());
       })
-      .catch((err) => { clearTimeout(fail); sec.classList.remove('is-boot'); console.warn('[KIOSK] sky unavailable', err); });
+      .catch((err) => { clearTimeout(fail); giveUp(); console.warn('[KIOSK] sky unavailable', err); });
   }
 
   function loadScript(src) {
@@ -4094,6 +4549,7 @@
     { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
+    { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
   ];
   const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
@@ -4167,7 +4623,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { home: pageHome, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
+  const PAGES = { home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();

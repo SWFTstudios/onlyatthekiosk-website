@@ -2442,29 +2442,48 @@ html[data-nav='back']::view-transition-new(root) { animation-name: k-vt-in-back;
 /* ------------------------------------------------------ mobile tab bar */
 .k-tabbar { display: none; }
 @media (max-width: 760px) {
-  :root { --tabbar-h: calc(64px + max(10px, env(safe-area-inset-bottom))); }
+  :root { --tabbar-h: calc(62px + max(12px, env(safe-area-inset-bottom))); }
   .k-tabbar {
     position: fixed; z-index: 110;
-    left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom));
-    display: grid; grid-template-columns: repeat(6, 1fr); align-items: stretch;
-    height: 62px; padding: 5px;
-    border-radius: 24px; border: 1px solid var(--line-2);
-    background: var(--nav-bg);
-    -webkit-backdrop-filter: var(--blur-strong); backdrop-filter: var(--blur-strong);
-    box-shadow: var(--hairline), var(--elev-2);
+    left: 14px; right: 14px; bottom: max(12px, env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 10px;
+    pointer-events: none;
   }
-  html[data-corners='square'] .k-tabbar { border-radius: 4px; }
+  .k-tabbar > * { pointer-events: auto; }
+  .k-tabbar__pill, .k-tabbar__more {
+    border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6); backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow: 0 10px 30px -12px rgba(0,0,0,.45), inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+  }
+  .k-tabbar__pill {
+    position: relative; flex: 1; display: grid; grid-template-columns: repeat(var(--n), 1fr);
+    height: 60px; padding: 5px; border-radius: 30px; max-width: 360px;
+  }
+  .k-tabbar__glow {
+    position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc((100% - 10px) / var(--n));
+    border-radius: 25px; background: color-mix(in srgb, var(--ink) 11%, transparent);
+    transform: translateX(calc(var(--i) * 100%));
+    transition: transform .5s cubic-bezier(.3, 1.35, .45, 1), opacity .3s;
+  }
+  .k-tabbar__pill[data-idle] .k-tabbar__glow { opacity: 0; }
   .k-tabbar__item {
-    position: relative; display: grid; place-items: center; align-content: center; gap: 3px;
-    min-width: 0; padding: 0; border: 0; border-radius: 18px; background: none;
-    font: inherit; font-size: calc(10px * var(--type, 1)); letter-spacing: 0.01em; color: var(--ink-3);
-    transition: color 0.2s, background 0.25s var(--ease), transform 0.2s var(--ease);
+    position: relative; z-index: 1; display: grid; place-items: center;
+    min-width: 0; padding: 0; border: 0; border-radius: 25px; background: none;
+    color: var(--ink-3); -webkit-tap-highlight-color: transparent;
+    transition: color .25s, transform .25s var(--ease);
   }
-  .k-tabbar__item svg { width: 23px; height: 23px; }
-  .k-tabbar__item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
-  .k-tabbar__item[aria-current='page'], .k-tabbar__item[aria-expanded='true'] { color: var(--ink); background: var(--glass-3); }
-  .k-tabbar__item[aria-current='page']::before { content: ''; position: absolute; top: 5px; left: 50%; width: 4px; height: 4px; margin-left: 13px; border-radius: 50%; background: var(--signal); }
-  body.is-radio-playing .k-tabbar__item[data-tab='radio']::after { content: ''; position: absolute; top: 6px; left: 50%; margin-left: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--signal); animation: k-pulse 1s var(--ease-io) infinite alternate; }
+  .k-tabbar__item svg { width: 25px; height: 25px; transition: transform .35s var(--ease); }
+  .k-tabbar__item[aria-current='page'] { color: var(--ink); }
+  .k-tabbar__item[aria-current='page'] svg { transform: scale(1.06); }
+  .k-tabbar__item:active svg { transform: scale(.88); }
+  .k-tabbar__more { flex: none; width: 60px; height: 60px; border-radius: 50%; color: var(--ink); margin-left: auto; }
+  .k-tabbar__more[aria-expanded='true'] { background: var(--ink); color: var(--bg); }
+  body.is-radio-playing .k-tabbar__item[data-tab='radio']::after { content: ''; position: absolute; top: 11px; right: calc(50% - 15px); width: 6px; height: 6px; border-radius: 50%; background: var(--signal); animation: k-pulse 1s var(--ease-io) infinite alternate; }
+
+  /* On the home page the top pill waits until the ꓘIOSK wordmark has flown into it */
+  .k-nav__inner { transition: background-color .45s var(--ease), border-color .45s var(--ease), box-shadow .45s var(--ease), -webkit-backdrop-filter .45s, backdrop-filter .45s; }
+  html.is-mark-pending .k-nav__inner { background: transparent; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 
   /* The top bar keeps just the logo (and tucks away as you read) */
   .k-nav__actions { display: none !important; }
@@ -3304,3 +3323,139 @@ a.k-board__row { display: grid; text-decoration: none; }
 @keyframes k-sky-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 /* the cover below takes the logo's place: no second wordmark */
 .k-sky ~ .k-cover .k-cover__title { display: none; }
+
+/* ---------------------------------------------------------- satellite Earth
+ * js/kiosk-earth.js: map labels in the style of a flight tracker */
+.k-earth-label { position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: none; color: #fff; font-family: var(--f-sans); font-weight: 600; font-size: 12.5px; letter-spacing: .01em; text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.45); will-change: transform, opacity; transition: opacity .25s; }
+.k-earth-label--city { translate: -4px -50%; display: flex; align-items: center; gap: 5px; }
+.k-earth-label--city i { width: 5px; height: 5px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,.8); }
+.k-earth-label--land { translate: -50% -50%; font-size: 15px; letter-spacing: .32em; text-transform: uppercase; font-weight: 700; }
+.k-earth-label--sea { translate: -50% -50%; color: #a9d3ff; font-style: italic; font-weight: 600; font-size: 12px; letter-spacing: .12em; }
+@media (max-width: 760px) { .k-earth-label { font-size: 11.5px; } .k-earth-label--land { font-size: 13px; } .k-earth-label--sea { font-size: 10.5px; } }
+
+/* ------------------------------------------------------------- the Atlas */
+.k-atlas-hero { position: relative; height: min(86svh, 860px); min-height: 560px; overflow: hidden; background: #000; color: #fff; isolation: isolate; }
+.k-atlas-hero__earth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); cursor: grab; }
+.k-atlas-hero__earth:active { cursor: grabbing; }
+.k-atlas-hero.is-ready .k-atlas-hero__earth { opacity: 1; }
+.k-atlas-hero.is-nogl { background: radial-gradient(120% 90% at 50% 110%, #12305c 0, #061226 45%, #000 70%); }
+.k-atlas-hero__labels, .k-atlas-hero__pins { position: absolute; inset: 0; pointer-events: none; }
+.k-atlas-hero__labels { opacity: 0; transition: opacity 1s .4s; }
+.k-atlas-hero.is-ready .k-atlas-hero__labels { opacity: 1; }
+.k-atlas-hero__pins { z-index: 2; color: #fff; }
+.k-atlas-pin .k-wl-node__label b { text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.k-atlas-pin .k-wl-node__label small { color: rgba(255,255,255,.75); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.k-atlas-hero__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,.45) 0, transparent 22%, transparent 55%, rgba(0,0,0,.55) 82%, var(--bg) 100%); }
+.k-atlas-hero__inner { position: absolute; left: 0; right: 0; bottom: clamp(22px, 5vh, 56px); z-index: 3; pointer-events: none; }
+.k-atlas-hero__inner > * { pointer-events: auto; }
+.k-atlas-hero .k-term__strip { color: rgba(255,255,255,.8); }
+.k-atlas-hero__title { margin: 10px 0 0; font-size: calc(clamp(52px, 9vw, 128px) * var(--type, 1)); line-height: .9; letter-spacing: -0.05em; font-weight: 500; text-shadow: 0 2px 24px rgba(0,0,0,.4); }
+.k-atlas-hero__lede { max-width: 46ch; margin: 12px 0 0; color: rgba(255,255,255,.82); font-size: calc(15.5px * var(--type, 1)); text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+.k-atlas-hero__search { margin-top: 18px; max-width: 560px; background: rgba(20,22,28,.55) !important; border-color: rgba(255,255,255,.18) !important; color: #fff; -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); }
+.k-atlas-hero__search input { color: #fff; }
+.k-atlas-hero__search input::placeholder { color: rgba(255,255,255,.6); }
+.k-atlas-hero__search svg { width: 18px; height: 18px; flex: none; }
+html[data-theme='dark'] .k-atlas-hero__shade { background: linear-gradient(180deg, rgba(0,0,0,.45) 0, transparent 22%, transparent 55%, rgba(0,0,0,.6) 82%, var(--bg) 100%); }
+@media (max-width: 760px) {
+  .k-atlas-hero { height: 78svh; min-height: 520px; }
+  .k-atlas-hero__lede { font-size: 14px; }
+  .k-atlas-pin .k-wl-node__card { width: 92px; }
+}
+.k-atlas-browse { padding-top: 6px !important; }
+.k-atlas-browse .k-lib__filters { margin-bottom: 8px; }
+.k-atlas-rows { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(14px, 2.4vw, 26px); }
+.k-atlas-rows > * { min-width: 0; }
+.k-earth-label.is-hidden { opacity: 0 !important; }
+.k-atlas-rows[hidden], [data-atlas-results][hidden] { display: none !important; }
+.k-atile { display: block; text-decoration: none; }
+.k-atile .k-ftile__media > .k-media { position: absolute; inset: 0; height: 100%; border-radius: 0; }
+.k-atile .k-ftile__media .k-media img, .k-atile .k-ftile__media .k-media .plate { width: 100%; height: 100%; object-fit: cover; }
+.k-atile .k-lib-card__type { left: 10px; top: 10px; }
+.k-hscroll-wrap--atlas-big .k-hscroll { grid-auto-columns: clamp(270px, 44vw, 620px); }
+.k-atile--big .k-ftile__media { aspect-ratio: 16 / 9; }
+.k-atile__over { position: absolute; inset: auto 0 0 0; display: grid; gap: 3px; padding: 44px 16px 14px; color: #fff; background: linear-gradient(180deg, transparent, rgba(0,0,0,.78)); }
+.k-atile__over small { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.k-atile__over b { font-weight: 500; font-size: calc(clamp(17px, 2vw, 26px) * var(--type, 1)); letter-spacing: -0.02em; line-height: 1.1; }
+.k-atile__over em { font-family: var(--f-serif); font-size: calc(clamp(14px, 1.4vw, 18px) * var(--type, 1)); opacity: .85; }
+
+/* ------------------------------------------------------------- flights
+ * flights.html: a satellite globe behind a dark sheet (side panel on wide
+ * screens), in the spirit of a flight tracker app. */
+body[data-page='flights'] { background: #000; }
+body[data-page='flights'] .k-footer { display: none; }
+.k-flights { position: relative; min-height: 100svh; color: #f4f4f5; }
+.k-flights__stage { position: fixed; inset: 0; z-index: 0; background: #000; }
+.k-flights__earth, .k-flights__air { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.k-flights__earth { opacity: 0; transition: opacity 1.2s var(--ease); touch-action: pan-y; cursor: grab; }
+.k-flights.is-ready .k-flights__earth { opacity: 1; }
+.k-flights.is-nogl .k-flights__stage { background: radial-gradient(120% 80% at 60% 110%, #12305c 0, #061226 45%, #000 70%); }
+.k-flights__air { pointer-events: none; }
+.k-flights__labels { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1s .4s; }
+.k-flights.is-ready .k-flights__labels { opacity: 1; }
+.k-flights__stage { pointer-events: none; }
+.k-flights__stage .k-flights__earth { pointer-events: auto; }
+.k-flights__panel {
+  position: relative; z-index: 2;
+  display: grid; gap: 14px; align-content: start;
+  background: rgba(22,23,27,.9); color: #f4f4f5;
+  -webkit-backdrop-filter: blur(28px) saturate(1.5); backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,.8);
+  --ink: #f4f4f5; --ink-2: rgba(244,244,245,.78); --ink-3: rgba(244,244,245,.55); --line: rgba(255,255,255,.1); --line-2: rgba(255,255,255,.16);
+}
+.k-flights__grab { display: none; }
+.k-flights__head .k-term__strip { color: rgba(255,255,255,.7); }
+.k-flights__title { margin: 6px 0 0; font-size: calc(clamp(34px, 4vw, 46px) * var(--type, 1)); font-weight: 600; letter-spacing: -0.035em; line-height: 1; }
+.k-flights__sub { margin: 8px 0 0; color: var(--ink-2); font-size: calc(14.5px * var(--type, 1)); min-height: 2.6em; }
+.k-flights__search .k-term__field { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #fff; }
+.k-flights__search input { color: #fff; text-transform: uppercase; letter-spacing: .04em; }
+.k-flights__search input::placeholder { color: rgba(255,255,255,.45); text-transform: none; letter-spacing: 0; }
+.k-flights__search svg { width: 18px; height: 18px; flex: none; }
+.k-flights__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.k-flights .k-btn { border-color: rgba(255,255,255,.16); color: #fff; background: rgba(255,255,255,.06); }
+.k-flights .k-btn--solid { background: #fff; color: #0b0b0c; border-color: #fff; }
+.k-flights__note { margin: 4px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
+.k-flights__note a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.k-fcard { display: grid; gap: 14px; padding: 16px; border-radius: 20px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+.k-fcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.k-fcard__airline { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+.k-fcard__cs { margin: 2px 0 0; font-family: var(--f-mono); font-size: calc(30px * var(--type, 1)); font-weight: 600; letter-spacing: .02em; }
+.k-fcard__state { flex: none; padding: 5px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,.1); }
+.k-fcard__state--climb { background: rgba(52,199,89,.18); color: #5ee083; }
+.k-fcard__state--descend { background: rgba(255,159,10,.18); color: #ffb648; }
+.k-fcard__state--cruise { background: rgba(10,132,255,.2); color: #6cb6ff; }
+.k-fcard__route { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; }
+.k-fcard__route > div:not(.k-fcard__track) b { display: block; font-family: var(--f-mono); font-size: 22px; font-weight: 600; letter-spacing: .02em; }
+.k-fcard__route > div:not(.k-fcard__track) small { display: block; max-width: 11ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--ink-3); }
+.k-fcard__route > div:last-child { text-align: right; }
+.k-fcard__track { position: relative; height: 2px; border-radius: 2px; background: rgba(255,255,255,.18); }
+.k-fcard__track i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--p) * 100%); border-radius: 2px; background: #fff; }
+.k-fcard__track span { position: absolute; top: 50%; left: calc(var(--p) * 100%); translate: -50% -50%; font-size: 16px; color: #ff7a3d; text-shadow: 0 0 10px rgba(255,122,61,.7); }
+.k-fcard__left { margin: -6px 0 0; font-size: 12px; color: var(--ink-3); }
+.k-fcard__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; margin: 0; }
+.k-fcard__grid dt { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.k-fcard__grid dd { margin: 3px 0 0; font-size: 14.5px; font-weight: 500; }
+.k-fcard__grid dd small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); }
+.k-fcard__grid .k-mono { font-size: 12px; }
+.k-fcard__seen { margin: 0; font-size: 11.5px; color: var(--ink-3); }
+.k-fcard__cta { display: flex; flex-wrap: wrap; gap: 8px; }
+.k-fcard__cta [aria-pressed='true'] { background: rgba(255,122,61,.18); border-color: rgba(255,122,61,.5); color: #ffb58f; }
+.k-flights__list-title { margin: 4px 0 8px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.k-flights__list ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.k-flights__list button { width: 100%; display: grid; grid-template-columns: 92px 1fr auto; align-items: center; gap: 10px; padding: 11px 4px; border: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.k-flights__list button:hover { background: rgba(255,255,255,.04); }
+.k-flights__cs { font-family: var(--f-mono); font-weight: 600; font-size: 13.5px; }
+.k-flights__al { font-size: 12.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-flights__alt { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-3); }
+@media (min-width: 760px) {
+  .k-flights__panel { position: fixed; left: max(16px, calc((100vw - var(--max)) / 2)); top: calc(var(--nav-h, 76px) + 24px); bottom: 20px; width: min(420px, 38vw); padding: 22px; border-radius: 28px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+}
+@media (max-width: 759px) {
+  .k-flights { padding-top: 54svh; }
+  .k-flights__panel { margin: 0 8px; padding: 10px 18px calc(var(--tabbar-h, 80px) + 24px); border-radius: 30px 30px 0 0; min-height: 50svh; border-bottom: 0; }
+  .k-flights__grab { display: block; justify-self: center; width: 38px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.25); }
+  .k-fcard__cs { font-size: 26px; }
+  .k-fcard__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body[data-page='flights'].k { padding-bottom: 0; }
+}
+@media (max-width: 760px) { .k-sky__hint { bottom: calc(var(--tabbar-h) + 18px); } }

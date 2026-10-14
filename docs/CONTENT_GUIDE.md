@@ -7,7 +7,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Page | URL | Renders |
 | --- | --- | --- |
 | Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
-| Journal | `atlas.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
+| Atlas | `atlas.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
 | Garage | `atlas.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
 | Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
 | Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
@@ -346,11 +346,20 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 ## Site map (2026-10)
 
 - **Home** (`index.html`): opens *above the clouds* (`js/kiosk-sky.js`): a dotted globe turns while a flight hops New York → Reykjavík → Lisbon → Lagos → Dubai → Tokyo, then the camera drops out of orbit toward Tokyo (land streaming past, the air thickening into the sky of the hour), breaks out high over the cloud sea and levels off above it. The spelled-out ꓘIOSK rises from behind the clouds with the tagline (`.k-sky__tagline` in `index.html`) beneath. Scrolling flies the wordmark up into the centered nav symbol while the camera sinks into the clouds and dissolves onto the hero slideshow. The globe journey plays once per session (Settings › Intro animation: Off skips it); the route is `ROUTE` in `js/kiosk-sky.js`. Further down, the **Atlas** globe pins up to four featured stories (`issue.featured`) at their `geo: { lat, lon }`; scrolling past the hero flips the hero video into the first pin (GSAP Flip, `js/vendor/gsap`).
-- **The Atlas** (`atlas.html`): every post, video or written. Search any word (titles, places, story text, chapters, tags); sort by date, title, location or author; filter by type (video / photos / article), desk, author, location and tags. Filters live in the URL, e.g. `atlas.html?type=video&tag=Film`.
+- **The Atlas** (`atlas.html`): opens on a satellite Earth in quarter view (`js/kiosk-earth.js`), framed on the stories that have a `geo` and lit for late afternoon, with up to four featured posts pinned on it. Drag the globe to look around. Below it, posts sit in streaming-style rows: Featured (`issue.featured`), Latest, Films & vlogs, Photo diaries, Stories, then one row per desk. Typing in the search box or touching a filter swaps the rows for a results grid. Search any word (titles, places, story text, chapters, tags); sort by date, title, location or author; filter by type (video / photos / article), desk, author, location and tags. Filters live in the URL, e.g. `atlas.html?type=video&tag=Film`.
+- **Flights** (`flights.html`, terminal T6 "Flight deck"): live flight status on the same satellite Earth, with the real day/night line. Search a flight number (`BA117`) or callsign (`BAW117`), press *Surprise me* for a random flight near one of ~36 world hubs, or *Above me* for the closest flight overhead (asks for location). Links share as `flights.html?f=BAW117`. Data: `functions/api/flights.js` proxies the free [adsb.lol](https://adsb.lol) ADS-B feed (ODbL) with the OpenSky Network as a backup for callsign lookups, and caches answers at the edge for a few seconds. Routes come from adsb.lol's route database and can be wrong for some callsigns. If the feed can't be reached, the page says so and shows sample traffic from the fictional KIOSK fleet (`KSK` callsigns). Airline names for callsign prefixes are `AIRLINES` in `js/kiosk-glass.js`.
 - **Films** (`films.html`): the screening room, a billboard and streaming-style rows from `filmRows` and `films` in `js/kiosk-content.js`. Add `vimeo`, `youtube` or `video` to a film to make it playable; without one it shows "Coming soon".
 - **Radio** (`radio.html`): curated playlists from Spotify (`spotify`), SoundCloud (`soundcloud`), Apple Music (`apple`) or a self-hosted MP3 (`audio`). The player docks at the bottom and keeps playing while people browse.
 - **Lost & Found** (`lost-and-found.html`, was The Hunt): rare finds and pickup-only pieces on the map.
 - The Garage page is gone; `/garage` redirects to the library and `/hunt` to Lost & Found (`_redirects`).
+
+## Satellite Earth (Atlas header, Flights)
+
+`js/kiosk-earth.js` draws a photographic globe in one WebGL2 pass: NASA Blue Marble (day), Black Marble city lights (night), a relief map for terrain shading, ocean glint, atmosphere and stars. The textures live in `images/earth/` (NASA Visible Earth, public domain; phones load `day-2k.jpg`, larger screens `day-4k.jpg`). Map labels (continents, oceans, cities) are `LABELS` in the same file. Without WebGL2 the header falls back to a dark gradient.
+
+## Phone navigation
+
+On phones the tab bar floats at the bottom with icons only (Home, Atlas, Films, Radio, Shop); a soft highlight glides to the current page, and More sits apart in its own circle and opens the menu, which also lists Flights, Lost & Found and Stores. On the home page the header pill stays hidden until the ꓘIOSK wordmark has flown up and formed the symbol inside it.
 
 ## Brand marks
 
