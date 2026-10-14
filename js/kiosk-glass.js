@@ -71,6 +71,9 @@
     pause: '<svg viewBox="0 0 12 14" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="4" height="14" rx="1"/><rect x="8" y="0" width="4" height="14" rx="1"/></svg>',
     close: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
     heart: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13.5S2 10 2 5.8A3 3 0 0 1 8 4.3a3 3 0 0 1 6 1.5C14 10 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    expand: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5L9 7M2.5 13.5L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    collapse: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5L14 2M6.5 9.5L2 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    pin: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 14.5s5-4.6 5-8.3A5 5 0 0 0 3 6.2c0 3.7 5 8.3 5 8.3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.3" r="1.7" stroke="currentColor" stroke-width="1.3"/></svg>',
     gear: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 6h8M15 6h2M3 14h2M9 14h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="13" cy="6" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="14" r="2" stroke="currentColor" stroke-width="1.4"/></svg>',
     search: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -124,13 +127,16 @@
     return `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
   };
 
-  const productHref = (p, cw) => {
-    if (p.status !== 'available') return '';
-    const way = (p.colorways || [])[cw || 0];
-    const handle = (way && way.shopifyHandle) || p.shopifyHandle;
-    if (handle) return `/products/${encodeURIComponent(handle)}`;
-    return p.href || '';
-  };
+  // Per-colourway helpers: a colourway can carry its own status, handle and photos
+  const wayOf = (p, cw) => (p.colorways || [])[cw || 0] || {};
+  const wayStatus = (p, cw) => wayOf(p, cw).status || p.status;
+  const handleOf = (p, cw) => wayOf(p, cw).shopifyHandle || p.shopifyHandle || '';
+  const lifeOf = (p, cw) => { const w = wayOf(p, cw); return (w.lifestyle && w.lifestyle.length ? w.lifestyle : p.lifestyle) || []; };
+  const isDigitalP = (p) => ['mixes', 'films', 'luts'].includes(p.category);
+  const canBuy = (p, cw) => wayStatus(p, cw) === 'available' && !!(handleOf(p, cw) || p.href);
+  // Kept for older links: a direct link to the product page
+  const productHref = (p, cw) => (canBuy(p, cw) ? (p.href && !handleOf(p, cw) ? p.href : pdpHref(p, cw)) : '');
+  const pdpHref = (p, cw) => `vault.html?p=${encodeURIComponent(p.id)}${cw ? `&cw=${cw}` : ''}`;
 
   /** Product visual: real photo when present, otherwise a vector mockup. */
   /**
@@ -142,7 +148,11 @@
   function productVisual(p, cw = 0, view = '') {
     const way = (p.colorways || [])[cw] || {};
     const alt = esc(way.name ? `${p.title}, ${way.name}` : p.title);
-    if (view === 'life' && (p.lifestyle || []).length) return `<img class="k-product-img k-product-img--photo" src="${esc(p.lifestyle[0])}" alt="${alt}, on location" loading="lazy" decoding="async">`;
+    const life = lifeOf(p, cw);
+    if ((view === 'life' || view === 'life2') && life.length) {
+      const i = view === 'life2' && life[1] ? 1 : 0;
+      return `<img class="k-product-img k-product-img--photo" src="${esc(life[i])}" alt="${alt}, ${i ? 'in the terminal' : 'on the street'}" loading="lazy" decoding="async">`;
+    }
     if (view === 'front' && way.imageFront) return `<img class="k-product-img" src="${esc(way.imageFront)}" alt="${alt}, front" loading="lazy" decoding="async">`;
     const src = way.image || p.image;
     if (src && way.imageFront && !view) {
@@ -220,6 +230,7 @@
     const params = new URLSearchParams(location.search);
     if (PAGE === 'garage' && params.get('format') === 'film') return 'films';
     if (PAGE === 'story') return 'journal';
+    if (PAGE === 'hunt' || PAGE === 'store') return 'vault';   // both live under Shop
     return PAGE;
   }
 
@@ -305,7 +316,8 @@
       <ul class="k-sheet__links">
         <li><a href="index.html">Home <span>00</span></a></li>
         ${NAV.map((n, i) => `<li><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
-        <li><a href="vault.html?c=hunt">The Hunt <span>${pad(NAV.length + 1)}</span></a></li>
+        <li><a href="hunt.html">The Hunt <span>${pad(NAV.length + 1)}</span></a></li>
+        <li><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
       </ul>
       <div class="k-sheet__foot">
         <button class="k-btn k-btn--sm" type="button" data-settings-open>${icon.gear}<span>Settings</span></button>
@@ -361,7 +373,7 @@
             <p class="k-lede k-mt-s">A global magazine and marketplace. Cars, motorcycles, skate, travel and the people behind them, plus pieces you can only find at the kiosk.</p>
           </div>
           <div><h4>Watch + Listen</h4><ul><li><a href="garage.html">Garage</a></li><li><a href="garage.html?format=film">Films</a></li><li><a href="garage.html?format=gallery">Photo stories</a></li><li><a href="garage.html?format=interview">Interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="vault.html?c=hunt">The Hunt</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Classic store</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="hunt.html">The Hunt</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true">KIOSK</div>
@@ -1045,9 +1057,11 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'garage', 'journal', 'story', 'radio', 'vault']);
+  const SOFT_PAGES = new Set(['', 'index', 'garage', 'journal', 'story', 'radio', 'vault', 'hunt', 'store']);
   let pageAbort = new AbortController();
-  let renderedKey = location.pathname + location.search;
+  // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
+  const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
+  let renderedKey = pageKey();
 
   function softUrl(a) {
     if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.dataset.hard != null) return null;
@@ -1085,7 +1099,8 @@
     pageAbort.abort();
     pageAbort = new AbortController();
     if (push) history.pushState({ kiosk: true }, '', href);
-    renderedKey = location.pathname + location.search;
+    renderedKey = pageKey();
+    if (pdpEl && pdpEl.classList.contains('is-open')) closePDP({ fromHistory: true });
     document.title = doc.title;
     const desc = doc.querySelector('meta[name="description"]');
     const here = $('meta[name="description"]');
@@ -1103,6 +1118,7 @@
       runPage();
       reveal();
       player.sync();
+      syncPDPFromUrl();
     };
     // App-style page change: the new page rises in over the old one
     if (document.startViewTransition && !REDUCED) {
@@ -1125,10 +1141,14 @@
       const url = softUrl(e.target.closest('a[href]'));
       if (!url) return;
       e.preventDefault();
+      // Same page, different product (?p=): just open the panel
+      const k = new URLSearchParams(url.search); ['p', 'cw', 'handle'].forEach((x) => k.delete(x));
+      const ks = k.toString();
+      if (url.pathname + (ks ? `?${ks}` : '') === renderedKey) { history.pushState({ kiosk: true }, '', url.pathname + url.search + url.hash); syncPDPFromUrl(); return; }
       softNavigate(url.href, true);
     });
     window.addEventListener('popstate', () => {
-      if (location.pathname + location.search === renderedKey) return;   // hash-only change
+      if (pageKey() === renderedKey) { syncPDPFromUrl(); return; }   // hash or product-panel change
       softNavigate(location.href, false);
     });
   }
@@ -1206,98 +1226,8 @@
     if (name) name.textContent = p.colorways[i].name;
   }
 
-  function openQuickView(id, cw = 0) {
-    const p = productById(id);
-    if (!p) return;
-    const ways = p.colorways || [];
-    const sizes = p.sizes || [];
-    const seen = storiesFor(p);
-    const mix = p.category === 'mixes' ? (C.mixes || []).find((m) => m.product === p.id) : null;
-    const state = { cw, size: sizes.length === 1 ? sizes[0] : '', view: '' };
-    const views = (ways[0] || {}).imageFront ? ['back', 'front'] : [];
-    const store = storeOf(p);
-
-    openLightbox(`
-      <div class="k-qv k-light" data-qv="${esc(p.id)}">
-        <div class="k-qv__media">
-          <div data-qv-img style="width:100%;height:100%;display:grid;place-items:center">${productVisual(p, cw, views.length ? 'back' : '')}</div>
-          ${views.length ? `<div class="k-qv__views" role="group" aria-label="View">${[['back', 'Back'], ['front', 'Front'], ...((p.lifestyle || []).length ? [['life', 'On location']] : [])].map(([v, l], i) => `<button class="k-chip" type="button" data-qv-view="${v}" aria-pressed="${i === 0}">${l}</button>`).join('')}</div>` : ''}
-          ${p.badge ? `<span class="k-badge${p.badge === 'Issue 01' ? ' k-badge--sticker' : ''}" style="top:16px;left:16px">${esc(p.badge)}</span>` : ''}
-          ${ways.length > 1 ? `<div class="k-qv__thumbs">${ways.map((w, i) => `<button type="button" data-qv-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}">${productVisual(p, i)}</button>`).join('')}</div>` : ''}
-        </div>
-        <div class="k-qv__body">
-          <div class="k-qv__head">
-            <div>
-              <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.status === 'available' ? '' : ' · Coming soon'}${store ? ` · by ${esc(store.name)}` : ''}</p>
-              <h2 class="k-qv__title k-mt-s">${esc(p.title)}</h2>
-            </div>
-            <button class="k-qv__close" type="button" data-close aria-label="Close">${icon.close}</button>
-          </div>
-          <p class="k-qv__price">${esc(price(p))}</p>
-          ${ways.length ? `<div><p class="k-qv__label"><span>Colour</span><span data-qv-cwname>${esc((ways[cw] || {}).name || '')}</span></p>
-            <div class="k-dots">${ways.map((w, i) => `<button class="k-dot k-dot--lg" type="button" style="--sw:${esc(w.garment)}" data-qv-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</div></div>` : ''}
-          ${sizes.length ? `<div><p class="k-qv__label"><span>Size</span><span data-qv-sizename>${esc(state.size || 'Select a size')}</span></p>
-            <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-qv-size="${esc(z)}" aria-pressed="${z === state.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
-          <div class="k-qv__cta" data-qv-cta></div>
-          <p class="k-form-msg" data-qv-msg aria-live="polite"></p>
-          <dl class="k-qv__list">
-            ${p.detail ? `<div><dt>Details</dt><dd>${esc(p.detail)}</dd></div>` : ''}
-            ${p.quote ? `<div><dt>On the back</dt><dd class="k-serif">“${esc(p.quote)}”</dd></div>` : ''}
-            <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : ['mixes', 'films', 'luts'].includes(p.category) ? 'Digital download' : 'Shipped'}</dd></div>
-            ${p.pickup ? `<div><dt>The Hunt</dt><dd>${esc(p.pickup.coords || 'Coordinates revealed at the drop')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
-          </dl>
-          ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
-        </div>
-      </div>`, p.title);
-
-    const root = $('.k-qv');
-    const renderCta = () => {
-      const href = productHref(p, state.cw);
-      const cta = $('[data-qv-cta]', root);
-      const needsSize = sizes.length > 1 && !state.size;
-      if (href) {
-        cta.innerHTML = `<a class="k-btn k-btn--solid" href="${esc(href)}" data-qv-buy>${p.price == null ? 'Shop collection' : `Buy — ${esc(price(p))}`}</a>`;
-      } else {
-        cta.innerHTML = `<button class="k-btn k-btn--solid" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">Notify me when it drops</button>`;
-      }
-      if (mix) cta.innerHTML += `<button class="k-btn" type="button" data-mix-play="${esc(mix.slug)}"><span data-ico style="display:inline-grid">${icon.play}</span> Preview the mix</button>`;
-      const buy = $('[data-qv-buy]', cta);
-      if (buy && needsSize) {
-        buy.addEventListener('click', (e) => {
-          e.preventDefault();
-          $('[data-qv-msg]', root).textContent = 'Pick a size first.';
-        });
-      }
-    };
-    root.addEventListener('click', (e) => {
-      const v = e.target.closest('[data-qv-view]');
-      if (v) {
-        state.view = v.dataset.qvView;
-        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw, state.view);
-        $$('[data-qv-view]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === v)));
-        return;
-      }
-      const c = e.target.closest('[data-qv-cw]');
-      if (c) {
-        state.cw = Number(c.dataset.qvCw);
-        $('[data-qv-img]', root).innerHTML = productVisual(p, state.cw, state.view || (views.length ? 'back' : ''));
-        $$('[data-qv-cw]', root).forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.qvCw) === state.cw)));
-        const nm = $('[data-qv-cwname]', root);
-        if (nm) nm.textContent = ways[state.cw].name;
-        renderCta();
-        return;
-      }
-      const z = e.target.closest('[data-qv-size]');
-      if (z) {
-        state.size = z.dataset.qvSize;
-        $$('[data-qv-size]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === z)));
-        $('[data-qv-sizename]', root).textContent = state.size;
-        $('[data-qv-msg]', root).textContent = '';
-        renderCta();
-      }
-    });
-    renderCta();
-  }
+  // Older call sites ("Quick view") open the new product panel
+  function openQuickView(id, cw = 0) { openPDP(id, { cw }); }
 
   function filmRow(f, i) {
     return `
@@ -1466,6 +1396,8 @@
     document.addEventListener('click', (e) => {
       const dot = e.target.closest('[data-dot]');
       if (dot) { const card = dot.closest('[data-product]'); if (card) swapColorway(card, Number(dot.dataset.dot)); return; }
+      const pd = e.target.closest('[data-pdp]');
+      if (pd) { e.preventDefault(); openPDP(pd.dataset.pdp, { cw: Number(pd.dataset.cw || 0), full: pd.dataset.full != null }); return; }
       const qv = e.target.closest('[data-quickview]');
       if (qv) {
         const card = qv.closest('[data-product]');
@@ -1916,6 +1848,295 @@
     $$('main > section:not(.k-cover), main > .k-section, main > .k-wrap > section', root).forEach((s) => {
       if (!s.hasAttribute('data-reveal')) s.setAttribute('data-reveal', 'rise');
     });
+  }
+
+  /* --------------------------------------------------------- shop core
+   * Flight numbers and gates for the terminal store, one search across
+   * products, Hunt pieces and partner stores, the product panel (PDP) with
+   * its full-screen "learn more" view, and Shopify checkout.
+   * -------------------------------------------------------------------- */
+  const GATE_LETTERS = 'ABCDEFGHJKLMN';
+  const gateOf = (catId) => { const i = (C.categories || []).findIndex((c) => c.id === catId); return i < 0 ? '—' : GATE_LETTERS[i] || '—'; };
+  const flightOf = (p) => { const m = String(p.title).match(/#(\d{3})/); return `KSK ${m ? m[1] : String(100 + (hash(p.id) % 900))}`; };
+  const statusOf = (p, cw) => {
+    if (p.pickup) return { key: 'pickup', label: 'Pickup only' };
+    if (wayStatus(p, cw) === 'available') return { key: 'boarding', label: isDigitalP(p) ? 'Download' : 'Boarding' };
+    return { key: 'soon', label: isDigitalP(p) ? 'Dropping soon' : 'Coming soon' };
+  };
+  const storeById = (id) => (C.stores || []).find((x) => x.id === id);
+  const storeHref = (st) => `store.html?s=${encodeURIComponent(st.id)}`;
+  // Partner store links go through /go/<store> so the visit is counted (see functions/go/[store].js)
+  const visitHref = (st, p) => (st.url ? `/go/${encodeURIComponent(st.id)}${p ? `?p=${encodeURIComponent(p.id)}` : ''}` : 'vault.html');
+
+  const fold = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  /** Search products, Hunt pieces and stores. Every word must match somewhere. */
+  function searchCatalog(q, { kinds = ['product', 'hunt', 'store'], limit = 24 } = {}) {
+    const words = fold(q).split(/\s+/).filter(Boolean);
+    const out = [];
+    const score = (fields) => {
+      if (!words.length) return 0;
+      let total = 0;
+      for (const w of words) {
+        let best = 0;
+        fields.forEach(([txt, weight]) => { const t = fold(txt); if (!t) return; if (t.startsWith(w)) best = Math.max(best, weight * 2); else if (t.includes(` ${w}`) || t.includes(w)) best = Math.max(best, weight); });
+        if (!best) return 0;
+        total += best;
+      }
+      return total;
+    };
+    (C.products || []).forEach((p) => {
+      const kind = p.pickup ? 'hunt' : 'product';
+      if (!kinds.includes(kind)) return;
+      const st = storeOf(p);
+      const sc = score([[p.title, 5], [p.design, 4], [categoryLabel(p.category), 3], [(p.colorways || []).map((w) => w.name).join(' '), 2], [p.quote, 1], [p.detail, 1], [st && st.name, 2], [p.pickup && p.pickup.place, 3], [flightOf(p), 2], [(p.vibes || []).join(' '), 1]]);
+      if (sc || !words.length) out.push({ kind, p, score: sc });
+    });
+    if (kinds.includes('store')) {
+      (C.stores || []).forEach((st) => {
+        const sc = score([[st.name, 6], [st.city, 3], [st.country, 2], [st.note, 1], [(st.tags || []).join(' '), 2]]);
+        if (sc || !words.length) out.push({ kind: 'store', st, score: sc + 1 });
+      });
+    }
+    return out.sort((a, b) => b.score - a.score).slice(0, limit);
+  }
+  function resultHtml(r) {
+    if (r.kind === 'store') {
+      return `<a class="k-sr-row" href="${storeHref(r.st)}" role="option"><span class="k-sr-row__img k-sr-row__img--store">${esc((r.st.name || '?').slice(0, 1))}</span><span><b>${esc(r.st.name)}</b><small>Store · ${esc([r.st.city, r.st.country].filter(Boolean).join(', '))}</small></span><i>${icon.arrow}</i></a>`;
+    }
+    const p = r.p;
+    return `<button class="k-sr-row" type="button" data-pdp="${esc(p.id)}" role="option"><span class="k-sr-row__img">${productVisual(p, 0, lifeOf(p, 0).length ? 'life' : '')}</span><span><b>${esc(p.title)}</b><small>${esc(flightOf(p))} · Gate ${esc(gateOf(p.category))} · ${esc(price(p))}${p.pickup ? ` · ${esc(p.pickup.place)}` : ''}</small></span><i>${icon.arrow}</i></button>`;
+  }
+  /** Wire a search field to a results list (shared by the store, Hunt and store directory). */
+  function bindSearch(input, list, opts = {}) {
+    if (!input || !list) return;
+    const signal = pageAbort.signal;
+    const run = () => {
+      const q = input.value.trim();
+      const res = q ? searchCatalog(q, opts) : [];
+      if (opts.onResults) opts.onResults(res, q);
+      if (opts.inline === false) return;
+      list.innerHTML = q ? (res.length ? res.map(resultHtml).join('') : `<p class="k-sr-empty">Nothing at this terminal matches “${esc(q)}”. Try a colour, a print or a city.</p>`) : '';
+      list.hidden = !q;
+    };
+    input.addEventListener('input', run, { signal });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { input.value = ''; run(); }
+      if (e.key === 'ArrowDown') { const f = $('.k-sr-row', list); if (f) { e.preventDefault(); f.focus(); } }
+    }, { signal });
+    list.addEventListener('keydown', (e) => {
+      const rows = $$('.k-sr-row', list); const i = rows.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' && rows[i + 1]) { e.preventDefault(); rows[i + 1].focus(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); (rows[i - 1] || input).focus(); }
+      if (e.key === 'Escape') input.focus();
+    }, { signal });
+    document.addEventListener('click', (e) => { if (!e.target.closest('[data-search-scope]')) list.hidden = true; else if (input.value.trim() && opts.inline !== false) list.hidden = false; }, { signal });
+    run();
+    return run;
+  }
+
+  /* -- Product panel: a frosted panel that expands into a full product page */
+  let pdpEl = null;
+  const pdpState = { id: '', cw: 0, size: '', img: 0, full: false };
+  function pdpImages(p, cw) {
+    const w = wayOf(p, cw);
+    const out = [];
+    lifeOf(p, cw).forEach((src, i) => out.push({ src, alt: `${p.title}, ${w.name || ''}, ${i ? 'in the terminal' : 'on the street'}` }));
+    if (w.image) out.push({ src: w.image, alt: `${p.title}, ${w.name || ''}${w.imageFront ? ', back' : ''}`, flat: true });
+    if (w.imageFront) out.push({ src: w.imageFront, alt: `${p.title}, ${w.name || ''}, front`, flat: true });
+    if (!out.length && p.image) out.push({ src: p.image, alt: p.title, flat: true });
+    return out;
+  }
+  function pdpHtml(p) {
+    const { cw } = pdpState;
+    const ways = p.colorways || [];
+    const sizes = p.sizes || [];
+    const st = storeOf(p);
+    const imgs = pdpImages(p, cw);
+    const stat = statusOf(p, cw);
+    const seen = storiesFor(p);
+    const related = (C.products || []).filter((x) => x.id !== p.id && (x.category === p.category || (p.design && x.design))).slice(0, 4);
+    const cur = imgs[Math.min(pdpState.img, imgs.length - 1)];
+    return `
+      <div class="k-pdp__scrim" data-pdp-close></div>
+      <article class="k-pdp__panel" aria-labelledby="k-pdp-title">
+        <header class="k-pdp__bar">
+          <span class="k-pdp__flight"><b>${esc(flightOf(p))}</b><span>Gate ${esc(gateOf(p.category))}</span><span class="k-board__status k-board__status--${stat.key}">${esc(stat.label)}</span></span>
+          <span class="k-pdp__tools">
+            <button type="button" class="k-pdp__icon" data-pdp-full aria-label="${pdpState.full ? 'Back to the panel' : 'Open the full product page'}">${pdpState.full ? icon.collapse : icon.expand}</button>
+            <button type="button" class="k-pdp__icon" data-pdp-close aria-label="Close">${icon.close}</button>
+          </span>
+        </header>
+        <div class="k-pdp__body">
+          <div class="k-pdp__media">
+            <div class="k-pdp__stage${cur && cur.flat ? ' is-flat' : ''}" data-pdp-stage>${cur ? `<img src="${esc(cur.src)}" alt="${esc(cur.alt)}" decoding="async">` : productVisual(p, cw)}</div>
+            ${imgs.length > 1 ? `<div class="k-pdp__thumbs" role="group" aria-label="Photos">${imgs.map((im, i) => `<button type="button" data-pdp-img="${i}" aria-pressed="${i === pdpState.img}" aria-label="${esc(im.alt)}"><img src="${esc(im.src)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
+          </div>
+          <div class="k-pdp__info">
+            <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.design ? ` · ${esc(p.design)}` : ''}${st ? ` · by <a href="${storeHref(st)}">${esc(st.name)}</a>` : ''}</p>
+            <h2 class="k-pdp__title" id="k-pdp-title">${esc(p.title)}</h2>
+            <p class="k-pdp__price">${esc(price(p))}</p>
+            ${ways.length ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Colour</span><span>${esc((ways[cw] || {}).name || '')}${wayStatus(p, cw) !== 'available' && p.status === 'available' ? ' · coming soon' : ''}</span></p>
+              <div class="k-dots">${ways.map((w, i) => `<button class="k-dot k-dot--lg" type="button" style="--sw:${esc(w.garment)}" data-pdp-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</div></div>` : ''}
+            ${sizes.length > 1 ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Size</span><span>${esc(pdpState.size || 'Select a size')}</span></p>
+              <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-pdp-size="${esc(z)}" aria-pressed="${z === pdpState.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
+            <div class="k-pdp__cta">
+              ${canBuy(p, cw)
+                ? `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>${p.price == null ? 'Shop' : `Buy · ${esc(price(p))}`}</button>`
+                : `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve · get the coordinates' : 'Notify me when it drops'}</button>`}
+              ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
+            </div>
+            <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
+            ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
+            ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="hunt.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
+
+            <div class="k-pdp__more"${pdpState.full ? '' : ' hidden'}>
+              ${p.description ? `<p class="k-pdp__desc">${esc(p.description)}</p>` : ''}
+              <dl class="k-qv__list">
+                ${p.design ? `<div><dt>Print</dt><dd>${esc(p.design)}</dd></div>` : ''}
+                ${p.quote ? `<div><dt>On the back</dt><dd class="k-serif">“${esc(p.quote)}”</dd></div>` : ''}
+                ${ways.length ? `<div><dt>Colourways</dt><dd>${ways.map((w) => esc(w.name) + (w.status === 'soon' ? ' (soon)' : '')).join(' · ')}</dd></div>` : ''}
+                ${sizes.length ? `<div><dt>Sizes</dt><dd>${sizes.map(esc).join(' · ')}</dd></div>` : ''}
+                <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from the KIOSK store'}</dd></div>
+                ${p.pickup ? `<div><dt>The Hunt</dt><dd>${esc(p.pickup.coords || 'Exact coordinates drop in the Dispatch')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
+                <div><dt>Flight</dt><dd>${esc(flightOf(p))} · Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</dd></div>
+              </dl>
+              ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
+              ${st ? `<a class="k-pdp__store" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><small>Sold by</small><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span><i>${icon.arrow}</i></a>` : ''}
+              ${related.length ? `<div><p class="k-qv__label"><span>Also at this gate</span></p><div class="k-pdp__related">${related.map((x) => `<button type="button" data-pdp="${esc(x.id)}"><span>${productVisual(x, 0, lifeOf(x, 0).length ? 'life' : '')}</span><b>${esc(x.title)}</b><small>${esc(price(x))}</small></button>`).join('')}</div></div>` : ''}
+            </div>
+          </div>
+        </div>
+      </article>`;
+  }
+  function renderPDP() {
+    const p = productById(pdpState.id);
+    if (!pdpEl || !p) return;
+    const info = $('.k-pdp__info', pdpEl); const top = info ? info.scrollTop : 0;
+    const body = $('.k-pdp__body', pdpEl); const btop = body ? body.scrollTop : 0;
+    pdpEl.innerHTML = pdpHtml(p);
+    pdpEl.classList.toggle('is-full', pdpState.full);
+    const ni = $('.k-pdp__info', pdpEl); if (ni) ni.scrollTop = top;
+    const nb = $('.k-pdp__body', pdpEl); if (nb) nb.scrollTop = btop;
+  }
+  const urlWithP = (id, cw) => {
+    const u = new URL(location.href);
+    if (id) { u.searchParams.set('p', id); if (cw) u.searchParams.set('cw', cw); else u.searchParams.delete('cw'); } else { u.searchParams.delete('p'); u.searchParams.delete('cw'); }
+    u.searchParams.delete('handle');
+    return u.pathname + u.search + u.hash;
+  };
+  function openPDP(id, { cw = 0, full = false, push = true } = {}) {
+    const p = productById(id);
+    if (!p) return;
+    if (!pdpEl) {
+      pdpEl = document.createElement('div');
+      pdpEl.className = 'k-pdp';
+      pdpEl.setAttribute('role', 'dialog');
+      pdpEl.setAttribute('aria-modal', 'true');
+      document.body.append(pdpEl);
+      bindPDP(pdpEl);
+    }
+    const wasOpen = pdpEl.classList.contains('is-open');
+    Object.assign(pdpState, { id, cw: Math.min(cw, Math.max(0, (p.colorways || []).length - 1)), size: (p.sizes || []).length === 1 ? p.sizes[0] : '', img: 0, full });
+    if (!wasOpen) pdpEl.__return = document.activeElement;
+    renderPDP();
+    document.documentElement.classList.add('is-pdp-open');
+    requestAnimationFrame(() => {
+      pdpEl.classList.add('is-open');
+      const f = $('[data-pdp-close].k-pdp__icon', pdpEl); if (f && !wasOpen) f.focus({ preventScroll: true });
+    });
+    if (full && push) { history.pushState({ kiosk: true, pdp: id }, '', urlWithP(id, pdpState.cw)); }
+  }
+  function setPDPFull(full) {
+    pdpState.full = full;
+    renderPDP();
+    const want = urlWithP(full ? pdpState.id : '', pdpState.cw);
+    if (want !== location.pathname + location.search + location.hash) {
+      if (full) history.pushState({ kiosk: true, pdp: pdpState.id }, '', want);
+      else history.replaceState(history.state, '', want);
+    }
+    const b = $('.k-pdp__body', pdpEl); if (b) b.scrollTop = 0;
+  }
+  function closePDP({ fromHistory = false } = {}) {
+    if (!pdpEl || !pdpEl.classList.contains('is-open')) return;
+    pdpEl.classList.remove('is-open');
+    document.documentElement.classList.remove('is-pdp-open');
+    if (!fromHistory && new URLSearchParams(location.search).has('p')) history.replaceState(history.state, '', urlWithP('', 0));
+    const back = pdpEl.__return; if (back && back.focus && back.isConnected) back.focus({ preventScroll: true });
+  }
+  // Keep the panel in step with the address bar (?p=<id> is the full product page)
+  function syncPDPFromUrl() {
+    const q = new URLSearchParams(location.search);
+    const id = q.get('p');
+    const handle = q.get('handle');
+    if (id && productById(id)) { openPDP(id, { cw: Number(q.get('cw')) || 0, full: true, push: false }); return; }
+    if (handle) {
+      const p = (C.products || []).find((x) => x.shopifyHandle === handle || (x.colorways || []).some((w) => w.shopifyHandle === handle));
+      if (p) { const cw = Math.max(0, (p.colorways || []).findIndex((w) => w.shopifyHandle === handle)); openPDP(p.id, { cw, full: true, push: false }); history.replaceState(history.state, '', urlWithP(p.id, cw)); return; }
+    }
+    if (!id && pdpEl && pdpEl.classList.contains('is-open') && pdpState.full) closePDP({ fromHistory: true });
+  }
+  function bindPDP(root) {
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
+      if (e.target.closest('[data-pdp-full]')) { setPDPFull(!pdpState.full); return; }
+      const im = e.target.closest('[data-pdp-img]');
+      if (im) { pdpState.img = Number(im.dataset.pdpImg); renderPDP(); return; }
+      const c = e.target.closest('[data-pdp-cw]');
+      if (c) { pdpState.cw = Number(c.dataset.pdpCw); pdpState.img = 0; renderPDP(); if (pdpState.full) history.replaceState(history.state, '', urlWithP(pdpState.id, pdpState.cw)); return; }
+      const z = e.target.closest('[data-pdp-size]');
+      if (z) { pdpState.size = z.dataset.pdpSize; renderPDP(); return; }
+      if (e.target.closest('[data-pdp-buy]')) { checkout(productById(pdpState.id), pdpState.cw, pdpState.size); }
+    });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.stopPropagation(); if (pdpState.full) setPDPFull(false); else closePDP(); return; }
+      if (e.key !== 'Tab') return;
+      const f = $$('button:not([disabled]), a[href], input', $('.k-pdp__panel', root)).filter((x) => x.offsetParent !== null);
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    });
+    // Swipe down to dismiss the sheet on phones
+    let sy = 0;
+    root.addEventListener('touchstart', (e) => { sy = e.target.closest('.k-pdp__bar') ? e.touches[0].clientY : 0; }, { passive: true });
+    root.addEventListener('touchend', (e) => { if (sy && e.changedTouches[0].clientY - sy > 80 && !pdpState.full) closePDP(); sy = 0; }, { passive: true });
+  }
+
+  /* -- Checkout: find the Shopify variant for the size, make a cart, go */
+  async function checkout(p, cw, size) {
+    if (!p) return;
+    const msg = pdpEl && $('[data-pdp-msg]', pdpEl);
+    const say = (t, err) => { if (msg) { msg.textContent = t; msg.classList.toggle('is-error', !!err); } };
+    if ((p.sizes || []).length > 1 && !size) { say('Pick a size first.', true); return; }
+    const handle = handleOf(p, cw);
+    if (!handle) { if (p.href) location.href = p.href; return; }
+    const btn = pdpEl && $('[data-pdp-buy]', pdpEl);
+    if (btn) btn.disabled = true;
+    say('Opening checkout…');
+    try {
+      const q = 'query($h:String!){product(handle:$h){variants(first:50){nodes{id availableForSale selectedOptions{name value}}}}}';
+      const r = await fetch('/api/shopify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { h: handle } }) });
+      const data = await r.json().catch(() => ({}));
+      const nodes = (((data.data || {}).product || {}).variants || {}).nodes || [];
+      if (!r.ok || !nodes.length) throw new Error('product');
+      const want = String(size || '').toUpperCase();
+      const v = nodes.find((n) => n.availableForSale && (!want || n.selectedOptions.some((o) => /size/i.test(o.name) && String(o.value).toUpperCase() === want)))
+        || (!want && nodes.find((n) => n.availableForSale));
+      if (!v) { say(size ? `Size ${size} is sold out in this colour.` : 'Sold out right now.', true); return; }
+      const post = (body) => fetch('/api/shopify-cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((x) => x.json());
+      const created = await post({ action: 'create' });
+      const cartId = created.cart && created.cart.id;
+      if (!cartId) throw new Error('cart');
+      const added = await post({ action: 'add', cartId, variantId: v.id, quantity: 1 });
+      const url = (added.cart || {}).checkoutUrl;
+      if (!url) throw new Error('checkout');
+      if (typeof window.gtag === 'function') window.gtag('event', 'begin_checkout', { items: [{ item_id: p.id, item_name: p.title, item_variant: (wayOf(p, cw).name || ''), price: p.price }] });
+      location.href = url;
+    } catch (err) {
+      const local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      say(local ? 'Checkout only works on the deployed site (it needs the Shopify token).' : 'Checkout is unavailable right now. Please try again in a minute.', true);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   /* ================================================================ PAGES */
@@ -2990,86 +3211,183 @@
     }).join('');
   }
 
+  /* ------------------------------------------------- terminal store
+   * The shop as an airport terminal: a frosted header with search and a
+   * split-flap departures board of the latest drops, gates for categories,
+   * boarding-pass product cards, the lounge (airport lookbook), in-flight
+   * downloads and the concourse of partner stores.
+   * -------------------------------------------------------------------- */
+  function termMedia(p, cw) {
+    const life = lifeOf(p, cw);
+    const alt = esc(`${p.title}${wayOf(p, cw).name ? `, ${wayOf(p, cw).name}` : ''}`);
+    if (life.length) {
+      return `<img class="k-tcard__img" src="${esc(life[0])}" alt="${alt}, on the street" loading="lazy" decoding="async">${life[1] ? `<img class="k-tcard__img k-tcard__img--alt" src="${esc(life[1])}" alt="" aria-hidden="true" loading="lazy" decoding="async">` : ''}`;
+    }
+    return `<span class="k-tcard__flat">${productVisual(p, cw)}</span>`;
+  }
+  function termCard(p, cw = 0) {
+    const ways = p.colorways || [];
+    const st = statusOf(p, cw);
+    const store = storeOf(p);
+    return `
+      <article class="k-tcard" data-tcard="${esc(p.id)}" data-cw="${cw}" data-reveal>
+        <button class="k-tcard__media" type="button" data-pdp="${esc(p.id)}" data-cw="${cw}" aria-label="${esc(p.title)}">
+          ${termMedia(p, cw)}
+          <span class="k-board__status k-board__status--${st.key} k-tcard__status">${esc(st.label)}</span>
+          <span class="k-tcard__gate" aria-hidden="true">${esc(gateOf(p.category))}</span>
+        </button>
+        <div class="k-tcard__pass">
+          <p class="k-tcard__row"><span>${esc(flightOf(p))}</span><span>Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</span></p>
+          <h3 class="k-tcard__title"><button type="button" data-pdp="${esc(p.id)}" data-cw="${cw}">${esc(p.title)}</button></h3>
+          <p class="k-tcard__sub">${[p.design, store && store.id !== 'kiosk' ? `by ${store.name}` : '', p.pickup ? p.pickup.place : ''].filter(Boolean).map(esc).join(' · ') || esc(p.detail || '')}</p>
+          <div class="k-tcard__foot">
+            <span class="k-tcard__fare">${esc(price(p))}</span>
+            ${ways.length > 1 ? `<span class="k-dots" role="group" aria-label="Colourways">${ways.map((w, i) => `<button class="k-dot" type="button" style="--sw:${esc(w.garment)}" data-tdot="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</span>` : ''}
+          </div>
+        </div>
+      </article>`;
+  }
+  const FLAP = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  function flapText(t, n) {
+    const txt = String(t).toUpperCase().replace(/[’']/g, '').slice(0, n);
+    return `<span class="k-flap" aria-label="${esc(t)}">${Array.from(txt.padEnd(n, ' ')).map((ch) => `<i data-ch="${esc(ch)}">${ch === ' ' ? '&nbsp;' : esc(ch)}</i>`).join('')}</span>`;
+  }
+  // Split-flap: each letter rattles through the alphabet before it lands
+  function flipBoard(root) {
+    if (REDUCED || !root) return;
+    $$('.k-flap i', root).forEach((el, i) => {
+      const final = el.dataset.ch;
+      if (final === ' ') return;
+      let n = 4 + (i % 7) + Math.floor(Math.random() * 6);
+      const tick = () => {
+        if (!el.isConnected) return;
+        if (n-- <= 0) { el.textContent = final; el.classList.remove('is-flip'); return; }
+        el.textContent = FLAP[Math.floor(Math.random() * FLAP.length)];
+        el.classList.add('is-flip');
+        setTimeout(tick, 45 + Math.random() * 40);
+      };
+      setTimeout(tick, i * 6);
+    });
+  }
+
   function pageVault() {
-    const hunt = (C.products || []).filter((p) => p.pickup);
-    if (hunt.length) fill('shop-hunt', hunt.map((p) => productCard(p, { noId: true })).join(''));
-    else { const h = mount('shop-hunt'); if (h) h.closest('section').hidden = true; }
-    fill('shop-stores', (C.stores || []).map((st) => `
-      <article class="k-store k-glass" data-reveal>
-        <p class="k-eyebrow">${esc([st.city, st.country].filter(Boolean).join(', '))}</p>
-        <h3 class="k-h3 k-mt-s">${esc(st.name)}</h3>
-        <p class="k-small k-mt-s">${esc(st.note || '')}</p>
-        <p class="k-small k-mt-s">${(C.products || []).filter((p) => (p.store || 'kiosk') === st.id).length} pieces</p>
-      </article>`).join('') + `
-      <button class="k-store k-store--join" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK" data-reveal>
-        <p class="k-eyebrow">Your store here</p>
-        <h3 class="k-h3 k-mt-s">Sell at the <span class="k-serif">KIOSK</span></h3>
-        <p class="k-small k-mt-s">Thrift curators, independent labels, makers anywhere in the world.</p>
-        <span class="k-bar k-mt-m">Get the stockist pack<span class="k-arrow">${icon.arrow}</span></span>
-      </button>`);
-    const look = lookbookHtml();
-    if (look) fill('shop-lookbook', railShell(look, 'Lookbook', 'k-hscroll-wrap--look'));
-    else { const sec = mount('shop-lookbook'); if (sec) sec.closest('section').hidden = true; }
+    const all = (C.products || []);
+    const cats = C.categories || [];
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
     let sort = params.get('sort') || 'featured';
-    const cats = C.categories || [];
-    const all = C.products || [];
-    const chips = mount('vault-cats');
-    const grid = mount('vault-grid');
+    const signal = pageAbort.signal;
+
+    // Backdrop: a terminal shot behind the frosted glass
+    const shots = all.flatMap((p) => (p.colorways || []).map((w) => (w.lifestyle || [])[1]).filter(Boolean));
+    if (shots.length) fill('term-backdrop', `<img src="${esc(shots[hash(new Date().toDateString()) % shots.length])}" alt="" decoding="async">`);
+
+    // Departures board: the latest drops
+    const board = mount('term-board');
+    if (board) {
+      const latest = all.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || ''))).slice(0, 7);
+      board.innerHTML = latest.map((p) => {
+        const st = statusOf(p, 0);
+        return `<li><button type="button" class="k-board__row" data-pdp="${esc(p.id)}">
+          <span class="k-board__flight">${flapText(flightOf(p), 7)}</span>
+          <span class="k-board__dest">${flapText(p.title, 22)}</span>
+          <span class="k-board__gate">${flapText(gateOf(p.category), 1)}</span>
+          <span class="k-board__fare">${esc(price(p))}</span>
+          <span class="k-board__status k-board__status--${st.key}">${esc(st.label)}</span>
+        </button></li>`;
+      }).join('');
+      flipBoard(board);
+    }
+
+    // Search across products, the Hunt and stores ("/" jumps to it)
+    const q = mount('term-q');
+    bindSearch(q, mount('term-results'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && q && !/input|textarea|select/i.test((document.activeElement || {}).tagName || '')) { e.preventDefault(); q.focus(); }
+    }, { signal });
+
+    // Gates
     const count = (id) => all.filter((p) => id === 'all' || p.category === id).length;
-
-    fill('shop-wall', wallHtml());
-
-    // Category tiles use the first product of each category as the icon
-    fill('shop-cats', cats.map((c) => {
-      const p = all.find((x) => x.category === c.id);
-      return `<button class="k-cat" type="button" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">${p ? productVisual(p, 0) : ''}<b>${esc(c.label)}</b><small>${count(c.id)}</small></button>`;
-    }).join(''));
-
-    chips.innerHTML = [{ id: 'all', label: 'All' }].concat(cats)
-      .map((c) => `<button class="k-chip" type="button" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">${esc(c.label)}<span class="k-count">${count(c.id)}</span></button>`).join('');
+    fill('term-gates', `<div class="k-gates__track">${[{ id: 'all', label: 'All gates' }].concat(cats).filter((c) => count(c.id)).map((c) => `
+      <button type="button" class="k-gate" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">
+        <b>${c.id === 'all' ? '★' : esc(gateOf(c.id))}</b><span>${esc(c.label)}</span><small>${count(c.id)}</small>
+      </button>`).join('')}</div>`);
 
     const sortSel = mount('vault-sort');
     if (sortSel) sortSel.value = sort;
-
     const order = (list) => {
       const l = list.slice();
       if (sort === 'new') l.sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')));
       if (sort === 'price-asc') l.sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
       if (sort === 'price-desc') l.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
+      if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));   // photographed pieces first
       return l;
     };
-
+    const grid = mount('vault-grid');
     const render = () => {
       const list = order(all.filter((p) => cat === 'all' || p.category === cat));
-      grid.innerHTML = list.map((p) => productCard(p)).join('');
-      const n = mount('vault-count');
-      if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
+      grid.innerHTML = list.map((p) => termCard(p)).join('');
+      const c = cats.find((x) => x.id === cat);
+      const lab = mount('term-gate-label'); if (lab) lab.textContent = c ? `Gate ${gateOf(c.id)} · ${c.label}` : 'All gates';
+      const n = mount('vault-count'); if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
       reveal(grid);
-      const q = new URLSearchParams(location.search);
-      if (cat === 'all') q.delete('c'); else q.set('c', cat);
-      if (sort === 'featured') q.delete('sort'); else q.set('sort', sort);
-      const qs = q.toString();
-      history.replaceState(null, '', (qs ? `?${qs}` : location.pathname) + location.hash);
-    };
-    const setCat = (id) => {
-      cat = id;
-      $$('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat || (cat === 'all' && x.dataset.cat === 'all'))));
-      render();
+      const qs = new URLSearchParams(location.search);
+      if (cat === 'all') qs.delete('c'); else qs.set('c', cat);
+      if (sort === 'featured') qs.delete('sort'); else qs.set('sort', sort);
+      const str = qs.toString();
+      history.replaceState(history.state, '', location.pathname + (str ? `?${str}` : '') + location.hash);
+      renderedKey = pageKey();
     };
     document.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-cat]');
-      if (!b) return;
-      const next = b.classList.contains('k-cat') && cat === b.dataset.cat ? 'all' : b.dataset.cat;
-      setCat(next);
-      if (b.classList.contains('k-cat')) mount('vault-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, { signal: pageAbort.signal });
-    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); });
+      const g = e.target.closest('[data-cat]');
+      if (g && g.closest('.k-gates')) {
+        cat = g.dataset.cat;
+        $$('.k-gate').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
+        render();
+        const sec = document.getElementById('shop'); if (sec) sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+        return;
+      }
+      const d = e.target.closest('[data-tdot]');
+      if (d) {
+        const card = d.closest('[data-tcard]'); const p = productById(card.dataset.tcard); const i = Number(d.dataset.tdot);
+        card.dataset.cw = i;
+        const media = $('.k-tcard__media', card);
+        $$('.k-tcard__img, .k-tcard__flat', media).forEach((x) => x.remove());
+        media.insertAdjacentHTML('afterbegin', termMedia(p, i));
+        $$('[data-pdp]', card).forEach((x) => { x.dataset.cw = i; });
+        $$('[data-tdot]', card).forEach((x) => x.setAttribute('aria-pressed', String(x === d)));
+        const st = statusOf(p, i); const chip = $('.k-tcard__status', card);
+        if (chip) { chip.className = `k-board__status k-board__status--${st.key} k-tcard__status`; chip.textContent = st.label; }
+      }
+    }, { signal });
+    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); }, { signal });
     render();
+
+    // Lounge: every airport shot, each one opens its colourway
+    const lounge = all.flatMap((p) => (p.colorways || []).map((w, i) => ({ p, i, w })).filter((x) => (x.w.lifestyle || [])[1]));
+    if (lounge.length) {
+      fill('term-lounge', railShell(lounge.map(({ p, i, w }) => `
+        <button type="button" class="k-lounge" data-pdp="${esc(p.id)}" data-cw="${i}">
+          <img src="${esc(w.lifestyle[1])}" alt="${esc(`${p.title}, ${w.name}, in the terminal`)}" loading="lazy" decoding="async">
+          <span class="k-lounge__tag"><b>${esc(p.design || p.title)}</b><small>${esc(w.name)} · ${esc(price(p))}</small></span>
+        </button>`).join(''), 'Lounge', 'k-hscroll-wrap--lounge'));
+    } else { const sec = $('[data-mount-section="lounge"]'); if (sec) sec.hidden = true; }
+
+    // In-flight: films and LUT packs
+    const digital = all.filter((p) => isDigitalP(p));
+    fill('term-digital', digital.map((p) => `
+      <button type="button" class="k-inflight__row" data-pdp="${esc(p.id)}">
+        <span class="k-inflight__thumb">${productVisual(p, 0)}</span>
+        <span><b>${esc(p.title)}</b><small>${esc(categoryLabel(p.category))} · ${esc(p.detail || '')}</small></span>
+        <span class="k-inflight__fare">${esc(price(p))}</span>
+      </button>`).join(''));
+
+    // Concourse: partner stores
+    fill('term-stores', (C.stores || []).map((st) => `<a class="k-store-chip" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span></a>`).join(''));
+
     if (location.hash) {
       const target = document.getElementById(location.hash.slice(1));
-      if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+      if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     }
   }
 
@@ -3398,6 +3716,7 @@
   bindSettingsOpen();
   bindDepth();
   runPage();
+  syncPDPFromUrl();
   bootI18n();
   reveal();
   wave.draw();

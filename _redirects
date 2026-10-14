@@ -1,1 +1,15 @@
-/products/:handle  /product?handle=:handle  200
+/products/:handle  /vault?handle=:handle  302
+/shop-tshirts-hoodies.html  /vault?c=apparel  301
+/shop-tshirts-hoodies  /vault?c=apparel  301
+/shop-bracelets-chains.html  /vault?c=accessories  301
+/shop-bracelets-chains  /vault?c=accessories  301
+/collections/t-shirts.html  /vault?c=apparel  301
+/collections/t-shirts  /vault?c=apparel  301
+/collections/hoodies.html  /vault?c=apparel  301
+/collections/hoodies  /vault?c=apparel  301
+/collections/chains.html  /vault?c=accessories  301
+/collections/chains  /vault?c=accessories  301
+/collections/bracelets.html  /vault?c=accessories  301
+/collections/bracelets  /vault?c=accessories  301
+/product.html  /vault  302
+/product  /vault  302

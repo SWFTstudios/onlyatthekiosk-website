@@ -13,7 +13,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
 | Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
 
-The older Shopify apparel pages (`store.html`, `collections/*`) are unchanged. In the new nav they appear as **Supply**.
+The older Shopify apparel pages (classic store, `collections/*`) have been removed; the shop now lives in `vault.html`.
 
 ---
 
@@ -293,7 +293,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. Until you set a real pro
 1. Create it in Shopify, one product per colourway. For films and LUTs, use a digital-delivery app such as Shopify's free **Digital Downloads** app.
 2. Put each handle on its colourway (`shopifyHandle`) and set `status: 'available'`.
 
-The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, and the existing `product.html` page handles checkout. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
+The Buy button then goes to `/products/<handle>` for whichever colourway the customer picked, which redirects to `vault.html?handle=<handle>`. The "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
 
 "Notify me" sends the email to `/api/subscribe`, which writes to the Airtable "Incoming Interest" table. It stores the email only, not the product.
 

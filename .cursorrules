@@ -46,7 +46,7 @@ This is a custom frontend e-commerce website with Shopify as the backend. The go
 
 ## File Organization
 
-- Root: HTML files (`index.html`, `store.html`, `carousel-template.html`)
+- Root: HTML files (`index.html`, `vault.html`, `store.html`)
 - `css/`: Stylesheets (`normalize.css`, `components.css`, `onlyatthekiosk.css`)
 - `js/`: JavaScript files (`email-signup.js`, `onlyatthekiosk.js`)
 - `functions/api/`: Cloudflare Pages Functions (`subscribe.js`)

@@ -42,7 +42,8 @@ All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` 
 ```
 onlyatthekiosk-website/
 ├── index.html              # Landing/Coming Soon page
-├── store.html              # Store page
+├── vault.html              # Shop (KIOSK Glass)
+├── store.html              # Partner store directory
 ├── css/                    # Stylesheets
 ├── js/                     # JavaScript files
 ├── images/                 # Images and assets
