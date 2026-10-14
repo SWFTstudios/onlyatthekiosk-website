@@ -7,8 +7,9 @@
  *   KioskMockup.render({ type: 'hoodie', print: 'arch', label, sub, swatches },
  *                      { garment: '#141414', ink: '#f2f0eb' })
  *
- * Returns an inline SVG string (viewBox 0 0 400 480). Real product
- * photography always wins: set `image` on a product to replace this.
+ * Returns an inline SVG string (viewBox 0 0 400 480). Pass
+ * { sketch: true, code, title, … } as a third argument for the black-and-
+ * white tech-pack flat (viewBox 0 0 360 480). Real photography always wins.
  */
 (function () {
   'use strict';
@@ -447,11 +448,236 @@
     },
   };
 
-  function render(spec, colorway) {
+  function render(spec, colorway, opts) {
+    if (opts && opts.sketch) return sketch(spec, colorway, opts);
     const id = `m${(uid += 1)}`;
     const c = { garment: '#141414', ink: '#f2f0eb', ...(colorway || {}) };
     const draw = garments[spec.type] || garments.tee;
     return `<svg class="k-mockup" viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false">${defs(id, c.garment)}${draw(spec, c, id)}</svg>`;
+  }
+
+  /* ------------------------------------------------------- tech sketch
+   * Factory tech-pack flats for pieces with no real photos yet: front and
+   * back line drawings, points of measure, zoomed construction details and
+   * a spec block. Pure vector, one ink and one paper colour; the site CSS
+   * swaps them per theme (.k-mockup--sketch in css/kiosk-glass.css).
+   *
+   *   KioskMockup.render(spec, colorway, { sketch: true, code, title, category, detail, sizes, colorways })
+   */
+  const INK = '#111111';
+  const PAPER = '#ffffff';
+  const BLANK = '#fefefd';   // stand-in garment colour while converting a mockup to line art
+
+  const attr = (a, name) => (a.match(new RegExp(`\\s${name}="([^"]*)"`)) || [])[1];
+  const setAttr = (a, name, v) => (attr(a, name) != null ? a.replace(new RegExp(`\\s${name}="[^"]*"`), v == null ? '' : ` ${name}="${v}"`) : (v == null ? a : `${a} ${name}="${v}"`));
+  const alpha = (col) => { const m = /^rgba\([^)]*,\s*([\d.]+)\)$/.exec(col || ''); return m ? Number(m[1]) : null; };
+
+  /** Turn a filled, shaded mockup into black-and-white line art. */
+  function lineArt(svg) {
+    const line = (a, w, dash) => setAttr(setAttr(setAttr(setAttr(a, 'stroke', INK), 'stroke-width', w), 'stroke-linejoin', 'round'), 'stroke-dasharray', dash);
+    return svg
+      .replace(/<(path|rect|circle|ellipse)\b[^>]*="url\(#(side|top|shadow|metal)[^"]*\)"[^>]*\/>/g, '')
+      .replace(/<(path|rect|circle|ellipse)\b([^>]*?)\/>/g, (m, tag, a) => {
+        const fill = attr(a, 'fill');
+        const stroke = attr(a, 'stroke');
+        if (stroke && stroke !== 'none') {
+          const w = Number(attr(a, 'stroke-width') || 1);
+          const al = alpha(stroke);
+          if (al != null && al <= 0.06) return '';
+          if (al != null) return `<${tag}${line(setAttr(a, 'opacity', null), w >= 2 ? 1.8 : 1, w >= 2 && !attr(a, 'stroke-dasharray') ? null : '4 2.5')}/>`;
+          if (stroke === INK || w <= 3.2) return `<${tag}${line(a, Math.max(1.4, Math.min(w, 2)), null)}/>`;
+          return `<${tag}${line(a, w + 3.6, null)}/><${tag}${setAttr(a, 'stroke', PAPER)}/>`;
+        }
+        if (!fill || fill === 'none' || fill === INK) return m;
+        const al = alpha(fill);
+        if (al != null) return al < 0.05 ? '' : `<${tag}${line(setAttr(a, 'fill', 'none'), 1, null)}/>`;
+        if (/^rgba\(255/.test(fill)) return '';
+        return `<${tag}${line(setAttr(a, 'fill', PAPER), 2, null)}/>`;
+      })
+      .replace(/<g opacity="[^"]*" style="mix-blend-mode:screen">/g, '<g>')
+      .replace(/(<text\b[^>]*?\sfill=")([^"]*)(")/g, (m, a, v, b) => `${a}${v === BLANK ? PAPER : INK}${b}`)
+      .split(BLANK).join(PAPER);
+  }
+
+  /* ---- geometry helpers for the apparel flats (each view is a 200 × 232 box) */
+  const fx = (n) => Math.round(n * 10) / 10;
+  const pt = (p) => `${fx(p[0])},${fx(p[1])}`;
+  const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const along = (a, b, d) => lerp(a, b, d / Math.hypot(b[0] - a[0], b[1] - a[1]));
+  const mir = (p) => [200 - p[0], p[1]];
+  const both = (fn) => fn((p) => p) + fn(mir);
+  const OUT = `fill="${PAPER}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"`;
+  const SEAM = `fill="none" stroke="${INK}" stroke-width=".8" stroke-linecap="round"`;
+  const STITCH = `fill="none" stroke="${INK}" stroke-width=".6" stroke-dasharray="2.2 1.6"`;
+  const RIB = `fill="none" stroke="${INK}" stroke-width=".45"`;
+
+  /* Body blocks: N neck point, SP shoulder point, SO/SU sleeve end (outer/under), UA underarm, H hem side. */
+  const BLOCKS = {
+    tee: { N: [70, 16], SP: [32, 30], SO: [4, 86], SU: [28, 102], UA: [42, 80], H: [42, 216], neck: 30, long: false },
+    longsleeve: { N: [70, 16], SP: [33, 30], SO: [8, 202], SU: [30, 206], UA: [42, 84], H: [42, 216], neck: 28, long: true },
+    crew: { N: [70, 16], SP: [33, 30], SO: [8, 202], SU: [30, 206], UA: [42, 84], H: [42, 216], neck: 26, long: true, rib: true },
+    hoodie: { N: [66, 36], SP: [31, 48], SO: [6, 208], SU: [28, 212], UA: [42, 100], H: [42, 224], neck: 26, long: true, rib: true, hood: true },
+  };
+
+  function apparelFlat(type, side, spec) {
+    const b = BLOCKS[type];
+    const { N, SP, SO, SU, UA, H } = b;
+    const back = side === 'back';
+    const hemY = H[1];
+    const neckD = back ? 7 : b.neck;
+    const out = [];
+    // silhouette
+    out.push(`<path d="M${pt(N)} L${pt(SP)} L${pt(SO)} L${pt(SU)} L${pt(UA)} L${pt(H)} Q100,${hemY + 2} ${pt(mir(H))} L${pt(mir(UA))} L${pt(mir(SU))} L${pt(mir(SO))} L${pt(mir(SP))} L${pt(mir(N))} Q100,${fx(N[1] + neckD * 1.1)} ${pt(N)} Z" ${OUT}/>`);
+    // armhole (drop shoulder) seams
+    out.push(both((m) => `<path d="M${pt(m(SP))} Q${pt(m([SP[0] + 11, (SP[1] + UA[1]) / 2]))} ${pt(m(UA))}" ${SEAM}/>`));
+    // neck rib: the band between the opening and the seam
+    if (!b.hood) {
+      const a = [N[0] + 5, N[1] - 1.5];
+      if (back) {
+        out.push(`<path d="M${pt(N)} Q100,${N[1] + 16} ${pt(mir(N))}" ${SEAM}/><path d="M${pt([N[0] + 2, N[1] + 3.2])} Q100,${N[1] + 19} ${pt([198 - N[0], N[1] + 3.2])}" ${STITCH}/>`);
+      } else {
+        out.push(`<path d="M${pt(a)} Q100,${N[1] + 4} ${pt(mir(a))}" ${SEAM}/>`);
+        out.push(`<path d="M${pt(a)} Q100,${fx(N[1] + neckD * 0.62)} ${pt(mir(a))}" ${SEAM}/>`);
+        out.push(`<path d="M${pt([N[0] - 2, N[1] + 1.5])} Q100,${fx(N[1] + neckD * 1.1 + 6)} ${pt([202 - N[0], N[1] + 1.5])}" ${STITCH}/>`);
+      }
+    }
+    // sleeve ends
+    const band = (d) => [along(SO, SP, d), along(SU, UA, d)];
+    if (b.rib) {
+      const [p, q] = band(14);
+      out.push(both((m) => {
+        let r = `<path d="M${pt(m(p))} L${pt(m(q))}" ${SEAM}/>`;
+        for (let i = 1; i < 8; i += 1) r += `<path d="M${pt(m(lerp(SO, SU, i / 8)))} L${pt(m(lerp(p, q, i / 8)))}" ${RIB}/>`;
+        return r;
+      }));
+    } else {
+      out.push(both((m) => [4, 6.5].map((d) => { const [p, q] = band(d); return `<path d="M${pt(m(p))} L${pt(m(q))}" ${STITCH}/>`; }).join('')));
+    }
+    // bottom
+    if (b.rib) {
+      let r = `<path d="M${H[0]},${hemY - 15} L${200 - H[0]},${hemY - 15}" ${SEAM}/>`;
+      for (let x = H[0] + 5; x < 200 - H[0]; x += 5) r += `<path d="M${x},${hemY - 14.5} L${x},${hemY + 0.6}" ${RIB}/>`;
+      out.push(r);
+    } else {
+      out.push([5, 7.5].map((d) => `<path d="M${H[0]},${hemY - d} Q100,${hemY - d + 2} ${200 - H[0]},${hemY - d}" ${STITCH}/>`).join(''));
+    }
+    // hood, drawcords and pocket
+    if (b.hood) {
+      if (back) {
+        out.push(`<path d="M${pt(N)} C56,-4 144,-4 ${pt(mir(N))} Q100,${N[1] + 12} ${pt(N)} Z" ${OUT}/><path d="M100,3 Q101.5,22 100,${N[1] + 5}" ${SEAM}/><path d="M${N[0] + 4},${N[1] + 1} Q100,${N[1] + 8} ${196 - N[0]},${N[1] + 1}" ${STITCH}/>`);
+      } else {
+        out.push(`<path d="M${pt(N)} C58,0 142,0 ${pt(mir(N))} Q118,${N[1] + 26} 100,${N[1] + 34} Q82,${N[1] + 26} ${pt(N)} Z" ${OUT}/>`);
+        out.push(`<path d="M78,${N[1] + 2} C80,10 120,10 122,${N[1] + 2} Q112,${N[1] + 20} 100,${N[1] + 26} Q88,${N[1] + 20} 78,${N[1] + 2} Z" fill="${PAPER}" stroke="${INK}" stroke-width="1"/>`);
+        out.push(`<path d="M74,${N[1]} C76,6 124,6 126,${N[1]}" ${STITCH}/>`);
+        out.push(`<path d="M90,${N[1] + 19} L88,${N[1] + 76} M110,${N[1] + 19} L112,${N[1] + 76}" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/>`);
+        out.push(`<circle cx="90" cy="${N[1] + 19}" r="1.7" ${OUT}/><circle cx="110" cy="${N[1] + 19}" r="1.7" ${OUT}/><rect x="86.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/><rect x="110.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/>`);
+        const top = hemY - 76; const bot = hemY - 15;
+        out.push(`<path d="M70,${top} L130,${top} L150,${bot} L50,${bot} Z" ${OUT}/><path d="M72,${top + 3} L128,${top + 3} M70.6,${top + 3} L54,${bot} M129.4,${top + 3} L146,${bot}" ${STITCH}/>`);
+      }
+    }
+    // artwork, in ink
+    const p = (name, x, y, w) => `<g transform="translate(${x} ${y}) scale(${w / 100})">${(PRINTS[name] || PRINTS.wordmark)(INK, PAPER, `sk${uid}`, spec)}</g>`;
+    if (back) {
+      if (spec.quote || spec.backPrint) out.push(p(spec.backPrint || 'quote', 100, N[1] + 70, 74));
+    } else if (spec.chest) {
+      out.push(`<g transform="translate(126 ${N[1] + 34}) scale(.2)">${PRINTS.kmark(INK, PAPER)}</g>`);
+    } else if (spec.print) {
+      out.push(p(spec.print, 100, N[1] + (b.hood ? 58 : 66), b.hood ? 64 : 70));
+    }
+    if (!back && spec.sleevePrint) out.push(`<text transform="translate(176 120) rotate(82)" text-anchor="middle" font-family="${SANS}" font-size="5.5" letter-spacing="1.8" fill="${INK}">${esc(spec.sleevePrint)}</text>`);
+    return out.join('');
+  }
+
+  /* Points of measure and the zoomed construction details per block. */
+  const DETAILS = {
+    tee: [['front', [78, 24], '1x1 rib neck'], ['back', [38, 38], 'Drop shoulder'], ['front', [16, 92], 'Twin needle sleeve hem'], ['back', [48, 210], 'Twin needle bottom hem']],
+    longsleeve: [['front', [78, 22], '1x1 rib neck'], ['back', [38, 38], 'Drop shoulder'], ['front', [19, 200], 'Twin needle cuff'], ['back', [48, 210], 'Twin needle bottom hem']],
+    crew: [['front', [78, 22], '1x1 rib neck'], ['back', [38, 38], 'Drop shoulder'], ['front', [19, 197], '1x1 rib cuff'], ['back', [48, 214], '1x1 rib waistband']],
+    hoodie: [['front', [80, 40], 'Lined hood'], ['front', [94, 112], 'Drawcord + aglets'], ['front', [56, 170], 'Kangaroo pocket'], ['back', [48, 218], '1x1 rib waistband']],
+  };
+
+  function sketch(spec, colorway, opts = {}) {
+    const id = `s${(uid += 1)}`;
+    const c = { garment: '#141414', ...(colorway || {}) };
+    const apparel = !!BLOCKS[spec.type];
+    const parts = [];
+    const S = 0.78; const Y = 46; const FX = 12; const BX = 188;
+    const label = (x, y, t, anchor = 'middle', size = 6.4, fill = INK) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${SANS}" font-weight="600" font-size="${size}" letter-spacing="1.1" fill="${fill}">${esc(String(t).toUpperCase())}</text>`;
+    const value = (x, y, t, size = 7.4) => `<text x="${x}" y="${y}" font-family="${SANS}" font-size="${size}" letter-spacing=".5" fill="${INK}">${esc(String(t).toUpperCase())}</text>`;
+    const arrow = (x1, y1, x2, y2, tag) => {
+      const a = Math.atan2(y2 - y1, x2 - x1); const h = (x, y, d) => `M${fx(x)},${fx(y)} l${fx(Math.cos(a + d) * 4)},${fx(Math.sin(a + d) * 4)} M${fx(x)},${fx(y)} l${fx(Math.cos(a - d) * 4)},${fx(Math.sin(a - d) * 4)}`;
+      const mx = (x1 + x2) / 2; const my = (y1 + y2) / 2;
+      return `<path d="M${fx(x1)},${fx(y1)} L${fx(x2)},${fx(y2)} ${h(x1, y1, 0.45)} ${h(x2, y2, Math.PI + 0.45)} ${h(x2, y2, Math.PI - 0.45)}" fill="none" stroke="${INK}" stroke-width=".6"/>
+        <rect x="${fx(mx - 5)}" y="${fx(my - 5)}" width="10" height="10" fill="${PAPER}"/><text x="${fx(mx)}" y="${fx(my + 2.6)}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7.5" fill="${INK}">${tag}</text>`;
+    };
+    let poms = [];
+    if (apparel) {
+      const b = BLOCKS[spec.type];
+      const front = apparelFlat(spec.type, 'front', spec);
+      const backV = apparelFlat(spec.type, 'back', spec);
+      const g = (x, body) => `<g transform="translate(${x} ${Y}) scale(${S})">${body}</g>`;
+      parts.push(g(FX, front), g(BX, backV));
+      parts.push(label(FX + 100 * S, Y + 254 * S, 'Front'), label(BX + 100 * S, Y + 254 * S, 'Back'));
+      // points of measure: A chest, B body length, C sleeve
+      const at = (x0, p) => [x0 + p[0] * S, Y + p[1] * S];
+      const ca = at(FX, [b.H[0], b.H[1] + 7]); const cb = at(FX, [200 - b.H[0], b.H[1] + 7]);
+      parts.push(arrow(ca[0] + 1, ca[1], cb[0] - 1, cb[1], 'A'));
+      const bt = at(BX, [200 - b.H[0] + 12, b.N[1]]); const bb = at(BX, [200 - b.H[0] + 12, b.H[1]]);
+      parts.push(arrow(bt[0], bt[1], bb[0], bb[1], 'B'));
+      const s1 = at(FX, b.SP); const s2 = at(FX, b.SO);
+      const nx = (s2[1] - s1[1]); const ny = -(s2[0] - s1[0]); const nl = Math.hypot(nx, ny) || 1; const o = 7;
+      parts.push(arrow(s1[0] - nx / nl * o, s1[1] - ny / nl * o, s2[0] - nx / nl * o, s2[1] - ny / nl * o, 'C'));
+      poms = ['A Body width', 'B Body length (HPS)', `C ${b.long ? 'Sleeve length' : 'Sleeve length'}`];
+      // zoomed construction details
+      const R = 25; const CY = 292; const Z = 3;
+      DETAILS[spec.type].forEach(([view, p, text], i) => {
+        const cx = 50 + i * 86.7;
+        const x0 = view === 'back' ? BX : FX;
+        const body = view === 'back' ? backV : front;
+        const [px, py] = at(x0, p);
+        parts.push(`<path d="M${fx(px)},${fx(py)} L${fx(cx)},${CY - R}" fill="none" stroke="${INK}" stroke-width=".35" stroke-dasharray="1.5 1.5"/><circle cx="${fx(px)}" cy="${fx(py)}" r="1.4" fill="${INK}"/>`);
+        parts.push(`<clipPath id="${id}c${i}"><circle cx="${cx}" cy="${CY}" r="${R}"/></clipPath>
+          <circle cx="${cx}" cy="${CY}" r="${R}" fill="${PAPER}"/>
+          <g clip-path="url(#${id}c${i})"><g transform="translate(${fx(cx)} ${CY}) scale(${S * Z}) translate(${-p[0]} ${-p[1]})">${body}</g></g>
+          <circle cx="${cx}" cy="${CY}" r="${R}" fill="none" stroke="${INK}" stroke-width=".8"/>`);
+        const words = text.toUpperCase().split(' ');
+        const l1 = []; const l2 = [];
+        words.forEach((w) => ((l1.join(' ') + ' ' + w).trim().length <= 13 && !l2.length ? l1 : l2).push(w));
+        parts.push(`<text x="${cx}" y="${CY + R + 10}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="5.6" letter-spacing=".9" fill="${INK}">${esc(l1.join(' '))}</text>`);
+        if (l2.length) parts.push(`<text x="${cx}" y="${CY + R + 17}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="5.6" letter-spacing=".9" fill="${INK}">${esc(l2.join(' '))}</text>`);
+      });
+    } else {
+      // everything else: the product mockup, redrawn as line art
+      const draw = garments[spec.type] || garments.tee;
+      const k = 0.6;
+      parts.push(`<g transform="translate(${fx(180 - 200 * k)} 48) scale(${k})">${lineArt(draw(spec, { ...c, garment: BLANK, ink: INK, brim: undefined }, id))}</g>`);
+      parts.push(label(180, 340, 'Flat'));
+    }
+    // spec block
+    const T = 352; const ways = (opts.colorways && opts.colorways.length ? opts.colorways : [c]).slice(0, 4);
+    const sizes = (opts.sizes || []).join(' – ') || 'One size';
+    const notes = String(opts.detail || '').split('·').map((x) => x.trim()).filter(Boolean).slice(0, 3);
+    parts.push(`<g>
+      <rect x="8" y="${T}" width="344" height="${472 - T}" fill="${PAPER}" stroke="${INK}" stroke-width=".8"/>
+      <path d="M8,${T + 24} L352,${T + 24} M8,${T + 74} L352,${T + 74} M70,${T} L70,${T + 24} M206,${T} L206,${T + 24} M300,${T} L300,${T + 24} M190,${T + 24} L190,${T + 120}" fill="none" stroke="${INK}" stroke-width=".5"/>
+      ${label(14, T + 9, 'Style no.', 'start', 5)}${value(14, T + 19, opts.code || '—')}
+      ${label(76, T + 9, 'Description', 'start', 5)}${value(76, T + 19, String(opts.title || '').slice(0, 28), 6.6)}
+      ${label(212, T + 9, 'Category', 'start', 5)}${value(212, T + 19, String(opts.category || '').slice(0, 15), 6.6)}
+      ${label(306, T + 9, 'Stage', 'start', 5)}${value(306, T + 19, 'Sample')}
+      ${label(14, T + 35, 'Colourways', 'start', 5)}
+      ${ways.map((w, i) => {
+        const x = 14 + (i % 2) * 88; const y = T + 42 + Math.floor(i / 2) * 15; const on = w.name === c.name;
+        return `<rect x="${x}" y="${y}" width="10" height="10" fill="${esc(w.garment || '#888')}" stroke="${INK}" stroke-width="${on ? 1.4 : 0.5}"/><text x="${x + 14}" y="${y + 8}" font-family="${SANS}" font-weight="${on ? 600 : 400}" font-size="6.6" letter-spacing=".5" fill="${INK}">${esc(String(w.name || '').toUpperCase().slice(0, 15))}</text>`;
+      }).join('')}
+      ${label(196, T + 35, 'Size range', 'start', 5)}${value(196, T + 47, sizes, 7)}
+      ${label(196, T + 60, 'View', 'start', 5)}${value(196, T + 70, apparel ? 'Front · Back' : 'Flat', 7)}
+      ${label(14, T + 85, 'Notes', 'start', 5)}
+      ${notes.map((n, i) => value(14, T + 96 + i * 9, n.slice(0, 32), 6.2)).join('')}
+      ${label(196, T + 85, apparel ? 'Points of measure' : 'Construction', 'start', 5)}
+      ${(apparel ? poms : ['Per factory sample']).map((n, i) => value(196, T + 96 + i * 9, n, 6.2)).join('')}
+    </g>`);
+    return `<svg class="k-mockup k-mockup--sketch" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
+      <rect width="360" height="480" fill="${PAPER}"/>${parts.join('')}</svg>`;
   }
 
   window.KioskMockup = { render, types: Object.keys(garments), prints: Object.keys(PRINTS) };

@@ -299,7 +299,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an ai
 
 **Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
 
-**3D product renders:** tees and hoodies use rendered product shots in `images/shop/3d/<id>-<colourway index>.webp`, set per colourway with `image`. To re-render after changing a print or colour, run `node scripts/render-3d-flat.js <dir>` with the local server on port 8765, then `python3 scripts/render-3d-shade.py <dir>/<id>--<n>.png images/shop/3d/<id>-<n>.webp tee|hoodie`.
+**Tech sketches:** a physical product (or colourway) without `lifestyle` photos is shown as a black-and-white tech-pack flat drawn from its `mockup` (front and back views, points of measure, construction details, spec block). Add real photos with `lifestyle` on the colourway to replace it. The flats live in `js/kiosk-mockups.js` (`sketch()`, `BLOCKS` and `DETAILS`); the theme colours are in `css/kiosk-glass.css` (`.k-mockup--sketch`).
 
 **Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
 
