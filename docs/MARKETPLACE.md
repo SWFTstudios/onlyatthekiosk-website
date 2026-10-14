@@ -92,17 +92,15 @@ Quote pieces have a small K on the chest and the quote on the back:
 ```js
 quote: 'Focus on direction, not speed.',
 mockup: { type: 'tee', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },   // or 'grotesk'
-lifestyle: ['images/shop/lifestyle/tee-q-direction.webp'],
 colorways: [{ name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214',
   image: 'images/shop/3d/tee-q-direction-0-back.webp', imageFront: 'images/shop/3d/tee-q-direction-0-front.webp' }],
 ```
-Product cards show the street photo and switch to the terminal shot on hover. The product panel shows every photo and render for the chosen colourway.
+Product cards show the 3D back render and flip to the front on hover. Add `lifestyle` photos per colourway only when you have real on-model shots (see `docs/LIFESTYLE_PROMPTS.md`); don't composite flat renders over shoot photos. The product panel shows every photo and render for the chosen colourway.
 
 **Rights:** some sayings have known authors. Before printing for sale, check that you can use each line. Common proverbs are usually fine, but a living author's line or book title may not be.
 
 ### Regenerating the images
 1. Start the local server (`python3 -m http.server 8765`), then flat-render front and back: `node scripts/render-3d-flat.js <dir> '^(tee-q|hoodie-q|hunt-)'`
 2. Shade each one into a 3D render: `python3 scripts/render-3d-shade.py <dir>/<id>--<n>--back.png images/shop/3d/<id>-<n>-back.webp tee|hoodie` (and the same for `--front`).
-3. Make a lifestyle composite (hanger in front of a shoot photo): `python3 scripts/render-lifestyle.py images/shop/3d/<id>-0-back.webp images/garage/<slug>/<nn>.webp images/shop/lifestyle/<id>.webp`
 
 For on-model photos, see `docs/LIFESTYLE_PROMPTS.md`.

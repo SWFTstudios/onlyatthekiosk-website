@@ -834,7 +834,6 @@ window.KIOSK_CONTENT = {
       id: 'tee-q-direction', category: 'quotes', store: 'kiosk', title: 'Direction Tee', price: 42, badge: 'New', added: '2026-10-13',
       detail: 'Heavyweight cotton · small K on the chest · quote printed on the back',
       quote: 'Focus on direction, not speed.',
-      lifestyle: ['images/shop/lifestyle/tee-q-direction.webp'],
       mockup: { type: 'tee', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },
       colorways: [
         { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', image: 'images/shop/3d/tee-q-direction-0-back.webp', imageFront: 'images/shop/3d/tee-q-direction-0-front.webp' },
@@ -848,7 +847,6 @@ window.KIOSK_CONTENT = {
       id: 'hoodie-q-exist', category: 'quotes', store: 'kiosk', title: 'Make It Exist Hoodie', price: 98, badge: 'New', added: '2026-10-13',
       detail: 'Brushed fleece · small K on the chest · quote printed on the back',
       quote: 'Just make it exist first. You can make it good later.',
-      lifestyle: ['images/shop/lifestyle/hoodie-q-exist.webp'],
       mockup: { type: 'hoodie', chest: true, quote: 'Just make it exist first. You can make it good later.', quoteStyle: 'grotesk' },
       colorways: [
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb', image: 'images/shop/3d/hoodie-q-exist-0-back.webp', imageFront: 'images/shop/3d/hoodie-q-exist-0-front.webp' },
@@ -862,7 +860,6 @@ window.KIOSK_CONTENT = {
       id: 'tee-q-curious', category: 'quotes', store: 'kiosk', title: 'Curious Tee', price: 42, badge: 'New', added: '2026-10-13',
       detail: 'Heavyweight cotton · small K on the chest · quote printed on the back',
       quote: 'The future belongs to the curious.',
-      lifestyle: ['images/shop/lifestyle/tee-q-curious.webp'],
       mockup: { type: 'tee', chest: true, quote: 'The future belongs to the curious.', quoteStyle: 'serif' },
       colorways: [
         { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', image: 'images/shop/3d/tee-q-curious-0-back.webp', imageFront: 'images/shop/3d/tee-q-curious-0-front.webp' },
@@ -876,7 +873,6 @@ window.KIOSK_CONTENT = {
       id: 'hoodie-q-nets', category: 'quotes', store: 'kiosk', title: 'Repair The Nets Hoodie', price: 98, badge: 'New', added: '2026-10-13',
       detail: 'Brushed fleece · small K on the chest · quote printed on the back',
       quote: 'When fishermen cannot go to sea, they repair nets.',
-      lifestyle: ['images/shop/lifestyle/hoodie-q-nets.webp'],
       mockup: { type: 'hoodie', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif' },
       colorways: [
         { name: 'Oak Brown', garment: '#6e5034', ink: '#ece9e1', image: 'images/shop/3d/hoodie-q-nets-0-back.webp', imageFront: 'images/shop/3d/hoodie-q-nets-0-front.webp' },
@@ -890,7 +886,6 @@ window.KIOSK_CONTENT = {
       id: 'tee-q-spiral', category: 'quotes', store: 'kiosk', title: 'Spiral Tee', price: 42, badge: 'New', added: '2026-10-13',
       detail: 'Heavyweight cotton · small K on the chest · quote printed on the back',
       quote: 'Life is a spiral, not a straight line.',
-      lifestyle: ['images/shop/lifestyle/tee-q-spiral.webp'],
       mockup: { type: 'tee', chest: true, quote: 'Life is a spiral, not a straight line.', quoteStyle: 'grotesk' },
       colorways: [
         { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', image: 'images/shop/3d/tee-q-spiral-0-back.webp', imageFront: 'images/shop/3d/tee-q-spiral-0-front.webp' },
@@ -904,7 +899,6 @@ window.KIOSK_CONTENT = {
       id: 'tee-q-tired', category: 'quotes', store: 'kiosk', title: 'Do It Tired Tee', price: 42, badge: 'New', added: '2026-10-13',
       detail: 'Heavyweight cotton · small K on the chest · quote printed on the back',
       quote: 'If you are tired, do it tired.',
-      lifestyle: ['images/shop/lifestyle/tee-q-tired.webp'],
       mockup: { type: 'tee', chest: true, quote: 'If you are tired, do it tired.', quoteStyle: 'grotesk' },
       colorways: [
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb', image: 'images/shop/3d/tee-q-tired-0-back.webp', imageFront: 'images/shop/3d/tee-q-tired-0-front.webp' },
@@ -918,7 +912,6 @@ window.KIOSK_CONTENT = {
       id: 'hoodie-q-glitch', category: 'quotes', store: 'kiosk', title: 'Glitch Hoodie', price: 98, badge: 'New', added: '2026-10-13',
       detail: 'Brushed fleece · small K on the chest · quote printed on the back',
       quote: 'Be the glitch you want to see in the matrix.',
-      lifestyle: ['images/shop/lifestyle/hoodie-q-glitch.webp'],
       mockup: { type: 'hoodie', chest: true, quote: 'Be the glitch you want to see in the matrix.', quoteStyle: 'grotesk' },
       colorways: [
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb', image: 'images/shop/3d/hoodie-q-glitch-0-back.webp', imageFront: 'images/shop/3d/hoodie-q-glitch-0-front.webp' },
@@ -932,7 +925,6 @@ window.KIOSK_CONTENT = {
       id: 'tee-q-understand', category: 'quotes', store: 'kiosk', title: 'Others Don’t Understand Tee', price: 42, badge: 'New', added: '2026-10-13',
       detail: 'Heavyweight cotton · small K on the chest · quote printed on the back',
       quote: 'It’s okay to live a life others don’t understand.',
-      lifestyle: ['images/shop/lifestyle/tee-q-understand.webp'],
       mockup: { type: 'tee', chest: true, quote: 'It’s okay to live a life others don’t understand.', quoteStyle: 'serif' },
       colorways: [
         { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', image: 'images/shop/3d/tee-q-understand-0-back.webp', imageFront: 'images/shop/3d/tee-q-understand-0-front.webp' },
@@ -977,7 +969,6 @@ window.KIOSK_CONTENT = {
       id: 'hunt-hudson-hoodie', category: 'hunt', store: 'kiosk', title: 'Hudson Valley Hunt Hoodie', price: 120, badge: 'Pickup only', added: '2026-10-13',
       detail: 'Numbered run · collect in person · the quote changes with every drop',
       quote: 'Focus on direction, not speed.',
-      lifestyle: ['images/shop/lifestyle/hunt-hudson-hoodie.webp'],
       mockup: { type: 'hoodie', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },
       colorways: [{ name: 'Oak Brown', garment: '#6e5034', ink: '#ece9e1', image: 'images/shop/3d/hunt-hudson-hoodie-0-back.webp', imageFront: 'images/shop/3d/hunt-hudson-hoodie-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
@@ -990,7 +981,6 @@ window.KIOSK_CONTENT = {
       id: 'hunt-bridge-tee', category: 'hunt', store: 'kiosk', title: 'Under the Bridge Hunt Tee', price: 60, badge: 'Pickup only', added: '2026-10-13',
       detail: 'Numbered run · collect in person at the bridge',
       quote: 'When fishermen cannot go to sea, they repair nets.',
-      lifestyle: ['images/shop/lifestyle/hunt-bridge-tee.webp'],
       mockup: { type: 'tee', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif' },
       colorways: [{ name: 'Racing Blue', garment: '#364679', ink: '#f2f0eb', image: 'images/shop/3d/hunt-bridge-tee-0-back.webp', imageFront: 'images/shop/3d/hunt-bridge-tee-0-front.webp' }],
       sizes: ['S', 'M', 'L', 'XL'],
