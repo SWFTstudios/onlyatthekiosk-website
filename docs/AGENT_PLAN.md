@@ -1,5 +1,11 @@
 # KIOSK backend: plan for Cursor agents
 
+> **Status (Oct 2026): Supabase is on hold** until the outstanding Supabase bill is paid.
+> Do not create projects, connect the Supabase MCP or run workstreams A, B, or the Supabase
+> parts of C, D and E. Supabase-free work (Shopify query validation, the orders webhook
+> logging to Cloudflare only, R2 media, Turnstile, a read-only Twilio audit) may proceed
+> once the owner approves it.
+
 **Purpose.** This is the playbook for Cursor agents that add accounts, sign-in and the backend to the KIOSK site. It covers the services, the MCP connectors each agent may use, the order to build in, and what "done" means.
 
 **How to use it:**
