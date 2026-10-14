@@ -222,7 +222,30 @@ The title, thumbnail and length load from Vimeo automatically. `title` overrides
 
 ## 3c. Look and feel: cover, intro, day/night
 
-- **Cover video:** `issue.reel` / `issue.reelWebm` / `issue.reelPoster` play full screen behind the giant KIOSK on the home page. `videos/kiosk-reel.*` is cut from the Q50 and R1M shoots. Replace it with any 10–20 s muted clip under about 8 MB.
+- **Cover slideshow:** `issue.heroSlides` in `js/kiosk-content.js` plays full-screen muted clips behind the giant KIOSK on the home page.
+  - **How it plays:** each clip plays once, then crossfades to the next. Story-style bars at the top show progress, and the caption links to the slide's story.
+  - **Controls:** visitors can tap a bar, use the arrows or swipe, and pause. The slideshow pauses when the cover scrolls out of view.
+  - **A slide:** `{ src, webm, poster, story, kicker, title, caption }`.
+  - **Clip size:** keep each clip 4–10 s, muted, 1600 px wide and about 1–2 MB.
+  - **Current clips:** `videos/hero/` holds the Q50 and R1M cuts of the KIOSK reel and the raw Q50 set footage.
+  - **Fallback:** with an empty list, the single `issue.reel` loop plays instead.
+- **Depth:** on the home page the issue slides up over the cover like a sheet while the cover sinks back. Sections rise into view as you scroll, and cards tilt toward the pointer on desktop.
+- **App shell:** links between the magazine pages load in place, with a short transition, so the header, tab bar and radio keep running.
+  - **Phones:** navigation moves to a bottom tab bar (Home, Garage, Journal, Radio, Shop, More). The top bar shrinks to the logo and clock and tucks away while you read.
+  - **Home screen:** `site.webmanifest` lets visitors add KIOSK to their home screen as a full-screen app.
+- **Settings** (gear in the header, *More › Settings* on phones, or `#settings` on any page): readers can change these for themselves, saved on their device only:
+  - language
+  - theme and accent colour
+  - text size
+  - depth on or off
+  - round or square corners
+  - density
+  - which home sections show, and in what order
+  - motion, intro and hero autoplay
+- **Languages:**
+  - **Supported:** English, Español, Français, Português, Deutsch, Italiano, 日本語, 한국어 and 中文.
+  - **Interface text:** the translations are in `js/kiosk-i18n.js`, keyed by the English text exactly as it appears on the page. If you change a label in the HTML or JS, change its key there too, or that label will stay in English.
+  - **Stories and product notes:** these are not in the dictionary. In browsers with a built-in on-device translator (recent desktop Chrome), readers can switch on *Translate stories on this device*. Elsewhere those passages stay in English.
 - **World traveler intro:** plays once per visit on the home page (skippable).
   - **The flight:** a 3D dotted Earth where a traveler flies New York → Reykjavík → London → Marrakesh → Dubai → Tokyo. Each stop gets a passport stamp, and a boarding pass shows the current leg and that city's local time. The camera then pulls back and the KIOSK title lands.
   - **Changing the route:** edit `ROUTE` at the top of `js/kiosk-intro3d.js`.

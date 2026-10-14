@@ -6,7 +6,13 @@
   <meta name="description" content="KIOSK is a global magazine and marketplace: films and stories about cars, motorcycles, skate, travel and the people behind them, plus rare pieces sourced around the world — some you can only collect in person.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf8">
-  <script>/* Day/night before first paint: follows local time unless the visitor picked one */(function(){var p='auto';try{p=JSON.parse(localStorage.getItem('kiosk:theme'))||'auto'}catch(e){}var h=new Date().getHours();document.documentElement.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p)})();</script>
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KIOSK">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
   <link rel="canonical" href="https://onlyatthekiosk.com/">
 
   <meta property="og:type" content="website">
@@ -55,6 +61,7 @@
       <div class="k-cover__media" data-mount="hero-bg"></div>
       <div class="k-cover__shade" aria-hidden="true"></div>
       <div class="k-cover__inner">
+        <div class="k-heroshow__bars" data-mount="hero-bars"></div>
         <div class="k-cover__top">
           <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
           <p class="k-eyebrow k-cover__edition">Global edition · <span data-clock>--:--</span> <span data-clock-zone></span></p>
@@ -66,6 +73,7 @@
           <a class="k-btn" href="vault.html">Shop the kiosk</a>
           <div data-mount="hero-watch"></div>
         </div>
+        <div class="k-heroshow__ui" data-mount="hero-controls"></div>
         <ol class="k-cover__index" aria-label="In this issue">
           <li><a href="garage.html"><span>01</span>Automotive</a></li>
           <li><a href="journal.html"><span>02</span>Travel</a></li>
@@ -85,7 +93,7 @@
     </div>
 
     <!-- 01 / GARAGE --------------------------------------------------- -->
-    <section class="k-section" id="garage" aria-labelledby="garage-title">
+    <section class="k-section" id="garage" aria-labelledby="garage-title" data-home="garage">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -112,7 +120,7 @@
     </section>
 
     <!-- DEPARTMENTS: horizontal rail ----------------------------------- -->
-    <section class="k-section k-section--tight" aria-label="Departments">
+    <section class="k-section k-section--tight" aria-label="Departments" data-home="departments">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -126,7 +134,7 @@
     </section>
 
     <!-- AROUND THE GLOBE: wireframe globe + flights ------------------- -->
-    <section class="k-section" id="globe" aria-labelledby="globe-title">
+    <section class="k-section" id="globe" aria-labelledby="globe-title" data-home="globe">
       <div class="k-wrap k-globe-wrap">
         <div class="k-globe-copy">
           <p class="k-eyebrow">Dispatches / Around the globe</p>
@@ -145,7 +153,7 @@
     </section>
 
     <!-- 02 / MANIFESTO ------------------------------------------------ -->
-    <section class="k-section k-section--tight" aria-label="About KIOSK">
+    <section class="k-section k-section--tight" aria-label="About KIOSK" data-home="about">
       <div class="k-wrap">
         <p class="k-eyebrow">02 / Why the kiosk</p>
         <p class="k-quote k-mt-m" data-reveal>
@@ -158,7 +166,7 @@
     </section>
 
     <!-- 03 / WHAT WE MAKE (bento) ------------------------------------- -->
-    <section class="k-section k-section--tight" aria-labelledby="make-title">
+    <section class="k-section k-section--tight" aria-labelledby="make-title" data-home="make">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -222,7 +230,7 @@
     </section>
 
     <!-- 04 / FILMS ---------------------------------------------------- -->
-    <section class="k-section" id="films" aria-labelledby="films-title">
+    <section class="k-section" id="films" aria-labelledby="films-title" data-home="films">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -246,7 +254,7 @@
     </section>
 
     <!-- MOSAIC: Pinterest-style board ----------------------------------- -->
-    <section class="k-section k-section--tight" data-mosaic-section aria-label="Every desk">
+    <section class="k-section k-section--tight" data-mosaic-section aria-label="Every desk" data-home="mosaic">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -261,7 +269,7 @@
     </section>
 
     <!-- 05 / RADIO ---------------------------------------------------- -->
-    <section class="k-section" id="radio" aria-labelledby="radio-title">
+    <section class="k-section" id="radio" aria-labelledby="radio-title" data-home="radio">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
@@ -278,7 +286,7 @@
     </section>
 
     <!-- 06 / SHOP -------------------------------------------------- -->
-    <section class="k-section" id="vault" aria-labelledby="vault-title">
+    <section class="k-section" id="vault" aria-labelledby="vault-title" data-home="shop">
       <div class="k-wrap">
         <div class="k-shop-hero" style="margin-bottom:clamp(32px,5vw,64px)">
           <div>
@@ -302,7 +310,7 @@
     </section>
 
     <!-- 07 / DISPATCH ------------------------------------------------- -->
-    <section class="k-section" id="dispatch" aria-labelledby="dispatch-title">
+    <section class="k-section" id="dispatch" aria-labelledby="dispatch-title" data-home="dispatch">
       <div class="k-wrap">
         <div class="k-dispatch k-glass">
           <div>

@@ -40,6 +40,14 @@ window.KIOSK_CONTENT = {
     reel: 'videos/kiosk-reel.mp4',              // full-screen cover video (muted loop)
     reelWebm: 'videos/kiosk-reel.webm',
     reelPoster: 'videos/kiosk-reel-poster.webp',
+    // Full-screen hero slideshow (muted, autoplay; each slide plays once, then the next).
+    // Each slide: src (mp4) + webm + poster, a kicker/title/caption, and the story it opens.
+    // Empty → the single reel above.
+    heroSlides: [
+      { src: 'videos/hero/q50.mp4', webm: 'videos/hero/q50.webm', poster: 'videos/hero/q50-poster.webp', story: 'andy-q50', kicker: 'Automotive', title: 'Real Slummy', caption: 'Andy’s Q50 on the Hudson Line' },
+      { src: 'videos/hero/r1m.mp4', webm: 'videos/hero/r1m.webm', poster: 'videos/hero/r1m-poster.webp', story: 'moses-r1m', kicker: 'Motorcycles', title: 'Under the Bridge', caption: 'Moses’ R1M under the George Washington Bridge' },
+      { src: 'videos/hero/bts.mp4', webm: 'videos/hero/bts.webm', poster: 'videos/hero/bts-poster.webp', story: 'andy-q50', kicker: 'On set', title: 'Behind the scenes · Hudson Line', caption: 'Raw footage from the Q50 shoot' },
+    ],
     lead: 'andy-q50',
   },
 
