@@ -14,7 +14,7 @@ node scripts/build-nav.js
 echo "Copying public files to dist/..."
 rm -rf dist
 mkdir -p dist
-cp ./*.html _redirects dist/
+cp ./*.html _redirects site.webmanifest dist/
 for dir in css js images videos fonts collections; do
   cp -R "$dir" dist/
 done

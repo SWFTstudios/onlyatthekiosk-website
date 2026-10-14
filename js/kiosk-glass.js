@@ -34,6 +34,35 @@
     },
   };
 
+  /* ------------------------------------------------- reader settings
+   * Saved on this device as 'kiosk:prefs' (only values that differ from
+   * the defaults). The <head> of each page copies the look-and-feel ones
+   * onto <html data-*> before paint; the CSS does the rest.
+   * -------------------------------------------------------------------- */
+  const PREFS_KEY = 'kiosk:prefs';
+  const PREF_DEFAULTS = {
+    accent: 'signal', type: 'm', density: 'comfortable', depth: 'on', corners: 'round',
+    motion: 'system', intro: 'once', autoplay: 'on', lang: 'en', mt: 'off',
+    homeOrder: [], homeHidden: [],
+  };
+  const PREF_ATTRS = ['accent', 'type', 'density', 'depth', 'corners', 'motion'];
+  const prefs = Object.assign({}, PREF_DEFAULTS, store.get(PREFS_KEY, {}));
+  function savePrefs() {
+    const out = {};
+    Object.keys(PREF_DEFAULTS).forEach((k) => {
+      if (JSON.stringify(prefs[k]) !== JSON.stringify(PREF_DEFAULTS[k])) out[k] = prefs[k];
+    });
+    store.set(PREFS_KEY, out);
+    applyPrefs();
+  }
+  function applyPrefs() {
+    const d = document.documentElement;
+    PREF_ATTRS.forEach((k) => {
+      if (prefs[k] && prefs[k] !== PREF_DEFAULTS[k]) d.setAttribute(`data-${k}`, prefs[k]);
+      else d.removeAttribute(`data-${k}`);
+    });
+  }
+
   const icon = {
     arrow: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     right: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -42,6 +71,7 @@
     pause: '<svg viewBox="0 0 12 14" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="4" height="14" rx="1"/><rect x="8" y="0" width="4" height="14" rx="1"/></svg>',
     close: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
     heart: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13.5S2 10 2 5.8A3 3 0 0 1 8 4.3a3 3 0 0 1 6 1.5C14 10 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    gear: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 6h8M15 6h2M3 14h2M9 14h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="13" cy="6" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="14" r="2" stroke="currentColor" stroke-width="1.4"/></svg>',
     search: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     copy: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="12" height="12"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V4a1 1 0 0 1 1-1h6.5" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -170,6 +200,22 @@
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
+  const TAB_ICONS = {
+    home: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    garage: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 14.5l1.6-4.3A2 2 0 0 1 7 8.9h10a2 2 0 0 1 1.9 1.3l1.6 4.3V18a1 1 0 0 1-1 1h-1.6a1 1 0 0 1-1-1v-1H7.1v1a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.5" cy="14" r="1.1" fill="currentColor"/><circle cx="16.5" cy="14" r="1.1" fill="currentColor"/></svg>',
+    journal: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4.5h10.5L19 8v11.5H5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 10h8M8 13.5h8M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    radio: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12v-1a8 8 0 0 1 16 0v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="16.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>',
+    shop: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 11.5H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
+  };
+  const TABS = [
+    { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
+    { id: 'garage', label: 'Garage', href: 'garage.html', icon: TAB_ICONS.garage },
+    { id: 'journal', label: 'Journal', href: 'journal.html', icon: TAB_ICONS.journal },
+    { id: 'radio', label: 'Radio', href: 'radio.html', icon: TAB_ICONS.radio },
+    { id: 'vault', label: 'Shop', href: 'vault.html', icon: TAB_ICONS.shop },
+  ];
+
   function currentNav() {
     const params = new URLSearchParams(location.search);
     if (PAGE === 'garage' && params.get('format') === 'film') return 'films';
@@ -241,6 +287,7 @@
         <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
         <div class="k-nav__actions">
           <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
+          <button class="k-nav__theme k-nav__settings" type="button" data-settings-open aria-label="Open settings">${icon.gear}</button>
           <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas><span class="k-nav__radio-label">Radio</span></a>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
@@ -261,6 +308,8 @@
         <li><a href="vault.html?c=hunt">The Hunt <span>${pad(NAV.length + 1)}</span></a></li>
       </ul>
       <div class="k-sheet__foot">
+        <button class="k-btn k-btn--sm" type="button" data-settings-open>${icon.gear}<span>Settings</span></button>
+        <button class="k-btn k-btn--sm k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
         <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
         <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
         <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
@@ -273,20 +322,33 @@
     guides.setAttribute('aria-hidden', 'true');
     guides.innerHTML = '<span></span><span></span><span></span><span></span>';
 
+    // Phones: primary navigation sits in a bottom tab bar, within reach of a thumb
+    const tabbar = document.createElement('nav');
+    tabbar.className = 'k-tabbar';
+    tabbar.setAttribute('aria-label', 'Primary');
+    tabbar.innerHTML = `${TABS.map((t) => `<a class="k-tabbar__item" href="${t.href}" data-tab="${t.id}"${t.id === cur ? ' aria-current="page"' : ''}>${t.icon}<span>${t.label}</span></a>`).join('')}
+      <button class="k-tabbar__item" type="button" data-tab-more aria-expanded="false" aria-controls="k-sheet">${TAB_ICONS.more}<span>More</span></button>`;
+
     document.body.prepend(guides);
     document.body.prepend(sheet);
     document.body.prepend(nav);
+    document.body.append(tabbar);
 
     const btn = $('.k-nav__menu-btn', nav);
+    const more = $('[data-tab-more]', tabbar);
     const setOpen = (open) => {
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      more.setAttribute('aria-expanded', String(open));
+      document.documentElement.classList.toggle('is-sheet-open', open);
       sheet.classList.toggle('is-open', open);
       sheet.setAttribute('aria-hidden', String(!open));
       document.body.style.overflow = open ? 'hidden' : '';
     };
     btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
-    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify]')) setOpen(false); });
+    more.addEventListener('click', () => setOpen(more.getAttribute('aria-expanded') !== 'true'));
+    tabbar.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open]')) setOpen(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
     const footer = document.createElement('footer');
@@ -531,11 +593,12 @@
    *
    * Every <canvas data-wave> on the page is drawn from the same signal.
    * data-wave="<slug>" only moves while that mix is the one playing.
-   * While the radio is on, internal links load in place (see softNavigate)
+   * Internal links load in place (see softNavigate)
    * so the music keeps going from page to page.
    * -------------------------------------------------------------------- */
 
-  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Reduced motion: the visitor's system setting, or Settings › Motion
+  const REDUCED = prefs.motion === 'reduced' || (prefs.motion !== 'full' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   const wave = {
     bins: new Float32Array(64),
@@ -977,8 +1040,8 @@
   };
 
   /* ---------------------------------------------------- soft navigation
-   * While the radio is on, links to KIOSK Glass pages swap <main> in place
-   * instead of reloading, so the dock (and the music) survive navigation.
+   * Links between KIOSK Glass pages swap <main> in place instead of
+   * reloading, like an app: the chrome stays put, the radio keeps playing.
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
@@ -1001,6 +1064,10 @@
     $$('.k-nav__links a, .k-sheet__links a').forEach((a) => {
       const item = NAV.find((n) => n.href === a.getAttribute('href'));
       if (item && item.id === cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    const tab = cur === 'films' ? 'garage' : cur;
+    $$('[data-tab]').forEach((a) => {
+      if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
   }
 
@@ -1028,12 +1095,22 @@
     const lb = $('.k-lightbox.is-open');
     if (lb) closeLightbox();
 
-    $('main').replaceWith(document.importNode(main, true));
-    markNav();
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    runPage();
-    reveal();
-    player.sync();
+    const swap = () => {
+      $('main').replaceWith(document.importNode(main, true));
+      document.documentElement.classList.remove('is-reading');
+      markNav();
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      runPage();
+      reveal();
+      player.sync();
+    };
+    // App-style page change: the new page rises in over the old one
+    if (document.startViewTransition && !REDUCED) {
+      document.documentElement.dataset.nav = push ? 'forward' : 'back';
+      await document.startViewTransition(swap).updateCallbackDone.catch(() => {});
+    } else {
+      swap();
+    }
     const hash = new URL(href, location.href).hash;
     const target = hash && document.getElementById(hash.slice(1));
     if (target) target.scrollIntoView({ block: 'start' });
@@ -1044,7 +1121,7 @@
 
   function bindSoftNav() {
     document.addEventListener('click', (e) => {
-      if (!player.active() || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const url = softUrl(e.target.closest('a[href]'));
       if (!url) return;
       e.preventDefault();
@@ -1052,7 +1129,6 @@
     });
     window.addEventListener('popstate', () => {
       if (location.pathname + location.search === renderedKey) return;   // hash-only change
-      if (!player.active()) { location.reload(); return; }
       softNavigate(location.href, false);
     });
   }
@@ -1421,18 +1497,558 @@
     });
   }
 
+  /* ------------------------------------------------------------- i18n
+   * Interface text comes from js/kiosk-i18n.js (loaded only when a reader
+   * picks another language): every text node and aria-label / placeholder /
+   * title is looked up by its English text, including text rendered later.
+   * Stories and product notes aren't in the dictionary; where the browser
+   * has an on-device translator (Translator API) and the reader turns it on,
+   * longer passages are translated locally. Nothing is sent to a server.
+   * -------------------------------------------------------------------- */
+  const I18N_ATTRS = ['aria-label', 'placeholder', 'title'];
+  const I18N_SKIP = 'script, style, textarea, code, pre, [data-clock], [data-clock-zone], [data-no-i18n], .k-tabbar__item svg';
+  const i18n = { strings: null, patterns: [], loading: null, done: new Set(), attrs: new Map(), mo: null, mt: null, mtCache: new Map(), queue: new Set(), raf: 0 };
+  const norm = (t) => t.replace(/\s+/g, ' ').trim();
+
+  function i18nLoad() {
+    if (window.KIOSK_I18N) return Promise.resolve(window.KIOSK_I18N);
+    if (!i18n.loading) i18n.loading = loadScript('js/kiosk-i18n.js').then(() => window.KIOSK_I18N);
+    return i18n.loading;
+  }
+  function i18nReady(data) {
+    if (i18n.strings || !data) return;
+    i18n.strings = data.strings || {};
+    i18n.patterns = Object.keys(data.patterns || {}).map((key) => {
+      const names = [];
+      const re = new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{(\w+)\\\}/g, (m, n) => { names.push(n); return '(.+?)'; })}$`);
+      return { re, names, tr: data.patterns[key] };
+    });
+  }
+  function lookup(text, lang) {
+    const key = norm(text);
+    if (!key || !/[A-Za-z]/.test(key)) return null;
+    const hit = i18n.strings[key];
+    if (hit && hit[lang]) return hit[lang];
+    for (const p of i18n.patterns) {
+      const m = key.match(p.re);
+      if (m && p.tr[lang]) {
+        return p.names.reduce((out, n, i) => {
+          const cap = m[i + 1]; const t = i18n.strings[cap];
+          return out.replace(`{${n}}`, t && t[lang] ? t[lang] : cap);
+        }, p.tr[lang]);
+      }
+    }
+    return null;
+  }
+  function translateText(node, lang) {
+    const st = node.__k || (node.__k = { src: node.nodeValue, out: null });
+    if (node.nodeValue !== st.out && node.nodeValue !== st.src) { st.src = node.nodeValue; st.out = null; }   // the app changed it
+    if (lang === 'en') { if (st.out != null && node.nodeValue === st.out) node.nodeValue = st.src; st.out = null; return; }
+    const tr = lookup(st.src, lang);
+    if (tr) {
+      const lead = st.src.match(/^\s*/)[0]; const tail = st.src.match(/\s*$/)[0];
+      st.out = lead + tr + tail;
+      if (node.nodeValue !== st.out) node.nodeValue = st.out;
+      i18n.done.add(node);
+    } else if (prefs.mt === 'on' && norm(st.src).length > 36) {
+      machineTranslate(node, st, lang);
+    }
+  }
+  function translateAttrs(el, lang) {
+    let rec = i18n.attrs.get(el);
+    I18N_ATTRS.forEach((a) => {
+      if (!el.hasAttribute(a)) return;
+      const v = el.getAttribute(a);
+      if (!rec) { rec = {}; i18n.attrs.set(el, rec); }
+      const r = rec[a] || (rec[a] = { src: v, out: null });
+      if (v !== r.out && v !== r.src) { r.src = v; r.out = null; }
+      if (lang === 'en') { if (r.out != null && v === r.out) el.setAttribute(a, r.src); r.out = null; return; }
+      const tr = lookup(r.src, lang);
+      if (tr) { r.out = tr; if (v !== tr) el.setAttribute(a, tr); }
+    });
+  }
+  function translateTree(root, lang = prefs.lang) {
+    if (!i18n.strings || !root) return;
+    if (root.nodeType === 3) { if (!(root.parentElement && root.parentElement.closest(I18N_SKIP))) translateText(root, lang); return; }
+    if (root.nodeType !== 1 || root.closest(I18N_SKIP)) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest(I18N_SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) translateText(n, lang);
+    [root, ...root.querySelectorAll('[aria-label], [placeholder], [title]')].forEach((el) => { if (el.nodeType === 1) translateAttrs(el, lang); });
+  }
+  function i18nWatch() {
+    if (i18n.mo) return;
+    i18n.mo = new MutationObserver((records) => {
+      records.forEach((r) => {
+        if (r.type === 'childList') r.addedNodes.forEach((n) => i18n.queue.add(n));
+        else if (r.type === 'characterData') i18n.queue.add(r.target);
+        else i18n.queue.add(r.target);
+      });
+      if (!i18n.raf) {
+        i18n.raf = requestAnimationFrame(() => {
+          i18n.raf = 0;
+          const q = Array.from(i18n.queue); i18n.queue.clear();
+          q.forEach((n) => { if (n.isConnected) translateTree(n); });
+        });
+      }
+    });
+    i18n.mo.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS });
+  }
+
+  /* On-device translation of longer passages (Chrome's Translator API) */
+  const hasMT = () => 'Translator' in self;
+  async function mtTranslator(lang) {
+    if (!hasMT()) return null;
+    if (i18n.mt && i18n.mt.lang === lang) return i18n.mt.ready;
+    const ready = (async () => {
+      try {
+        const opts = { sourceLanguage: 'en', targetLanguage: lang };
+        const a = await self.Translator.availability(opts);
+        if (a === 'unavailable') return null;
+        return await self.Translator.create(opts);
+      } catch (e) { return null; }
+    })();
+    i18n.mt = { lang, ready };
+    return ready;
+  }
+  async function machineTranslate(node, st, lang) {
+    const key = `${lang}\u0000${st.src}`;
+    if (i18n.mtCache.has(key)) { st.out = i18n.mtCache.get(key); node.nodeValue = st.out; i18n.done.add(node); return; }
+    const tr = await mtTranslator(lang);
+    if (!tr || prefs.lang !== lang || prefs.mt !== 'on' || node.nodeValue !== st.src) return;
+    try {
+      const out = await tr.translate(st.src);
+      i18n.mtCache.set(key, out);
+      if (node.nodeValue === st.src && prefs.lang === lang) { st.out = out; node.nodeValue = out; i18n.done.add(node); }
+    } catch (e) { /* leave it in English */ }
+  }
+
+  async function setLanguage(lang) {
+    prefs.lang = lang;
+    savePrefs();
+    document.documentElement.lang = lang;
+    if (lang === 'en') {
+      i18n.done.forEach((n) => { if (n.isConnected) translateText(n, 'en'); });
+      i18n.done.clear();
+      i18n.attrs.forEach((rec, el) => { if (el.isConnected) translateAttrs(el, 'en'); });
+      return;
+    }
+    try { i18nReady(await i18nLoad()); } catch (e) { toast('Couldn’t load that language. Try again.'); return; }
+    translateTree(document.body, lang);
+    i18nWatch();
+  }
+  function bootI18n() {
+    const d = document.documentElement;
+    if (prefs.lang === 'en') { d.classList.remove('is-i18n'); return; }
+    i18nLoad().then((data) => { i18nReady(data); translateTree(document.body); i18nWatch(); })
+      .catch(() => {})
+      .finally(() => d.classList.remove('is-i18n'));
+  }
+
+  /* --------------------------------------------------------- settings
+   * A sheet with the reader's options: language, look, layout and motion.
+   * Opened from the gear in the header, "Settings" in the menu or #settings.
+   * -------------------------------------------------------------------- */
+  const HOME_SECTIONS = [
+    ['garage', 'Garage stories'], ['departments', 'The Departments'], ['globe', 'The globe'], ['about', 'About'],
+    ['make', 'What we make'], ['films', 'Films'], ['mosaic', 'The Mosaic'], ['radio', 'Radio'], ['shop', 'Supply & co.'], ['dispatch', 'The Dispatch'],
+  ];
+  const ACCENTS = [['signal', 'Signal', '#ff5b23'], ['cobalt', 'Cobalt', '#2f5bff'], ['acid', 'Acid', '#b6f500'], ['rose', 'Rose', '#ff3d8b'], ['gold', 'Gold', '#e2a72e'], ['mono', 'Mono', 'currentColor']];
+
+  function homeOrder() {
+    const known = HOME_SECTIONS.map(([k]) => k);
+    return prefs.homeOrder.filter((k) => known.includes(k)).concat(known.filter((k) => !prefs.homeOrder.includes(k)));
+  }
+  // Home page: put sections in the reader's order, hide the ones switched off, renumber the eyebrows
+  function applyHome() {
+    const main = $('main');
+    if (PAGE !== 'home' || !main) return;
+    let n = 0;
+    homeOrder().forEach((k) => {
+      const sec = $(`[data-home="${k}"]`, main);
+      if (!sec) return;
+      main.append(sec);
+      sec.hidden = prefs.homeHidden.includes(k);
+      if (sec.hidden) return;
+      const eb = $$('.k-eyebrow', sec).find((e) => /^\s*\d{2} \//.test(e.textContent));
+      const t = eb && Array.from(eb.childNodes).find((c) => c.nodeType === 3 && /^\s*\d{2} \//.test(c.nodeValue));
+      if (t) { n += 1; t.nodeValue = t.nodeValue.replace(/\d{2}/, pad(n)); }
+    });
+  }
+
+  function seg(name, opts, current, label) {
+    return `<div class="k-seg k-set__seg" role="radiogroup" aria-label="${esc(label)}">${opts.map(([v, l]) => `<button type="button" role="radio" data-pref="${name}" data-value="${v}" aria-checked="${String(v === current)}">${l}</button>`).join('')}</div>`;
+  }
+  function settingsHtml() {
+    const langs = (window.KIOSK_I18N && window.KIOSK_I18N.langs) || LANGS;
+    const order = homeOrder();
+    const label = Object.fromEntries(HOME_SECTIONS);
+    return `
+      <div class="k-set__scrim" data-settings-close></div>
+      <div class="k-set__panel" role="document">
+        <header class="k-set__head">
+          <span class="k-set__grab" aria-hidden="true"></span>
+          <h2 class="k-set__title" id="k-set-title">Settings</h2>
+          <button type="button" class="k-set__x" data-settings-close aria-label="Close settings">${icon.close}</button>
+        </header>
+        <div class="k-set__body">
+          <section class="k-set__group" aria-labelledby="k-set-lang">
+            <h3 id="k-set-lang">Language</h3>
+            <div class="k-set__langs" role="radiogroup" aria-label="Interface language">
+              ${langs.map((l) => `<button type="button" role="radio" data-lang="${l.code}" lang="${l.code}" aria-checked="${String(prefs.lang === l.code)}" data-no-i18n>${esc(l.name)}</button>`).join('')}
+            </div>
+            <label class="k-set__switch${hasMT() ? '' : ' is-off'}">
+              <span><b>Translate stories on this device</b><small>${hasMT() ? 'Uses your browser’s built-in translator. Nothing leaves your device.' : 'Stories and product notes stay in English in this browser.'}</small></span>
+              <input type="checkbox" data-pref-check="mt"${prefs.mt === 'on' ? ' checked' : ''}${hasMT() ? '' : ' disabled'}><i aria-hidden="true"></i>
+            </label>
+          </section>
+
+          <section class="k-set__group" aria-labelledby="k-set-look">
+            <h3 id="k-set-look">Appearance</h3>
+            <div class="k-set__row"><span>Theme</span>${seg('theme', [['auto', 'Auto'], ['light', 'Day'], ['dark', 'Night']], themePref(), 'Theme')}</div>
+            <div class="k-set__row"><span>Accent</span>
+              <div class="k-set__swatches" role="radiogroup" aria-label="Accent">${ACCENTS.map(([v, l, c]) => `<button type="button" role="radio" data-pref="accent" data-value="${v}" aria-checked="${String(prefs.accent === v)}" aria-label="${l}" title="${l}" style="--sw:${c}"></button>`).join('')}</div>
+            </div>
+            <div class="k-set__row"><span>Text size</span>${seg('type', [['s', '<small>A</small>'], ['m', 'A'], ['l', '<big>A</big>'], ['xl', '<big><b>A</b></big>']], prefs.type, 'Text size')}</div>
+            <div class="k-set__row"><span>Depth</span>${seg('depth', [['on', 'Depth'], ['off', 'Flat']], prefs.depth, 'Depth and parallax')}</div>
+            <div class="k-set__row"><span>Corners</span>${seg('corners', [['round', 'Round'], ['square', 'Square']], prefs.corners, 'Corners')}</div>
+          </section>
+
+          <section class="k-set__group" aria-labelledby="k-set-layout">
+            <h3 id="k-set-layout">Layout</h3>
+            <div class="k-set__row"><span>Density</span>${seg('density', [['comfortable', 'Comfortable'], ['compact', 'Compact']], prefs.density, 'Density')}</div>
+            <p class="k-set__label">Home sections</p>
+            <p class="k-set__hint">Drag or use the arrows to reorder. Switch a section off to hide it.</p>
+            <ol class="k-set__sections" data-home-list>
+              ${order.map((k, i) => `
+                <li data-key="${k}" draggable="true">
+                  <span class="k-set__handle" aria-hidden="true"></span>
+                  <span class="k-set__name">${esc(label[k])}</span>
+                  <button type="button" class="k-set__mv" data-move="-1" aria-label="Move up"${i === 0 ? ' disabled' : ''}>${icon.left}</button>
+                  <button type="button" class="k-set__mv" data-move="1" aria-label="Move down"${i === order.length - 1 ? ' disabled' : ''}>${icon.right}</button>
+                  <label class="k-set__mini"><input type="checkbox" data-home-show${prefs.homeHidden.includes(k) ? '' : ' checked'} aria-label="Show"><i aria-hidden="true"></i></label>
+                </li>`).join('')}
+            </ol>
+          </section>
+
+          <section class="k-set__group" aria-labelledby="k-set-motion">
+            <h3 id="k-set-motion">Motion</h3>
+            <div class="k-set__row"><span>Animations</span>${seg('motion', [['system', 'System'], ['full', 'Full'], ['reduced', 'Reduced']], prefs.motion, 'Animations')}</div>
+            <div class="k-set__row"><span>Intro animation</span>${seg('intro', [['once', 'Once per visit'], ['off', 'Off']], prefs.intro, 'Intro animation')}</div>
+            <div class="k-set__row"><span>Autoplay hero videos</span>${seg('autoplay', [['on', 'On'], ['off', 'Off']], prefs.autoplay, 'Autoplay hero videos')}</div>
+          </section>
+        </div>
+        <footer class="k-set__foot">
+          <p>Your settings are saved on this device.</p>
+          <button type="button" class="k-btn k-btn--sm" data-settings-reset>Reset to defaults</button>
+          <button type="button" class="k-btn k-btn--sm k-btn--solid" data-settings-close>Done</button>
+        </footer>
+      </div>`;
+  }
+  const LANGS = [{ code: 'en', name: 'English' }, { code: 'es', name: 'Español' }, { code: 'fr', name: 'Français' }, { code: 'pt', name: 'Português' }, { code: 'de', name: 'Deutsch' }, { code: 'it', name: 'Italiano' }, { code: 'ja', name: '日本語' }, { code: 'ko', name: '한국어' }, { code: 'zh', name: '中文' }];
+
+  let settingsEl = null;
+  let settingsReturn = null;
+  function openSettings() {
+    if (!settingsEl) {
+      settingsEl = document.createElement('div');
+      settingsEl.className = 'k-set';
+      settingsEl.id = 'k-settings';
+      settingsEl.setAttribute('role', 'dialog');
+      settingsEl.setAttribute('aria-modal', 'true');
+      settingsEl.setAttribute('aria-labelledby', 'k-set-title');
+      document.body.append(settingsEl);
+      bindSettings(settingsEl);
+    }
+    settingsEl.innerHTML = settingsHtml();
+    settingsReturn = document.activeElement;
+    document.documentElement.classList.add('is-settings-open');
+    requestAnimationFrame(() => {
+      settingsEl.classList.add('is-open');
+      const first = $('.k-set__x', settingsEl);
+      if (first) first.focus({ preventScroll: true });
+    });
+  }
+  function closeSettings() {
+    if (!settingsEl || !settingsEl.classList.contains('is-open')) return;
+    settingsEl.classList.remove('is-open');
+    document.documentElement.classList.remove('is-settings-open');
+    if (location.hash === '#settings') history.replaceState(history.state, '', location.pathname + location.search);
+    if (settingsReturn && settingsReturn.focus) settingsReturn.focus({ preventScroll: true });
+  }
+  function refreshSettings() {
+    if (!settingsEl) return;
+    const body = $('.k-set__body', settingsEl);
+    const top = body ? body.scrollTop : 0;
+    settingsEl.innerHTML = settingsHtml();
+    const nb = $('.k-set__body', settingsEl);
+    if (nb) nb.scrollTop = top;
+  }
+  function moveHome(key, dir) {
+    const order = homeOrder();
+    const i = order.indexOf(key); const j = i + dir;
+    if (i < 0 || j < 0 || j >= order.length) return;
+    [order[i], order[j]] = [order[j], order[i]];
+    prefs.homeOrder = order;
+    savePrefs(); applyHome();
+  }
+  function bindSettings(root) {
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-settings-close]')) { closeSettings(); return; }
+      if (e.target.closest('[data-settings-reset]')) {
+        const lang = prefs.lang;
+        Object.assign(prefs, JSON.parse(JSON.stringify(PREF_DEFAULTS)));
+        store.set(THEME_KEY, 'auto'); applyTheme();
+        savePrefs(); applyHome();
+        if (lang !== 'en') setLanguage('en');
+        refreshSettings();
+        toast('Settings reset');
+        return;
+      }
+      const lang = e.target.closest('[data-lang]');
+      if (lang) { setLanguage(lang.dataset.lang).then(refreshSettings); return; }
+      const opt = e.target.closest('[data-pref]');
+      if (opt) {
+        const { pref, value } = opt.dataset;
+        if (pref === 'theme') { store.set(THEME_KEY, value); applyTheme(); }
+        else { prefs[pref] = value; savePrefs(); }
+        if (pref === 'motion') toast('Settings saved');
+        $$(`[data-pref="${pref}"]`, root).forEach((b) => b.setAttribute('aria-checked', String(b === opt)));
+        return;
+      }
+      const mv = e.target.closest('[data-move]');
+      if (mv) {
+        const key = mv.closest('[data-key]').dataset.key;
+        moveHome(key, Number(mv.dataset.move));
+        refreshSettings();
+        const again = $(`[data-key="${key}"] [data-move="${mv.dataset.move}"]`, root);
+        if (again && !again.disabled) again.focus(); else { const li = $(`[data-key="${key}"] [data-move]:not([disabled])`, root); if (li) li.focus(); }
+      }
+    });
+    root.addEventListener('change', (e) => {
+      const chk = e.target.closest('[data-pref-check]');
+      if (chk) {
+        prefs[chk.dataset.prefCheck] = chk.checked ? 'on' : 'off';
+        savePrefs();
+        if (chk.dataset.prefCheck === 'mt' && prefs.lang !== 'en') { mtTranslator(prefs.lang); translateTree(document.body); }
+        return;
+      }
+      const show = e.target.closest('[data-home-show]');
+      if (show) {
+        const key = show.closest('[data-key]').dataset.key;
+        prefs.homeHidden = show.checked ? prefs.homeHidden.filter((k) => k !== key) : prefs.homeHidden.concat(key);
+        savePrefs(); applyHome();
+      }
+    });
+    // Drag to reorder home sections
+    let dragKey = null;
+    root.addEventListener('dragstart', (e) => { const li = e.target.closest('[data-key]'); if (!li) return; dragKey = li.dataset.key; li.classList.add('is-drag'); e.dataTransfer.effectAllowed = 'move'; });
+    root.addEventListener('dragover', (e) => { if (dragKey && e.target.closest('[data-key]')) e.preventDefault(); });
+    root.addEventListener('drop', (e) => {
+      const li = e.target.closest('[data-key]');
+      if (!dragKey || !li) return;
+      e.preventDefault();
+      const order = homeOrder().filter((k) => k !== dragKey);
+      order.splice(order.indexOf(li.dataset.key) + (e.offsetY > li.offsetHeight / 2 ? 1 : 0), 0, dragKey);
+      prefs.homeOrder = order; dragKey = null;
+      savePrefs(); applyHome(); refreshSettings();
+    });
+    root.addEventListener('dragend', () => { dragKey = null; });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.stopPropagation(); closeSettings(); return; }
+      if (e.key !== 'Tab') return;
+      const f = $$('button:not([disabled]), input:not([disabled]), a[href]', $('.k-set__panel', root)).filter((x) => x.offsetParent !== null);
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    });
+  }
+  function bindSettingsOpen() {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-settings-open]')) { e.preventDefault(); openSettings(); }
+    });
+    if (location.hash === '#settings') openSettings();
+    window.addEventListener('hashchange', () => { if (location.hash === '#settings') openSettings(); });
+  }
+
+  /* ------------------------------------------------------------ depth
+   * Scroll-linked cover (it sinks back as the page slides over it), a
+   * header that tucks away while you read, and cards that tilt toward the
+   * pointer. Off with Settings › Depth: Flat or reduced motion.
+   * -------------------------------------------------------------------- */
+  function bindDepth() {
+    const d = document.documentElement;
+    let lastY = window.scrollY; let ticking = false;
+    const onScroll = () => {
+      ticking = false;
+      const y = window.scrollY;
+      d.classList.toggle('is-scrolled', y > 8);
+      if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', y > lastY && y > 160); lastY = y; }
+      const cover = $('.k-cover');
+      if (cover && !REDUCED && prefs.depth !== 'off') {
+        const p = Math.min(1, Math.max(0, y / (cover.offsetHeight || window.innerHeight)));
+        cover.style.setProperty('--hero-p', p.toFixed(3));
+      }
+    };
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+    onScroll();
+
+    if (REDUCED || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const TILT = '.k-card, .k-tile, .k-feature-card, .k-shop-card__media, .k-vimeo__card';
+    let el = null;
+    document.addEventListener('pointermove', (e) => {
+      if (prefs.depth === 'off') return;
+      const t = e.target.closest && e.target.closest(TILT);
+      if (el && el !== t) { el.style.removeProperty('--rx'); el.style.removeProperty('--ry'); el.classList.remove('is-tilt'); }
+      el = t;
+      if (!t) return;
+      const r = t.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5; const y = (e.clientY - r.top) / r.height - 0.5;
+      t.classList.add('is-tilt');
+      t.style.setProperty('--rx', `${(-y * 5).toFixed(2)}deg`);
+      t.style.setProperty('--ry', `${(x * 6).toFixed(2)}deg`);
+    }, { passive: true });
+  }
+
+  /* Sections rise into view as you scroll */
+  function markRise(root = document) {
+    $$('main > section:not(.k-cover), main > .k-section, main > .k-wrap > section', root).forEach((s) => {
+      if (!s.hasAttribute('data-reveal')) s.setAttribute('data-reveal', 'rise');
+    });
+  }
+
   /* ================================================================ PAGES */
 
   /* ------------------------------------------------------------- home */
+
+  /* --------------------------------------------- hero video slideshow
+   * Full-screen muted clips from C.issue.heroSlides. Each plays once, then
+   * crossfades to the next; story-style bars show progress. Pauses when the
+   * cover scrolls away or the tab is hidden. Reduced motion or Settings ›
+   * "Autoplay hero videos: Off" shows the posters and waits for a tap.
+   * -------------------------------------------------------------------- */
+  function heroShow(slides) {
+    const bg = mount('hero-bg');
+    if (!bg) return;
+    const cover = bg.closest('.k-cover');
+    const signal = pageAbort.signal;
+    bg.innerHTML = `<div class="k-heroshow" aria-roledescription="carousel" aria-label="KIOSK films">${slides.map((s, i) => `
+      <div class="k-heroshow__slide${i === 0 ? ' is-active' : ''}" role="group" aria-roledescription="slide" aria-label="${esc(s.title)}"${i ? ' aria-hidden="true"' : ''}>
+        <video muted playsinline preload="${i < 2 ? 'auto' : 'metadata'}"${s.poster ? ` poster="${esc(s.poster)}"` : ''} aria-hidden="true">${s.webm ? `<source src="${esc(s.webm)}" type="video/webm">` : ''}<source src="${esc(s.src)}" type="video/mp4"></video>
+      </div>`).join('')}</div>`;
+    fill('hero-bars', slides.map((s, i) => `<button type="button" class="k-heroshow__bar" data-hero-go="${i}" aria-label="${esc(s.title)}"><i></i></button>`).join(''));
+    fill('hero-controls', `
+      <a class="k-heroshow__caption" data-hero-link href="#"><span class="k-heroshow__kicker" data-hero-kicker></span><b data-hero-title></b><small data-hero-caption></small></a>
+      <div class="k-heroshow__btns">
+        <span class="k-heroshow__count" data-hero-count aria-live="polite"></span>
+        <button type="button" class="k-heroshow__btn" data-hero-prev aria-label="Previous slide">${icon.left}</button>
+        <button type="button" class="k-heroshow__btn" data-hero-toggle aria-label="Pause slideshow">${icon.pause}</button>
+        <button type="button" class="k-heroshow__btn" data-hero-next aria-label="Next slide">${icon.right}</button>
+      </div>`);
+
+    const els = $$('.k-heroshow__slide', bg);
+    const vids = els.map((el) => $('video', el));
+    const bars = $$('.k-heroshow__bar');
+    const toggle = $('[data-hero-toggle]');
+    let cur = 0;
+    let playing = !REDUCED && prefs.autoplay !== 'off';
+    let visible = true;
+    let fallback = 0;
+    let raf = 0;
+
+    const caption = () => {
+      const s = slides[cur];
+      const f = featureBySlug(s.story);
+      const link = $('[data-hero-link]');
+      if (link) link.setAttribute('href', f ? storyHref(f) : '#garage');
+      const set = (sel, v) => { const el = $(sel); if (el) el.textContent = v || ''; };
+      set('[data-hero-kicker]', s.kicker);
+      set('[data-hero-title]', s.title || (f && f.title));
+      set('[data-hero-caption]', s.caption);
+      set('[data-hero-count]', `${pad(cur + 1)} / ${pad(slides.length)}`);
+    };
+    const paint = () => {
+      bars.forEach((b, i) => {
+        const v = vids[i];
+        const p = i < cur ? 1 : i > cur ? 0 : (v.duration ? Math.min(1, v.currentTime / v.duration) : 0);
+        b.style.setProperty('--p', p.toFixed(4));
+        b.classList.toggle('is-active', i === cur);
+      });
+    };
+    const loop = () => { paint(); raf = requestAnimationFrame(loop); };
+    const run = () => {
+      clearTimeout(fallback);
+      cancelAnimationFrame(raf);
+      const v = vids[cur];
+      if (playing && visible && !document.hidden) {
+        const p = v.play();
+        if (p && p.catch) p.catch(() => { fallback = setTimeout(() => go(cur + 1), 6000); });
+        raf = requestAnimationFrame(loop);
+      } else {
+        v.pause();
+        paint();
+      }
+      toggle.innerHTML = playing ? icon.pause : icon.play;
+      toggle.setAttribute('aria-label', playing ? 'Pause slideshow' : 'Play slideshow');
+      cover.classList.toggle('is-paused', !playing);
+    };
+    function go(i) {
+      const next = (i + slides.length) % slides.length;
+      if (next !== cur) {
+        vids[cur].pause();
+        els[cur].classList.remove('is-active');
+        els[cur].setAttribute('aria-hidden', 'true');
+        cur = next;
+        els[cur].classList.add('is-active');
+        els[cur].removeAttribute('aria-hidden');
+        // Warm the one after this
+        const after = vids[(cur + 1) % slides.length];
+        if (after.preload !== 'auto') { after.preload = 'auto'; after.load(); }
+      }
+      try { vids[cur].currentTime = 0; } catch (e) { /* not loaded yet */ }
+      caption();
+      run();
+    }
+    vids.forEach((v, i) => v.addEventListener('ended', () => { if (i === cur) go(cur + 1); }, { signal }));
+
+    cover.addEventListener('click', (e) => {
+      const to = e.target.closest('[data-hero-go]');
+      if (to) { go(Number(to.dataset.heroGo)); return; }
+      if (e.target.closest('[data-hero-prev]')) { go(cur - 1); return; }
+      if (e.target.closest('[data-hero-next]')) { go(cur + 1); return; }
+      if (e.target.closest('[data-hero-toggle]')) { playing = !playing; run(); }
+    }, { signal });
+
+    // Swipe between slides
+    let sx = 0; let sy = 0;
+    cover.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true, signal });
+    cover.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - sx; const dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) go(cur + (dx < 0 ? 1 : -1));
+    }, { passive: true, signal });
+
+    if ('IntersectionObserver' in window) {
+      const io2 = new IntersectionObserver(([en]) => { visible = en.isIntersecting; run(); }, { threshold: 0.15 });
+      io2.observe(cover);
+      signal.addEventListener('abort', () => io2.disconnect());
+    }
+    document.addEventListener('visibilitychange', run, { signal });
+    signal.addEventListener('abort', () => { clearTimeout(fallback); cancelAnimationFrame(raf); vids.forEach((v) => v.pause()); });
+
+    caption();
+    run();
+  }
 
   function pageHome() {
     const issue = C.issue || {};
     const lead = featureBySlug(issue.lead) || features[0];
     if (!lead) return;
 
-    // Hero background
+    // Hero background: video slideshow, else the single reel, else the lead story's cover
     const fullBleed = { cls: 'k-media--clean', style: 'position:absolute;inset:0' };
-    fill('hero-bg', issue.reel
+    if ((issue.heroSlides || []).length) heroShow(issue.heroSlides);
+    else fill('hero-bg', issue.reel
       ? `<div class="k-media k-media--clean" style="position:absolute;inset:0"><video autoplay muted loop playsinline preload="auto"${issue.reelPoster ? ` poster="${esc(issue.reelPoster)}"` : ''} aria-label="KIOSK reel">${issue.reelWebm ? `<source src="${esc(issue.reelWebm)}" type="video/webm">` : ''}<source src="${esc(issue.reel)}" type="video/mp4"></video></div>`
       : featureMedia(lead, { meta: '', mark: '', eager: true, ...fullBleed }));
 
@@ -2691,7 +3307,7 @@
   function runIntro() {
     let seen = false;
     try { seen = sessionStorage.getItem('kiosk:intro') === '1'; sessionStorage.setItem('kiosk:intro', '1'); } catch (e) { seen = true; }
-    if (seen || REDUCED) return;
+    if (seen || REDUCED || prefs.intro === 'off') return;
     const issue = esc((C.issue || {}).number || '01');
     const el = document.createElement('div');
     el.className = 'k-intro k-i3d is-loading';
@@ -2762,6 +3378,8 @@
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
+      applyHome();
+      markRise();
       hydrateCovers();
       bindRails();
       mountGlobes();
@@ -2777,7 +3395,10 @@
   bindGlobal();
   bindMagazine();
   bindSoftNav();
+  bindSettingsOpen();
+  bindDepth();
   runPage();
+  bootI18n();
   reveal();
   wave.draw();
   window.KIOSK = { openFilm: (s) => openFilm(featureBySlug(s)), player, toast };
