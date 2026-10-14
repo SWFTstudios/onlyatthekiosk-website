@@ -299,7 +299,7 @@ The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an ai
 
 **Prints:** `wordmark`, `kmark`, `wangan`, `issue`, `arch`, `phonk`, `cafe`, `checker`. Pass `printW` to resize a print. Decks take `deckText` and `deckSub`, longsleeves take `sleevePrint`, and cassettes and VHS tapes take `label` and `sub`. New prints and garment types live in `js/kiosk-mockups.js`.
 
-**Tech sketches:** a physical product (or colourway) without `lifestyle` photos is shown as a factory tech sketch drawn from its `mockup`: line art on pattern paper with numbered callouts and a spec block. Add real photos with `lifestyle` on the colourway to replace it. The sketch style lives in `js/kiosk-mockups.js` (`sketch()` and `CALLOUTS`).
+**Tech sketches:** a physical product (or colourway) without `lifestyle` photos is shown as a black-and-white tech-pack flat drawn from its `mockup` (front and back views, points of measure, construction details, spec block). Add real photos with `lifestyle` on the colourway to replace it. The flats live in `js/kiosk-mockups.js` (`sketch()`, `BLOCKS` and `DETAILS`); the theme colours are in `css/kiosk-glass.css` (`.k-mockup--sketch`).
 
 **Colourways:** `garment` is the fabric colour and `ink` is the print colour. Name a colourway after a story palette colour (for example "Sodium" or "Midnight Purple") and that story's **Shop the look** will feature the product in that colourway automatically.
 

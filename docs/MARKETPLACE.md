@@ -94,7 +94,7 @@ quote: 'Focus on direction, not speed.',
 mockup: { type: 'tee', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif' },   // or 'grotesk'
 colorways: [{ name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214' }],
 ```
-Until a colourway has real photos, its card and product panel show a **tech sketch**: a factory-style line drawing on pattern paper, drawn from `mockup`, with numbered callouts and a spec block (colour, view, stage). Quote pieces show the back with the front as an inset. When you have on-model shots, add them to the colourway as `lifestyle: ['street.webp', 'terminal.webp']` and the sketch is replaced by the photos. Don't composite flat renders over shoot photos.
+Until a colourway has real photos, its card and product panel show a **tech sketch**: a black-and-white tech-pack flat drawn from `mockup`. Apparel (tees, longsleeves, crews, hoodies) gets front and back views, points of measure (A/B/C), zoomed construction details and a spec block (style no., colourways, size range, notes from `detail`). Other goods get a single line-art flat with the same spec block. It's pure vector, so it stays sharp at any zoom, and it follows the site theme (black on white, white on black). When you have on-model shots, add them to the colourway as `lifestyle: ['street.webp', 'terminal.webp']` and the sketch is replaced by the photos. Don't composite flat renders over shoot photos.
 
 **Rights:** some sayings have known authors. Before printing for sale, check that you can use each line. Common proverbs are usually fine, but a living author's line or book title may not be.
 

@@ -157,7 +157,7 @@
     }
     // No real photos yet: a factory tech sketch instead of a render
     if (!life.length && !isDigitalP(p) && window.KioskMockup) {
-      return window.KioskMockup.render(p.mockup || { type: 'tee' }, way, { sketch: true, code: flightOf(p), title: p.title });
+      return window.KioskMockup.render(p.mockup || { type: 'tee' }, way, { sketch: true, code: flightOf(p), title: p.title, category: categoryLabel(p.category), detail: p.detail, sizes: p.sizes, colorways: p.colorways });
     }
     if (view === 'front' && way.imageFront) return `<img class="k-product-img" src="${esc(way.imageFront)}" alt="${alt}, front" loading="lazy" decoding="async">`;
     const src = way.image || p.image;
