@@ -1452,7 +1452,8 @@
     i18n.strings = data.strings || {};
     i18n.patterns = Object.keys(data.patterns || {}).map((key) => {
       const names = [];
-      const re = new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{(\w+)\\\}/g, (m, n) => { names.push(n); return '(.+?)'; })}$`);
+      // {num…} placeholders match digits only; any other {name} matches any text
+      const re = new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{(\w+)\\\}/g, (m, n) => { names.push(n); return /^num/.test(n) ? '(\\d+)' : '(.+?)'; })}$`);
       return { re, names, tr: data.patterns[key] };
     });
   }

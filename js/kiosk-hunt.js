@@ -223,7 +223,8 @@
     map.on('load', () => { if (spinning) raf = requestAnimationFrame(spin); });
 
     /* ---- HUD readout ---- */
-    const set = (k, v) => { const el = els.root.querySelector(`[data-hud="${k}"]`); if (el) el.textContent = v; };
+    // Only touch the text when the value changes, so translations aren't redrawn every frame
+    const set = (k, v) => { const el = els.root.querySelector(`[data-hud="${k}"]`); if (el && el.dataset.v !== v) { el.dataset.v = v; el.textContent = v; } };
     function hud() {
       const c = map.getCenter(); const z = map.getZoom();
       set('lat', fmt(c.lat, 'N', 'S')); set('lon', fmt(c.lng, 'E', 'W')); set('zoom', z.toFixed(1));
