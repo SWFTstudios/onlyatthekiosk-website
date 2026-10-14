@@ -102,6 +102,10 @@
    * spec.quote = text, spec.quoteStyle = 'serif' | 'grotesk', spec.quoteBy = attribution
    */
   PRINTS.quote = (ink, bg, id, spec = {}) => {
+    if (spec.quoteFont) {
+      const h = quoteBox(spec);
+      return `<g transform="translate(-34 ${fx(-h / 2)}) scale(1.5)">${quoteLettering(spec, 0, 4, ink, bg)}</g>`;
+    }
     const serif = spec.quoteStyle !== 'grotesk';
     const text = serif ? spec.quote : String(spec.quote || '').toUpperCase();
     const lines = wrap(text, serif ? 13 : 14);
@@ -519,6 +523,30 @@
     hoodie: { N: [66, 36], SP: [31, 48], SO: [6, 208], SU: [28, 212], UA: [42, 100], H: [42, 224], neck: 26, long: true, rib: true, hood: true },
   };
 
+  /* Quote lettering: small, over the wearer's right shoulder blade, as if
+   * written with a dipped quill or embroidered. spec.quoteFont picks the hand,
+   * spec.quoteFinish is 'ink' (default) or 'stitch'. */
+  const QUOTE_FONTS = {
+    quill: { family: "'Pinyon Script', 'Snell Roundhand', cursive", size: 9.6, lh: 1.08, max: 17 },
+    hand: { family: "'Homemade Apple', 'Bradley Hand', cursive", size: 5.6, lh: 1.75, max: 19 },
+    fell: { family: "'IM Fell English', Georgia, serif", italic: true, size: 7.4, lh: 1.12, max: 19 },
+    flourish: { family: "'Mrs Saint Delafield', 'Snell Roundhand', cursive", size: 12, lh: 0.92, max: 15 },
+    serif: { family: SERIF, italic: true, size: 8.2, lh: 1.05, max: 18 },
+    grotesk: { family: SANS, weight: 600, size: 5.4, lh: 1.2, max: 18, upper: true },
+  };
+  function quoteLettering(spec, x, y, ink, paper, scale = 1) {
+    const f = QUOTE_FONTS[spec.quoteFont] || QUOTE_FONTS[spec.quoteStyle] || QUOTE_FONTS.quill;
+    const text = f.upper ? String(spec.quote || '').toUpperCase() : String(spec.quote || '');
+    const lines = wrap(text, f.max);
+    const font = `font-family="${f.family}"${f.italic ? ' font-style="italic"' : ''}${f.weight ? ` font-weight="${f.weight}"` : ''} font-size="${f.size * scale}"`;
+    const set = (extra) => lines.map((l, i) => `<text x="${x}" y="${fx(y + i * f.size * f.lh * scale)}" ${font} ${extra}>${esc(l)}</text>`).join('');
+    const stitch = spec.quoteFinish === 'stitch'
+      ? set(`fill="none" stroke="${paper}" stroke-width="${0.24 * scale}" stroke-dasharray="${0.7 * scale} ${0.55 * scale}"`)
+      : '';
+    return `<g transform="rotate(-4 ${x} ${y})">${set(`fill="${ink}"`)}${stitch}</g>`;
+  }
+  const quoteBox = (spec) => { const f = QUOTE_FONTS[spec.quoteFont] || QUOTE_FONTS[spec.quoteStyle] || QUOTE_FONTS.quill; return wrap(spec.quote, f.max).length * f.size * f.lh; };
+
   function apparelFlat(type, side, spec) {
     const b = BLOCKS[type];
     const { N, SP, SO, SU, UA, H } = b;
@@ -578,7 +606,8 @@
     // artwork, in ink
     const p = (name, x, y, w) => `<g transform="translate(${x} ${y}) scale(${w / 100})">${(PRINTS[name] || PRINTS.wordmark)(INK, PAPER, `sk${uid}`, spec)}</g>`;
     if (back) {
-      if (spec.quote || spec.backPrint) out.push(p(spec.backPrint || 'quote', 100, N[1] + 70, 74));
+      if (spec.backPrint) out.push(p(spec.backPrint, 100, N[1] + 70, 74));
+      else if (spec.quote) out.push(quoteLettering(spec, 110, N[1] + (b.hood ? 30 : 38), INK, PAPER));
     } else if (spec.chest) {
       out.push(`<g transform="translate(126 ${N[1] + 34}) scale(.2)">${PRINTS.kmark(INK, PAPER)}</g>`);
     } else if (spec.print) {
@@ -630,7 +659,12 @@
       poms = ['A Body width', 'B Body length (HPS)', `C ${b.long ? 'Sleeve length' : 'Sleeve length'}`];
       // zoomed construction details
       const R = 25; const CY = 292; const Z = 3;
-      DETAILS[spec.type].forEach(([view, p, text], i) => {
+      const details = DETAILS[spec.type].slice();
+      if (spec.quote && !spec.backPrint) {
+        const qy = b.N[1] + (b.hood ? 30 : 38) + quoteBox(spec) / 2 - 3;
+        details[1] = ['back', [137, qy], spec.quoteFinish === 'stitch' ? 'Embroidered quote' : 'Hand-lettered quote', 1.35];
+      }
+      details.forEach(([view, p, text, zoom], i) => {
         const cx = 50 + i * 86.7;
         const x0 = view === 'back' ? BX : FX;
         const body = view === 'back' ? backV : front;
@@ -638,7 +672,7 @@
         parts.push(`<path d="M${fx(px)},${fx(py)} L${fx(cx)},${CY - R}" fill="none" stroke="${INK}" stroke-width=".35" stroke-dasharray="1.5 1.5"/><circle cx="${fx(px)}" cy="${fx(py)}" r="1.4" fill="${INK}"/>`);
         parts.push(`<clipPath id="${id}c${i}"><circle cx="${cx}" cy="${CY}" r="${R}"/></clipPath>
           <circle cx="${cx}" cy="${CY}" r="${R}" fill="${PAPER}"/>
-          <g clip-path="url(#${id}c${i})"><g transform="translate(${fx(cx)} ${CY}) scale(${S * Z}) translate(${-p[0]} ${-p[1]})">${body}</g></g>
+          <g clip-path="url(#${id}c${i})"><g transform="translate(${fx(cx)} ${CY}) scale(${fx(S * (zoom || Z) * 100) / 100}) translate(${fx(-p[0])} ${fx(-p[1])})">${body}</g></g>
           <circle cx="${cx}" cy="${CY}" r="${R}" fill="none" stroke="${INK}" stroke-width=".8"/>`);
         const words = text.toUpperCase().split(' ');
         const l1 = []; const l2 = [];
@@ -656,7 +690,7 @@
     // spec block
     const T = 352; const ways = (opts.colorways && opts.colorways.length ? opts.colorways : [c]).slice(0, 4);
     const sizes = (opts.sizes || []).join(' – ') || 'One size';
-    const notes = String(opts.detail || '').split('·').map((x) => x.trim()).filter(Boolean).slice(0, 3);
+    const notes = [].concat(...String(opts.detail || '').split('·').map((x) => x.trim()).filter(Boolean).map((x) => wrap(x, 34))).slice(0, 4);
     parts.push(`<g>
       <rect x="8" y="${T}" width="344" height="${472 - T}" fill="${PAPER}" stroke="${INK}" stroke-width=".8"/>
       <path d="M8,${T + 24} L352,${T + 24} M8,${T + 74} L352,${T + 74} M70,${T} L70,${T + 24} M206,${T} L206,${T + 24} M300,${T} L300,${T + 24} M190,${T + 24} L190,${T + 120}" fill="none" stroke="${INK}" stroke-width=".5"/>
@@ -672,7 +706,7 @@
       ${label(196, T + 35, 'Size range', 'start', 5)}${value(196, T + 47, sizes, 7)}
       ${label(196, T + 60, 'View', 'start', 5)}${value(196, T + 70, apparel ? 'Front · Back' : 'Flat', 7)}
       ${label(14, T + 85, 'Notes', 'start', 5)}
-      ${notes.map((n, i) => value(14, T + 96 + i * 9, n.slice(0, 32), 6.2)).join('')}
+      ${notes.map((n, i) => value(14, T + 94 + i * 7.6, n.slice(0, 36), 5.8)).join('')}
       ${label(196, T + 85, apparel ? 'Points of measure' : 'Construction', 'start', 5)}
       ${(apparel ? poms : ['Per factory sample']).map((n, i) => value(196, T + 96 + i * 9, n, 6.2)).join('')}
     </g>`);
