@@ -1531,7 +1531,12 @@
     if (hit && hit[lang]) return hit[lang];
     for (const p of i18n.patterns) {
       const m = key.match(p.re);
-      if (m && p.tr[lang]) return p.names.reduce((out, n, i) => out.replace(`{${n}}`, m[i + 1]), p.tr[lang]);
+      if (m && p.tr[lang]) {
+        return p.names.reduce((out, n, i) => {
+          const cap = m[i + 1]; const t = i18n.strings[cap];
+          return out.replace(`{${n}}`, t && t[lang] ? t[lang] : cap);
+        }, p.tr[lang]);
+      }
     }
     return null;
   }
