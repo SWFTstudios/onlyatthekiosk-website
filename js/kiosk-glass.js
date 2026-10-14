@@ -75,6 +75,8 @@
     collapse: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5L14 2M6.5 9.5L2 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     pin: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 14.5s5-4.6 5-8.3A5 5 0 0 0 3 6.2c0 3.7 5 8.3 5 8.3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.3" r="1.7" stroke="currentColor" stroke-width="1.3"/></svg>',
     gear: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 6h8M15 6h2M3 14h2M9 14h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="13" cy="6" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="14" r="2" stroke="currentColor" stroke-width="1.4"/></svg>',
+    user: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M4 16.5c1.5-3 4-4.5 6-4.5s4.5 1.5 6 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    bag: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 7h9l-.7 9.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5.5 7z" stroke="currentColor" stroke-width="1.4"/><path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     search: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     copy: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="12" height="12"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V4a1 1 0 0 1 1-1h6.5" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -299,6 +301,8 @@
         <div class="k-nav__actions">
           <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
           <button class="k-nav__theme k-nav__settings" type="button" data-settings-open aria-label="Open settings">${icon.gear}</button>
+          <button class="k-nav__theme k-nav__account is-hidden" type="button" data-account-open aria-label="Account" hidden>${icon.user}</button>
+          <button class="k-nav__theme k-nav__cart is-hidden" type="button" data-cart-open aria-label="Cart" hidden><span class="k-nav__cart-icon">${icon.bag}</span><span class="k-nav__cart-count" data-cart-count hidden>0</span></button>
           <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas><span class="k-nav__radio-label">Radio</span></a>
           <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
         </div>
@@ -322,6 +326,8 @@
       <div class="k-sheet__foot">
         <button class="k-btn k-btn--sm" type="button" data-settings-open>${icon.gear}<span>Settings</span></button>
         <button class="k-btn k-btn--sm k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
+        <button class="k-btn k-btn--sm is-hidden" type="button" data-account-open hidden>${icon.user}<span>Account</span></button>
+        <button class="k-btn k-btn--sm is-hidden" type="button" data-cart-open hidden>${icon.bag}<span>Cart</span><span class="k-nav__cart-count" data-cart-count hidden>0</span></button>
         <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
         <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
         <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
@@ -360,7 +366,7 @@
     btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
     more.addEventListener('click', () => setOpen(more.getAttribute('aria-expanded') !== 'true'));
     tabbar.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
-    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open]')) setOpen(false); });
+    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open]')) setOpen(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
     const footer = document.createElement('footer');
@@ -1158,10 +1164,13 @@
   const SAVE_KEY = 'kiosk:saved';
   const saved = new Set(store.get(SAVE_KEY, []));
   function toggleSave(slug, btn) {
-    if (saved.has(slug)) saved.delete(slug); else saved.add(slug);
+    const on = !saved.has(slug);
+    if (on) saved.add(slug); else saved.delete(slug);
     store.set(SAVE_KEY, Array.from(saved));
     $$(`[data-save="${CSS.escape(slug)}"]`).forEach((b) => b.setAttribute('aria-pressed', String(saved.has(slug))));
     if (btn) toast(saved.has(slug) ? 'Saved to your garage' : 'Removed from your garage');
+    // Let kiosk-account.js sync to D1 when signed in
+    document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { ref: slug, kind: 'story', on } }));
   }
 
   /* ---------------------------------------------------------- cards */
@@ -1982,7 +1991,8 @@
               <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-pdp-size="${esc(z)}" aria-pressed="${z === pdpState.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
             <div class="k-pdp__cta">
               ${canBuy(p, cw)
-                ? `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>${p.price == null ? 'Shop' : `Buy · ${esc(price(p))}`}</button>`
+                ? `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>${p.price == null ? 'Shop' : `Buy · ${esc(price(p))}`}</button>
+                   <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to cart</button>`
                 : `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve · get the coordinates' : 'Notify me when it drops'}</button>`}
               ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
             </div>
@@ -2016,7 +2026,7 @@
     const body = $('.k-pdp__body', pdpEl); const btop = body ? body.scrollTop : 0;
     // Keep keyboard focus on the same control across the re-render
     const act = pdpEl.contains(document.activeElement) ? document.activeElement : null;
-    const keep = act && ['data-pdp-cw', 'data-pdp-size', 'data-pdp-img', 'data-pdp-full', 'data-pdp-buy'].find((a) => act.hasAttribute(a));
+    const keep = act && ['data-pdp-cw', 'data-pdp-size', 'data-pdp-img', 'data-pdp-full', 'data-pdp-buy', 'data-pdp-cart'].find((a) => act.hasAttribute(a));
     const keepSel = keep ? `[${keep}${act.getAttribute(keep) ? `="${act.getAttribute(keep)}"` : ''}]` : '';
     pdpEl.innerHTML = pdpHtml(p);
     if (keepSel) { const again = $(keepSel, pdpEl) || $('.k-pdp__icon', pdpEl); if (again) again.focus({ preventScroll: true }); }
@@ -2098,6 +2108,11 @@
       const z = e.target.closest('[data-pdp-size]');
       if (z) { pdpState.size = z.dataset.pdpSize; renderPDP(); return; }
       if (e.target.closest('[data-pdp-buy]')) { checkout(productById(pdpState.id), pdpState.cw, pdpState.size); }
+      if (e.target.closest('[data-pdp-cart]')) {
+        document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {
+          detail: { productId: pdpState.id, cw: pdpState.cw, size: pdpState.size },
+        }));
+      }
     });
     root.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { e.stopPropagation(); if (pdpState.full) setPDPFull(false); else closePDP(); return; }
@@ -3826,7 +3841,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt };
+  const PAGES = { home: pageHome, garage: pageGarage, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
@@ -3854,5 +3869,20 @@
   bootI18n();
   reveal();
   wave.draw();
-  window.KIOSK = { openFilm: (s) => openFilm(featureBySlug(s)), player, toast };
+  window.KIOSK = {
+    openFilm: (s) => openFilm(featureBySlug(s)),
+    player,
+    toast,
+    store,
+    icon,
+    esc,
+    saved,
+    saveKey: SAVE_KEY,
+    productById: (id) => (typeof productById === 'function' ? productById(id) : (C.products || []).find((p) => p.id === id)),
+    featureBySlug: (s) => (typeof featureBySlug === 'function' ? featureBySlug(s) : (C.features || []).find((f) => f.slug === s)),
+    handleOf: (p, cw) => (typeof handleOf === 'function' ? handleOf(p, cw) : null),
+    wayOf: (p, cw) => (typeof wayOf === 'function' ? wayOf(p, cw) : ((p && p.colorways) || [])[cw] || {}),
+    price: (p) => (typeof price === 'function' ? price(p) : (p && p.price != null ? `$${p.price}` : '')),
+    content: C,
+  };
 })();

@@ -5,6 +5,11 @@
 > parts of C, D and E. Supabase-free work (Shopify query validation, the orders webhook
 > logging to Cloudflare only, R2 media, Turnstile, a read-only Twilio audit) may proceed
 > once the owner approves it.
+>
+> **Accounts (PR #21):** while Supabase is on hold, sign-in and the account dashboard use
+> **Shopify Customer Accounts + Cloudflare D1** instead. See [docs/ACCOUNTS.md](ACCOUNTS.md).
+> When the Supabase bill is paid, decide whether to keep this hybrid or migrate identity to
+> Supabase Auth as originally planned in workstreams A–B.
 
 **Purpose.** This is the playbook for Cursor agents that add accounts, sign-in and the backend to the KIOSK site. It covers the services, the MCP connectors each agent may use, the order to build in, and what "done" means.
 

@@ -12,5 +12,15 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Create with: npx wrangler d1 create kiosk-accounts
+  // Then replace database_id below and set SHOPIFY_CUSTOMER_CLIENT_ID / SECRET.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kiosk-accounts",
+      "database_id": "00000000-0000-4000-8000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
