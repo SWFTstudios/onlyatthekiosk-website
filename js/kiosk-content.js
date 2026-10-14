@@ -816,6 +816,72 @@ window.KIOSK_CONTENT = {
     },
   ],
 
+  /* ----------------------------------------------------------
+   * GARMENT GUIDES: what customers always ask (size chart, fabric,
+   * care, fit, FAQ). Keyed by mockup type; a product can override any
+   * field with `guide: { … }` (e.g. guide: { fabric: [...] }).
+   * Measurements are flat, in inches, garment laid on a table. These are
+   * the target specs for sampling: confirm them against the factory's
+   * production sample before selling.
+   * -------------------------------------------------------- */
+  guides: {
+    tee: {
+      fit: 'Relaxed and boxy with a dropped shoulder. True to size for an easy fit; size down for a closer fit.',
+      fabric: ['100% long-staple Supima® cotton, 230 gsm single jersey', 'Enzyme- and silicone-washed for a soft, broken-in hand from the first wear', 'Garment-dyed and pre-shrunk', '1x1 rib collar, twin-needle sleeve and bottom hems', 'Breathable, packs flat, keeps its shape on long-haul days'],
+      care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Hang dry or tumble dry low', 'Warm iron inside out; never iron the lettering', 'Do not dry clean'],
+      chart: { points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length'], rows: { XS: [20.5, 26.5, 8.25], S: [21.5, 27.5, 8.5], M: [22.5, 28.5, 8.75], L: [23.5, 29.5, 9], XL: [24.5, 30.5, 9.25], XXL: [25.5, 31.5, 9.5] } },
+      shrink: 'Pre-shrunk. Expect under 3% after washing; wash cold and hang dry to keep the exact fit.',
+    },
+    longsleeve: {
+      fit: 'Relaxed with a dropped shoulder and a slightly long sleeve that stacks at the cuff. True to size.',
+      fabric: ['100% long-staple Supima® cotton, 200 gsm single jersey', 'Enzyme-washed for a soft, smooth hand', 'Garment-dyed and pre-shrunk', '1x1 rib collar, twin-needle cuffs and hem', 'Light enough to layer under a jacket in transit'],
+      care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Hang dry or tumble dry low', 'Warm iron inside out; avoid the print', 'Do not dry clean'],
+      chart: { points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'], rows: { S: [21, 27.5, 24.5], M: [22, 28.5, 25], L: [23, 29.5, 25.5], XL: [24, 30.5, 26], XXL: [25, 31.5, 26.5] } },
+      shrink: 'Pre-shrunk. Expect under 3% after washing; wash cold and hang dry to keep the fit.',
+    },
+    crew: {
+      fit: 'Relaxed with a dropped shoulder; rib cuffs and waistband hold the shape. True to size, size up for an oversized fit.',
+      fabric: ['100% long-staple cotton loopback French terry, 400 gsm', 'Enzyme-washed for a soft face; loopback inside breathes on planes and trains', 'Garment-dyed and pre-shrunk', '1x1 rib collar, cuffs and waistband with spandex for recovery'],
+      care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Lay flat or hang to dry; tumble dry low if needed', 'Do not iron the print', 'Do not dry clean'],
+      chart: { points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'], rows: { S: [22, 26.5, 24], M: [23, 27.5, 24.5], L: [24, 28.5, 25], XL: [25, 29.5, 25.5], XXL: [26, 30.5, 26] } },
+      shrink: 'Pre-shrunk. Expect under 3% after washing; air dry to keep the length.',
+    },
+    hoodie: {
+      fit: 'Relaxed with a dropped shoulder and room to layer. True to size; size up for an oversized fit.',
+      fabric: ['Heavyweight brushed-back fleece, 450 gsm: 100% long-staple cotton face, cloud-soft brushed interior', 'Enzyme-washed and garment-dyed for a lived-in hand', 'Pre-shrunk', 'Double-layer lined hood with flat cotton drawcord and metal eyelets', '1x1 rib cuffs and waistband with spandex for recovery', 'Warm for cold cabins and airport floors, breathable enough for the walk to the gate'],
+      care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener (it flattens the brushed fleece)', 'Lay flat or hang to dry; tumble dry low if needed', 'Do not iron the print or embroidery', 'Do not dry clean'],
+      chart: { points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'], rows: { S: [22.5, 27, 24], M: [23.5, 28, 24.5], L: [24.5, 29, 25], XL: [25.5, 30, 25.5], XXL: [26.5, 31, 26] } },
+      shrink: 'Pre-shrunk. Expect under 3% after washing; air dry to keep the fleece lofty.',
+    },
+    cap: {
+      fit: 'Unstructured six-panel, low crown, adjustable strapback. Fits most heads (21.5–23.5 in / 55–60 cm).',
+      fabric: ['100% washed cotton twill', 'Unstructured crown, pre-curved visor', 'Embroidered eyelets, adjustable strapback with metal clasp'],
+      care: ['Spot clean with a damp cloth and mild soap', 'Hand wash cold if needed; reshape and air dry', 'Do not machine wash or tumble dry'],
+    },
+    beanie: {
+      fit: 'One size, stretches to fit. Wear it slouched or with the cuff folded.',
+      fabric: ['Soft merino wool and cotton blend rib knit', 'Folded cuff with woven patch', 'Warm, breathable, packs into a pocket'],
+      care: ['Hand wash cold with wool-safe detergent', 'Reshape and dry flat', 'Do not tumble dry'],
+    },
+    socks: {
+      fit: 'Crew height with a cushioned foot. S/M fits US men’s 6–9 / women’s 7–10; L/XL fits US men’s 9.5–13.',
+      fabric: ['Combed cotton with nylon and spandex for stretch', 'Cushioned sole and reinforced heel and toe', 'Ribbed arch support'],
+      care: ['Machine wash cold, inside out', 'Tumble dry low', 'No bleach'],
+    },
+    tote: {
+      fit: 'Holds a 14" laptop, a camera and a jacket. Long handles go over the shoulder.',
+      fabric: ['Heavy cotton canvas', 'Reinforced handle stitching', 'Flat bottom'],
+      care: ['Spot clean', 'Hand wash cold if needed and air dry', 'Do not tumble dry'],
+    },
+  },
+
+  /* Colours the guide suggests wearing with each colourway ("Pairs well with"). */
+  pairPalette: [
+    { name: 'Obsidian', hex: '#121214' }, { name: 'Hudson Haze', hex: '#e4e1da' }, { name: 'Bridge Grey', hex: '#a8aba8' },
+    { name: 'Raw Denim', hex: '#2b3a55' }, { name: 'Oak Brown', hex: '#6e5034' }, { name: 'Olive', hex: '#4b5a32' },
+    { name: 'Sand', hex: '#d2c4b0' }, { name: 'Bone', hex: '#e8e0d4' }, { name: 'Tail Red', hex: '#7a2430' }, { name: 'Racing Blue', hex: '#364679' },
+  ],
+
   categories: [
     { id: 'quotes', label: 'Words to wear', kind: 'physical' },
     { id: 'travel', label: 'Travel goods', kind: 'physical' },
@@ -832,7 +898,7 @@ window.KIOSK_CONTENT = {
     /* ---- Words to wear: small K on the chest, the quote on the back ---- */
     {
       id: 'tee-q-direction', category: 'quotes', store: 'kiosk', title: 'Direction Tee', price: 42, badge: 'New', added: '2026-10-13',
-      detail: 'Heavyweight cotton · small K on the chest · quote hand-lettered small over the right shoulder blade',
+      detail: 'Supima® cotton jersey · small K on the chest · quote hand-lettered small over the right shoulder blade',
       quote: 'Focus on direction, not speed.',
       mockup: { type: 'tee', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif', quoteFont: 'quill' },
       colorways: [
@@ -845,7 +911,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'hoodie-q-exist', category: 'quotes', store: 'kiosk', title: 'Make It Exist Hoodie', price: 98, badge: 'New', added: '2026-10-13',
-      detail: 'Brushed fleece · small K on the chest · quote embroidered small over the right shoulder blade',
+      detail: 'Brushed-back cotton fleece · small K on the chest · quote embroidered small over the right shoulder blade',
       quote: 'Just make it exist first. You can make it good later.',
       mockup: { type: 'hoodie', chest: true, quote: 'Just make it exist first. You can make it good later.', quoteStyle: 'grotesk', quoteFont: 'hand', quoteFinish: 'stitch' },
       colorways: [
@@ -858,7 +924,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'tee-q-curious', category: 'quotes', store: 'kiosk', title: 'Curious Tee', price: 42, badge: 'New', added: '2026-10-13',
-      detail: 'Heavyweight cotton · small K on the chest · quote hand-lettered small over the right shoulder blade',
+      detail: 'Supima® cotton jersey · small K on the chest · quote hand-lettered small over the right shoulder blade',
       quote: 'The future belongs to the curious.',
       mockup: { type: 'tee', chest: true, quote: 'The future belongs to the curious.', quoteStyle: 'serif', quoteFont: 'fell' },
       colorways: [
@@ -871,7 +937,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'hoodie-q-nets', category: 'quotes', store: 'kiosk', title: 'Repair The Nets Hoodie', price: 98, badge: 'New', added: '2026-10-13',
-      detail: 'Brushed fleece · small K on the chest · quote embroidered small over the right shoulder blade',
+      detail: 'Brushed-back cotton fleece · small K on the chest · quote embroidered small over the right shoulder blade',
       quote: 'When fishermen cannot go to sea, they repair nets.',
       mockup: { type: 'hoodie', chest: true, quote: 'When fishermen cannot go to sea, they repair nets.', quoteStyle: 'serif', quoteFont: 'flourish', quoteFinish: 'stitch' },
       colorways: [
@@ -884,7 +950,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'tee-q-spiral', category: 'quotes', store: 'kiosk', title: 'Spiral Tee', price: 42, badge: 'New', added: '2026-10-13',
-      detail: 'Heavyweight cotton · small K on the chest · quote embroidered small over the right shoulder blade',
+      detail: 'Supima® cotton jersey · small K on the chest · quote embroidered small over the right shoulder blade',
       quote: 'Life is a spiral, not a straight line.',
       mockup: { type: 'tee', chest: true, quote: 'Life is a spiral, not a straight line.', quoteStyle: 'grotesk', quoteFont: 'quill', quoteFinish: 'stitch' },
       colorways: [
@@ -897,7 +963,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'tee-q-tired', category: 'quotes', store: 'kiosk', title: 'Do It Tired Tee', price: 42, badge: 'New', added: '2026-10-13',
-      detail: 'Heavyweight cotton · small K on the chest · quote hand-lettered small over the right shoulder blade',
+      detail: 'Supima® cotton jersey · small K on the chest · quote hand-lettered small over the right shoulder blade',
       quote: 'If you are tired, do it tired.',
       mockup: { type: 'tee', chest: true, quote: 'If you are tired, do it tired.', quoteStyle: 'grotesk', quoteFont: 'hand' },
       colorways: [
@@ -910,7 +976,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'hoodie-q-glitch', category: 'quotes', store: 'kiosk', title: 'Glitch Hoodie', price: 98, badge: 'New', added: '2026-10-13',
-      detail: 'Brushed fleece · small K on the chest · quote embroidered small over the right shoulder blade',
+      detail: 'Brushed-back cotton fleece · small K on the chest · quote embroidered small over the right shoulder blade',
       quote: 'Be the glitch you want to see in the matrix.',
       mockup: { type: 'hoodie', chest: true, quote: 'Be the glitch you want to see in the matrix.', quoteStyle: 'grotesk', quoteFont: 'fell', quoteFinish: 'stitch' },
       colorways: [
@@ -923,7 +989,7 @@ window.KIOSK_CONTENT = {
     },
     {
       id: 'tee-q-understand', category: 'quotes', store: 'kiosk', title: 'Others Don’t Understand Tee', price: 42, badge: 'New', added: '2026-10-13',
-      detail: 'Heavyweight cotton · small K on the chest · quote hand-lettered small over the right shoulder blade',
+      detail: 'Supima® cotton jersey · small K on the chest · quote hand-lettered small over the right shoulder blade',
       quote: 'It’s okay to live a life others don’t understand.',
       mockup: { type: 'tee', chest: true, quote: 'It’s okay to live a life others don’t understand.', quoteStyle: 'serif', quoteFont: 'flourish' },
       colorways: [

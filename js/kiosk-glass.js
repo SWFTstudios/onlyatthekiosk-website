@@ -1954,13 +1954,77 @@
   function pdpImages(p, cw) {
     const w = wayOf(p, cw);
     const out = [];
-    if (!lifeOf(p, cw).length && !isDigitalP(p)) return out;   // the stage shows the tech sketch
+    // No photos yet: every schematic view of the tech sketch
+    if (!lifeOf(p, cw).length && !isDigitalP(p) && window.KioskMockup) {
+      return window.KioskMockup.sketchViews(p.mockup || { type: 'tee' }).map((view) => ({ view, alt: `${p.title}, ${window.KioskMockup.viewNames[view] || view}` }));
+    }
     lifeOf(p, cw).forEach((src, i) => out.push({ src, alt: `${p.title}, ${w.name || ''}, ${i ? 'in the terminal' : 'on the street'}` }));
     if (w.image) out.push({ src: w.image, alt: `${p.title}, ${w.name || ''}${w.imageFront ? ', back' : ''}`, flat: true });
     if (w.imageFront) out.push({ src: w.imageFront, alt: `${p.title}, ${w.name || ''}, front`, flat: true });
     if (!out.length && p.image) out.push({ src: p.image, alt: p.title, flat: true });
     return out;
   }
+  /* -- Garment guide: size chart, fabric, care, colours and FAQ (C.guides) */
+  const FITS_CHEST = { XS: '32–34', S: '34–36', M: '38–40', L: '42–44', XL: '46–48', XXL: '50–52' };
+  function guideOf(p) {
+    const type = (p.mockup || {}).type;
+    const base = (C.guides || {})[type];
+    return base && !isDigitalP(p) ? { type, ...base, ...(p.guide || {}) } : null;
+  }
+  const rgbOf = (hex) => { const h = String(hex || '#777').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((x) => x + x).join('') : h.slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const lightOf = (hex) => { const [r, g, b] = rgbOf(hex); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; };
+  const near = (a, b) => { const x = rgbOf(a); const y = rgbOf(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 70; };
+  /** Colours to wear with a garment colour, from C.pairPalette. */
+  function pairsFor(hex) {
+    const pal = C.pairPalette || [];
+    const L = lightOf(hex);
+    const order = L < 0.3 ? ['Hudson Haze', 'Raw Denim', 'Sand', 'Oak Brown', 'Bone', 'Bridge Grey']
+      : L > 0.68 ? ['Obsidian', 'Raw Denim', 'Olive', 'Oak Brown', 'Bridge Grey', 'Tail Red']
+        : ['Obsidian', 'Hudson Haze', 'Raw Denim', 'Sand', 'Bone', 'Oak Brown'];
+    const look = L < 0.3 ? 'Raw or light-wash denim, sand chinos, white leather sneakers and a brown suede layer.'
+      : L > 0.68 ? 'Black or raw denim, olive cargos, dark boots and an overshirt for the flight.'
+        : 'Black jeans or cream trousers, white sneakers and a navy or brown outer layer.';
+    const list = order.map((n) => pal.find((c) => c.name === n)).filter((c) => c && !near(c.hex, hex)).slice(0, 4);
+    return { list, look };
+  }
+  function guideHtml(p, cw) {
+    const g = guideOf(p);
+    if (!g) return '';
+    const w = wayOf(p, cw);
+    const unit = pdpState.unit || 'in';
+    const num = (v) => (unit === 'cm' ? Math.round(v * 2.54 * 2) / 2 : v);
+    const sizes = (p.sizes || []).filter((z) => g.chart && g.chart.rows[z]);
+    const chart = g.chart && sizes.length ? `
+      <div class="k-guide__units" role="group" aria-label="Units">${['in', 'cm'].map((u) => `<button type="button" data-pdp-unit="${u}" aria-pressed="${unit === u}">${u}</button>`).join('')}</div>
+      <div class="k-guide__table-wrap"><table class="k-guide__table">
+        <thead><tr><th scope="col">Size</th>${g.chart.points.map((pt, i) => `<th scope="col"><b>${'ABC'[i]}</b> ${esc(pt)}</th>`).join('')}<th scope="col">Fits chest</th></tr></thead>
+        <tbody>${sizes.map((z) => `<tr${z === pdpState.size ? ' class="is-on"' : ''}><th scope="row">${esc(z)}</th>${g.chart.rows[z].map((v) => `<td>${num(v)}</td>`).join('')}<td>${FITS_CHEST[z] ? (unit === 'cm' ? FITS_CHEST[z].split('–').map((v) => Math.round(v * 2.54)).join('–') : FITS_CHEST[z]) : '—'}</td></tr>`).join('')}</tbody>
+      </table></div>
+      <p class="k-guide__note">Measured flat, garment laid on a table, in ${unit === 'cm' ? 'centimetres' : 'inches'}. A, B and C match the tech sketch. Tolerance ±0.5 in / 1 cm.</p>` : '';
+    const pair = pairsFor(w.garment || '#777');
+    const sw = (hex, name, sub) => `<li><span class="k-guide__sw" style="--sw:${esc(hex)}"></span><span><b>${esc(name)}</b><small>${esc(sub || String(hex).toUpperCase())}</small></span></li>`;
+    const finish = p.mockup && p.mockup.quoteFinish === 'stitch' ? 'Embroidered in tonal thread, small, over the right shoulder blade on the back.' : 'Printed small in a hand-lettered script over the right shoulder blade on the back, so it reads like ink from a quill.';
+    const faq = [
+      ['How does it fit?', g.fit],
+      g.chart ? ['Which size should I get?', 'Lay a top you love flat and measure pit to pit (A), then match it to the chart. Between sizes? Size up for room to layer on cold flights.'] : null,
+      g.shrink ? ['Will it shrink?', g.shrink] : null,
+      p.quote ? ['Is the quote printed or embroidered?', finish] : null,
+      ['Is it good for travel?', ['tee', 'longsleeve', 'crew', 'hoodie'].includes(g.type) ? 'Yes. Soft, breathable cotton that packs flat and recovers its shape after a long day in a seat.' : 'Yes. Built to be packed, carried and worn on the road.'],
+      [wayStatus(p, cw) === 'available' ? 'How long does shipping take?' : 'When does it drop?', wayStatus(p, cw) === 'available' ? 'See <a href="shipping-returns.html">Shipping &amp; returns</a> for times and costs.' : 'Tap “Notify me” and the Dispatch tells you the moment it lands. Shipping times are on <a href="shipping-returns.html">Shipping &amp; returns</a>.'],
+    ].filter(Boolean);
+    const sec = (id, title, body) => `<details class="k-guide__sec" data-acc="${id}"><summary><span>${title}</span><i aria-hidden="true">+</i></summary><div class="k-guide__body">${body}</div></details>`;
+    return `<div class="k-guide">
+      ${sec('size', g.chart ? 'Size chart &amp; fit' : 'Size &amp; fit', `<p>${esc(g.fit)}</p>${chart}`)}
+      ${sec('fabric', 'Materials', `<ul class="k-guide__list">${g.fabric.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
+      ${sec('care', 'Care', `<ul class="k-guide__list">${g.care.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
+      ${sec('palette', 'Colour palette', `<ul class="k-guide__sws">${sw(w.garment, w.name || 'Garment', `Garment · ${String(w.garment || '').toUpperCase()}`)}${w.ink ? sw(w.ink, p.quote ? 'Lettering' : 'Print', String(w.ink).toUpperCase()) : ''}</ul>
+        ${(p.colorways || []).length > 1 ? `<p class="k-guide__note">Also in ${(p.colorways || []).filter((x) => x !== w).map((x) => esc(x.name)).join(', ')}.</p>` : ''}`)}
+      ${sec('pairs', 'Pairs well with', `<ul class="k-guide__sws">${pair.list.map((c) => sw(c.hex, c.name)).join('')}</ul><p class="k-guide__note">${esc(pair.look)}</p>`)}
+      ${sec('faq', 'Questions', `<dl class="k-guide__faq">${faq.map(([q, a]) => `<div><dt>${esc(q)}</dt><dd>${/</.test(a) ? a : esc(a)}</dd></div>`).join('')}</dl>`)}
+    </div>`;
+  }
+  const sketchOf = (p, cw, view) => window.KioskMockup.render(p.mockup || { type: 'tee' }, wayOf(p, cw), { sketch: true, view, code: flightOf(p), title: p.title, category: categoryLabel(p.category), detail: p.detail, sizes: p.sizes, colorways: p.colorways });
+  const slideHtml = (p, cw, im, thumb) => (im.view ? sketchOf(p, cw, im.view) : `<img src="${esc(im.src)}" alt="${thumb ? '' : esc(im.alt)}" ${thumb ? 'loading="lazy"' : 'decoding="async"'}>`);
   function pdpHtml(p) {
     const { cw } = pdpState;
     const ways = p.colorways || [];
@@ -1970,7 +2034,6 @@
     const stat = statusOf(p, cw);
     const seen = storiesFor(p);
     const related = (C.products || []).filter((x) => x.id !== p.id && (x.category === p.category || (p.design && x.design))).slice(0, 4);
-    const cur = imgs[Math.min(pdpState.img, imgs.length - 1)];
     return `
       <div class="k-pdp__scrim" data-pdp-close></div>
       <article class="k-pdp__panel" aria-labelledby="k-pdp-title">
@@ -1983,8 +2046,13 @@
         </header>
         <div class="k-pdp__body">
           <div class="k-pdp__media">
-            <div class="k-pdp__stage${cur && cur.flat ? ' is-flat' : ''}" data-pdp-stage>${cur ? `<img src="${esc(cur.src)}" alt="${esc(cur.alt)}" decoding="async">` : productVisual(p, cw)}</div>
-            ${imgs.length > 1 ? `<div class="k-pdp__thumbs" role="group" aria-label="Photos">${imgs.map((im, i) => `<button type="button" data-pdp-img="${i}" aria-pressed="${i === pdpState.img}" aria-label="${esc(im.alt)}"><img src="${esc(im.src)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
+            <div class="k-pdp__stage" data-pdp-stage>${imgs.length ? `
+              <div class="k-car" data-car tabindex="0" role="region" aria-roledescription="carousel" aria-label="${esc(p.title)} images">${imgs.map((im, i) => `
+                <div class="k-car__slide${im.flat ? ' is-flat' : ''}${im.view ? ' is-sketch' : ''}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${imgs.length}: ${esc(im.alt)}">${slideHtml(p, cw, im)}</div>`).join('')}
+              </div>
+              ${imgs.length > 1 ? `<button class="k-car__nav k-car__nav--prev" type="button" data-car-step="-1" aria-label="Previous image">‹</button><button class="k-car__nav k-car__nav--next" type="button" data-car-step="1" aria-label="Next image">›</button>
+              <div class="k-car__dots" aria-hidden="true">${imgs.map((im, i) => `<i${i === pdpState.img ? ' class="is-on"' : ''}></i>`).join('')}</div>` : ''}` : productVisual(p, cw)}</div>
+            ${imgs.length > 1 ? `<div class="k-pdp__thumbs" role="group" aria-label="Images">${imgs.map((im, i) => `<button type="button" data-pdp-img="${i}" aria-pressed="${i === pdpState.img}" aria-label="${esc(im.alt)}"${im.view ? ' class="is-sketch"' : ''}>${slideHtml(p, cw, im, true)}</button>`).join('')}</div>` : ''}
           </div>
           <div class="k-pdp__info">
             <p class="k-eyebrow">${esc(categoryLabel(p.category))}${p.design ? ` · ${esc(p.design)}` : ''}${st ? ` · by <a href="${storeHref(st)}">${esc(st.name)}</a>` : ''}</p>
@@ -2004,6 +2072,7 @@
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
             ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
             ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="hunt.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
+            ${guideHtml(p, cw)}
 
             <div class="k-pdp__more"${pdpState.full ? '' : ' hidden'}>
               ${p.description ? `<p class="k-pdp__desc">${esc(p.description)}</p>` : ''}
@@ -2024,6 +2093,35 @@
         </div>
       </article>`;
   }
+  /* Swipeable image carousel: native scroll-snap, synced to thumbs and dots */
+  function carSync(i) {
+    pdpState.img = i;
+    $$('[data-pdp-img]', pdpEl).forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+    $$('.k-car__dots i', pdpEl).forEach((d, k) => d.classList.toggle('is-on', k === i));
+    const t = $(`[data-pdp-img="${i}"]`, pdpEl); if (t) t.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  function carGo(i, instant) {
+    const car = pdpEl && $('[data-car]', pdpEl);
+    if (!car) return;
+    const n = car.children.length;
+    const k = Math.max(0, Math.min(n - 1, i));
+    car.scrollTo({ left: k * car.clientWidth, behavior: instant || REDUCED ? 'auto' : 'smooth' });
+    carSync(k);
+  }
+  function bindCarousel() {
+    const car = pdpEl && $('[data-car]', pdpEl);
+    if (!car) return;
+    requestAnimationFrame(() => carGo(Math.min(pdpState.img, car.children.length - 1), true));
+    let raf = 0;
+    car.addEventListener('scroll', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { const k = Math.round(car.scrollLeft / Math.max(1, car.clientWidth)); if (k !== pdpState.img) carSync(k); });
+    }, { passive: true });
+    car.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); carGo(pdpState.img + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); carGo(pdpState.img - 1); }
+    });
+  }
   function renderPDP() {
     const p = productById(pdpState.id);
     if (!pdpEl || !p) return;
@@ -2033,7 +2131,10 @@
     const act = pdpEl.contains(document.activeElement) ? document.activeElement : null;
     const keep = act && ['data-pdp-cw', 'data-pdp-size', 'data-pdp-img', 'data-pdp-full', 'data-pdp-buy', 'data-pdp-cart'].find((a) => act.hasAttribute(a));
     const keepSel = keep ? `[${keep}${act.getAttribute(keep) ? `="${act.getAttribute(keep)}"` : ''}]` : '';
+    const opened = $$('[data-acc][open]', pdpEl).map((d) => d.dataset.acc);
     pdpEl.innerHTML = pdpHtml(p);
+    opened.forEach((a) => { const d = $(`[data-acc="${a}"]`, pdpEl); if (d) d.open = true; });
+    bindCarousel();
     if (keepSel) { const again = $(keepSel, pdpEl) || $('.k-pdp__icon', pdpEl); if (again) again.focus({ preventScroll: true }); }
     pdpEl.classList.toggle('is-full', pdpState.full);
     const ni = $('.k-pdp__info', pdpEl); if (ni) ni.scrollTop = top;
@@ -2107,11 +2208,15 @@
       if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
       if (e.target.closest('[data-pdp-full]')) { setPDPFull(!pdpState.full); return; }
       const im = e.target.closest('[data-pdp-img]');
-      if (im) { pdpState.img = Number(im.dataset.pdpImg); renderPDP(); return; }
+      if (im) { carGo(Number(im.dataset.pdpImg)); return; }
+      const step = e.target.closest('[data-car-step]');
+      if (step) { carGo(pdpState.img + Number(step.dataset.carStep)); return; }
       const c = e.target.closest('[data-pdp-cw]');
       if (c) { pdpState.cw = Number(c.dataset.pdpCw); pdpState.img = 0; renderPDP(); if (pdpState.full) history.replaceState(history.state, '', urlWithP(pdpState.id, pdpState.cw)); return; }
       const z = e.target.closest('[data-pdp-size]');
       if (z) { pdpState.size = z.dataset.pdpSize; renderPDP(); return; }
+      const un = e.target.closest('[data-pdp-unit]');
+      if (un) { pdpState.unit = un.dataset.pdpUnit; renderPDP(); return; }
       if (e.target.closest('[data-pdp-buy]')) { checkout(productById(pdpState.id), pdpState.cw, pdpState.size); }
       if (e.target.closest('[data-pdp-cart]')) {
         document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {

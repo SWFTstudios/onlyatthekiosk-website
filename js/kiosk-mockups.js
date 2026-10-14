@@ -625,6 +625,19 @@
     hoodie: [['front', [80, 40], 'Lined hood'], ['front', [94, 112], 'Drawcord + aglets'], ['front', [56, 170], 'Kangaroo pocket'], ['back', [48, 218], '1x1 rib waistband']],
   };
 
+  const quoteCentre = (spec) => { const b = BLOCKS[spec.type]; return [137, b.N[1] + (b.hood ? 30 : 38) + quoteBox(spec) / 2 - 3]; };
+  function detailsFor(spec) {
+    const details = DETAILS[spec.type].slice();
+    if (spec.quote && !spec.backPrint) details[1] = ['back', quoteCentre(spec), spec.quoteFinish === 'stitch' ? 'Embroidered quote' : 'Hand-lettered quote', 1.35];
+    return details;
+  }
+  /** The schematic views a product gets, in carousel order. */
+  function sketchViews(spec) {
+    if (!BLOCKS[spec.type]) return ['sheet', 'flat'];
+    return ['sheet', 'front', 'back', 'details'].concat(spec.quote && !spec.backPrint ? ['lettering'] : []);
+  }
+  const VIEW_NAMES = { sheet: 'Tech sheet', front: 'Front view', back: 'Back view', details: 'Construction details', lettering: 'Lettering detail', flat: 'Flat view' };
+
   function sketch(spec, colorway, opts = {}) {
     const id = `s${(uid += 1)}`;
     const c = { garment: '#141414', ...(colorway || {}) };
@@ -639,6 +652,51 @@
       return `<path d="M${fx(x1)},${fx(y1)} L${fx(x2)},${fx(y2)} ${h(x1, y1, 0.45)} ${h(x2, y2, Math.PI + 0.45)} ${h(x2, y2, Math.PI - 0.45)}" fill="none" stroke="${INK}" stroke-width=".6"/>
         <rect x="${fx(mx - 5)}" y="${fx(my - 5)}" width="10" height="10" fill="${PAPER}"/><text x="${fx(mx)}" y="${fx(my + 2.6)}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7.5" fill="${INK}">${tag}</text>`;
     };
+    const view = opts.view || 'sheet';
+    if (view !== 'sheet') {
+      const out = [];
+      const b = BLOCKS[spec.type];
+      if (apparel && (view === 'front' || view === 'back')) {
+        const k = 1.42; const ox = 180 - 100 * k; const oy = 50;
+        const at = (p) => [ox + p[0] * k, oy + p[1] * k];
+        out.push(`<g transform="translate(${fx(ox)} ${oy}) scale(${k})">${apparelFlat(spec.type, view, spec)}</g>`);
+        if (view === 'front') {
+          const a1 = at([b.H[0], b.H[1] + 8]); const a2 = at([200 - b.H[0], b.H[1] + 8]);
+          out.push(arrow(a1[0] + 1, a1[1], a2[0] - 1, a2[1], 'A'));
+          const s1 = at(b.SP); const s2 = at(b.SO); const nx = s2[1] - s1[1]; const ny = -(s2[0] - s1[0]); const nl = Math.hypot(nx, ny) || 1;
+          out.push(arrow(s1[0] - nx / nl * 9, s1[1] - ny / nl * 9, s2[0] - nx / nl * 9, s2[1] - ny / nl * 9, 'C'));
+        } else {
+          const t = at([200 - b.H[0] + 10, b.N[1]]); const u = at([200 - b.H[0] + 10, b.H[1]]);
+          out.push(arrow(t[0], t[1], u[0], u[1], 'B'));
+        }
+      } else if (apparel && view === 'details') {
+        detailsFor(spec).forEach(([side, p, text, zoom], i) => {
+          const cx = i % 2 ? 268 : 92; const cy = i < 2 ? 128 : 300; const R = 72;
+          const body = apparelFlat(spec.type, side, spec);
+          out.push(`<clipPath id="${id}d${i}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><circle cx="${cx}" cy="${cy}" r="${R}" fill="${PAPER}"/>
+            <g clip-path="url(#${id}d${i})"><g transform="translate(${cx} ${cy}) scale(${fx((zoom ? zoom * 2.1 : 5.2) * 100) / 100}) translate(${fx(-p[0])} ${fx(-p[1])})">${body}</g></g>
+            <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${INK}" stroke-width="1"/>
+            <text x="${cx}" y="${cy + R + 14}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7" letter-spacing="1.2" fill="${INK}">${i + 1}  ${esc(text.toUpperCase())}</text>`);
+        });
+      } else if (apparel && view === 'lettering') {
+        const q = quoteCentre(spec); const R = 150;
+        out.push(`<clipPath id="${id}q"><circle cx="180" cy="220" r="${R}"/></clipPath>
+          <g clip-path="url(#${id}q)"><g transform="translate(180 220) scale(4.6) translate(${-q[0]} ${fx(-q[1])})">${apparelFlat(spec.type, 'back', spec)}</g></g>
+          <circle cx="180" cy="220" r="${R}" fill="none" stroke="${INK}" stroke-width="1"/>
+          ${label(180, 396, spec.quoteFinish === 'stitch' ? 'Satin-stitch embroidery · tonal thread' : 'Screen-printed hand lettering · one colour', 'middle', 6.6)}
+          ${label(180, 410, 'Placement: right shoulder blade, 3 in below collar seam', 'middle', 5.6)}`);
+      } else {
+        const draw = garments[spec.type] || garments.tee; const k = 0.8;
+        out.push(`<g transform="translate(${fx(180 - 200 * k)} 34) scale(${k})">${lineArt(draw(spec, { ...c, garment: BLANK, ink: INK, brim: undefined }, id))}</g>`);
+      }
+      out.push(label(16, 26, VIEW_NAMES[view] || view, 'start', 6.6), label(344, 26, 'Not to scale', 'end', 5.4));
+      out.push(`<rect x="8" y="432" width="344" height="40" fill="${PAPER}" stroke="${INK}" stroke-width=".8"/><path d="M80,432 L80,472 M262,432 L262,472" stroke="${INK}" stroke-width=".5"/>
+        ${label(14, 444, 'Style no.', 'start', 5)}${value(14, 460, opts.code || '—')}
+        ${label(86, 444, 'Description', 'start', 5)}${value(86, 460, String(opts.title || '').slice(0, 28), 6.8)}
+        ${label(268, 444, 'View', 'start', 5)}${value(268, 460, String(VIEW_NAMES[view] || view).slice(0, 16), 6.4)}`);
+      return `<svg class="k-mockup k-mockup--sketch" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
+        <rect width="360" height="480" fill="${PAPER}"/>${out.join('')}</svg>`;
+    }
     let poms = [];
     if (apparel) {
       const b = BLOCKS[spec.type];
@@ -659,12 +717,7 @@
       poms = ['A Body width', 'B Body length (HPS)', `C ${b.long ? 'Sleeve length' : 'Sleeve length'}`];
       // zoomed construction details
       const R = 25; const CY = 292; const Z = 3;
-      const details = DETAILS[spec.type].slice();
-      if (spec.quote && !spec.backPrint) {
-        const qy = b.N[1] + (b.hood ? 30 : 38) + quoteBox(spec) / 2 - 3;
-        details[1] = ['back', [137, qy], spec.quoteFinish === 'stitch' ? 'Embroidered quote' : 'Hand-lettered quote', 1.35];
-      }
-      details.forEach(([view, p, text, zoom], i) => {
+      detailsFor(spec).forEach(([view, p, text, zoom], i) => {
         const cx = 50 + i * 86.7;
         const x0 = view === 'back' ? BX : FX;
         const body = view === 'back' ? backV : front;
@@ -714,5 +767,5 @@
       <rect width="360" height="480" fill="${PAPER}"/>${parts.join('')}</svg>`;
   }
 
-  window.KioskMockup = { render, types: Object.keys(garments), prints: Object.keys(PRINTS) };
+  window.KioskMockup = { render, sketchViews, viewNames: VIEW_NAMES, types: Object.keys(garments), prints: Object.keys(PRINTS) };
 })();

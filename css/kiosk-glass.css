@@ -3101,3 +3101,53 @@ html:not([data-theme='dark']) .k-cart__panel { background: rgba(251,250,248,.94)
 }
 html.is-account-open, html.is-account-open body,
 html.is-cart-open, html.is-cart-open body { overflow: hidden; }
+
+/* Product guide: size chart, materials, care, colours, FAQ */
+.k-guide { border-top: 1px solid var(--line); margin-top: 4px; }
+.k-guide__sec { border-bottom: 1px solid var(--line); }
+.k-guide__sec > summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; cursor: pointer; list-style: none; font-size: calc(14px * var(--type, 1)); font-weight: 500; }
+.k-guide__sec > summary::-webkit-details-marker { display: none; }
+.k-guide__sec > summary i { font-style: normal; font-family: var(--f-mono); color: var(--ink-3); transition: transform 0.3s var(--ease); }
+.k-guide__sec[open] > summary i { transform: rotate(45deg); }
+.k-guide__body { padding: 0 0 16px; display: grid; gap: 12px; font-size: calc(13.5px * var(--type, 1)); color: var(--ink-2); }
+.k-guide__body p { margin: 0; }
+.k-guide__body a { color: var(--ink); }
+.k-guide__list { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.k-guide__note { font-size: calc(12px * var(--type, 1)); color: var(--ink-3); }
+.k-guide__units { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 2px; justify-self: start; }
+.k-guide__units button { border: 0; background: none; color: var(--ink-3); font: inherit; font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: var(--r-pill); cursor: pointer; }
+.k-guide__units button[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
+.k-guide__table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.k-guide__table { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.k-guide__table th, .k-guide__table td { padding: 8px 8px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.k-guide__table thead th { font-weight: 400; color: var(--ink-3); font-size: 10.5px; letter-spacing: .04em; white-space: normal; vertical-align: bottom; }
+.k-guide__table thead th b { color: var(--ink); }
+.k-guide__table tbody th { color: var(--ink); font-weight: 600; }
+.k-guide__table tr.is-on td, .k-guide__table tr.is-on th { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--ink); }
+.k-guide__sws { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.k-guide__sws li { display: flex; align-items: center; gap: 10px; }
+.k-guide__sws b { display: block; font-weight: 500; color: var(--ink); font-size: 13px; }
+.k-guide__sws small { display: block; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .04em; }
+.k-guide__sw { width: 34px; height: 34px; border-radius: 10px; background: var(--sw); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent); flex: none; }
+.k-guide__faq { margin: 0; display: grid; gap: 12px; }
+.k-guide__faq dt { color: var(--ink); font-weight: 500; }
+.k-guide__faq dd { margin: 2px 0 0; }
+
+/* Product image carousel: swipe (scroll-snap), arrows, dots */
+.k-pdp__stage { display: block; }
+.k-car { position: absolute; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; outline: none; }
+.k-car::-webkit-scrollbar { display: none; }
+.k-car__slide { flex: 0 0 100%; height: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: grid; place-items: center; overflow: hidden; }
+.k-car__slide img { width: 100%; height: 100%; object-fit: cover; }
+.k-car__slide.is-flat img { object-fit: contain; padding: 6%; }
+.k-car__slide.is-sketch { background: var(--bg-3); padding-bottom: 26px; }
+.k-car__slide.is-sketch svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; }
+.k-car__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--frost-line, var(--line)); background: var(--frost, rgba(0,0,0,.4)); color: var(--ink); font-size: 22px; line-height: 1; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); opacity: .85; transition: opacity .2s; z-index: 2; }
+.k-car__nav:hover { opacity: 1; }
+.k-car__nav--prev { left: 12px; }
+.k-car__nav--next { right: 12px; }
+.k-car__dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 6px; pointer-events: none; z-index: 2; }
+.k-car__dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); opacity: .3; transition: opacity .2s, width .2s; }
+.k-car__dots i.is-on { opacity: .9; width: 18px; border-radius: 3px; }
+.k-pdp__thumbs button.is-sketch svg { width: 100%; height: 100%; display: block; }
+@media (hover: none) { .k-car__nav { display: none; } }
