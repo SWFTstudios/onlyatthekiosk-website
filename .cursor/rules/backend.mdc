@@ -9,6 +9,7 @@ alwaysApply: false
 Read `docs/AGENT_PLAN.md` first. It holds the architecture, the workstreams (A–F) and their done-when criteria.
 
 - **Supabase is on hold** (see the status in docs/AGENT_PLAN.md). Do not use the Supabase MCP or create Supabase resources until the owner lifts the hold.
+- **Accounts (current):** Shopify Customer Accounts for sign-in/orders + Cloudflare D1 for sessions/wishlist/cart. Follow docs/ACCOUNTS.md. Do not create the D1 database or put Customer Account secrets without the owner's OK.
 - **Dev first.** MCP connectors point at the `kiosk-dev` Supabase project, read-only. Never touch `kiosk-prod` or production Cloudflare resources without the owner's explicit OK.
 - **Migrations live in git.** Add new files under `supabase/migrations/`. Do not edit the existing 2025 products migration or anything in `archive/`. Never change the schema through the MCP or the dashboard.
 - **RLS on every table.** Deny by default, add owner-only policies, and test them with two users plus an anonymous client.
