@@ -249,6 +249,7 @@
             </ul>
             <div class="k-cart__foot">
               <p class="k-cart__total"><span>Total</span><b>${esc(money(cart.cost))}</b></p>
+              <p class="k-cart__ship">Shipping calculated at checkout · Secure Shopify checkout</p>
               <a class="k-btn k-btn--solid" href="${esc(cart.checkoutUrl || '#')}">Checkout</a>
             </div>`}
         </div>
@@ -528,5 +529,6 @@
     openAccount: openAccountSheet,
     openCart: openCartDrawer,
     getState: () => state,
+    wishlisted: (kind, ref) => (state.wishlist || []).some((w) => w.kind === kind && w.ref === ref),
   };
 })();

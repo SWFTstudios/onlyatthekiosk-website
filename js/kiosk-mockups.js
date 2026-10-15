@@ -662,7 +662,7 @@
       const a = Math.atan2(y2 - y1, x2 - x1); const h = (x, y, d) => `M${fx(x)},${fx(y)} l${fx(Math.cos(a + d) * 4)},${fx(Math.sin(a + d) * 4)} M${fx(x)},${fx(y)} l${fx(Math.cos(a - d) * 4)},${fx(Math.sin(a - d) * 4)}`;
       const mx = (x1 + x2) / 2; const my = (y1 + y2) / 2;
       return `<path d="M${fx(x1)},${fx(y1)} L${fx(x2)},${fx(y2)} ${h(x1, y1, 0.45)} ${h(x2, y2, Math.PI + 0.45)} ${h(x2, y2, Math.PI - 0.45)}" fill="none" stroke="${INK}" stroke-width=".6"/>
-        <rect x="${fx(mx - 5)}" y="${fx(my - 5)}" width="10" height="10" fill="${PAPER}"/><text x="${fx(mx)}" y="${fx(my + 2.6)}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7.5" fill="${INK}">${tag}</text>`;
+        <rect x="${fx(mx - 5)}" y="${fx(my - 5)}" width="10" height="10" fill="none"/><text x="${fx(mx)}" y="${fx(my + 2.6)}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7.5" fill="${INK}">${tag}</text>`;
     };
     const view = opts.view || 'sheet';
     if (view !== 'sheet') {
@@ -685,7 +685,7 @@
         detailsFor(spec).forEach(([side, p, text, zoom], i) => {
           const cx = i % 2 ? 268 : 92; const cy = i < 2 ? 128 : 300; const R = 72;
           const body = apparelFlat(spec.type, side, spec);
-          out.push(`<clipPath id="${id}d${i}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><circle cx="${cx}" cy="${cy}" r="${R}" fill="${PAPER}"/>
+          out.push(`<clipPath id="${id}d${i}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><circle cx="${cx}" cy="${cy}" r="${R}" fill="none"/>
             <g clip-path="url(#${id}d${i})"><g transform="translate(${cx} ${cy}) scale(${fx((zoom ? zoom * 2.1 : 5.2) * 100) / 100}) translate(${fx(-p[0])} ${fx(-p[1])})">${body}</g></g>
             <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${INK}" stroke-width="1"/>
             <text x="${cx}" y="${cy + R + 14}" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="7" letter-spacing="1.2" fill="${INK}">${i + 1}  ${esc(text.toUpperCase())}</text>`);
@@ -702,12 +702,12 @@
         out.push(`<g transform="translate(${fx(180 - 200 * k)} 34) scale(${k})">${lineArt(draw(spec, { ...c, garment: BLANK, ink: INK, brim: undefined }, id))}</g>`);
       }
       out.push(label(16, 26, VIEW_NAMES[view] || view, 'start', 6.6), label(344, 26, 'Not to scale', 'end', 5.4));
-      out.push(`<rect x="8" y="432" width="344" height="40" fill="${PAPER}" stroke="${INK}" stroke-width=".8"/><path d="M80,432 L80,472 M262,432 L262,472" stroke="${INK}" stroke-width=".5"/>
+      out.push(`<rect x="8" y="432" width="344" height="40" fill="none" stroke="${INK}" stroke-width=".8"/><path d="M80,432 L80,472 M262,432 L262,472" stroke="${INK}" stroke-width=".5"/>
         ${label(14, 444, 'Style no.', 'start', 5)}${value(14, 460, opts.code || '—')}
         ${label(86, 444, 'Description', 'start', 5)}${value(86, 460, String(opts.title || '').slice(0, 28), 6.8)}
         ${label(268, 444, 'View', 'start', 5)}${value(268, 460, String(VIEW_NAMES[view] || view).slice(0, 16), 6.4)}`);
       return `<svg class="k-mockup k-mockup--sketch" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
-        <rect width="360" height="480" fill="${PAPER}"/>${out.join('')}</svg>`;
+        ${out.join('')}</svg>`;
     }
     let poms = [];
     if (apparel) {
@@ -736,7 +736,7 @@
         const [px, py] = at(x0, p);
         parts.push(`<path d="M${fx(px)},${fx(py)} L${fx(cx)},${CY - R}" fill="none" stroke="${INK}" stroke-width=".35" stroke-dasharray="1.5 1.5"/><circle cx="${fx(px)}" cy="${fx(py)}" r="1.4" fill="${INK}"/>`);
         parts.push(`<clipPath id="${id}c${i}"><circle cx="${cx}" cy="${CY}" r="${R}"/></clipPath>
-          <circle cx="${cx}" cy="${CY}" r="${R}" fill="${PAPER}"/>
+          <circle cx="${cx}" cy="${CY}" r="${R}" fill="none"/>
           <g clip-path="url(#${id}c${i})"><g transform="translate(${fx(cx)} ${CY}) scale(${fx(S * (zoom || Z) * 100) / 100}) translate(${fx(-p[0])} ${fx(-p[1])})">${body}</g></g>
           <circle cx="${cx}" cy="${CY}" r="${R}" fill="none" stroke="${INK}" stroke-width=".8"/>`);
         const words = text.toUpperCase().split(' ');
@@ -757,7 +757,7 @@
     const sizes = (opts.sizes || []).join(' – ') || 'One size';
     const notes = [].concat(...String(opts.detail || '').split('·').map((x) => x.trim()).filter(Boolean).map((x) => wrap(x, 34))).slice(0, 4);
     parts.push(`<g>
-      <rect x="8" y="${T}" width="344" height="${472 - T}" fill="${PAPER}" stroke="${INK}" stroke-width=".8"/>
+      <rect x="8" y="${T}" width="344" height="${472 - T}" fill="none" stroke="${INK}" stroke-width=".8"/>
       <path d="M8,${T + 24} L352,${T + 24} M8,${T + 74} L352,${T + 74} M70,${T} L70,${T + 24} M206,${T} L206,${T + 24} M300,${T} L300,${T + 24} M190,${T + 24} L190,${T + 120}" fill="none" stroke="${INK}" stroke-width=".5"/>
       ${label(14, T + 9, 'Style no.', 'start', 5)}${value(14, T + 19, opts.code || '—')}
       ${label(76, T + 9, 'Description', 'start', 5)}${value(76, T + 19, String(opts.title || '').slice(0, 28), 6.6)}
@@ -776,7 +776,7 @@
       ${(apparel ? poms : ['Per factory sample']).map((n, i) => value(196, T + 96 + i * 9, n, 6.2)).join('')}
     </g>`);
     return `<svg class="k-mockup k-mockup--sketch" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
-      <rect width="360" height="480" fill="${PAPER}"/>${parts.join('')}</svg>`;
+      ${parts.join('')}</svg>`;
   }
 
   window.KioskMockup = { render, sketchViews, viewNames: VIEW_NAMES, types: Object.keys(garments), prints: Object.keys(PRINTS) };
