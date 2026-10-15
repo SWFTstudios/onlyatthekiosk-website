@@ -3472,6 +3472,10 @@
   const airlineOf = (cs) => (BY_ICAO[String(cs || '').slice(0, 3)] || {}).name || '';
   const prettyCs = (cs) => String(cs || '').replace(/^([A-Z]{3})(\d)/, '$1 $2');
   const iataNo = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata} ${cs.slice(3)}` : ''; };
+  // Aviationstack times are airport-local wall clock; show them as written
+  const asTime = (t) => (t && t.length >= 16 ? t.slice(11, 16) : '');
+  const STATUS_LABEL = { scheduled: 'Scheduled', active: 'En route', landed: 'Landed', cancelled: 'Cancelled', incident: 'Incident', diverted: 'Diverted', unknown: 'Status unknown' };
+  const iataFor = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata}${cs.slice(3)}` : ''; };
   const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round((((deg || 0) % 360) + 360) % 360 / 22.5) % 16];
   const kmBetween = (a, b) => {
     const r = Math.PI / 180; const dLa = (b.lat - a.lat) * r; const dLo = (b.lon - a.lon) * r;
@@ -3500,7 +3504,7 @@
     const resEl = $('[data-fl-result]', root);
     const listEl = $('[data-fl-list]', root);
     const phone = () => window.innerWidth < 760;
-    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null };
+    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null, status: null, statusOn: true, statusBusy: false };
     const say = (t) => { status.textContent = t; };
 
     const api = (qs) => fetch(`/api/flights?${qs}`, { signal, headers: { Accept: 'application/json' } }).then(async (r) => {
@@ -3546,12 +3550,12 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, air.clientWidth, air.clientHeight);
       // route of the selected flight
-      if (S.route && S.route.stops && S.sel) {
+      if (S.route && S.route.stops && (S.sel || S.status)) {
         const [o, d] = [S.route.stops[0], S.route.stops[S.route.stops.length - 1]];
         if (o.lat != null && d.lat != null) {
           const pts = window.KioskEarth.arc(o, d, 64, 0);
-          const here = posOf(S.sel, now);
-          const done = kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d));
+          const here = S.sel ? posOf(S.sel, now) : null;
+          const done = here ? kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d)) : (S.status && S.status.status === 'landed' ? 1 : 0);
           ctx.lineWidth = 2; ctx.lineCap = 'round';
           [[0, done, 'rgba(255,255,255,.95)', []], [done, 1, 'rgba(255,255,255,.55)', [5, 6]]].forEach(([t0, t1, col, dash]) => {
             ctx.strokeStyle = col; ctx.setLineDash(dash); ctx.beginPath(); let pen = false;
@@ -3600,8 +3604,43 @@
     // --- panels
     const fmt = (n, d = 0) => (n == null ? '—' : Number(n).toLocaleString(undefined, { maximumFractionDigits: d }));
     const phase = (a) => (a.ground ? ['ground', 'On the ground'] : a.vs > 400 ? ['climb', 'Climbing'] : a.vs < -400 ? ['descend', 'Descending'] : a.alt > 18000 ? ['cruise', 'Cruising'] : ['level', 'In the air']);
+    // Gates, times and delays from Aviationstack
+    function statusHtml(st) {
+      const end = (e, label) => {
+        const late = (e.estimated || e.actual) && e.scheduled && (e.actual || e.estimated) > e.scheduled;
+        const now = e.actual ? ['Actual', asTime(e.actual)] : e.estimated ? ['Expected', asTime(e.estimated)] : null;
+        return `<div class="k-fstat__end">
+          <small>${label}</small><b>${esc(e.iata || e.icao || '—')}</b><span>${esc(e.airport || '')}</span>
+          <dl>
+            <div><dt>Scheduled</dt><dd>${esc(asTime(e.scheduled) || '—')}</dd></div>
+            ${now ? `<div><dt>${now[0]}</dt><dd class="${late ? 'is-late' : 'is-ok'}">${esc(now[1])}</dd></div>` : ''}
+            ${e.terminal ? `<div><dt>Terminal</dt><dd>${esc(e.terminal)}</dd></div>` : ''}
+            ${e.gate ? `<div><dt>Gate</dt><dd>${esc(e.gate)}</dd></div>` : ''}
+            ${e.baggage ? `<div><dt>Baggage</dt><dd>${esc(e.baggage)}</dd></div>` : ''}
+          </dl></div>`;
+      };
+      const delay = Math.max(st.dep.delay || 0, st.arr.delay || 0);
+      const day = st.date ? new Date(`${st.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+      return `<div class="k-fstat">
+        <p class="k-fstat__head"><span class="k-fstat__pill k-fstat__pill--${esc(st.status)}">${esc(STATUS_LABEL[st.status] || st.status)}</span>${delay ? `<span class="k-fstat__delay">Delayed ${delay} min</span>` : ''}<span class="k-fstat__day">${esc(day)}</span></p>
+        <div class="k-fstat__ends">${end(st.dep, 'Departs')}${end(st.arr, 'Arrives')}</div>
+        <p class="k-fstat__note">Local airport times · Aviationstack</p>
+      </div>`;
+    }
     function card() {
-      const a = S.sel; if (!a) { resEl.innerHTML = ''; return; }
+      const a = S.sel;
+      if (!a && S.status) {
+        const st = S.status;
+        resEl.innerHTML = `<article class="k-fcard" aria-live="polite">
+          <div class="k-fcard__top"><div><p class="k-fcard__airline">${esc(st.airline.name || 'Flight')}${st.flight.icao ? ` · ${esc(prettyCs(st.flight.icao))}` : ''}</p>
+          <h2 class="k-fcard__cs">${esc(st.flight.iata || st.flight.icao)}</h2></div></div>
+          ${statusHtml(st)}
+          ${st.aircraft && (st.aircraft.type || st.aircraft.reg) ? `<p class="k-fcard__seen">Aircraft ${esc([st.aircraft.type, st.aircraft.reg].filter(Boolean).join(' · '))}</p>` : ''}
+          <div class="k-fcard__cta"><button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button><button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button></div>
+        </article>`;
+        return;
+      }
+      if (!a) { resEl.innerHTML = ''; return; }
       const [pk, pl] = phase(a);
       const stops = S.route && S.route.stops; const o = stops && stops[0]; const d = stops && stops[stops.length - 1];
       let prog = '';
@@ -3620,6 +3659,7 @@
           <span class="k-fcard__state k-fcard__state--${pk}">${pl}</span>
         </div>
         ${prog}
+        ${S.status ? statusHtml(S.status) : ''}
         <dl class="k-fcard__grid">
           <div><dt>Altitude</dt><dd>${a.ground ? 'Ground' : `${fmt(a.alt)} ft`}</dd></div>
           <div><dt>Ground speed</dt><dd>${fmt(a.gs)} kt<small>${fmt(a.gs * 1.852)} km/h</small></dd></div>
@@ -3631,6 +3671,7 @@
         <p class="k-fcard__seen">${a.sample ? 'Sample traffic · live feed unavailable' : `Last fix ${ago} s ago · ${esc(S.source || 'ADS-B')}${a.squawk ? ` · squawk ${esc(a.squawk)}` : ''}`}</p>
         <div class="k-fcard__cta">
           <button class="k-btn k-btn--sm" type="button" data-fl-follow aria-pressed="${S.follow}">${S.follow ? 'Following' : 'Follow'}</button>
+          ${!a.sample && !S.status && S.statusOn && a.callsign ? `<button class="k-btn k-btn--sm" type="button" data-fl-times${S.statusBusy ? ' disabled' : ''}>${S.statusBusy ? 'Checking…' : 'Gate & times'}</button>` : ''}
           <button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button>
           ${a.sample ? '' : '<button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button>'}
         </div>
@@ -3660,8 +3701,17 @@
       if (!a || a.sample || !a.callsign || !S.live) return;
       try { const r = await api(`route=${encodeURIComponent(a.callsign)}&lat=${a.lat.toFixed(3)}&lon=${a.lon.toFixed(3)}`); if (S.sel === a) { S.route = r.route; card(); } } catch (e) { /* routes are a bonus */ }
     }
-    async function select(a, why) {
-      S.sel = a; S.route = null; S.follow = true;
+    // One Aviationstack lookup (cached on the server); only on request, the plan is small
+    async function statusLookup(code) {
+      if (!S.statusOn || !code) return null;
+      try { const d = await api(`status=${encodeURIComponent(code)}`); return d.flight || null; } catch (e) {
+        if (e.status === 503) S.statusOn = false;          // no key on this deploy
+        else if (e.status === 429) toast(e.message || 'Flight status is busy. Try again later.');
+        return null;
+      }
+    }
+    async function select(a, why, status = null) {
+      S.sel = a; S.route = null; S.follow = true; S.status = status;
       if (!a) { card(); return; }
       card(); list();
       const p = posOf(a, performance.now());
@@ -3688,19 +3738,46 @@
       const cs = toCallsign(raw);
       if (cs.length < 3) { say('Type a flight number like BA117 or a callsign like DAL1.'); return; }
       say(`Looking for ${prettyCs(cs)}…`);
-      try {
-        const d = await api(`callsign=${encodeURIComponent(cs)}`);
-        S.live = true; S.source = d.source;
-        const hit = stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0];
-        if (!hit) { say(`${prettyCs(cs)} isn’t in the air right now, or it isn’t broadcasting. Check the number, or try another.`); return; }
-        S.hub = null;
-        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
-        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
-        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`);
-      } catch (e) {
-        if (signal.aborted) return;
-        say(e.status === 429 ? 'Too many lookups at once. Give it a few seconds.' : 'The live feed isn’t reachable right now. Try again shortly, or press Surprise me for sample traffic.');
+      const typed = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const flightNo = /^[A-Z0-9]{2}\d/.test(typed) && !/^[A-Z]{3}\d/.test(typed) ? typed : (iataFor(cs) || cs);
+      const [live, st] = await Promise.all([
+        api(`callsign=${encodeURIComponent(cs)}`).then((d) => { S.live = true; S.source = d.source; return stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0] || null; }).catch((e) => (e.status === 429 ? 'busy' : null)),
+        statusLookup(flightNo),
+      ]);
+      if (signal.aborted) return;
+      let hit = live && live !== 'busy' ? live : null;
+      // In the air per Aviationstack but not on ADS-B: plot its reported position
+      if (!hit && st && st.live && st.live.lat != null && !st.live.ground) {
+        hit = stamp([{ hex: (st.aircraft && st.aircraft.icao24) || `as${cs}`.toLowerCase().slice(0, 6), callsign: st.flight.icao || cs, reg: (st.aircraft || {}).reg || '', type: (st.aircraft || {}).type || '', lat: st.live.lat, lon: st.live.lon, alt: st.live.alt, gs: st.live.gs, track: st.live.track, vs: 0, seen: 0, ground: false }])[0];
       }
+      if (hit) {
+        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
+        S.hub = null;
+        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
+        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`, st);
+        return;
+      }
+      if (st) {
+        // Not in the air: show its status and its route on the globe
+        S.sel = null; S.status = st; S.route = null; card();
+        const label = `${st.flight.iata || cs} · ${STATUS_LABEL[st.status] || st.status}`;
+        say(st.status === 'scheduled' ? `${label}. Departs ${st.dep.iata || ''} at ${asTime(st.dep.estimated || st.dep.scheduled) || '—'} local.` : st.status === 'landed' ? `${label} at ${st.arr.iata || ''}${st.arr.actual ? ` (${asTime(st.arr.actual)} local)` : ''}.` : `${label}.`);
+        const qs = new URLSearchParams(location.search); qs.set('f', st.flight.iata || cs);
+        history.replaceState(history.state, '', `${location.pathname}?${qs}`);
+        try {
+          const r = await api(`route=${encodeURIComponent(st.flight.icao || cs)}&lat=0&lon=0`);
+          const stops = r.route && r.route.stops;
+          if (stops && stops[0].lat != null && S.status === st) {
+            S.route = r.route;
+            const o = stops[0]; const d = stops[stops.length - 1];
+            const mid = window.KioskEarth.arc(o, d, 2, 0)[1];
+            S.earth.flyTo(frameView(mid.lat, mid.lon, false), 1600);
+          }
+        } catch (e) { /* the status card stands on its own */ }
+        return;
+      }
+      if (live === 'busy') { say('Too many lookups at once. Give it a few seconds.'); return; }
+      say(`${prettyCs(cs)} isn’t in the air right now${S.statusOn ? ' and has no status today' : ', or it isn’t broadcasting'}. Check the number, or try another.`);
     }
     function above() {
       if (!navigator.geolocation) { say('Your browser can’t share a location.'); return; }
@@ -3730,6 +3807,16 @@
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-fl-random]')) { random(); return; }
       if (e.target.closest('[data-fl-near]')) { above(); return; }
+      if (e.target.closest('[data-fl-times]') && S.sel && !S.statusBusy) {
+        const a = S.sel; S.statusBusy = true; card();
+        statusLookup(iataFor(a.callsign) || a.callsign).then((st) => {
+          S.statusBusy = false;
+          if (S.sel !== a) return;
+          S.status = st; card();
+          if (!st) say(S.statusOn ? `No gate or schedule found for ${prettyCs(a.callsign)}. Private and cargo flights often aren’t listed.` : 'Flight status isn’t set up on this site yet.');
+        });
+        return;
+      }
       const f = e.target.closest('[data-fl-follow]');
       if (f) { S.follow = !S.follow; card(); if (S.follow && S.sel) { const p = posOf(S.sel, performance.now()); S.earth.flyTo(frameView(p.lat, p.lon, true), 900); } return; }
       if (e.target.closest('[data-fl-share]')) { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('Link copied')); return; }
