@@ -162,7 +162,7 @@ Private project - All rights reserved
 
 ## Cloudflare Worker (`onlyatthekiosk`)
 
-The site can run as a Cloudflare Worker named **onlyatthekiosk** (`wrangler.jsonc`), deployed from the `main` branch with Workers Builds:
+The site runs as a Cloudflare Worker named **onlyatthekiosk-website** (`wrangler.jsonc`), serving onlyatthekiosk.com and www,, deployed from the `main` branch with Workers Builds:
 
 | Setting | Value |
 | --- | --- |
