@@ -12,14 +12,11 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
-  "observability": { "enabled": true },
-  // The site's own domains. A successful deploy creates their DNS records
-  // and certificates in the onlyatthekiosk.com zone (the domain's nameservers
-  // point at Cloudflare), so nothing needs adding by hand in DNS.
-  "routes": [
-    { "pattern": "onlyatthekiosk.com", "custom_domain": true },
-    { "pattern": "www.onlyatthekiosk.com", "custom_domain": true }
-  ]
+  "observability": { "enabled": true }
+  // onlyatthekiosk.com and www are served by the Cloudflare Pages project
+  // "onlyatthekiosk-website" (Custom domains tab). Don't add custom-domain
+  // routes here while Pages serves the site, or a Worker deploy would try to
+  // take the domain over.
   // Accounts (sign-in, wishlist, cart, check-in) need a D1 database. Until it
   // exists the site runs without it and shows "Accounts are coming soon".
   // To switch accounts on:
