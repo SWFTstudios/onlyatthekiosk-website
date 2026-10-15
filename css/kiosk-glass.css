@@ -3299,7 +3299,9 @@ a.k-board__row { display: grid; text-decoration: none; }
   radial-gradient(1px 1px at 91% 82%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 6% 88%, rgba(255,255,255,.6) 50%, transparent 51%),
   radial-gradient(120% 90% at 50% 50%, #0b1630 0%, #04070f 70%); }
 .k-sky.is-boot .k-sky__space { opacity: 1; }
-.k-sky__globe, .k-sky__fog { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-sky__globe, .k-sky__fog, .k-sky__earth { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-sky__earth { display: block; opacity: 0; pointer-events: none; }
+.k-sky:not(.is-live) .k-sky__earth { display: none; }
 .k-sky__fogcss { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 52%; pointer-events: none; display: none;
   background: radial-gradient(40% 60% at 20% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, var(--sky-fog) 0%, var(--sky-fog) 45%, rgba(255,255,255,0) 100%);
   filter: blur(6px); }

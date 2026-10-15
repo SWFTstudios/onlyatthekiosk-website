@@ -4492,6 +4492,43 @@
    * GSAP + the world dots loaded only here). The globe journey plays once
    * per session (Settings › Intro animation: Off skips it).
    * -------------------------------------------------------------------- */
+  /* Where the visitor roughly is, so the opening flight lands over their town:
+   * the city Cloudflare attaches to the request (/api/where, no permission
+   * prompt), else a guess from the device's time zone, else New York. */
+  const TZ_HOME = {
+    'America/New_York': [40.71, -74.0, 'New York'], 'America/Detroit': [42.33, -83.05, 'Detroit'], 'America/Toronto': [43.65, -79.38, 'Toronto'],
+    'America/Chicago': [41.88, -87.63, 'Chicago'], 'America/Denver': [39.74, -104.99, 'Denver'], 'America/Phoenix': [33.45, -112.07, 'Phoenix'],
+    'America/Los_Angeles': [34.05, -118.24, 'Los Angeles'], 'America/Vancouver': [49.28, -123.12, 'Vancouver'], 'America/Anchorage': [61.22, -149.9, 'Anchorage'],
+    'Pacific/Honolulu': [21.31, -157.86, 'Honolulu'], 'America/Halifax': [44.65, -63.57, 'Halifax'], 'America/Mexico_City': [19.43, -99.13, 'Mexico City'],
+    'America/Bogota': [4.71, -74.07, 'Bogotá'], 'America/Lima': [-12.05, -77.04, 'Lima'], 'America/Sao_Paulo': [-23.55, -46.63, 'São Paulo'],
+    'America/Argentina/Buenos_Aires': [-34.6, -58.38, 'Buenos Aires'], 'America/Santiago': [-33.45, -70.67, 'Santiago'], 'America/Puerto_Rico': [18.47, -66.11, 'San Juan'],
+    'America/Jamaica': [17.97, -76.79, 'Kingston'], 'Atlantic/Reykjavik': [64.15, -21.94, 'Reykjavík'], 'Europe/London': [51.51, -0.13, 'London'],
+    'Europe/Dublin': [53.35, -6.26, 'Dublin'], 'Europe/Lisbon': [38.72, -9.14, 'Lisbon'], 'Europe/Madrid': [40.42, -3.7, 'Madrid'], 'Europe/Paris': [48.86, 2.35, 'Paris'],
+    'Europe/Amsterdam': [52.37, 4.9, 'Amsterdam'], 'Europe/Brussels': [50.85, 4.35, 'Brussels'], 'Europe/Berlin': [52.52, 13.4, 'Berlin'], 'Europe/Zurich': [47.38, 8.54, 'Zürich'],
+    'Europe/Rome': [41.9, 12.5, 'Rome'], 'Europe/Stockholm': [59.33, 18.07, 'Stockholm'], 'Europe/Oslo': [59.91, 10.75, 'Oslo'], 'Europe/Copenhagen': [55.68, 12.57, 'Copenhagen'],
+    'Europe/Warsaw': [52.23, 21.01, 'Warsaw'], 'Europe/Athens': [37.98, 23.73, 'Athens'], 'Europe/Istanbul': [41.01, 28.98, 'Istanbul'], 'Europe/Moscow': [55.76, 37.62, 'Moscow'],
+    'Africa/Lagos': [6.52, 3.38, 'Lagos'], 'Africa/Accra': [5.6, -0.19, 'Accra'], 'Africa/Nairobi': [-1.29, 36.82, 'Nairobi'], 'Africa/Johannesburg': [-26.2, 28.05, 'Johannesburg'],
+    'Africa/Cairo': [30.04, 31.24, 'Cairo'], 'Africa/Casablanca': [33.57, -7.59, 'Casablanca'], 'Africa/Dakar': [14.72, -17.47, 'Dakar'], 'Asia/Dubai': [25.2, 55.27, 'Dubai'],
+    'Asia/Riyadh': [24.71, 46.68, 'Riyadh'], 'Asia/Kolkata': [19.08, 72.88, 'Mumbai'], 'Asia/Bangkok': [13.76, 100.5, 'Bangkok'], 'Asia/Singapore': [1.35, 103.82, 'Singapore'],
+    'Asia/Jakarta': [-6.2, 106.85, 'Jakarta'], 'Asia/Manila': [14.6, 120.98, 'Manila'], 'Asia/Hong_Kong': [22.32, 114.17, 'Hong Kong'], 'Asia/Shanghai': [31.23, 121.47, 'Shanghai'],
+    'Asia/Taipei': [25.03, 121.57, 'Taipei'], 'Asia/Seoul': [37.57, 126.98, 'Seoul'], 'Asia/Tokyo': [35.68, 139.69, 'Tokyo'], 'Australia/Sydney': [-33.87, 151.21, 'Sydney'],
+    'Australia/Melbourne': [-37.81, 144.96, 'Melbourne'], 'Australia/Perth': [-31.95, 115.86, 'Perth'], 'Pacific/Auckland': [-36.85, 174.76, 'Auckland'],
+  };
+  function homeFromZone() {
+    let tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { tz = ''; }
+    const hit = TZ_HOME[tz];
+    return hit ? { lat: hit[0], lon: hit[1], city: hit[2], approx: true } : null;
+  }
+  function visitorHome(signal) {
+    const fallback = homeFromZone() || { lat: 40.71, lon: -74.0, city: 'New York', approx: true };
+    const ask = fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (d && d.lat != null ? { lat: d.lat, lon: d.lon, city: d.city || fallback.city } : fallback))
+      .catch(() => fallback);
+    return Promise.race([ask, new Promise((r) => setTimeout(() => r(fallback), 1500))]);
+  }
+
   function mountSky() {
     const sec = $('[data-sky]');
     if (!sec || sec.dataset.on) return;
@@ -4505,14 +4542,20 @@
     const giveUp = () => { sec.classList.remove('is-boot'); root.classList.remove('is-mark-pending'); };
     signal.addEventListener('abort', () => root.classList.remove('is-mark-pending'));
     const fail = setTimeout(giveUp, 3500);
-    Promise.all([loadGsap(), window.KIOSK_WORLD ? null : loadScript('js/kiosk-world.js')])
+    const journey = !quick && !REDUCED;
+    let home = null;
+    Promise.all([
+      loadGsap(), window.KIOSK_WORLD ? null : loadScript('js/kiosk-world.js'),
+      journey && !window.KioskEarth ? loadScript('js/kiosk-earth.js').catch(() => null) : null,
+      journey ? visitorHome(signal).then((h) => { home = h; }) : null,
+    ])
       .then(() => (window.KioskSky ? null : loadScript('js/kiosk-sky.js')))
       .then(() => {
         clearTimeout(fail);
         if (signal.aborted) return;
         window.gsap.registerPlugin(window.ScrollTrigger);
         sec.classList.add('is-live');
-        const sky = window.KioskSky.mount(sec, { gsap: window.gsap, ScrollTrigger: window.ScrollTrigger, world: window.KIOSK_WORLD, quick, reduced: REDUCED });
+        const sky = window.KioskSky.mount(sec, { gsap: window.gsap, ScrollTrigger: window.ScrollTrigger, world: window.KIOSK_WORLD, Earth: window.KioskEarth, home, quick, reduced: REDUCED });
         sec.classList.remove('is-boot');
         window.ScrollTrigger.refresh();
         signal.addEventListener('abort', () => sky.stop());

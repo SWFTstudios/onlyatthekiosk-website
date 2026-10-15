@@ -1,34 +1,63 @@
 /**
  * KIOSK — "Above the clouds" opening for the home page
  *
- *   1. Around the globe: a dotted Earth turns while a flight hops
- *      New York → Reykjavík → Lisbon → Lagos → Dubai → Tokyo.
- *   2. Re-entry: the camera locks onto Tokyo and drops out of orbit, the
- *      land streaming past, the air thickening into the sky of the hour,
+ *   1. Around the globe: the satellite Earth (js/kiosk-earth.js) turns while
+ *      a flight hops across the world toward the visitor's own town
+ *      (opts.home, from /api/where), each stop closer to home.
+ *   2. Re-entry: the camera locks onto home and drops out of orbit, the
+ *      land rushing up, the air thickening into the sky of the hour,
  *      until we break out high over the cloud sea and level off above it.
  *   3. The spelled-out ꓘIOSK rises from behind the clouds, tagline below.
  *   4. Scroll: ꓘIOSK flies up into the nav icon while the camera sinks into
  *      the fog until it whites out, then the layer dissolves onto the rest
  *      of the home page (below the clouds).
  *
- * Light on purpose: the globe is ~4k dots on a 2D canvas, the fog is one
+ * Light on purpose: the globe is one WebGL2 pass (a ~4k-dot 2D globe
+ * stands in without WebGL2, and on return visits nothing is loaded), the fog is one
  * full-screen WebGL pass of value noise rendered at reduced resolution,
  * and the sky is CSS. Everything stops when the layer is off screen.
  *
- *   KioskSky.mount(section, { gsap, ScrollTrigger, world, quick, reduced }) → { stop() }
+ *   KioskSky.mount(section, { gsap, ScrollTrigger, world, Earth, home, quick, reduced }) → { stop() }
  */
 (function () {
   'use strict';
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const ROUTE = [
-    { n: 'New York', c: 'JFK', la: 40.71, lo: -74.0 },
-    { n: 'Reykjavík', c: 'KEF', la: 64.15, lo: -21.94 },
-    { n: 'Lisbon', c: 'LIS', la: 38.72, lo: -9.14 },
-    { n: 'Lagos', c: 'LOS', la: 6.52, lo: 3.38 },
-    { n: 'Dubai', c: 'DXB', la: 25.2, lo: 55.27 },
-    { n: 'Tokyo', c: 'HND', la: 35.68, lo: 139.69 },
-  ];
+  /* The opening flight: a few hops round the world that finish over the
+   * visitor's own town (opts.home), each stop closer to home than the last. */
+  const HUBS = [
+    ['New York', 'JFK', 40.64, -73.78], ['Los Angeles', 'LAX', 33.94, -118.41], ['Chicago', 'ORD', 41.98, -87.9], ['Miami', 'MIA', 25.79, -80.29],
+    ['Toronto', 'YYZ', 43.68, -79.63], ['Vancouver', 'YVR', 49.19, -123.18], ['Mexico City', 'MEX', 19.44, -99.07], ['Bogotá', 'BOG', 4.7, -74.15],
+    ['Lima', 'LIM', -12.02, -77.11], ['São Paulo', 'GRU', -23.43, -46.47], ['Buenos Aires', 'EZE', -34.82, -58.54], ['Reykjavík', 'KEF', 63.98, -22.6],
+    ['London', 'LHR', 51.47, -0.45], ['Paris', 'CDG', 49.01, 2.55], ['Lisbon', 'LIS', 38.77, -9.13], ['Madrid', 'MAD', 40.47, -3.56],
+    ['Berlin', 'BER', 52.36, 13.5], ['Rome', 'FCO', 41.8, 12.25], ['Istanbul', 'IST', 41.26, 28.74], ['Lagos', 'LOS', 6.58, 3.32],
+    ['Accra', 'ACC', 5.6, -0.17], ['Dakar', 'DSS', 14.67, -17.07], ['Nairobi', 'NBO', -1.32, 36.93], ['Johannesburg', 'JNB', -26.14, 28.24],
+    ['Cairo', 'CAI', 30.12, 31.41], ['Casablanca', 'CMN', 33.37, -7.59], ['Dubai', 'DXB', 25.25, 55.36], ['Delhi', 'DEL', 28.56, 77.1],
+    ['Mumbai', 'BOM', 19.09, 72.87], ['Bangkok', 'BKK', 13.69, 100.75], ['Singapore', 'SIN', 1.36, 103.99], ['Hong Kong', 'HKG', 22.31, 113.91],
+    ['Shanghai', 'PVG', 31.14, 121.81], ['Seoul', 'ICN', 37.46, 126.44], ['Tokyo', 'HND', 35.55, 139.78], ['Sydney', 'SYD', -33.95, 151.18],
+    ['Auckland', 'AKL', -37.01, 174.79], ['Honolulu', 'HNL', 21.32, -157.92], ['Anchorage', 'ANC', 61.17, -149.99],
+  ].map(([n, c, la, lo]) => ({ n, c, la, lo }));
+  const km = (a, b) => {
+    const r = Math.PI / 180; const dLa = (b.la - a.la) * r; const dLo = (b.lo - a.lo) * r;
+    const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.la * r) * Math.cos(b.la * r) * Math.sin(dLo / 2) ** 2;
+    return 12742 * Math.asin(Math.min(1, Math.sqrt(h)));
+  };
+  function routeTo(home) {
+    const end = { n: home.city || 'Home', c: 'YOU', la: home.lat, lo: home.lon, home: true };
+    const near = HUBS.slice().sort((a, b) => km(a, end) - km(b, end))[0];
+    if (km(near, end) < 60) end.c = near.c;
+    const stops = [];
+    // far side of the world → another continent → the region → the last hop home
+    [[9000, 17000], [5000, 9000], [1800, 5000], [300, 1800]].forEach(([lo, hi]) => {
+      const pool = HUBS.filter((x) => { const d = km(x, end); return d >= lo && d < hi && !stops.includes(x); });
+      if (!pool.length) return;
+      const prev = stops[stops.length - 1];
+      stops.push(prev ? pool.sort((a, b) => km(a, prev) - km(b, prev))[Math.floor(Math.random() * Math.min(2, pool.length))]
+        : pool[Math.floor(Math.random() * pool.length)]);
+    });
+    return stops.concat(end);
+  }
+  const DEFAULT_HOME = { lat: 40.71, lon: -74.0, city: 'New York' };
   const vec = (la, lo) => { const a = la * Math.PI / 180; const b = lo * Math.PI / 180; return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)]; };
   function slerp(a, b, u) {
     const d = Math.acos(clamp(a[0] * b[0] + a[1] * b[1] + a[2] * b[2], -1, 1));
@@ -78,7 +107,7 @@
   }
 
   /* ------------------------------------------------------------ globe */
-  function globe(canvas, G, world) {
+  function globe(canvas, G, world, ROUTE) {
     const ctx = canvas.getContext('2d');
     const raw = world ? world.points() : new Float32Array(0);
     const n = raw.length / 2;
@@ -129,7 +158,8 @@
       const cx = w / 2; const cy = h / 2 + G.drop * h;
       const R = f / Math.sqrt(D * D - 1);                        // apparent disc radius
       const diag = Math.hypot(w, h);
-      const cyw = Math.cos(G.yaw); const syw = Math.sin(G.yaw); const cp = Math.cos(G.pitch); const sp = Math.sin(G.pitch);
+      const yaw = -G.lon * Math.PI / 180; const pitch = clamp(G.lat * Math.PI / 180, -0.9, 0.9);
+      const cyw = Math.cos(yaw); const syw = Math.sin(yaw); const cp = Math.cos(pitch); const sp = Math.sin(pitch);
       const rot = (x, y, z) => { const x1 = x * cyw + z * syw; const z1 = -x * syw + z * cyw; return [x1, y * cp - z1 * sp, y * sp + z1 * cp]; };
       // screen position of a rotated point at camera distance d (null when over the horizon)
       const proj = (r, d) => { const q = r[0] * r[0] + r[1] * r[1] + r[2] * r[2]; if (r[2] * d <= q + 0.002) return null; const k = f / (d - r[2]); return [cx + r[0] * k, cy - r[1] * k, k]; };
@@ -223,6 +253,90 @@
       ctx.globalAlpha = 1;
     }
     return { draw, resize };
+  }
+
+  /* ------------------------------------------------- satellite globe
+   * The same photographic Earth as the Atlas and Flights (js/kiosk-earth.js),
+   * driven by the timeline: G.lat/G.lon is the point under the camera and
+   * G.fall 0 … 1 the drop from orbit (log altitude, tilting toward the
+   * horizon near the ground). Flight arcs, pins and the thickening air are
+   * drawn on the 2D canvas above it. */
+  function satellite(earthCanvas, canvas, G, Earth, ROUTE) {
+    const earth = Earth.create(earthCanvas, { view: { lat: G.lat, lon: G.lon, alt: 2, tilt: 0, fov: 0.55 }, maxDpr: 1.5, relief: 1 });
+    if (!earth.gl) return null;
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let w = 0; let h = 0; let alive = true;
+    const resize = () => { w = canvas.clientWidth; h = canvas.clientHeight; canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); };
+    resize();
+    const legs = ROUTE.slice(0, -1).map((a, i) => Earth.arc({ lat: a.la, lon: a.lo }, { lat: ROUTE[i + 1].la, lon: ROUTE[i + 1].lo }, 48, 0.12));
+    const NEAR = 0.045;  // ~290 km up when the air takes over (lower and the imagery runs out of detail)
+    const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+    function overlay(now) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = G.alpha;
+      const leg = Math.min(Math.floor(G.leg), legs.length - 1);
+      const u = clamp(G.leg - leg, 0, 1);
+      ctx.lineCap = 'round'; ctx.lineWidth = 2;
+      let head = null;
+      for (let k = 0; k <= leg; k += 1) {
+        const end = k < leg ? 1 : u; let prev = null;
+        ctx.strokeStyle = k < leg ? 'rgba(255,122,61,.55)' : '#ff7a3d';
+        ctx.beginPath();
+        legs[k].forEach((q) => {
+          if (q.t > end) return;
+          const s = earth.project(q.lat, q.lon, q.lift);
+          if (!s.front) { prev = null; return; }
+          if (prev) ctx.lineTo(s.x, s.y); else ctx.moveTo(s.x, s.y);
+          prev = s;
+        });
+        ctx.stroke();
+        if (k === leg && u < 1 && prev) head = prev;
+      }
+      if (head) {
+        ctx.fillStyle = 'rgba(255,170,120,.35)'; ctx.beginPath(); ctx.arc(head.x, head.y, 9, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(head.x, head.y, 3.2, 0, 6.283); ctx.fill();
+      }
+      const pin = (c, on) => {
+        const s = earth.project(c.la, c.lo); if (!s.front) return;
+        ctx.fillStyle = '#ff5a1f'; ctx.beginPath(); ctx.arc(s.x, s.y, on ? 4.5 : 2.5, 0, 6.283); ctx.fill();
+        if (!on) return;
+        ctx.strokeStyle = 'rgba(255,90,31,.7)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(s.x, s.y, 10 + 4 * Math.sin(now / 200), 0, 6.283); ctx.stroke();
+        ctx.font = '600 11px ui-monospace, "SF Mono", Menlo, monospace'; ctx.fillStyle = '#fff';
+        ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 4;
+        ctx.fillText(`${c.c} · ${String(c.n).toUpperCase()}`, s.x + 13, s.y - 9); ctx.shadowBlur = 0;
+      };
+      ROUTE.forEach((c, i) => { if (i <= leg) pin(c, i === leg && u < 0.2); });
+      if (u >= 0.8 || G.leg >= ROUTE.length - 1) pin(ROUTE[Math.min(leg + 1, ROUTE.length - 1)], true);
+      // Entry: the air thickens into the colour of the sky below
+      if (G.atmo > 0.001 && G.tint) {
+        const [lo, hi] = G.tint; const diag = Math.hypot(w, h);
+        const air = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, diag * 0.7);
+        air.addColorStop(0, css([hi[0], hi[1], hi[2], 1])); air.addColorStop(1, css([lo[0], lo[1], lo[2], 1]));
+        ctx.globalAlpha = G.alpha * clamp(G.atmo, 0, 1);
+        ctx.fillStyle = air; ctx.fillRect(0, 0, w, h);
+      }
+      ctx.globalAlpha = 1;
+    }
+    earth.onFrame = () => overlay(performance.now());
+    return {
+      ready: earth.ready,
+      resize() { resize(); earth.invalidate(); },
+      draw() {
+        if (!alive) return;
+        earthCanvas.style.opacity = G.alpha.toFixed(3);
+        canvas.style.opacity = '';
+        if (G.alpha <= 0.01) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+        // whole planet in frame at the start, whatever the screen shape
+        const tanR = 0.55 * 0.612 * Math.min(w, h) / Math.max(1, h);
+        const far = Math.sqrt(1 + 1 / (tanR * tanR)) - 1;
+        const f = clamp(G.fall, 0, 1);
+        Object.assign(earth.view, { lat: G.lat, lon: G.lon, alt: far * Math.pow(NEAR / far, f), tilt: 1.15 * smooth(0.35, 1, f), px: 0.5, py: 0.5 });
+        earth.invalidate();
+      },
+      destroy() { if (!alive) return; alive = false; earth.destroy(); earthCanvas.style.opacity = '0'; ctx.clearRect(0, 0, canvas.width, canvas.height); },
+    };
   }
 
   /* ----------------------------------------------------------- clouds
@@ -380,7 +494,9 @@
   function mount(section, opts) {
     const { gsap, ScrollTrigger } = opts;
     const layer = section.querySelector('.k-sky__layer');
-    const G = { yaw: 1.29, pitch: 0.55, zoom: 0.9, drop: 0, alpha: 1, leg: 0, fall: 0, atmo: 0, tint: null };
+    const G = { lat: 0, lon: 0, zoom: 0.9, drop: 0, alpha: 1, leg: 0, fall: 0, atmo: 0, tint: null };
+    const ROUTE = routeTo(opts.home && opts.home.lat != null ? opts.home : DEFAULT_HOME);
+    const journey = !(opts.quick || opts.reduced);
     const F = { hz: -0.6, pit: 0, cam: 1.5, dive: 0, pal: skyAt(localHour()) };
     const zone = (() => { try { return (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' '); } catch (e) { return ''; } })();
     const paint = () => {
@@ -394,7 +510,11 @@
     paint();
     const caption = () => `KSK 001 · ${NAMES[F.pal.phase]} above the clouds${zone ? ` · ${zone}` : ''} · 36,000 ft`;
     const tick = setInterval(() => { F.pal = skyAt(localHour()); paint(); if (section.classList.contains('is-settled') && route) route.textContent = caption(); }, 60000);
-    const gv = globe(section.querySelector('.k-sky__globe'), G, opts.world);
+    // The satellite Earth when the journey plays and WebGL2 is there; the dotted globe otherwise
+    let sat = null;
+    const earthEl = section.querySelector('.k-sky__earth');
+    if (journey && opts.Earth && earthEl) { try { sat = satellite(earthEl, section.querySelector('.k-sky__globe'), G, opts.Earth, ROUTE); } catch (e) { sat = null; } }
+    const gv = sat ? null : globe(section.querySelector('.k-sky__globe'), G, opts.world, ROUTE);
     let fv = null;
     try { fv = fog(section.querySelector('.k-sky__fog'), F); } catch (e) { fv = null; }
     if (!fv) section.classList.add('is-nogl');
@@ -450,20 +570,22 @@
     const frame = (now) => {
       raf = 0;
       if (!on) return;
-      if (G.alpha > 0.01 || globeDirty) { gv.draw(now); globeDirty = G.alpha > 0.01; }
+      if (G.alpha > 0.01 || globeDirty) { if (sat) sat.draw(now); else gv.draw(now); globeDirty = G.alpha > 0.01; }
       if (fv) fv.draw((now - t0) / 1000);
       applyTitle();
       raf = requestAnimationFrame(frame);
     };
     const wake = () => { if (on && !raf) raf = requestAnimationFrame(frame); };
-    const onResize = () => { gv.resize(); if (fv) fv.resize(); measure(); applyTitle(); };
+    const onResize = () => { if (sat) sat.resize(); else gv.resize(); if (fv) fv.resize(); measure(); applyTitle(); };
     window.addEventListener('resize', onResize);
 
-    // Face a city: yaw/pitch that bring (la, lo) to the front
-    const face = (c) => ({ yaw: -c.lo * Math.PI / 180, pitch: clamp(c.la * Math.PI / 180, -0.9, 0.9) });
+    // Face a city; longitudes stay continuous so no tween swings the long way round
+    let lonNow = 0;
+    const face = (c) => { let d = (c.lo - lonNow) % 360; if (d > 180) d -= 360; if (d < -180) d += 360; lonNow += d; return { lat: c.la, lon: lonNow }; };
+    const midOf = (a, b) => { const p = vec(a.la, a.lo); const q = vec(b.la, b.lo); const m = [p[0] + q[0], p[1] + q[1], p[2] + q[2]]; return { la: Math.atan2(m[1], Math.hypot(m[0], m[2])) * 180 / Math.PI, lo: Math.atan2(m[0], m[2]) * 180 / Math.PI }; };
     const tl = gsap.timeline();
-    const settled = () => { section.classList.add('is-settled'); };
-    if (opts.quick || opts.reduced) {
+    const settled = () => { section.classList.add('is-settled'); if (sat) sat.destroy(); };
+    if (!journey) {
       Object.assign(G, { alpha: 0 }); F.hz = SETTLED_HZ; T.rise = 1;
       gsap.set(space, { opacity: F.pal.stars });
       gsap.set(tagline, { opacity: 1, y: 0 });
@@ -473,13 +595,14 @@
       // 1. Around the globe, in the dark above the atmosphere
       gsap.set(space, { opacity: 1 }); gsap.set(tagline, { opacity: 0, y: 14 });
       Object.assign(G, face(ROUTE[0]));
+      const LEG = 0.9;
       ROUTE.slice(0, -1).forEach((c, i) => {
         const b = ROUTE[i + 1];
-        const mid = face({ la: (c.la + b.la) / 2, lo: (c.lo + b.lo) / 2 });
-        tl.call(() => { if (route) route.textContent = `KSK 00${i + 1} · ${c.c} → ${b.c} · ${b.n}`; }, null, i * 0.72);
-        tl.to(G, { leg: i + 1, yaw: mid.yaw - 0.15, pitch: mid.pitch * 0.8, duration: 0.72, ease: 'power1.inOut' }, i * 0.72);
+        const mid = midOf(c, b); const at = face({ la: mid.la * 0.8, lo: mid.lo + 8.6 });
+        tl.call(() => { if (route) route.textContent = `KSK 00${i + 1} · ${c.c} → ${b.c} · ${b.n}`; }, null, i * LEG);
+        tl.to(G, { leg: i + 1, lat: at.lat, lon: at.lon, duration: LEG, ease: 'power1.inOut' }, i * LEG);
       });
-      const up = (ROUTE.length - 1) * 0.72 + 0.1;
+      const up = (ROUTE.length - 1) * LEG + 0.1;
       const last = ROUTE[ROUTE.length - 1];
       const P = F.pal;
       G.tint = [P.haze, P.lit.map((v, i) => v + (P.haze[i] - v) * 0.25)];
@@ -487,7 +610,7 @@
       // 2. Re-entry: lock onto the last stop and drop out of orbit toward it.
       //    The land rushes past, the air thickens into the sky of the hour,
       //    and we break out high above the cloud sea, looking down on it…
-      tl.call(() => { if (route) route.textContent = `KSK 006 · Descent · ${last.c} ${last.n}`; }, null, up)
+      tl.call(() => { if (route) route.textContent = `KSK 00${ROUTE.length} · Descent · ${last.home ? 'Home' : last.c} · ${last.n}`; }, null, up)
         .to(G, { ...face(last), duration: 1.3, ease: 'power2.inOut' }, up)
         .to(G, { fall: 1, duration: 3.3, ease: 'sine.in' }, up + 0.1)
         .to(G, { atmo: 1, duration: 1.0, ease: 'power2.in' }, up + 2.4)
@@ -505,12 +628,18 @@
         .call(settled, null, up + 6.3);
     }
 
+    // Hold the journey until the planet's textures are in (or 2.5 s, whichever is first)
+    if (journey && sat) {
+      tl.pause();
+      Promise.race([sat.ready.catch(() => {}), new Promise((r) => setTimeout(r, 2500))]).then(() => { if (tl.progress() < 1) tl.play(); });
+    }
+
     // 4. Scroll: ꓘIOSK flies up into the nav icon while the camera sinks into the clouds
     const st = ScrollTrigger.create({
       trigger: section, start: 'top top', end: 'bottom top', scrub: 0.6,
       onUpdate: (self) => {
         const p = self.progress;
-        if (p > 0.001 && tl.isActive()) tl.progress(1);
+        if (p > 0.001 && tl.progress() < 1) tl.progress(1);
         T.fly = clamp(p / 0.5, 0, 1);
         F.dive = clamp(p / 0.8, 0, 1);
         if (!tl.isActive()) { F.hz = SETTLED_HZ + F.dive * 0.42; F.cam = 1.5 - F.dive * 1.55; }
@@ -526,7 +655,7 @@
     wake();
     return {
       stop() {
-        on = false; clearInterval(tick); tl.kill(); st.kill(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
+        on = false; clearInterval(tick); tl.kill(); st.kill(); if (sat) sat.destroy(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
         if (navMark) { navMark.style.opacity = ''; navMark.style.transform = ''; }
         document.documentElement.classList.remove('is-mark-pending');
       },

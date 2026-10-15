@@ -164,7 +164,7 @@
       loadImage(`${base}${hd ? 'day-4k' : 'day-2k'}.jpg`).then((im) => upload('dayT', im)),
       loadImage(`${base}relief.jpg`).then((im) => upload('reliefT', im)),
       loadImage(`${base}water.jpg`).then((im) => upload('waterT', im)),
-      loadImage(`${base}night.jpg`).then((im) => upload('nightT', im)),
+      loadImage(`${base}${hd ? 'night-4k' : 'night'}.jpg`).then((im) => upload('nightT', im)),
     ]).then(() => { canvas.classList.add('is-ready'); });
     api.ready.catch(() => {});
 
