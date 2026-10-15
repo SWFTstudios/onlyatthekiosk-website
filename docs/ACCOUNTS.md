@@ -11,7 +11,7 @@ The UI stays hidden until `SHOPIFY_CUSTOMER_CLIENT_ID` and the D1 binding are li
 | Sign-in (email code) | Shopify Customer Account API (hosted OAuth) |
 | Orders | Shopify Customer Account GraphQL |
 | Checkout | Shopify Storefront cart + checkout URL |
-| Session cookie, wishlist, cart id | Cloudflare D1 (`kiosk-accounts`) + Worker `/api/*` |
+| Session cookie, wishlist, cart id, check-in answers | Cloudflare D1 (`kiosk-accounts`) + Worker `/api/*` |
 
 ## Owner checklist
 
@@ -64,7 +64,9 @@ npm run build:worker
 npx wrangler deploy
 ```
 
-After deploy, open the site: the account and cart buttons appear in the header once `/api/me` returns `{ enabled: true }`.
+After deploy, open the site: sign-in and the cart light up once `/api/me` returns `{ enabled: true }`. The account button itself always shows, because check-in works on the device before accounts are switched on.
+
+The migrations include `0002_profiles.sql` (check-in answers). Run the apply command above again after pulling it; until then `/api/me` simply reports `profile: null`.
 
 ## API surface
 
@@ -75,7 +77,24 @@ After deploy, open the site: the account and cart buttons appear in the header o
 | `GET /api/auth/logout` | session | Clear session + Shopify logout |
 | `GET /api/me` | cookie | Profile, wishlist, cart, orders (`enabled: false` when not configured) |
 | `GET/POST/DELETE /api/wishlist` | session | Saved stories/products |
+| `GET/PUT/DELETE /api/profile` | session | Check-in answers (`taste`), cleaned by `functions/_lib/taste.js` |
+| `GET /api/where` | — | Approximate city of the request (home intro, check-in suggestion) |
 | `GET/POST /api/cart` | optional session | Create/add/update/remove/attach cart |
+
+## Check-in (onboarding)
+
+Creating an account stays with Shopify: *Sign in / create account* sends people to Shopify's email code, no passwords. Around that, **Check-in** (`js/kiosk-onboard.js`, loaded on demand) asks, all skippable:
+
+1. What to call you
+2. Interests: cars, motorcycles, sports, travel, fashion, skate, music, culture, food, photo & film
+3. Formats (films, vlogs, interviews, photo diaries, long reads, audio notes, playlists) and pace
+4. Home city (suggested from `/api/where`), how you travel, up to six dream destinations
+5. Style, top and waist sizes, fit, colours you wear
+6. What to hear about (drops, stories, rare finds, radio, meets)
+
+It ends on a boarding pass. Answers save as you go on the device (`localStorage['kiosk:taste']`). For members they also save to D1 (`profiles`) through `/api/profile`, and the account copy wins on other devices. Someone who checks in before signing up has their answers carried over on first sign-in; a member signing in for the first time without answers gets Check-in opened for them once.
+
+Where the answers show up: a *Picked for you* row leading the Atlas (`pickedFor` in `js/kiosk-glass.js`), the home intro flying to your home city, your top size pre-picked on product pages, and *Your check-in* on the account page. Open it from the menu (*Check in*), the account sheet or page, or any element with `data-onboard-open` (add `data-onboard-step="fit"` to jump to a step). Option ids live in `TASTE` in both `js/kiosk-onboard.js` and `functions/_lib/taste.js`; change them together.
 
 ## Local tests
 

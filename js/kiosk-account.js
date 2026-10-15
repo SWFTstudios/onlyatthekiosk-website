@@ -21,8 +21,60 @@
     wishlist: [],
     cart: null,
     orders: [],
+    profile: null,
     loading: true,
   };
+  let justSignedIn = false;
+
+  /* ------------------------------------------------- check-in (onboarding)
+   * js/kiosk-onboard.js loads on demand. Answers live on the device as
+   * 'kiosk:taste'; for members they also live on the account
+   * (/api/profile). The account copy wins once it exists. */
+  const TASTE_KEY = 'kiosk:taste';
+  const localTaste = () => { try { return JSON.parse(localStorage.getItem(TASTE_KEY) || 'null'); } catch (e) { return null; } };
+  let onboardReady = null;
+  function loadOnboard() {
+    if (window.KioskOnboard) return Promise.resolve(window.KioskOnboard);
+    if (!onboardReady) {
+      onboardReady = new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = 'js/kiosk-onboard.js'; sc.async = true;
+        sc.onload = () => resolve(window.KioskOnboard);
+        sc.onerror = () => { onboardReady = null; reject(new Error('onboarding unavailable')); };
+        document.head.append(sc);
+      });
+    }
+    return onboardReady;
+  }
+  function openOnboarding(opts = {}) {
+    closeAccountSheet();
+    return loadOnboard().then((ob) => ob.open({ ...opts, onDone: () => { renderAccountPage(); if (opts.onDone) opts.onDone(); } })).catch(() => toast('Check-in couldn’t load. Try again.'));
+  }
+  let tasteTimer = 0;
+  function saveTaste(taste) {
+    if (!state.user) return Promise.resolve(null);
+    clearTimeout(tasteTimer);
+    return new Promise((resolve) => {
+      tasteTimer = setTimeout(() => {
+        api('/api/profile', { method: 'PUT', body: JSON.stringify({ taste }) })
+          .then((d) => { state.profile = d.profile || null; resolve(state.profile); })
+          .catch(() => resolve(null));
+      }, 600);
+    });
+  }
+  async function syncTaste() {
+    if (!state.user) return;
+    const local = localTaste();
+    if (state.profile && state.profile.onboardedAt) {
+      // the account copy wins; keep this device in step
+      try { localStorage.setItem(TASTE_KEY, JSON.stringify(state.profile.taste)); } catch (e) { /* storage unavailable */ }
+      document.dispatchEvent(new CustomEvent('kiosk:taste', { detail: state.profile.taste }));
+    } else if (local && local.completedAt) {
+      await saveTaste(local);   // checked in before signing up: carry it over
+    } else if (justSignedIn) {
+      openOnboarding();         // first time in: check in
+    }
+  }
 
   let accountEl = null;
   let cartEl = null;
@@ -67,7 +119,8 @@
   }
 
   function showAccountButtons(accountsOn, cartOn) {
-    $$('[data-account-open]').forEach((el) => setChromeVisible(el, accountsOn));
+    // The account button always shows: check-in works on this device even before accounts are switched on
+    $$('[data-account-open]').forEach((el) => setChromeVisible(el, true));
     // Cart chrome can light up for guests once Storefront cart works,
     // even before Customer Account OAuth is configured.
     const showCart = !!(accountsOn || cartOn);
@@ -90,6 +143,7 @@
       state.wishlist = data.wishlist || [];
       state.cart = data.cart || null;
       state.orders = data.orders || [];
+      state.profile = data.profile || null;
       state.loading = false;
       if (state.cart && state.cart.id) setCartId(state.cart.id);
       else if (!state.user) {
@@ -104,13 +158,14 @@
       // Show cart chrome when accounts are on, or when a guest already has a cart id.
       showAccountButtons(state.enabled, !!(state.cart && state.cart.id) || !!cartId());
       updateCartBadge(state.cart);
-      if (state.user) await mergeLocalWishlist();
+      if (state.user) { await mergeLocalWishlist(); await syncTaste(); }
       renderAccountPage();
       return state;
     } catch (err) {
       state.enabled = false;
       state.loading = false;
       showAccountButtons(false, !!cartId());
+      renderAccountPage();
       return state;
     }
   }
@@ -136,6 +191,16 @@
 
   /* ---------------------------------------------------------- account sheet */
 
+  const tasteLine = (t) => (window.KioskOnboard && window.KioskOnboard.summary ? window.KioskOnboard.summary(t) : [...(t.interests || []), ...(t.formats || []).slice(0, 2)].map((x) => x.replace(/-/g, ' ')).join(' · '));
+  function checkinBlock(cls = '') {
+    const t = localTaste();
+    if (t && t.completedAt) {
+      if (!window.KioskOnboard) loadOnboard().then(() => { renderAccountPage(); if (accountEl && accountEl.classList.contains('is-open')) accountEl.innerHTML = accountSheetHtml(); }).catch(() => {});
+      return `<div class="k-checkin ${cls}"><p class="k-checkin__eyebrow">Your check-in</p><p class="k-checkin__line">${esc(tasteLine(t) || 'Checked in')}</p><button type="button" class="k-btn k-btn--sm" data-onboard-open>Edit check-in</button></div>`;
+    }
+    return `<div class="k-checkin k-checkin--new ${cls}"><p class="k-checkin__eyebrow">Check-in · 1 minute</p><p class="k-checkin__line">Tell us what you’re into and we’ll pick stories, films and pieces for you.</p><button type="button" class="k-btn k-btn--sm k-btn--solid" data-onboard-open>Check in</button></div>`;
+  }
+
   function accountSheetHtml() {
     const u = state.user;
     if (!u) {
@@ -148,9 +213,10 @@
             <button type="button" class="k-acct__x" data-account-close aria-label="Close">${icon().close || '×'}</button>
           </header>
           <div class="k-acct__body">
-            <p class="k-lede">Sign in to save pieces across devices, keep a cart, and see your orders.</p>
+            ${state.enabled ? `<p class="k-lede">Make an account to keep your check-in, saves and cart on every device, and see your orders.</p>
             <a class="k-btn k-btn--solid k-acct__cta" href="${loginUrl()}">Sign in / create account</a>
-            <p class="k-acct__hint">You’ll use Shopify’s secure email code. We never see your password.</p>
+            <p class="k-acct__hint">No password: you’ll get a one-time code by email (Shopify’s secure sign-in).</p>` : '<p class="k-lede">Accounts are coming soon. Until then your check-in and saves stay on this device.</p>'}
+            ${checkinBlock('k-checkin--sheet')}
           </div>
         </div>`;
     }
@@ -165,6 +231,7 @@
         <div class="k-acct__body">
           <p class="k-acct__hello">Hi${u.firstName ? `, ${esc(u.firstName)}` : ''}</p>
           <p class="k-acct__email">${esc(u.email || '')}</p>
+          ${checkinBlock('k-checkin--sheet')}
           <div class="k-acct__actions">
             <a class="k-btn k-btn--solid" href="account.html">Open dashboard</a>
             <button class="k-btn" type="button" data-cart-open>View cart</button>
@@ -175,7 +242,6 @@
   }
 
   function openAccountSheet() {
-    if (!state.enabled) return;
     if (!accountEl) {
       accountEl = document.createElement('div');
       accountEl.className = 'k-acct';
@@ -390,8 +456,9 @@
       root.innerHTML = `
         <section class="k-acct-page k-wrap">
           <p class="k-eyebrow">Account</p>
-          <h1 class="k-display">Coming online</h1>
-          <p class="k-lede">Accounts aren’t configured on this deploy yet. Wishlist and cart will light up once Shopify Customer Accounts and D1 are connected.</p>
+          <h1 class="k-display">Your KIOSK</h1>
+          <p class="k-lede">Accounts are coming soon. Your check-in and saves stay on this device until then.</p>
+          ${checkinBlock('k-checkin--page')}
         </section>`;
       return;
     }
@@ -401,8 +468,9 @@
         <section class="k-acct-page k-wrap">
           <p class="k-eyebrow">Account</p>
           <h1 class="k-display">Your KIOSK</h1>
-          <p class="k-lede">Sign in to sync saves, keep a cart and see orders.</p>
+          <p class="k-lede">Make an account to keep your check-in, saves and cart on every device. No password: a one-time code by email.</p>
           <a class="k-btn k-btn--solid" href="${loginUrl()}">Sign in / create account</a>
+          ${checkinBlock('k-checkin--page')}
         </section>`;
       return;
     }
@@ -454,6 +522,10 @@
             <h2 id="acct-orders">Orders</h2>
             ${ordersHtml}
           </section>
+          <section class="k-glass-panel k-acct-taste" aria-labelledby="acct-taste">
+            <h2 id="acct-taste">Your check-in</h2>
+            ${tastePanel()}
+          </section>
           <section class="k-glass-panel" aria-labelledby="acct-profile">
             <h2 id="acct-profile">Profile</h2>
             <dl class="k-acct-dl">
@@ -464,6 +536,25 @@
           </section>
         </div>
       </section>`;
+  }
+
+  function tastePanel() {
+    const t = localTaste();
+    if (!t || !t.completedAt) return `<p class="k-acct-empty">Not checked in yet. A minute of questions and the KIOSK picks for you.</p><button class="k-btn k-btn--sm k-btn--solid" type="button" data-onboard-open>Check in</button>`;
+    const ob = window.KioskOnboard;
+    const lab = (g, v) => (ob && ob.TASTE[g] ? ((ob.TASTE[g].find((x) => x[0] === v) || [])[1] || v) : v);
+    const row = (label, list) => (list && list.length ? `<div><dt>${label}</dt><dd>${list.map((x) => `<span class="k-acct-tag">${esc(x)}</span>`).join('')}</dd></div>` : '');
+    if (!ob) loadOnboard().then(() => renderAccountPage()).catch(() => {});
+    return `<dl class="k-acct-dl k-acct-dl--taste">
+        ${row('Into', (t.interests || []).map((v) => lab('interests', v)))}
+        ${row('Formats', (t.formats || []).map((v) => lab('formats', v)))}
+        ${t.home && t.home.city ? `<div><dt>Home</dt><dd>${esc(t.home.city)}</dd></div>` : ''}
+        ${row('Dream trips', (t.dream || []).map((v) => lab('dream', v)))}
+        ${row('Style', (t.style || []).map((v) => lab('style', v)))}
+        ${t.sizes && (t.sizes.top || t.sizes.bottom) ? `<div><dt>Sizes</dt><dd>${[t.sizes.top ? `Top ${esc(t.sizes.top.toUpperCase())}` : '', t.sizes.bottom ? `Waist ${esc(t.sizes.bottom)}` : '', t.fit ? esc(lab('fit', t.fit)) : ''].filter(Boolean).join(' · ')}</dd></div>` : ''}
+        ${row('Updates', (t.updates || []).map((v) => lab('updates', v)))}
+      </dl>
+      <button class="k-btn k-btn--sm" type="button" data-onboard-open>Edit check-in</button>`;
   }
 
   /* --------------------------------------------------------------- bind */
@@ -478,6 +569,8 @@
         }
         openAccountSheet();
       }
+      const ob = e.target.closest('[data-onboard-open]');
+      if (ob) { e.preventDefault(); openOnboarding(ob.dataset.onboardStep ? { step: ob.dataset.onboardStep } : {}); return; }
       if (e.target.closest('[data-cart-open]') && !e.target.closest('.k-cart')) {
         e.preventDefault();
         openCartDrawer();
@@ -492,6 +585,7 @@
     // After OAuth return, merge guest cart onto the customer
     const params = new URLSearchParams(location.search);
     if (params.get('signed_in') === '1') {
+      justSignedIn = true;
       const id = cartId();
       if (id) {
         api('/api/cart', { method: 'POST', body: JSON.stringify({ action: 'attach', cartId: id }) })
@@ -527,6 +621,8 @@
     refresh: refreshMe,
     openAccount: openAccountSheet,
     openCart: openCartDrawer,
+    openOnboarding,
+    saveTaste,
     getState: () => state,
   };
 })();
