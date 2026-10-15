@@ -13,14 +13,21 @@
     "not_found_handling": "404-page"
   },
   "observability": { "enabled": true },
-  // Create with: npx wrangler d1 create kiosk-accounts
-  // Then replace database_id below and set SHOPIFY_CUSTOMER_CLIENT_ID / SECRET.
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "kiosk-accounts",
-      "database_id": "00000000-0000-4000-8000-000000000001",
-      "migrations_dir": "migrations"
-    }
+  // The site's own domains. A successful deploy creates their DNS records
+  // and certificates in the onlyatthekiosk.com zone (the domain's nameservers
+  // point at Cloudflare), so nothing needs adding by hand in DNS.
+  "routes": [
+    { "pattern": "onlyatthekiosk.com", "custom_domain": true },
+    { "pattern": "www.onlyatthekiosk.com", "custom_domain": true }
   ]
+  // Accounts (sign-in, wishlist, cart, check-in) need a D1 database. Until it
+  // exists the site runs without it and shows "Accounts are coming soon".
+  // To switch accounts on:
+  //   npx wrangler d1 create kiosk-accounts
+  //   then add this block above, with the database_id that command prints,
+  //   and run: npx wrangler d1 migrations apply kiosk-accounts
+  //   "d1_databases": [
+  //     { "binding": "DB", "database_name": "kiosk-accounts", "database_id": "<id>", "migrations_dir": "migrations" }
+  //   ]
+  // Also set SHOPIFY_CUSTOMER_CLIENT_ID / SECRET (see docs/ACCOUNTS.md).
 }
