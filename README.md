@@ -172,4 +172,4 @@ The site runs as a Cloudflare Worker named **onlyatthekiosk-website** (`wrangler
 
 `npm run build:worker` builds the nav, copies only the public files into `dist/`, and compiles `functions/api/*` into the Worker. Run `npm run deploy:worker` to build and deploy from your own machine (needs `wrangler login`).
 
-The `/api` endpoints need these as Worker **Variables and Secrets** (copy them from the Pages project): `AIRTABLE_ACCESS_TOKEN`, `AIRTABLE_BASE_ID`, `AIRTABLE_ORDERS_TABLE`, `AIRTABLE_PRODUCTS_TABLE`, `SHOPIFY_STORE`, `SHOPIFY_STOREFRONT_TOKEN`, `SHOPIFY_API_VERSION`, `SITE_ORIGIN`, `IMAGE_SYNC_SECRET`, `IMAGE_GEN_API_KEY`, `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL`.
+The `/api` endpoints need these as Worker **Variables and Secrets** (copy them from the Pages project): `AIRTABLE_ACCESS_TOKEN`, `AIRTABLE_BASE_ID`, `AIRTABLE_ORDERS_TABLE`, `AIRTABLE_PRODUCTS_TABLE`, `SHOPIFY_STORE`, `SHOPIFY_STOREFRONT_TOKEN`, `SHOPIFY_API_VERSION`, `SITE_ORIGIN`, `IMAGE_SYNC_SECRET`, `IMAGE_GEN_API_KEY`, `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL`. The Flights page's gate and schedule data uses the secret `aviationstack_api` (Aviationstack access key).

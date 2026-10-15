@@ -5,6 +5,11 @@
  *   ?callsign=DAL123     one flight by callsign (ICAO, e.g. BAW117)
  *   ?hex=a1b2c3          one aircraft by its ICAO 24-bit address (refresh)
  *   ?route=DAL123&lat=…&lon=…   origin and destination airports for a callsign
+ *   ?status=BA117        scheduled/actual times, gates, delays (Aviationstack;
+ *                        flight number BA117 or callsign BAW117). Needs the
+ *                        Worker secret `aviationstack_api`. The free plan is
+ *                        ~100 calls a month, so answers are cached 10 minutes
+ *                        and the page only asks when someone looks a flight up.
  *
  * Source: adsb.lol (community ADS-B feed, ODbL). The OpenSky Network is the
  * fallback for callsign lookups. Responses are normalised to
@@ -83,6 +88,63 @@ async function byHex(hex) {
   return { source: 'adsb.lol', now: d.now || Date.now(), aircraft: (d.ac || []).map(fromAdsb).filter(usable) };
 }
 
+/* ------------------------------------------------ Aviationstack status */
+const AS_STATUS = { scheduled: 'scheduled', active: 'active', landed: 'landed', cancelled: 'cancelled', incident: 'incident', diverted: 'diverted' };
+function asEnd(x = {}) {
+  return {
+    airport: x.airport || '', iata: x.iata || '', icao: x.icao || '', timezone: x.timezone || '',
+    terminal: x.terminal || '', gate: x.gate || '', baggage: x.baggage || '', delay: num(x.delay),
+    // Aviationstack gives airport-local wall-clock times (despite the +00:00 suffix)
+    scheduled: x.scheduled || '', estimated: x.estimated || '', actual: x.actual || '',
+  };
+}
+function fromAviationstack(f) {
+  const live = f.live || null;
+  return {
+    date: f.flight_date || '', status: AS_STATUS[f.flight_status] || 'unknown',
+    airline: { name: (f.airline || {}).name || '', iata: (f.airline || {}).iata || '', icao: (f.airline || {}).icao || '' },
+    flight: { iata: (f.flight || {}).iata || '', icao: (f.flight || {}).icao || '', number: (f.flight || {}).number || '' },
+    dep: asEnd(f.departure), arr: asEnd(f.arrival),
+    aircraft: f.aircraft ? { reg: f.aircraft.registration || '', type: f.aircraft.iata || f.aircraft.icao || '', icao24: (f.aircraft.icao24 || '').toLowerCase() } : null,
+    live: live && live.latitude != null ? {
+      lat: num(live.latitude), lon: num(live.longitude), alt: live.altitude != null ? Math.round(num(live.altitude) * 3.28084) : null,
+      track: num(live.direction), gs: live.speed_horizontal != null ? Math.round(num(live.speed_horizontal) / 1.852) : null,
+      ground: !!live.is_ground, updated: live.updated || '',
+    } : null,
+  };
+}
+// The flight that matters: one in the air now, else the nearest date
+function bestFlight(list) {
+  const today = Date.parse(new Date().toISOString().slice(0, 10));
+  const rank = { active: 0, scheduled: 1, landed: 2, diverted: 2, incident: 3, cancelled: 3, unknown: 4 };
+  return list.slice().sort((a, b) => (a.status === 'active' ? 0 : 1) - (b.status === 'active' ? 0 : 1)
+    || Math.abs(Date.parse(a.date) - today) - Math.abs(Date.parse(b.date) - today)
+    || rank[a.status] - rank[b.status])[0] || null;
+}
+async function aviationstack(env, code) {
+  const key = env.aviationstack_api || env.AVIATIONSTACK_API || env.AVIATIONSTACK_API_KEY;
+  if (!key) throw Object.assign(new Error('Flight status is not set up yet.'), { status: 503, configured: false });
+  const field = /^[A-Z]{3}\d/.test(code) ? 'flight_icao' : 'flight_iata';
+  const qs = `access_key=${encodeURIComponent(key)}&${field}=${encodeURIComponent(code)}&limit=10`;
+  const ask = async (scheme) => {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 9000);
+    try {
+      const res = await fetch(`${scheme}://api.aviationstack.com/v1/flights?${qs}`, { headers: UA, signal: ctl.signal });
+      return await res.json().catch(() => ({ error: { code: `http_${res.status}` } }));
+    } finally { clearTimeout(t); }
+  };
+  let d = await ask('https');
+  // the free plan refuses HTTPS; fall back to plain HTTP for that case only
+  if (d && d.error && /https/i.test(`${d.error.code || ''} ${d.error.type || ''}`)) d = await ask('http');
+  if (d && d.error) {
+    const c = String(d.error.code || d.error.type || '');
+    const limited = /limit|usage/i.test(c);
+    throw Object.assign(new Error(limited ? 'Flight status has hit its monthly limit.' : 'Flight status didn’t answer. Try again shortly.'), { status: limited ? 429 : 502, reason: c });
+  }
+  const flights = (d.data || []).map(fromAviationstack);
+  return { source: 'aviationstack', flight: bestFlight(flights), count: flights.length };
+}
+
 async function route(cs, lat, lon) {
   const d = await getJson(`${ADSB}/api/0/routeset`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -128,14 +190,21 @@ export async function onRequest(context) {
       if (hex.length !== 6) return withCors(error('hex must be 6 hex digits'), request);
       body = await byHex(hex);
       ttl = 5;
+    } else if (q.get('status')) {
+      const code = q.get('status').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+      if (code.length < 3) return withCors(error('Flight number looks too short'), request);
+      if (!rateLimit(`flights-status:${clientIp(request)}`, { limit: 10, windowMs: 60_000 })) return withCors(error('Too many status lookups, slow down a little', 429), request);
+      body = await aviationstack(context.env || {}, code);
+      ttl = 600;
     } else if (q.get('route')) {
       const cs = q.get('route').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
       body = await route(cs, num(q.get('lat')), num(q.get('lon')));
       ttl = 3600;
     } else {
-      return withCors(error('Ask with ?near=lat,lon, ?callsign=, ?hex= or ?route='), request);
+      return withCors(error('Ask with ?near=lat,lon, ?callsign=, ?hex=, ?status= or ?route='), request);
     }
   } catch (e) {
+    if (e && e.status) return withCors(error(e.message, e.status, e.configured === false ? { configured: false } : {}), request);
     return withCors(error('The live feed did not answer. Try again in a moment.', 502), request);
   }
 

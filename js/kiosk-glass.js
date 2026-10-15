@@ -2117,20 +2117,38 @@
             <h2 class="k-pdp__title" id="k-pdp-title">${esc(p.title)}</h2>
             <p class="k-pdp__price">${esc(price(p))}</p>
             ${ways.length ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Colour</span><span>${esc((ways[cw] || {}).name || '')}${wayStatus(p, cw) !== 'available' && p.status === 'available' ? ' · coming soon' : ''}</span></p>
-              <div class="k-dots">${ways.map((w, i) => `<button class="k-dot k-dot--lg" type="button" style="--sw:${esc(w.garment)}" data-pdp-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</div></div>` : ''}
-            ${sizes.length > 1 ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Size</span><span>${esc(pdpState.size || 'Select a size')}</span></p>
+              <div class="k-dots" style="gap:12px">${ways.map((w, i) => `<button class="k-swatch" type="button" style="--sw:${esc(w.garment)}" data-pdp-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}"><i></i>${esc(w.name)}</button>`).join('')}</div></div>` : ''}
+            ${sizes.length > 1 ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Size</span><span><a href="#guide-size" data-pdp-guide>Size guide</a> · ${esc(pdpState.size || 'Select a size')}</span></p>
               <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-pdp-size="${esc(z)}" aria-pressed="${z === pdpState.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
             <div class="k-pdp__cta">
               ${canBuy(p, cw)
-                ? `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>${p.price == null ? 'Shop' : `Buy · ${esc(price(p))}`}</button>
-                   <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to cart</button>`
+                ? `<div class="k-pdp__pricebar"><b>${esc(price(p))}</b>
+                     <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to bag</button>
+                     <button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>Buy now <span class="k-arrow">${icon.arrow}</span></button></div>`
                 : `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve · get the coordinates' : 'Notify me when it drops'}</button>`}
               ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
             </div>
+            <div class="k-pdp__sticky" aria-hidden="false">
+              <div class="k-pdp__sticky-inner">
+                <b>${esc(price(p))}</b>
+                <button type="button" class="k-pdp__wish" data-wish-product="${esc(p.id)}" aria-label="Save">${icon.heart}</button>
+                ${canBuy(p, cw)
+                  ? `<button class="k-btn" type="button" data-pdp-cart>Add to bag</button>`
+                  : `<button class="k-btn" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve' : 'Notify'}</button>`}
+              </div>
+            </div>
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
             ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
-            ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="lost-and-found.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
-            ${guideHtml(p, cw)}
+            ${p.pickup ? `<div class="k-pdp__collect">
+              <p class="k-qv__label"><span>How collection works</span></p>
+              <ol>
+                <li><b>1</b><span>Reserve the piece and join the Dispatch.</span></li>
+                <li><b>2</b><span>Exact coordinates drop when you’re cleared to collect.</span></li>
+                <li><b>3</b><span>Travel to ${esc(p.pickup.place)}${p.pickup.window ? ` · ${esc(p.pickup.window)}` : ''}.</span></li>
+              </ol>
+              <p class="k-pickup">${icon.pin}<a href="lost-and-found.html?item=${encodeURIComponent(p.id)}">See it on the Lost &amp; Found map</a></p>
+            </div>` : ''}
+            <div id="guide-size">${guideHtml(p, cw)}</div>
 
             <div class="k-pdp__more"${pdpState.full ? '' : ' hidden'}>
               ${p.description ? `<p class="k-pdp__desc">${esc(p.description)}</p>` : ''}
@@ -2145,7 +2163,7 @@
               </dl>
               ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
               ${st ? `<a class="k-pdp__store" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><small>Sold by</small><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span><i>${icon.arrow}</i></a>` : ''}
-              ${related.length ? `<div><p class="k-qv__label"><span>Also at this gate</span></p><div class="k-pdp__related">${related.map((x) => `<button type="button" data-pdp="${esc(x.id)}"><span>${productVisual(x, 0, lifeOf(x, 0).length ? 'life' : '')}</span><b>${esc(x.title)}</b><small>${esc(price(x))}</small></button>`).join('')}</div></div>` : ''}
+              ${related.length ? `<div><p class="k-qv__label"><span>More for the trip</span></p><div class="k-pdp__related">${related.map((x) => `<button type="button" data-pdp="${esc(x.id)}"><span>${productVisual(x, 0, lifeOf(x, 0).length ? 'life' : '')}</span><b>${esc(x.title)}</b><small>${esc(price(x))}</small></button>`).join('')}</div></div>` : ''}
             </div>
           </div>
         </div>
@@ -2282,6 +2300,17 @@
         document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {
           detail: { productId: pdpState.id, cw: pdpState.cw, size: pdpState.size },
         }));
+      }
+      if (e.target.closest('[data-pdp-guide]')) {
+        e.preventDefault();
+        const sec = $('[data-acc="size"]', root);
+        if (sec) { sec.open = true; sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'nearest' }); }
+      }
+      const wish = e.target.closest('[data-wish-product]');
+      if (wish) {
+        const on = wish.getAttribute('aria-pressed') !== 'true';
+        wish.setAttribute('aria-pressed', String(on));
+        document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { kind: 'product', ref: wish.dataset.wishProduct, on } }));
       }
     });
     root.addEventListener('keydown', (e) => {
@@ -3480,6 +3509,10 @@
   const airlineOf = (cs) => (BY_ICAO[String(cs || '').slice(0, 3)] || {}).name || '';
   const prettyCs = (cs) => String(cs || '').replace(/^([A-Z]{3})(\d)/, '$1 $2');
   const iataNo = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata} ${cs.slice(3)}` : ''; };
+  // Aviationstack times are airport-local wall clock; show them as written
+  const asTime = (t) => (t && t.length >= 16 ? t.slice(11, 16) : '');
+  const STATUS_LABEL = { scheduled: 'Scheduled', active: 'En route', landed: 'Landed', cancelled: 'Cancelled', incident: 'Incident', diverted: 'Diverted', unknown: 'Status unknown' };
+  const iataFor = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata}${cs.slice(3)}` : ''; };
   const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round((((deg || 0) % 360) + 360) % 360 / 22.5) % 16];
   const kmBetween = (a, b) => {
     const r = Math.PI / 180; const dLa = (b.lat - a.lat) * r; const dLo = (b.lon - a.lon) * r;
@@ -3508,7 +3541,7 @@
     const resEl = $('[data-fl-result]', root);
     const listEl = $('[data-fl-list]', root);
     const phone = () => window.innerWidth < 760;
-    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null };
+    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null, status: null, statusOn: true, statusBusy: false };
     const say = (t) => { status.textContent = t; };
 
     const api = (qs) => fetch(`/api/flights?${qs}`, { signal, headers: { Accept: 'application/json' } }).then(async (r) => {
@@ -3554,12 +3587,12 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, air.clientWidth, air.clientHeight);
       // route of the selected flight
-      if (S.route && S.route.stops && S.sel) {
+      if (S.route && S.route.stops && (S.sel || S.status)) {
         const [o, d] = [S.route.stops[0], S.route.stops[S.route.stops.length - 1]];
         if (o.lat != null && d.lat != null) {
           const pts = window.KioskEarth.arc(o, d, 64, 0);
-          const here = posOf(S.sel, now);
-          const done = kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d));
+          const here = S.sel ? posOf(S.sel, now) : null;
+          const done = here ? kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d)) : (S.status && S.status.status === 'landed' ? 1 : 0);
           ctx.lineWidth = 2; ctx.lineCap = 'round';
           [[0, done, 'rgba(255,255,255,.95)', []], [done, 1, 'rgba(255,255,255,.55)', [5, 6]]].forEach(([t0, t1, col, dash]) => {
             ctx.strokeStyle = col; ctx.setLineDash(dash); ctx.beginPath(); let pen = false;
@@ -3608,8 +3641,43 @@
     // --- panels
     const fmt = (n, d = 0) => (n == null ? '—' : Number(n).toLocaleString(undefined, { maximumFractionDigits: d }));
     const phase = (a) => (a.ground ? ['ground', 'On the ground'] : a.vs > 400 ? ['climb', 'Climbing'] : a.vs < -400 ? ['descend', 'Descending'] : a.alt > 18000 ? ['cruise', 'Cruising'] : ['level', 'In the air']);
+    // Gates, times and delays from Aviationstack
+    function statusHtml(st) {
+      const end = (e, label) => {
+        const late = (e.estimated || e.actual) && e.scheduled && (e.actual || e.estimated) > e.scheduled;
+        const now = e.actual ? ['Actual', asTime(e.actual)] : e.estimated ? ['Expected', asTime(e.estimated)] : null;
+        return `<div class="k-fstat__end">
+          <small>${label}</small><b>${esc(e.iata || e.icao || '—')}</b><span>${esc(e.airport || '')}</span>
+          <dl>
+            <div><dt>Scheduled</dt><dd>${esc(asTime(e.scheduled) || '—')}</dd></div>
+            ${now ? `<div><dt>${now[0]}</dt><dd class="${late ? 'is-late' : 'is-ok'}">${esc(now[1])}</dd></div>` : ''}
+            ${e.terminal ? `<div><dt>Terminal</dt><dd>${esc(e.terminal)}</dd></div>` : ''}
+            ${e.gate ? `<div><dt>Gate</dt><dd>${esc(e.gate)}</dd></div>` : ''}
+            ${e.baggage ? `<div><dt>Baggage</dt><dd>${esc(e.baggage)}</dd></div>` : ''}
+          </dl></div>`;
+      };
+      const delay = Math.max(st.dep.delay || 0, st.arr.delay || 0);
+      const day = st.date ? new Date(`${st.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+      return `<div class="k-fstat">
+        <p class="k-fstat__head"><span class="k-fstat__pill k-fstat__pill--${esc(st.status)}">${esc(STATUS_LABEL[st.status] || st.status)}</span>${delay ? `<span class="k-fstat__delay">Delayed ${delay} min</span>` : ''}<span class="k-fstat__day">${esc(day)}</span></p>
+        <div class="k-fstat__ends">${end(st.dep, 'Departs')}${end(st.arr, 'Arrives')}</div>
+        <p class="k-fstat__note">Local airport times · Aviationstack</p>
+      </div>`;
+    }
     function card() {
-      const a = S.sel; if (!a) { resEl.innerHTML = ''; return; }
+      const a = S.sel;
+      if (!a && S.status) {
+        const st = S.status;
+        resEl.innerHTML = `<article class="k-fcard" aria-live="polite">
+          <div class="k-fcard__top"><div><p class="k-fcard__airline">${esc(st.airline.name || 'Flight')}${st.flight.icao ? ` · ${esc(prettyCs(st.flight.icao))}` : ''}</p>
+          <h2 class="k-fcard__cs">${esc(st.flight.iata || st.flight.icao)}</h2></div></div>
+          ${statusHtml(st)}
+          ${st.aircraft && (st.aircraft.type || st.aircraft.reg) ? `<p class="k-fcard__seen">Aircraft ${esc([st.aircraft.type, st.aircraft.reg].filter(Boolean).join(' · '))}</p>` : ''}
+          <div class="k-fcard__cta"><button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button><button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button></div>
+        </article>`;
+        return;
+      }
+      if (!a) { resEl.innerHTML = ''; return; }
       const [pk, pl] = phase(a);
       const stops = S.route && S.route.stops; const o = stops && stops[0]; const d = stops && stops[stops.length - 1];
       let prog = '';
@@ -3628,6 +3696,7 @@
           <span class="k-fcard__state k-fcard__state--${pk}">${pl}</span>
         </div>
         ${prog}
+        ${S.status ? statusHtml(S.status) : ''}
         <dl class="k-fcard__grid">
           <div><dt>Altitude</dt><dd>${a.ground ? 'Ground' : `${fmt(a.alt)} ft`}</dd></div>
           <div><dt>Ground speed</dt><dd>${fmt(a.gs)} kt<small>${fmt(a.gs * 1.852)} km/h</small></dd></div>
@@ -3639,6 +3708,7 @@
         <p class="k-fcard__seen">${a.sample ? 'Sample traffic · live feed unavailable' : `Last fix ${ago} s ago · ${esc(S.source || 'ADS-B')}${a.squawk ? ` · squawk ${esc(a.squawk)}` : ''}`}</p>
         <div class="k-fcard__cta">
           <button class="k-btn k-btn--sm" type="button" data-fl-follow aria-pressed="${S.follow}">${S.follow ? 'Following' : 'Follow'}</button>
+          ${!a.sample && !S.status && S.statusOn && a.callsign ? `<button class="k-btn k-btn--sm" type="button" data-fl-times${S.statusBusy ? ' disabled' : ''}>${S.statusBusy ? 'Checking…' : 'Gate & times'}</button>` : ''}
           <button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button>
           ${a.sample ? '' : '<button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button>'}
         </div>
@@ -3668,8 +3738,17 @@
       if (!a || a.sample || !a.callsign || !S.live) return;
       try { const r = await api(`route=${encodeURIComponent(a.callsign)}&lat=${a.lat.toFixed(3)}&lon=${a.lon.toFixed(3)}`); if (S.sel === a) { S.route = r.route; card(); } } catch (e) { /* routes are a bonus */ }
     }
-    async function select(a, why) {
-      S.sel = a; S.route = null; S.follow = true;
+    // One Aviationstack lookup (cached on the server); only on request, the plan is small
+    async function statusLookup(code) {
+      if (!S.statusOn || !code) return null;
+      try { const d = await api(`status=${encodeURIComponent(code)}`); return d.flight || null; } catch (e) {
+        if (e.status === 503) S.statusOn = false;          // no key on this deploy
+        else if (e.status === 429) toast(e.message || 'Flight status is busy. Try again later.');
+        return null;
+      }
+    }
+    async function select(a, why, status = null) {
+      S.sel = a; S.route = null; S.follow = true; S.status = status;
       if (!a) { card(); return; }
       card(); list();
       const p = posOf(a, performance.now());
@@ -3696,19 +3775,46 @@
       const cs = toCallsign(raw);
       if (cs.length < 3) { say('Type a flight number like BA117 or a callsign like DAL1.'); return; }
       say(`Looking for ${prettyCs(cs)}…`);
-      try {
-        const d = await api(`callsign=${encodeURIComponent(cs)}`);
-        S.live = true; S.source = d.source;
-        const hit = stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0];
-        if (!hit) { say(`${prettyCs(cs)} isn’t in the air right now, or it isn’t broadcasting. Check the number, or try another.`); return; }
-        S.hub = null;
-        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
-        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
-        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`);
-      } catch (e) {
-        if (signal.aborted) return;
-        say(e.status === 429 ? 'Too many lookups at once. Give it a few seconds.' : 'The live feed isn’t reachable right now. Try again shortly, or press Surprise me for sample traffic.');
+      const typed = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const flightNo = /^[A-Z0-9]{2}\d/.test(typed) && !/^[A-Z]{3}\d/.test(typed) ? typed : (iataFor(cs) || cs);
+      const [live, st] = await Promise.all([
+        api(`callsign=${encodeURIComponent(cs)}`).then((d) => { S.live = true; S.source = d.source; return stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0] || null; }).catch((e) => (e.status === 429 ? 'busy' : null)),
+        statusLookup(flightNo),
+      ]);
+      if (signal.aborted) return;
+      let hit = live && live !== 'busy' ? live : null;
+      // In the air per Aviationstack but not on ADS-B: plot its reported position
+      if (!hit && st && st.live && st.live.lat != null && !st.live.ground) {
+        hit = stamp([{ hex: (st.aircraft && st.aircraft.icao24) || `as${cs}`.toLowerCase().slice(0, 6), callsign: st.flight.icao || cs, reg: (st.aircraft || {}).reg || '', type: (st.aircraft || {}).type || '', lat: st.live.lat, lon: st.live.lon, alt: st.live.alt, gs: st.live.gs, track: st.live.track, vs: 0, seen: 0, ground: false }])[0];
       }
+      if (hit) {
+        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
+        S.hub = null;
+        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
+        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`, st);
+        return;
+      }
+      if (st) {
+        // Not in the air: show its status and its route on the globe
+        S.sel = null; S.status = st; S.route = null; card();
+        const label = `${st.flight.iata || cs} · ${STATUS_LABEL[st.status] || st.status}`;
+        say(st.status === 'scheduled' ? `${label}. Departs ${st.dep.iata || ''} at ${asTime(st.dep.estimated || st.dep.scheduled) || '—'} local.` : st.status === 'landed' ? `${label} at ${st.arr.iata || ''}${st.arr.actual ? ` (${asTime(st.arr.actual)} local)` : ''}.` : `${label}.`);
+        const qs = new URLSearchParams(location.search); qs.set('f', st.flight.iata || cs);
+        history.replaceState(history.state, '', `${location.pathname}?${qs}`);
+        try {
+          const r = await api(`route=${encodeURIComponent(st.flight.icao || cs)}&lat=0&lon=0`);
+          const stops = r.route && r.route.stops;
+          if (stops && stops[0].lat != null && S.status === st) {
+            S.route = r.route;
+            const o = stops[0]; const d = stops[stops.length - 1];
+            const mid = window.KioskEarth.arc(o, d, 2, 0)[1];
+            S.earth.flyTo(frameView(mid.lat, mid.lon, false), 1600);
+          }
+        } catch (e) { /* the status card stands on its own */ }
+        return;
+      }
+      if (live === 'busy') { say('Too many lookups at once. Give it a few seconds.'); return; }
+      say(`${prettyCs(cs)} isn’t in the air right now${S.statusOn ? ' and has no status today' : ', or it isn’t broadcasting'}. Check the number, or try another.`);
     }
     function above() {
       if (!navigator.geolocation) { say('Your browser can’t share a location.'); return; }
@@ -3738,6 +3844,16 @@
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-fl-random]')) { random(); return; }
       if (e.target.closest('[data-fl-near]')) { above(); return; }
+      if (e.target.closest('[data-fl-times]') && S.sel && !S.statusBusy) {
+        const a = S.sel; S.statusBusy = true; card();
+        statusLookup(iataFor(a.callsign) || a.callsign).then((st) => {
+          S.statusBusy = false;
+          if (S.sel !== a) return;
+          S.status = st; card();
+          if (!st) say(S.statusOn ? `No gate or schedule found for ${prettyCs(a.callsign)}. Private and cargo flights often aren’t listed.` : 'Flight status isn’t set up on this site yet.');
+        });
+        return;
+      }
       const f = e.target.closest('[data-fl-follow]');
       if (f) { S.follow = !S.follow; card(); if (S.follow && S.sel) { const p = posOf(S.sel, performance.now()); S.earth.flyTo(frameView(p.lat, p.lon, true), 900); } return; }
       if (e.target.closest('[data-fl-share]')) { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('Link copied')); return; }
@@ -4018,6 +4134,9 @@
     const ways = p.colorways || [];
     const st = statusOf(p, cw);
     const store = storeOf(p);
+    const sizes = p.sizes || [];
+    const wishOn = window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.wishlisted
+      ? window.KIOSK_ACCOUNT.wishlisted('product', p.id) : false;
     return `
       <article class="k-tcard" data-tcard="${esc(p.id)}" data-cw="${cw}" data-reveal>
         <button class="k-tcard__media" type="button" data-pdp="${esc(p.id)}" data-cw="${cw}" aria-label="${esc(p.title)}">
@@ -4025,6 +4144,12 @@
           <span class="k-board__status k-board__status--${st.key} k-tcard__status">${esc(st.label)}</span>
           <span class="k-tcard__gate" aria-hidden="true">${esc(gateOf(p.category))}</span>
         </button>
+        <button type="button" class="k-tcard__wish" data-wish-product="${esc(p.id)}" aria-pressed="${wishOn}" aria-label="Save ${esc(p.title)}">${icon.heart}</button>
+        ${canBuy(p, cw) ? `<button type="button" class="k-tcard__qa" data-qa="${esc(p.id)}" aria-label="Quick add ${esc(p.title)}">${icon.bag}</button>
+          <div class="k-qa" data-qa-menu="${esc(p.id)}" hidden>
+            <p>${sizes.length > 1 ? 'Choose size' : 'Add to bag'}</p>
+            <div class="k-qa__sizes">${(sizes.length ? sizes : ['OS']).map((z) => `<button type="button" data-qa-add="${esc(p.id)}" data-size="${esc(z)}" data-cw="${cw}">${esc(z)}</button>`).join('')}</div>
+          </div>` : ''}
         <div class="k-tcard__pass">
           <p class="k-tcard__row"><span>${esc(flightOf(p))}</span><span>Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</span></p>
           <h3 class="k-tcard__title"><button type="button" data-pdp="${esc(p.id)}" data-cw="${cw}">${esc(p.title)}</button></h3>
@@ -4065,16 +4190,27 @@
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
     let sort = params.get('sort') || 'featured';
+    let page = 1;
+    const PAGE = 12;
+    const filters = {
+      size: new Set((params.get('size') || '').split(',').filter(Boolean)),
+      colour: new Set((params.get('colour') || '').split(',').filter(Boolean)),
+      store: new Set((params.get('store') || '').split(',').filter(Boolean)),
+      avail: new Set((params.get('avail') || '').split(',').filter(Boolean)),
+      max: params.get('max') ? Number(params.get('max')) : null,
+    };
     const signal = pageAbort.signal;
 
-    // Backdrop: a terminal shot behind the frosted glass
-    const shots = all.flatMap((p) => (p.colorways || []).map((w) => (w.lifestyle || [])[1]).filter(Boolean));
-    if (shots.length) fill('term-backdrop', `<img src="${esc(shots[hash(new Date().toDateString()) % shots.length])}" alt="" decoding="async">`);
+    const shots = all.flatMap((p) => (p.colorways || []).map((w) => (w.lifestyle || [])[0] || (w.lifestyle || [])[1]).filter(Boolean));
+    const heroShot = shots.length ? shots[hash(new Date().toDateString()) % shots.length] : '';
+    if (heroShot) {
+      fill('term-backdrop', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
+      fill('term-life', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
+    }
 
-    // Departures board: the latest drops
     const board = mount('term-board');
     if (board) {
-      const latest = all.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || ''))).slice(0, 7);
+      const latest = all.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || ''))).slice(0, 4);
       board.innerHTML = latest.map((p) => {
         const st = statusOf(p, 0);
         return `<li><button type="button" class="k-board__row" data-pdp="${esc(p.id)}">
@@ -4088,50 +4224,118 @@
       flipBoard(board);
     }
 
-    // Search across products, the Hunt and stores ("/" jumps to it)
     const q = mount('term-q');
     bindSearch(q, mount('term-results'));
     document.addEventListener('keydown', (e) => {
       if (e.key === '/' && q && !/input|textarea|select/i.test((document.activeElement || {}).tagName || '')) { e.preventDefault(); q.focus(); }
     }, { signal });
 
-    // Gates
     const count = (id) => all.filter((p) => id === 'all' || p.category === id).length;
-    fill('term-gates', `<div class="k-gates__track">${[{ id: 'all', label: 'All gates' }].concat(cats).filter((c) => count(c.id)).map((c) => `
+    fill('term-gates', [{ id: 'all', label: 'All' }].concat(cats).filter((c) => count(c.id)).map((c) => `
       <button type="button" class="k-gate" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">
         <b>${c.id === 'all' ? '★' : esc(gateOf(c.id))}</b><span>${esc(c.label)}</span><small>${count(c.id)}</small>
-      </button>`).join('')}</div>`);
+      </button>`).join(''));
+
+    // Filter rail / sheet
+    const sizesAll = [...new Set(all.flatMap((p) => p.sizes || []))];
+    const coloursAll = [...new Set(all.flatMap((p) => (p.colorways || []).map((w) => w.name).filter(Boolean)))];
+    const storesAll = C.stores || [];
+    const prices = all.map((p) => p.price).filter((n) => n != null);
+    const priceMax = prices.length ? Math.ceil(Math.max(...prices) / 10) * 10 : 200;
+    const filterBody = mount('filter-body');
+    const filterRoot = mount('vault-filter');
+    if (filterRoot) filterRoot.hidden = false;
+    const filterHtml = () => `
+      <fieldset class="k-filter__group"><legend>Availability</legend>
+        ${[['ships', 'Ships'], ['pickup', 'Pickup only'], ['digital', 'Digital']].map(([v, l]) => `
+          <label class="k-filter__opt"><input type="checkbox" data-ff="avail" value="${v}" ${filters.avail.has(v) ? 'checked' : ''}>${l}</label>`).join('')}
+      </fieldset>
+      ${sizesAll.length ? `<fieldset class="k-filter__group"><legend>Size</legend>
+        ${sizesAll.map((z) => `<label class="k-filter__opt"><input type="checkbox" data-ff="size" value="${esc(z)}" ${filters.size.has(z) ? 'checked' : ''}>${esc(z)}</label>`).join('')}
+      </fieldset>` : ''}
+      ${coloursAll.length ? `<fieldset class="k-filter__group"><legend>Colourway</legend>
+        ${coloursAll.map((n) => `<label class="k-filter__opt"><input type="checkbox" data-ff="colour" value="${esc(n)}" ${filters.colour.has(n) ? 'checked' : ''}>${esc(n)}</label>`).join('')}
+      </fieldset>` : ''}
+      <fieldset class="k-filter__group"><legend>Price up to</legend>
+        <div class="k-filter__range">
+          <input type="range" min="0" max="${priceMax}" step="5" value="${filters.max != null ? filters.max : priceMax}" data-ff="max" aria-label="Maximum price">
+          <span data-mount="filter-max-label">${filters.max != null ? `$${filters.max}` : 'Any'}</span>
+        </div>
+      </fieldset>
+      ${storesAll.length ? `<fieldset class="k-filter__group"><legend>Store</legend>
+        ${storesAll.map((s) => `<label class="k-filter__opt"><input type="checkbox" data-ff="store" value="${esc(s.id)}" ${filters.store.has(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
+      </fieldset>` : ''}`;
+    if (filterBody) filterBody.innerHTML = filterHtml();
+
+    const activeFilterCount = () => filters.size.size + filters.colour.size + filters.store.size + filters.avail.size + (filters.max != null && filters.max < priceMax ? 1 : 0);
+    const syncFilterBadge = () => {
+      const n = activeFilterCount();
+      const wrap = $('.k-cmd__filter'); if (wrap) wrap.dataset.count = String(n);
+      const badge = mount('filter-count'); if (badge) badge.textContent = String(n);
+    };
 
     const sortSel = mount('vault-sort');
     if (sortSel) sortSel.value = sort;
+    const matches = (p) => {
+      if (cat !== 'all' && p.category !== cat) return false;
+      if (filters.size.size && !(p.sizes || []).some((z) => filters.size.has(z))) return false;
+      if (filters.colour.size && !(p.colorways || []).some((w) => filters.colour.has(w.name))) return false;
+      if (filters.store.size && !filters.store.has(p.store || 'kiosk')) return false;
+      if (filters.max != null && p.price != null && p.price > filters.max) return false;
+      if (filters.avail.size) {
+        const ok = (filters.avail.has('pickup') && p.pickup)
+          || (filters.avail.has('digital') && isDigitalP(p))
+          || (filters.avail.has('ships') && !p.pickup && !isDigitalP(p));
+        if (!ok) return false;
+      }
+      return true;
+    };
     const order = (list) => {
       const l = list.slice();
       if (sort === 'new') l.sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')));
       if (sort === 'price-asc') l.sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
       if (sort === 'price-desc') l.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-      if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));   // photographed pieces first
+      if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));
       return l;
     };
     const grid = mount('vault-grid');
+    const moreBtn = mount('vault-more');
     const render = () => {
-      const list = order(all.filter((p) => cat === 'all' || p.category === cat));
-      grid.innerHTML = list.map((p) => termCard(p)).join('');
+      const list = order(all.filter(matches));
+      const shown = list.slice(0, page * PAGE);
+      if (grid) grid.innerHTML = shown.map((p) => termCard(p)).join('');
+      if (moreBtn) { moreBtn.hidden = shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
       const c = cats.find((x) => x.id === cat);
       const lab = mount('term-gate-label'); if (lab) lab.textContent = c ? `Gate ${gateOf(c.id)} · ${c.label}` : 'All gates';
       const n = mount('vault-count'); if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
-      reveal(grid);
+      syncFilterBadge();
+      if (grid) reveal(grid);
       const qs = new URLSearchParams(location.search);
       if (cat === 'all') qs.delete('c'); else qs.set('c', cat);
       if (sort === 'featured') qs.delete('sort'); else qs.set('sort', sort);
+      [['size', filters.size], ['colour', filters.colour], ['store', filters.store], ['avail', filters.avail]].forEach(([k, set]) => {
+        if (!set.size) qs.delete(k); else qs.set(k, [...set].join(','));
+      });
+      if (filters.max == null || filters.max >= priceMax) qs.delete('max'); else qs.set('max', String(filters.max));
       const str = qs.toString();
       history.replaceState(history.state, '', location.pathname + (str ? `?${str}` : '') + location.hash);
       renderedKey = pageKey();
     };
+
+    const setFilterOpen = (on) => {
+      if (!filterRoot) return;
+      filterRoot.classList.toggle('is-open', on);
+      const btn = $('[data-filter-open]'); if (btn) btn.setAttribute('aria-expanded', String(on));
+      document.documentElement.classList.toggle('is-filter-open', on);
+    };
+
     document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-filter-open]')) { setFilterOpen(!filterRoot.classList.contains('is-open')); return; }
+      if (e.target.closest('[data-filter-close]')) { setFilterOpen(false); return; }
       const g = e.target.closest('[data-cat]');
-      if (g && g.closest('.k-gates')) {
-        cat = g.dataset.cat;
-        $$('.k-gate').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
+      if (g && (g.closest('[data-mount="term-gates"]') || g.closest('.k-gates'))) {
+        cat = g.dataset.cat; page = 1;
+        $$('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
         render();
         const sec = document.getElementById('shop'); if (sec) sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
         return;
@@ -4144,15 +4348,59 @@
         $$('.k-tcard__img, .k-tcard__flat', media).forEach((x) => x.remove());
         media.insertAdjacentHTML('afterbegin', termMedia(p, i));
         $$('[data-pdp]', card).forEach((x) => { x.dataset.cw = i; });
+        $$('[data-qa-add]', card).forEach((x) => { x.dataset.cw = i; });
         $$('[data-tdot]', card).forEach((x) => x.setAttribute('aria-pressed', String(x === d)));
         const st = statusOf(p, i); const chip = $('.k-tcard__status', card);
         if (chip) { chip.className = `k-board__status k-board__status--${st.key} k-tcard__status`; chip.textContent = st.label; }
+        return;
       }
+      const wish = e.target.closest('[data-wish-product]');
+      if (wish) {
+        const on = wish.getAttribute('aria-pressed') !== 'true';
+        wish.setAttribute('aria-pressed', String(on));
+        document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { kind: 'product', ref: wish.dataset.wishProduct, on } }));
+        return;
+      }
+      const qa = e.target.closest('[data-qa]');
+      if (qa) {
+        const menu = $(`[data-qa-menu="${qa.dataset.qa}"]`);
+        $$('[data-qa-menu]').forEach((m) => { if (m !== menu) m.hidden = true; });
+        if (menu) menu.hidden = !menu.hidden;
+        return;
+      }
+      const add = e.target.closest('[data-qa-add]');
+      if (add) {
+        document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {
+          detail: { productId: add.dataset.qaAdd, cw: Number(add.dataset.cw) || 0, size: add.dataset.size === 'OS' ? '' : add.dataset.size },
+        }));
+        const menu = add.closest('[data-qa-menu]'); if (menu) menu.hidden = true;
+        return;
+      }
+      if (!e.target.closest('[data-qa-menu]') && !e.target.closest('[data-qa]')) {
+        $$('[data-qa-menu]').forEach((m) => { m.hidden = true; });
+      }
+      if (e.target.closest('[data-mount="vault-more"]')) { page += 1; render(); }
     }, { signal });
-    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); }, { signal });
+
+    if (filterBody) {
+      filterBody.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement)) return;
+        const kind = t.dataset.ff;
+        if (kind === 'max') {
+          filters.max = Number(t.value) >= priceMax ? null : Number(t.value);
+          const lab = mount('filter-max-label'); if (lab) lab.textContent = filters.max == null ? 'Any' : `$${filters.max}`;
+        } else if (filters[kind]) {
+          if (t.checked) filters[kind].add(t.value); else filters[kind].delete(t.value);
+        }
+        page = 1;
+        render();
+      }, { signal });
+    }
+    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; page = 1; render(); }, { signal });
+    syncFilterBadge();
     render();
 
-    // Lounge: every airport shot, each one opens its colourway
     const lounge = all.flatMap((p) => (p.colorways || []).map((w, i) => ({ p, i, w })).filter((x) => (x.w.lifestyle || [])[1]));
     if (lounge.length) {
       fill('term-lounge', railShell(lounge.map(({ p, i, w }) => `
@@ -4162,7 +4410,6 @@
         </button>`).join(''), 'Lounge', 'k-hscroll-wrap--lounge'));
     } else { const sec = $('[data-mount-section="lounge"]'); if (sec) sec.hidden = true; }
 
-    // In-flight: films and LUT packs
     const digital = all.filter((p) => isDigitalP(p));
     fill('term-digital', digital.map((p) => `
       <button type="button" class="k-inflight__row" data-pdp="${esc(p.id)}">
@@ -4171,7 +4418,6 @@
         <span class="k-inflight__fare">${esc(price(p))}</span>
       </button>`).join(''));
 
-    // Concourse: partner stores
     fill('term-stores', (C.stores || []).map((st) => `<a class="k-store-chip" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span></a>`).join(''));
 
     if (location.hash) {
@@ -4265,10 +4511,12 @@
       const fb = mount('hunt-fallback');
       if (!fb) return;
       fb.hidden = false;
-      fb.innerHTML = `<p class="k-eyebrow">${esc(why)}</p><div class="k-term-grid k-mt-m">${items.map((p) => termCard(p)).join('')}</div>`;
+      fb.innerHTML = `<div class="k-finds-static"><p class="k-eyebrow">${esc(why)}</p>
+        <div class="k-term-grid k-mt-m">${items.map((p) => termCard(p)).join('')}</div></div>`;
       root.classList.add('is-fallback');
+      const finds = mount('hunt-finds'); if (finds) finds.hidden = true;
     };
-    if (!hasWebGL()) { fallback('This device can’t draw the 3D map. Here are the drops.'); return; }
+    if (!hasWebGL()) { fallback('This device can’t draw the 3D map. Here are the finds.'); return; }
 
     loadCss('js/vendor/maplibre/maplibre-gl.css');
     let hunt = null;
@@ -4286,8 +4534,10 @@
         const go = params.get('item') || params.get('store');
         if (go) { const it = hunt.find(go); if (it) setTimeout(() => hunt.flyTo(it), 600); }
         if (params.get('q') && q) { q.value = params.get('q'); q.dispatchEvent(new Event('input')); }
+        const view = params.get('view');
+        if (view && hunt.applyStyle) hunt.applyStyle(view);
       })
-      .catch((err) => { console.warn('[KIOSK] hunt map unavailable', err); fallback('The map couldn’t load. Here are the drops.'); });
+      .catch((err) => { console.warn('[KIOSK] hunt map unavailable', err); fallback('The map couldn’t load. Here are the finds.'); });
 
     // Search: results list in the HUD, cards around the globe
     bindSearch(q, mount('hunt-results'), {

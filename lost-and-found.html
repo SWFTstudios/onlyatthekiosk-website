@@ -51,11 +51,12 @@
           <div class="k-hud__filters" role="group" aria-label="Show on the map">
             <button type="button" class="k-hud__chip" data-hunt-layer="hunt" aria-pressed="true"><i class="k-beacon-dot"></i>Drops</button>
             <button type="button" class="k-hud__chip" data-hunt-layer="store" aria-pressed="true"><i class="k-beacon-dot k-beacon-dot--store"></i>Stores</button>
-            <button type="button" class="k-hud__chip" data-hunt-depth aria-pressed="true">Depth map</button>
+            <button type="button" class="k-hud__chip" data-hunt-styles aria-expanded="false">View</button>
           </div>
         </div>
       </div>
 
+      <button type="button" class="k-hud__tele-toggle" data-hunt-tele aria-label="Map readout" aria-expanded="false">i</button>
       <aside class="k-hud__tele k-hud-glass" aria-label="Map readout">
         <dl>
           <div><dt>Lat</dt><dd data-hud="lat">—</dd></div>
@@ -65,18 +66,45 @@
           <div><dt>View</dt><dd data-hud="mode">Globe</dd></div>
         </dl>
         <div class="k-hud__ctrl">
-          <button type="button" data-hunt-zoom="1" aria-label="Zoom in">+</button>
-          <button type="button" data-hunt-zoom="-1" aria-label="Zoom out">−</button>
-          <button type="button" data-hunt-north aria-label="Point north"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" data-hud="compass"><path d="M8 1.5l3 7H5z" fill="currentColor"/><path d="M8 14.5l-3-6h6z" stroke="currentColor" stroke-width="1.1"/></svg></button>
-          <button type="button" data-hunt-tilt aria-label="Tilt the map" aria-pressed="false">3D</button>
-          <button type="button" data-hunt-locate aria-label="Show where I am"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2.5M8 12.5V15M1 8h2.5M12.5 8H15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
-          <button type="button" data-hunt-home aria-label="Back to the globe"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 8h12.4M8 1.8c2 2 2 10.4 0 12.4M8 1.8c-2 2-2 10.4 0 12.4" stroke="currentColor" stroke-width="1.1"/></svg></button>
+          <div class="k-hud__ctrl-row">
+            <button type="button" data-hunt-zoom="1" aria-label="Zoom in">+</button>
+            <button type="button" data-hunt-zoom="-1" aria-label="Zoom out">−</button>
+            <button type="button" data-hunt-north aria-label="Point north"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" data-hud="compass"><path d="M8 1.5l3 7H5z" fill="currentColor"/><path d="M8 14.5l-3-6h6z" stroke="currentColor" stroke-width="1.1"/></svg></button>
+            <button type="button" data-hunt-tilt aria-label="Tilt the map" aria-pressed="false">3D</button>
+            <button type="button" data-hunt-locate aria-label="Show where I am"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2.5M8 12.5V15M1 8h2.5M12.5 8H15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+            <button type="button" data-hunt-home aria-label="Back to the globe"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 8h12.4M8 1.8c2 2 2 10.4 0 12.4M8 1.8c-2 2-2 10.4 0 12.4" stroke="currentColor" stroke-width="1.1"/></svg></button>
+          </div>
+          <button type="button" class="k-hud__proj" data-hunt-proj aria-pressed="true">Globe</button>
+          <div class="k-mapstyle" data-mount="map-styles" role="group" aria-label="Map style">
+            <button type="button" data-map-style="night" aria-pressed="true"><i class="k-mapstyle__sw k-mapstyle__sw--night" aria-hidden="true"></i>Night</button>
+            <button type="button" data-map-style="day" aria-pressed="false"><i class="k-mapstyle__sw k-mapstyle__sw--day" aria-hidden="true"></i>Day</button>
+            <button type="button" data-map-style="satellite" aria-pressed="false"><i class="k-mapstyle__sw k-mapstyle__sw--satellite" aria-hidden="true"></i>Sat</button>
+            <button type="button" data-map-style="blueprint" aria-pressed="false"><i class="k-mapstyle__sw k-mapstyle__sw--blueprint" aria-hidden="true"></i>Print</button>
+            <button type="button" data-map-style="terrain" aria-pressed="false"><i class="k-mapstyle__sw k-mapstyle__sw--terrain" aria-hidden="true"></i>Relief</button>
+          </div>
         </div>
+      </aside>
+
+      <aside class="k-finds" data-mount="hunt-finds" data-snap="peek" aria-label="Finds">
+        <span class="k-finds__grab" data-finds-grab aria-hidden="true"></span>
+        <div class="k-finds__head">
+          <h2 class="k-finds__title">Finds</h2>
+          <div class="k-finds__chips" role="group" aria-label="Show">
+            <button type="button" class="k-hud__chip" data-hunt-layer="hunt" aria-pressed="true">Drops</button>
+            <button type="button" class="k-hud__chip" data-hunt-layer="store" aria-pressed="true">Stores</button>
+          </div>
+          <label class="k-sr" for="finds-sort">Sort</label>
+          <select class="k-finds__sort" id="finds-sort" data-mount="finds-sort">
+            <option value="nearest">Nearest</option>
+            <option value="newest">Newest</option>
+            <option value="price">Price</option>
+          </select>
+        </div>
+        <div class="k-finds__list" data-mount="hunt-drops" role="list"></div>
       </aside>
 
       <div class="k-hud__bottom">
         <p class="k-hud__status" data-mount="hunt-status" aria-live="polite"></p>
-        <div class="k-hud__drops" data-mount="hunt-drops" role="list" aria-label="Drops"></div>
       </div>
     </div>
 
