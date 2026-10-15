@@ -2111,20 +2111,38 @@
             <h2 class="k-pdp__title" id="k-pdp-title">${esc(p.title)}</h2>
             <p class="k-pdp__price">${esc(price(p))}</p>
             ${ways.length ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Colour</span><span>${esc((ways[cw] || {}).name || '')}${wayStatus(p, cw) !== 'available' && p.status === 'available' ? ' · coming soon' : ''}</span></p>
-              <div class="k-dots">${ways.map((w, i) => `<button class="k-dot k-dot--lg" type="button" style="--sw:${esc(w.garment)}" data-pdp-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}" title="${esc(w.name)}"></button>`).join('')}</div></div>` : ''}
-            ${sizes.length > 1 ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Size</span><span>${esc(pdpState.size || 'Select a size')}</span></p>
+              <div class="k-dots" style="gap:12px">${ways.map((w, i) => `<button class="k-swatch" type="button" style="--sw:${esc(w.garment)}" data-pdp-cw="${i}" aria-pressed="${i === cw}" aria-label="${esc(w.name)}"><i></i>${esc(w.name)}</button>`).join('')}</div></div>` : ''}
+            ${sizes.length > 1 ? `<div class="k-pdp__opt"><p class="k-qv__label"><span>Size</span><span><a href="#guide-size" data-pdp-guide>Size guide</a> · ${esc(pdpState.size || 'Select a size')}</span></p>
               <div class="k-sizes">${sizes.map((z) => `<button class="k-size" type="button" data-pdp-size="${esc(z)}" aria-pressed="${z === pdpState.size}">${esc(z)}</button>`).join('')}</div></div>` : ''}
             <div class="k-pdp__cta">
               ${canBuy(p, cw)
-                ? `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>${p.price == null ? 'Shop' : `Buy · ${esc(price(p))}`}</button>
-                   <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to cart</button>`
+                ? `<div class="k-pdp__pricebar"><b>${esc(price(p))}</b>
+                     <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to bag</button>
+                     <button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>Buy now <span class="k-arrow">${icon.arrow}</span></button></div>`
                 : `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve · get the coordinates' : 'Notify me when it drops'}</button>`}
               ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
             </div>
+            <div class="k-pdp__sticky" aria-hidden="false">
+              <div class="k-pdp__sticky-inner">
+                <b>${esc(price(p))}</b>
+                <button type="button" class="k-pdp__wish" data-wish-product="${esc(p.id)}" aria-label="Save">${icon.heart}</button>
+                ${canBuy(p, cw)
+                  ? `<button class="k-btn" type="button" data-pdp-cart>Add to bag</button>`
+                  : `<button class="k-btn" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve' : 'Notify'}</button>`}
+              </div>
+            </div>
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
             ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
-            ${p.pickup ? `<p class="k-pickup">${icon.pin}Pickup only · ${esc(p.pickup.place)} · <a href="lost-and-found.html?item=${encodeURIComponent(p.id)}">See it on the map</a></p>` : ''}
-            ${guideHtml(p, cw)}
+            ${p.pickup ? `<div class="k-pdp__collect">
+              <p class="k-qv__label"><span>How collection works</span></p>
+              <ol>
+                <li><b>1</b><span>Reserve the piece and join the Dispatch.</span></li>
+                <li><b>2</b><span>Exact coordinates drop when you’re cleared to collect.</span></li>
+                <li><b>3</b><span>Travel to ${esc(p.pickup.place)}${p.pickup.window ? ` · ${esc(p.pickup.window)}` : ''}.</span></li>
+              </ol>
+              <p class="k-pickup">${icon.pin}<a href="lost-and-found.html?item=${encodeURIComponent(p.id)}">See it on the Lost &amp; Found map</a></p>
+            </div>` : ''}
+            <div id="guide-size">${guideHtml(p, cw)}</div>
 
             <div class="k-pdp__more"${pdpState.full ? '' : ' hidden'}>
               ${p.description ? `<p class="k-pdp__desc">${esc(p.description)}</p>` : ''}
@@ -2139,7 +2157,7 @@
               </dl>
               ${seen.length ? `<div><p class="k-qv__label"><span>As seen in</span></p><div class="k-qv__seen">${seen.map((f) => `<a class="k-btn k-btn--sm" href="${storyHref(f)}">${esc(f.title)} · ${esc(f.make)} ${esc(f.code)}</a>`).join('')}</div></div>` : ''}
               ${st ? `<a class="k-pdp__store" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><small>Sold by</small><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span><i>${icon.arrow}</i></a>` : ''}
-              ${related.length ? `<div><p class="k-qv__label"><span>Also at this gate</span></p><div class="k-pdp__related">${related.map((x) => `<button type="button" data-pdp="${esc(x.id)}"><span>${productVisual(x, 0, lifeOf(x, 0).length ? 'life' : '')}</span><b>${esc(x.title)}</b><small>${esc(price(x))}</small></button>`).join('')}</div></div>` : ''}
+              ${related.length ? `<div><p class="k-qv__label"><span>More for the trip</span></p><div class="k-pdp__related">${related.map((x) => `<button type="button" data-pdp="${esc(x.id)}"><span>${productVisual(x, 0, lifeOf(x, 0).length ? 'life' : '')}</span><b>${esc(x.title)}</b><small>${esc(price(x))}</small></button>`).join('')}</div></div>` : ''}
             </div>
           </div>
         </div>
@@ -2274,6 +2292,17 @@
         document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {
           detail: { productId: pdpState.id, cw: pdpState.cw, size: pdpState.size },
         }));
+      }
+      if (e.target.closest('[data-pdp-guide]')) {
+        e.preventDefault();
+        const sec = $('[data-acc="size"]', root);
+        if (sec) { sec.open = true; sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'nearest' }); }
+      }
+      const wish = e.target.closest('[data-wish-product]');
+      if (wish) {
+        const on = wish.getAttribute('aria-pressed') !== 'true';
+        wish.setAttribute('aria-pressed', String(on));
+        document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { kind: 'product', ref: wish.dataset.wishProduct, on } }));
       }
     });
     root.addEventListener('keydown', (e) => {
@@ -4066,6 +4095,9 @@
     const ways = p.colorways || [];
     const st = statusOf(p, cw);
     const store = storeOf(p);
+    const sizes = p.sizes || [];
+    const wishOn = window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.wishlisted
+      ? window.KIOSK_ACCOUNT.wishlisted('product', p.id) : false;
     return `
       <article class="k-tcard" data-tcard="${esc(p.id)}" data-cw="${cw}" data-reveal>
         <button class="k-tcard__media" type="button" data-pdp="${esc(p.id)}" data-cw="${cw}" aria-label="${esc(p.title)}">
@@ -4073,6 +4105,12 @@
           <span class="k-board__status k-board__status--${st.key} k-tcard__status">${esc(st.label)}</span>
           <span class="k-tcard__gate" aria-hidden="true">${esc(gateOf(p.category))}</span>
         </button>
+        <button type="button" class="k-tcard__wish" data-wish-product="${esc(p.id)}" aria-pressed="${wishOn}" aria-label="Save ${esc(p.title)}">${icon.heart}</button>
+        ${canBuy(p, cw) ? `<button type="button" class="k-tcard__qa" data-qa="${esc(p.id)}" aria-label="Quick add ${esc(p.title)}">${icon.bag}</button>
+          <div class="k-qa" data-qa-menu="${esc(p.id)}" hidden>
+            <p>${sizes.length > 1 ? 'Choose size' : 'Add to bag'}</p>
+            <div class="k-qa__sizes">${(sizes.length ? sizes : ['OS']).map((z) => `<button type="button" data-qa-add="${esc(p.id)}" data-size="${esc(z)}" data-cw="${cw}">${esc(z)}</button>`).join('')}</div>
+          </div>` : ''}
         <div class="k-tcard__pass">
           <p class="k-tcard__row"><span>${esc(flightOf(p))}</span><span>Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</span></p>
           <h3 class="k-tcard__title"><button type="button" data-pdp="${esc(p.id)}" data-cw="${cw}">${esc(p.title)}</button></h3>
@@ -4113,16 +4151,27 @@
     const params = new URLSearchParams(location.search);
     let cat = params.get('c') || 'all';
     let sort = params.get('sort') || 'featured';
+    let page = 1;
+    const PAGE = 12;
+    const filters = {
+      size: new Set((params.get('size') || '').split(',').filter(Boolean)),
+      colour: new Set((params.get('colour') || '').split(',').filter(Boolean)),
+      store: new Set((params.get('store') || '').split(',').filter(Boolean)),
+      avail: new Set((params.get('avail') || '').split(',').filter(Boolean)),
+      max: params.get('max') ? Number(params.get('max')) : null,
+    };
     const signal = pageAbort.signal;
 
-    // Backdrop: a terminal shot behind the frosted glass
-    const shots = all.flatMap((p) => (p.colorways || []).map((w) => (w.lifestyle || [])[1]).filter(Boolean));
-    if (shots.length) fill('term-backdrop', `<img src="${esc(shots[hash(new Date().toDateString()) % shots.length])}" alt="" decoding="async">`);
+    const shots = all.flatMap((p) => (p.colorways || []).map((w) => (w.lifestyle || [])[0] || (w.lifestyle || [])[1]).filter(Boolean));
+    const heroShot = shots.length ? shots[hash(new Date().toDateString()) % shots.length] : '';
+    if (heroShot) {
+      fill('term-backdrop', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
+      fill('term-life', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
+    }
 
-    // Departures board: the latest drops
     const board = mount('term-board');
     if (board) {
-      const latest = all.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || ''))).slice(0, 7);
+      const latest = all.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || ''))).slice(0, 4);
       board.innerHTML = latest.map((p) => {
         const st = statusOf(p, 0);
         return `<li><button type="button" class="k-board__row" data-pdp="${esc(p.id)}">
@@ -4136,50 +4185,118 @@
       flipBoard(board);
     }
 
-    // Search across products, the Hunt and stores ("/" jumps to it)
     const q = mount('term-q');
     bindSearch(q, mount('term-results'));
     document.addEventListener('keydown', (e) => {
       if (e.key === '/' && q && !/input|textarea|select/i.test((document.activeElement || {}).tagName || '')) { e.preventDefault(); q.focus(); }
     }, { signal });
 
-    // Gates
     const count = (id) => all.filter((p) => id === 'all' || p.category === id).length;
-    fill('term-gates', `<div class="k-gates__track">${[{ id: 'all', label: 'All gates' }].concat(cats).filter((c) => count(c.id)).map((c) => `
+    fill('term-gates', [{ id: 'all', label: 'All' }].concat(cats).filter((c) => count(c.id)).map((c) => `
       <button type="button" class="k-gate" data-cat="${esc(c.id)}" aria-pressed="${cat === c.id}">
         <b>${c.id === 'all' ? '★' : esc(gateOf(c.id))}</b><span>${esc(c.label)}</span><small>${count(c.id)}</small>
-      </button>`).join('')}</div>`);
+      </button>`).join(''));
+
+    // Filter rail / sheet
+    const sizesAll = [...new Set(all.flatMap((p) => p.sizes || []))];
+    const coloursAll = [...new Set(all.flatMap((p) => (p.colorways || []).map((w) => w.name).filter(Boolean)))];
+    const storesAll = C.stores || [];
+    const prices = all.map((p) => p.price).filter((n) => n != null);
+    const priceMax = prices.length ? Math.ceil(Math.max(...prices) / 10) * 10 : 200;
+    const filterBody = mount('filter-body');
+    const filterRoot = mount('vault-filter');
+    if (filterRoot) filterRoot.hidden = false;
+    const filterHtml = () => `
+      <fieldset class="k-filter__group"><legend>Availability</legend>
+        ${[['ships', 'Ships'], ['pickup', 'Pickup only'], ['digital', 'Digital']].map(([v, l]) => `
+          <label class="k-filter__opt"><input type="checkbox" data-ff="avail" value="${v}" ${filters.avail.has(v) ? 'checked' : ''}>${l}</label>`).join('')}
+      </fieldset>
+      ${sizesAll.length ? `<fieldset class="k-filter__group"><legend>Size</legend>
+        ${sizesAll.map((z) => `<label class="k-filter__opt"><input type="checkbox" data-ff="size" value="${esc(z)}" ${filters.size.has(z) ? 'checked' : ''}>${esc(z)}</label>`).join('')}
+      </fieldset>` : ''}
+      ${coloursAll.length ? `<fieldset class="k-filter__group"><legend>Colourway</legend>
+        ${coloursAll.map((n) => `<label class="k-filter__opt"><input type="checkbox" data-ff="colour" value="${esc(n)}" ${filters.colour.has(n) ? 'checked' : ''}>${esc(n)}</label>`).join('')}
+      </fieldset>` : ''}
+      <fieldset class="k-filter__group"><legend>Price up to</legend>
+        <div class="k-filter__range">
+          <input type="range" min="0" max="${priceMax}" step="5" value="${filters.max != null ? filters.max : priceMax}" data-ff="max" aria-label="Maximum price">
+          <span data-mount="filter-max-label">${filters.max != null ? `$${filters.max}` : 'Any'}</span>
+        </div>
+      </fieldset>
+      ${storesAll.length ? `<fieldset class="k-filter__group"><legend>Store</legend>
+        ${storesAll.map((s) => `<label class="k-filter__opt"><input type="checkbox" data-ff="store" value="${esc(s.id)}" ${filters.store.has(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
+      </fieldset>` : ''}`;
+    if (filterBody) filterBody.innerHTML = filterHtml();
+
+    const activeFilterCount = () => filters.size.size + filters.colour.size + filters.store.size + filters.avail.size + (filters.max != null && filters.max < priceMax ? 1 : 0);
+    const syncFilterBadge = () => {
+      const n = activeFilterCount();
+      const wrap = $('.k-cmd__filter'); if (wrap) wrap.dataset.count = String(n);
+      const badge = mount('filter-count'); if (badge) badge.textContent = String(n);
+    };
 
     const sortSel = mount('vault-sort');
     if (sortSel) sortSel.value = sort;
+    const matches = (p) => {
+      if (cat !== 'all' && p.category !== cat) return false;
+      if (filters.size.size && !(p.sizes || []).some((z) => filters.size.has(z))) return false;
+      if (filters.colour.size && !(p.colorways || []).some((w) => filters.colour.has(w.name))) return false;
+      if (filters.store.size && !filters.store.has(p.store || 'kiosk')) return false;
+      if (filters.max != null && p.price != null && p.price > filters.max) return false;
+      if (filters.avail.size) {
+        const ok = (filters.avail.has('pickup') && p.pickup)
+          || (filters.avail.has('digital') && isDigitalP(p))
+          || (filters.avail.has('ships') && !p.pickup && !isDigitalP(p));
+        if (!ok) return false;
+      }
+      return true;
+    };
     const order = (list) => {
       const l = list.slice();
       if (sort === 'new') l.sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')));
       if (sort === 'price-asc') l.sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
       if (sort === 'price-desc') l.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-      if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));   // photographed pieces first
+      if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));
       return l;
     };
     const grid = mount('vault-grid');
+    const moreBtn = mount('vault-more');
     const render = () => {
-      const list = order(all.filter((p) => cat === 'all' || p.category === cat));
-      grid.innerHTML = list.map((p) => termCard(p)).join('');
+      const list = order(all.filter(matches));
+      const shown = list.slice(0, page * PAGE);
+      if (grid) grid.innerHTML = shown.map((p) => termCard(p)).join('');
+      if (moreBtn) { moreBtn.hidden = shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
       const c = cats.find((x) => x.id === cat);
       const lab = mount('term-gate-label'); if (lab) lab.textContent = c ? `Gate ${gateOf(c.id)} · ${c.label}` : 'All gates';
       const n = mount('vault-count'); if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
-      reveal(grid);
+      syncFilterBadge();
+      if (grid) reveal(grid);
       const qs = new URLSearchParams(location.search);
       if (cat === 'all') qs.delete('c'); else qs.set('c', cat);
       if (sort === 'featured') qs.delete('sort'); else qs.set('sort', sort);
+      [['size', filters.size], ['colour', filters.colour], ['store', filters.store], ['avail', filters.avail]].forEach(([k, set]) => {
+        if (!set.size) qs.delete(k); else qs.set(k, [...set].join(','));
+      });
+      if (filters.max == null || filters.max >= priceMax) qs.delete('max'); else qs.set('max', String(filters.max));
       const str = qs.toString();
       history.replaceState(history.state, '', location.pathname + (str ? `?${str}` : '') + location.hash);
       renderedKey = pageKey();
     };
+
+    const setFilterOpen = (on) => {
+      if (!filterRoot) return;
+      filterRoot.classList.toggle('is-open', on);
+      const btn = $('[data-filter-open]'); if (btn) btn.setAttribute('aria-expanded', String(on));
+      document.documentElement.classList.toggle('is-filter-open', on);
+    };
+
     document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-filter-open]')) { setFilterOpen(!filterRoot.classList.contains('is-open')); return; }
+      if (e.target.closest('[data-filter-close]')) { setFilterOpen(false); return; }
       const g = e.target.closest('[data-cat]');
-      if (g && g.closest('.k-gates')) {
-        cat = g.dataset.cat;
-        $$('.k-gate').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
+      if (g && (g.closest('[data-mount="term-gates"]') || g.closest('.k-gates'))) {
+        cat = g.dataset.cat; page = 1;
+        $$('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
         render();
         const sec = document.getElementById('shop'); if (sec) sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
         return;
@@ -4192,15 +4309,59 @@
         $$('.k-tcard__img, .k-tcard__flat', media).forEach((x) => x.remove());
         media.insertAdjacentHTML('afterbegin', termMedia(p, i));
         $$('[data-pdp]', card).forEach((x) => { x.dataset.cw = i; });
+        $$('[data-qa-add]', card).forEach((x) => { x.dataset.cw = i; });
         $$('[data-tdot]', card).forEach((x) => x.setAttribute('aria-pressed', String(x === d)));
         const st = statusOf(p, i); const chip = $('.k-tcard__status', card);
         if (chip) { chip.className = `k-board__status k-board__status--${st.key} k-tcard__status`; chip.textContent = st.label; }
+        return;
       }
+      const wish = e.target.closest('[data-wish-product]');
+      if (wish) {
+        const on = wish.getAttribute('aria-pressed') !== 'true';
+        wish.setAttribute('aria-pressed', String(on));
+        document.dispatchEvent(new CustomEvent('kiosk:save', { detail: { kind: 'product', ref: wish.dataset.wishProduct, on } }));
+        return;
+      }
+      const qa = e.target.closest('[data-qa]');
+      if (qa) {
+        const menu = $(`[data-qa-menu="${qa.dataset.qa}"]`);
+        $$('[data-qa-menu]').forEach((m) => { if (m !== menu) m.hidden = true; });
+        if (menu) menu.hidden = !menu.hidden;
+        return;
+      }
+      const add = e.target.closest('[data-qa-add]');
+      if (add) {
+        document.dispatchEvent(new CustomEvent('kiosk:add-to-cart', {
+          detail: { productId: add.dataset.qaAdd, cw: Number(add.dataset.cw) || 0, size: add.dataset.size === 'OS' ? '' : add.dataset.size },
+        }));
+        const menu = add.closest('[data-qa-menu]'); if (menu) menu.hidden = true;
+        return;
+      }
+      if (!e.target.closest('[data-qa-menu]') && !e.target.closest('[data-qa]')) {
+        $$('[data-qa-menu]').forEach((m) => { m.hidden = true; });
+      }
+      if (e.target.closest('[data-mount="vault-more"]')) { page += 1; render(); }
     }, { signal });
-    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; render(); }, { signal });
+
+    if (filterBody) {
+      filterBody.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement)) return;
+        const kind = t.dataset.ff;
+        if (kind === 'max') {
+          filters.max = Number(t.value) >= priceMax ? null : Number(t.value);
+          const lab = mount('filter-max-label'); if (lab) lab.textContent = filters.max == null ? 'Any' : `$${filters.max}`;
+        } else if (filters[kind]) {
+          if (t.checked) filters[kind].add(t.value); else filters[kind].delete(t.value);
+        }
+        page = 1;
+        render();
+      }, { signal });
+    }
+    if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; page = 1; render(); }, { signal });
+    syncFilterBadge();
     render();
 
-    // Lounge: every airport shot, each one opens its colourway
     const lounge = all.flatMap((p) => (p.colorways || []).map((w, i) => ({ p, i, w })).filter((x) => (x.w.lifestyle || [])[1]));
     if (lounge.length) {
       fill('term-lounge', railShell(lounge.map(({ p, i, w }) => `
@@ -4210,7 +4371,6 @@
         </button>`).join(''), 'Lounge', 'k-hscroll-wrap--lounge'));
     } else { const sec = $('[data-mount-section="lounge"]'); if (sec) sec.hidden = true; }
 
-    // In-flight: films and LUT packs
     const digital = all.filter((p) => isDigitalP(p));
     fill('term-digital', digital.map((p) => `
       <button type="button" class="k-inflight__row" data-pdp="${esc(p.id)}">
@@ -4219,7 +4379,6 @@
         <span class="k-inflight__fare">${esc(price(p))}</span>
       </button>`).join(''));
 
-    // Concourse: partner stores
     fill('term-stores', (C.stores || []).map((st) => `<a class="k-store-chip" href="${storeHref(st)}"><span class="k-sr-row__img k-sr-row__img--store">${esc(st.name.slice(0, 1))}</span><span><b>${esc(st.name)}</b><small>${esc([st.city, st.country].filter(Boolean).join(', '))}</small></span></a>`).join(''));
 
     if (location.hash) {
@@ -4313,10 +4472,12 @@
       const fb = mount('hunt-fallback');
       if (!fb) return;
       fb.hidden = false;
-      fb.innerHTML = `<p class="k-eyebrow">${esc(why)}</p><div class="k-term-grid k-mt-m">${items.map((p) => termCard(p)).join('')}</div>`;
+      fb.innerHTML = `<div class="k-finds-static"><p class="k-eyebrow">${esc(why)}</p>
+        <div class="k-term-grid k-mt-m">${items.map((p) => termCard(p)).join('')}</div></div>`;
       root.classList.add('is-fallback');
+      const finds = mount('hunt-finds'); if (finds) finds.hidden = true;
     };
-    if (!hasWebGL()) { fallback('This device can’t draw the 3D map. Here are the drops.'); return; }
+    if (!hasWebGL()) { fallback('This device can’t draw the 3D map. Here are the finds.'); return; }
 
     loadCss('js/vendor/maplibre/maplibre-gl.css');
     let hunt = null;
@@ -4334,8 +4495,10 @@
         const go = params.get('item') || params.get('store');
         if (go) { const it = hunt.find(go); if (it) setTimeout(() => hunt.flyTo(it), 600); }
         if (params.get('q') && q) { q.value = params.get('q'); q.dispatchEvent(new Event('input')); }
+        const view = params.get('view');
+        if (view && hunt.applyStyle) hunt.applyStyle(view);
       })
-      .catch((err) => { console.warn('[KIOSK] hunt map unavailable', err); fallback('The map couldn’t load. Here are the drops.'); });
+      .catch((err) => { console.warn('[KIOSK] hunt map unavailable', err); fallback('The map couldn’t load. Here are the finds.'); });
 
     // Search: results list in the HUD, cards around the globe
     bindSearch(q, mount('hunt-results'), {

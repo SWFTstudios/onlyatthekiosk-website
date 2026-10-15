@@ -31,26 +31,16 @@
   <a class="k-skip" href="#main">Skip to content</a>
   <main id="main" class="k-term">
 
-    <!-- TERMINAL: frosted header, search, departures board ------------ -->
+    <!-- TERMINAL: compact bento hero + departures -------------------- -->
     <header class="k-term__hero">
       <div class="k-term__backdrop" data-mount="term-backdrop" aria-hidden="true"></div>
-      <div class="k-wrap k-term__hero-inner">
+      <div class="k-wrap k-term__bento">
+        <div class="k-term__life" data-mount="term-life" aria-hidden="true"></div>
         <div class="k-term__sign">
           <p class="k-term__strip"><span class="k-term__t">T1</span><span>KIOSK Supply terminal</span><span class="k-term__clock"><span data-clock>--:--:--</span> <small data-clock-zone></small></span></p>
           <h1 class="k-term__title">Supply <em>terminal.</em></h1>
-          <p class="k-lede">Clothing, travel goods and digital downloads from the kiosk and partner stores around the world. Some pieces you can only collect in person.</p>
+          <p class="k-lede">Clothing, travel goods and digital downloads from the kiosk and partner stores. Some pieces you collect in person.</p>
         </div>
-
-        <div class="k-term__search k-glass-panel" data-search-scope>
-          <label class="k-term__field">
-            <span class="k-sr">Search the terminal</span>
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-            <input type="search" data-mount="term-q" placeholder="Search tees, hoodies, LUTs, stores…" autocomplete="off" enterkeyhint="search" aria-controls="term-results">
-            <kbd aria-hidden="true">/</kbd>
-          </label>
-          <div class="k-sr-list" id="term-results" data-mount="term-results" role="listbox" aria-label="Search results" hidden></div>
-        </div>
-
         <section class="k-board k-glass-panel" aria-labelledby="board-title">
           <div class="k-board__head">
             <h2 class="k-board__title" id="board-title"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 16.5l19-6.5-1.2-2.6-6.6 1.8L8.3 3.5 6.6 4.2l3 6.1-4.4 1.3-2.2-2-1.4.5 1.4 3.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Departures</h2>
@@ -62,18 +52,25 @@
       </div>
     </header>
 
-    <!-- GATES: categories as wayfinding ------------------------------- -->
-    <nav class="k-gates" aria-label="Gates" data-mount="term-gates"></nav>
-
+    <!-- SHOP: command bar + filters + grid --------------------------- -->
     <section class="k-section k-section--tight" id="shop" aria-labelledby="all-title">
       <div class="k-wrap">
-        <div class="k-term__toolbar">
-          <div>
-            <p class="k-eyebrow" data-mount="term-gate-label">All gates</p>
-            <h2 class="k-h2 k-mt-s" id="all-title" data-mount="term-gate-title">Now <em class="k-serif">boarding.</em></h2>
+        <div class="k-cmd" data-mount="term-cmd" role="search">
+          <div class="k-cmd__search" data-search-scope>
+            <label class="k-term__field">
+              <span class="k-sr">Search the terminal</span>
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <input type="search" data-mount="term-q" placeholder="Search tees, hoodies, LUTs, stores…" autocomplete="off" enterkeyhint="search" aria-controls="term-results">
+              <kbd aria-hidden="true">/</kbd>
+            </label>
+            <div class="k-sr-list" id="term-results" data-mount="term-results" role="listbox" aria-label="Search results" hidden></div>
           </div>
-          <div class="k-row-flex">
-            <span class="k-small" data-mount="vault-count" aria-live="polite"></span>
+          <div class="k-cmd__gates" data-mount="term-gates" role="group" aria-label="Gates"></div>
+          <div class="k-cmd__meta">
+            <span class="k-cmd__count" data-mount="vault-count" aria-live="polite"></span>
+            <div class="k-cmd__filter" data-count="0">
+              <button type="button" class="k-btn k-btn--sm" data-filter-open aria-controls="vault-filter" aria-expanded="false">Filter<span class="k-cmd__badge" data-mount="filter-count">0</span></button>
+            </div>
             <label class="k-sr" for="vault-sort">Sort</label>
             <select class="k-select" id="vault-sort" data-mount="vault-sort">
               <option value="featured">Featured</option>
@@ -83,7 +80,28 @@
             </select>
           </div>
         </div>
-        <div class="k-term-grid" data-mount="vault-grid"></div>
+
+        <div class="k-shop">
+          <aside class="k-filter" id="vault-filter" data-mount="vault-filter" aria-label="Filters" hidden>
+            <div class="k-filter__scrim" data-filter-close hidden></div>
+            <div class="k-filter__panel">
+              <span class="k-filter__grab" aria-hidden="true"></span>
+              <p class="k-filter__title">Filters</p>
+              <div data-mount="filter-body"></div>
+              <button type="button" class="k-btn k-btn--solid k-filter__apply" data-filter-close>Apply</button>
+            </div>
+          </aside>
+          <div>
+            <div class="k-term__toolbar">
+              <div>
+                <p class="k-eyebrow" data-mount="term-gate-label">All gates</p>
+                <h2 class="k-h2 k-mt-s" id="all-title" data-mount="term-gate-title">Now <em class="k-serif">boarding.</em></h2>
+              </div>
+            </div>
+            <div class="k-term-grid" data-mount="vault-grid"></div>
+            <button type="button" class="k-btn k-tcard__more" data-mount="vault-more" hidden>Show more</button>
+          </div>
+        </div>
       </div>
     </section>
 
