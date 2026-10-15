@@ -784,10 +784,11 @@
       });
       return this.loading;
     },
-    async open(mix, slot) {
+    /** Plays the playlist, or one song from it when `track` (a spotify:track: URI) is given. */
+    async open(mix, slot, track) {
       const api = await this.load();
       if (!api) return false;
-      const uri = `spotify:playlist:${mix.spotify}`;
+      const uri = track || `spotify:playlist:${mix.spotify}`;
       this.wantPlay = true;
       if (this.ctrl) {
         if (this.uri !== uri) { this.uri = uri; this.ctrl.loadUri(uri); } else this.ctrl.resume();
@@ -827,10 +828,12 @@
       });
       return this.loading;
     },
-    async open(mix, slot) {
+    /** Plays the link from the top, or from song `index` of a playlist / likes page. */
+    async open(mix, slot, index) {
       const SC = await this.load();
       if (!SC || !SC.Widget) return false;
-      if (this.iframe && this.url === mix.soundcloud) { this.widget.play(); return true; }
+      const start = (w) => (index != null ? w.skip(index) : w.play());
+      if (this.iframe && this.url === mix.soundcloud) { start(this.widget); return true; }
       if (this.iframe) this.iframe.remove();
       this.url = mix.soundcloud;
       const f = document.createElement('iframe');
@@ -845,21 +848,90 @@
       w.bind(E.PLAY, () => {
         player.onSoundcloud({ playing: true });
         w.getCurrentSound((sound) => { if (sound && sound.title) player.nowPlaying(sound.title, sound.user && sound.user.username); });
+        w.getCurrentSoundIndex((i) => player.onSoundcloudIndex(i));
       });
       w.bind(E.PAUSE, () => player.onSoundcloud({ playing: false }));
       w.bind(E.FINISH, () => player.onSoundcloud({ playing: false }));
       w.bind(E.PLAY_PROGRESS, (e) => player.onSoundcloud({ playing: true, position: e.currentPosition, relative: e.relativePosition }));
       return new Promise((resolve) => {
         const t = setTimeout(() => resolve(false), 10000);
-        w.bind(E.READY, () => { clearTimeout(t); w.play(); resolve(true); });
+        w.bind(E.READY, () => { clearTimeout(t); start(w); resolve(true); });
+      });
+    },
+    /** The songs behind a link, read from a silent widget that's removed once it answers. */
+    async list(url) {
+      const SC = await this.load();
+      if (!SC || !SC.Widget) return [];
+      return new Promise((resolve) => {
+        const f = document.createElement('iframe');
+        f.title = 'SoundCloud tracklist';
+        f.setAttribute('aria-hidden', 'true');
+        f.tabIndex = -1;
+        f.style.cssText = 'position:fixed;left:-9999px;top:0;width:10px;height:10px;border:0;opacity:0;pointer-events:none';
+        f.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=false&visual=false`;
+        document.body.append(f);
+        const w = SC.Widget(f);
+        let t;
+        const done = (sounds) => { clearTimeout(t); f.remove(); resolve(Array.isArray(sounds) ? sounds : []); };
+        t = setTimeout(() => done([]), 12000);
+        w.bind(SC.Widget.Events.READY, () => w.getSounds(done));
       });
     },
   };
+
+  /* Songs in each mix, for the song wheel on the radio page.
+   * A mix's own `tracks` list wins; otherwise Spotify playlists are read by
+   * /api/radio/tracks and SoundCloud links by a silent widget.
+   * Each song: { title, artist, cover, uri (Spotify), source (SoundCloud index), audio } */
+  const radioTracks = {
+    list: {},          // slug → songs, once loaded
+    loading: {},       // slug → Promise<songs>
+    get(mix) {
+      if (!mix) return Promise.resolve([]);
+      if (this.list[mix.slug]) return Promise.resolve(this.list[mix.slug]);
+      if (!this.loading[mix.slug]) {
+        this.loading[mix.slug] = this.fetch(mix).catch(() => []).then((songs) => {
+          if (songs.length) this.list[mix.slug] = songs;
+          else delete this.loading[mix.slug];   // try again next time
+          return songs;
+        });
+      }
+      return this.loading[mix.slug];
+    },
+    async fetch(mix) {
+      const own = (mix.tracks || []).filter(Boolean);
+      if (own.length) {
+        return own.map((t) => (typeof t === 'string' ? { title: t } : {
+          title: t.title || '', artist: t.artist || '', cover: t.cover || '', audio: t.audio || '',
+          uri: t.spotify ? (String(t.spotify).startsWith('spotify:') ? t.spotify : `spotify:track:${t.spotify}`) : '',
+        })).map((t) => ({ ...t, cover: t.cover || (t.uri ? coverFor(t.uri) : '') }));
+      }
+      if (mix.spotify) {
+        const res = await fetch(`/api/radio/tracks?spotify=${encodeURIComponent(mix.spotify)}`);
+        if (!res.ok) return [];
+        const d = await res.json();
+        return (d.tracks || []).map((t) => ({ title: t.title, artist: t.artist, uri: t.uri, explicit: t.explicit, cover: t.cover || coverFor(t.uri) }));
+      }
+      if (mix.soundcloud) {
+        const sounds = await soundcloud.list(mix.soundcloud);
+        return sounds.map((x, i) => ({ x, i })).filter(({ x }) => x && x.title).map(({ x, i }) => ({
+          title: x.title,
+          artist: (x.user && x.user.username) || '',
+          cover: String(x.artwork_url || (x.user && x.user.avatar_url) || '').replace('-large.', '-t500x500.'),
+          source: i,
+        }));
+      }
+      return [];
+    },
+  };
+  const coverFor = (uri) => `/api/radio/cover?uri=${encodeURIComponent(uri)}`;
+  const radioWheels = new Set();
 
   const player = {
     el: null,
     mix: null,
     source: '',          // 'audio' | 'spotify' | 'soundcloud' | 'apple'
+    track: null,         // { slug, index } when one song was picked on the song wheel
     playing: false,
     buffering: false,
     audio: null,
@@ -923,20 +995,32 @@
       $('[data-dock-expand]', this.el).setAttribute('aria-expanded', String(open));
     },
 
-    async play(slug) {
+    /**
+     * Play a mix, or one song of it: `opts.index` is the song's place in
+     * radioTracks.list[slug] (the song wheel). A song that ends hands over to
+     * the next one, so the wheel keeps playing like a radio.
+     */
+    async play(slug, opts = {}) {
       const mix = mixBySlug(slug);
       if (!mix) return;
-      if (this.mix === mix && this.active()) { this.toggle(); return; }
-      if (!mix.audio && !mix.spotify && !mix.soundcloud && !mix.apple) { toast(`${mix.title} drops soon.`); return; }
+      const song = opts.index != null ? (radioTracks.list[slug] || [])[opts.index] : null;
+      const same = song ? !!(this.track && this.track.slug === slug && this.track.index === opts.index) : true;
+      if (this.mix === mix && this.active() && same) { this.toggle(); return; }
+      const audioSrc = (song && song.audio) || mix.audio;
+      if (!audioSrc && !mix.spotify && !mix.soundcloud && !mix.apple) { toast(`${mix.title} drops soon.`); return; }
       this.pauseAll();
       this.show(mix);
-      if (mix.audio) {
+      // Songs can be picked one at a time from Spotify, SoundCloud and MP3s (Apple's embed has no API)
+      const pickable = song && (song.audio || (mix.spotify && song.uri) || (mix.soundcloud && song.source != null));
+      this.track = pickable ? { slug, index: opts.index } : null;
+      if (this.track) this.nowPlaying(song.title, song.artist);
+      if (audioSrc) {
         this.source = 'audio';
         if (!this.audio) this.bindAudio();
         // Remote audio needs CORS for the analyser to read it (R2/Bunny: allow this origin)
-        if (new URL(mix.audio, location.href).origin !== location.origin) this.audio.crossOrigin = 'anonymous';
+        if (new URL(audioSrc, location.href).origin !== location.origin) this.audio.crossOrigin = 'anonymous';
         else this.audio.removeAttribute('crossorigin');
-        this.audio.src = mix.audio;
+        this.audio.src = audioSrc;
         wave.connect(this.audio);
         if (wave.ctx && wave.ctx.state === 'suspended') wave.ctx.resume();
         $('.k-dock__progress', this.el).hidden = false;
@@ -949,7 +1033,7 @@
         this.buffering = true;
         this.sync();
         this.expand(true);
-        const ok = await soundcloud.open(mix, $('[data-embed="soundcloud"].k-dock__embed', this.el));
+        const ok = await soundcloud.open(mix, $('[data-embed="soundcloud"].k-dock__embed', this.el), this.track ? song.source : null);
         if (!ok) {
           this.buffering = false;
           toast('SoundCloud couldn’t load. Opening it in a new tab.');
@@ -980,7 +1064,7 @@
         // Open the tracklist so the Spotify play button is right there if the
         // browser blocks autoplay; it folds away once music starts.
         this.expand(true);
-        const ok = await spotify.open(mix, slot);
+        const ok = await spotify.open(mix, slot, this.track ? song.uri : null);
         if (!ok) {
           this.buffering = false;
           toast('Spotify couldn’t load. Opening it in a new tab.');
@@ -1000,6 +1084,24 @@
     nowPlaying(title, artist) {
       if (!this.el || !this.mix) return;
       $('.k-dock__title', this.el).textContent = `${title}${artist ? ` — ${artist}` : ''} · ${this.mix.title}`;
+    },
+
+    /** Next song on the wheel (wraps round to the first). */
+    next() {
+      const t = this.track;
+      const list = t && radioTracks.list[t.slug];
+      if (!list || !list.length) return;
+      this.play(t.slug, { index: (t.index + 1) % list.length });
+    },
+
+    /** SoundCloud moved on to song `i` of its playlist: keep the wheel in step. */
+    onSoundcloudIndex(i) {
+      if (this.source !== 'soundcloud' || !this.mix) return;
+      const list = radioTracks.list[this.mix.slug] || [];
+      const k = list.findIndex((s) => s.source === i);
+      if (k < 0) return;
+      this.track = { slug: this.mix.slug, index: k };
+      this.sync();
     },
 
     onSoundcloud(d) {
@@ -1025,6 +1127,7 @@
       });
       this.audio.addEventListener('play', () => { this.playing = true; this.buffering = false; this.sync(); });
       this.audio.addEventListener('pause', () => { this.playing = false; this.sync(); });
+      this.audio.addEventListener('ended', () => { if (this.track) this.next(); });
       this.audio.addEventListener('waiting', () => { this.buffering = true; this.sync(); });
       this.audio.addEventListener('playing', () => { this.buffering = false; this.sync(); });
       this.audio.addEventListener('error', () => { toast('This mix couldn’t be loaded.'); this.playing = false; this.sync(); });
@@ -1035,6 +1138,16 @@
       const was = this.playing;
       this.playing = d.isPaused === false;
       this.buffering = !!d.isBuffering;
+      // A song picked on the wheel stops at its end (or jumps back to 0:00): play the next one
+      const pos = d.position || 0;
+      const ended = d.duration && (pos >= d.duration - 1500 || (pos === 0 && this.lastPos >= d.duration - 3000));
+      this.lastPos = pos;
+      if (this.track && was && !this.playing && ended && Date.now() - (this.advanced || 0) > 3000) {
+        this.advanced = Date.now();
+        this.lastPos = 0;
+        this.next();
+        return;
+      }
       wave.clock = { position: d.position || 0, at: performance.now() };
       if (this.playing) spotify.wantPlay = false;
       if (this.playing && !was && this.el.classList.contains('is-expanded') && !this.userExpanded) {
@@ -1106,6 +1219,7 @@
         if (label) label.textContent = on ? 'Pause' : 'Play';
       });
       $$('[data-radio-deck]').forEach((d) => d.classList.toggle('is-playing', this.isPlaying(d.dataset.radioDeck)));
+      radioWheels.forEach((w) => (w.root.isConnected ? w.sync() : radioWheels.delete(w)));
       wave.start();
     },
   };
@@ -1362,6 +1476,322 @@
       player.sync();
       wave.draw();
     });
+  }
+
+  /* ------------------------------------------------------ song wheel
+   * Radio page: every song of a playlist as a cover on a turning 3D drum.
+   * Drag or swipe it, scroll over it, or use the arrow keys; it spins with
+   * momentum and settles on a song. Tap the front cover (or Play) to hear
+   * that song, any other cover to bring it round. When a song ends the
+   * player starts the next one and the wheel turns to follow.
+   * -------------------------------------------------------------------- */
+
+  const WHEEL_STEP = 30;    // degrees between covers
+  const WHEEL_SPAN = 4;     // covers drawn either side of the front one
+
+  function radioWheelBlock(activeSlug, first) {
+    const mixes = C.mixes || [];
+    if (!mixes.length) return '';
+    const m = mixBySlug(activeSlug) || (player.mix && mixBySlug(player.mix.slug)) || mixes[0];
+    const link = sourceLink(m);
+    return `
+      <div class="k-wheel k-dark" data-wheel="${esc(m.slug)}"${first ? ' data-reveal' : ''}>
+        <div class="k-wheel__ambient" aria-hidden="true"><img alt="" data-wheel-ambient hidden></div>
+        <div class="k-wheel__head">
+          <p class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>KIOSK Radio</b> · Song wheel</p>
+          <div class="k-wheel__mixes" role="group" aria-label="Playlists">
+            ${mixes.map((x) => `
+              <button class="k-wheel__mix" type="button" data-wheel-mix="${esc(x.slug)}" aria-pressed="${x.slug === m.slug}">
+                <span class="k-wheel__mix-cover">${media({ image: x.cover, tone: x.tone, mark: '' })}</span>
+                <span><b>${esc(x.title)}</b><small>${esc(x.volume)}${sourceName(x) ? ` · ${esc(sourceName(x))}` : ''}</small></span>
+              </button>`).join('')}
+          </div>
+        </div>
+        <div class="k-wheel__stage" tabindex="0" role="group" aria-roledescription="song wheel" aria-label="Songs in ${esc(m.title)}. Left and right arrows turn the wheel, Enter plays the song in front." data-wheel-stage>
+          <div class="k-wheel__drum" data-wheel-drum aria-hidden="true"></div>
+        </div>
+        <div class="k-wheel__now">
+          <button class="k-wheel__step" type="button" data-wheel-step="-1" aria-label="Previous song">${icon.left}</button>
+          <div class="k-wheel__info" aria-live="polite" aria-atomic="true">
+            <span class="k-mono k-wheel__count" data-wheel-count></span>
+            <b class="k-wheel__title" data-wheel-title data-no-i18n></b>
+            <span class="k-wheel__artist" data-wheel-artist data-no-i18n></span>
+          </div>
+          <button class="k-wheel__step" type="button" data-wheel-step="1" aria-label="Next song">${icon.right}</button>
+        </div>
+        <div class="k-wheel__controls">
+          <button class="k-btn k-btn--solid" type="button" data-wheel-play><span data-ico style="display:inline-grid;width:12px">${icon.play}</span> <span data-label>Play</span></button>
+          ${link ? `<a class="k-btn" href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)}<span class="k-arrow">${icon.arrow}</span></a>` : ''}
+          <canvas class="k-wheel__wave" data-wave="${esc(m.slug)}" data-wave-bar="2" data-wave-gap="3" aria-hidden="true"></canvas>
+        </div>
+      </div>`;
+  }
+
+  function songWheel(root) {
+    const slug = root.dataset.wheel;
+    const mix = mixBySlug(slug);
+    const stage = $('[data-wheel-stage]', root);
+    const drum = $('[data-wheel-drum]', root);
+    const ambient = $('[data-wheel-ambient]', root);
+    const playBtn = $('[data-wheel-play]', root);
+    const SLOTS = WHEEL_SPAN * 2 + 1;
+
+    let songs = Array.from({ length: SLOTS }, () => ({}));   // blank covers while the list loads
+    let fallback = false;      // no song list: the wheel holds the playlist itself
+    let loaded = false;
+    let pos = 0;               // fractional song index facing the front
+    let vel = 0;
+    let target = 0;
+    let raf = 0;
+    let front = -1;
+    let followed = -1;         // last song the player reported, so the wheel follows it once
+    let drag = null;
+    let touched = 0;           // last time the visitor turned the wheel
+    let wheelSnap = 0;
+    let wheelLock = 0;
+    let cardW = 240;
+    let radius = 600;
+
+    const wrap = (i) => { const n = songs.length; return ((i % n) + n) % n; };
+    const current = () => (player.track && player.track.slug === slug ? player.track.index : -1);
+
+    // A fixed pool of covers; each keeps the song it shows while it's in view
+    const cards = Array.from({ length: SLOTS }, () => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'k-wheel__card';
+      b.tabIndex = -1;
+      b.innerHTML = `<span class="plate plate--${esc(mix.tone || 'graphite')}"></span><img alt="" decoding="async" draggable="false" hidden><span class="k-wheel__badge"><span class="k-wheel__eq"><i></i><i></i><i></i></span>${icon.play}</span>`;
+      const img = $('img', b);
+      img.addEventListener('load', () => { if (img.dataset.src) img.hidden = false; });
+      img.addEventListener('error', () => { img.hidden = true; });
+      drum.append(b);
+      return b;
+    });
+
+    const measure = () => {
+      cardW = cards[0].offsetWidth || cardW;
+      radius = Math.round(cardW / 2 / Math.tan((WHEEL_STEP * Math.PI) / 360) + cardW * 0.06);
+      drum.style.setProperty('--r', `${radius}px`);
+    };
+
+    const paint = (card, song) => {
+      const img = $('img', card);
+      const src = (song && song.cover) || '';
+      if (img.dataset.src === src) return;
+      img.dataset.src = src;
+      img.hidden = true;
+      if (src) img.src = src; else img.removeAttribute('src');
+    };
+
+    const describe = () => {
+      const song = songs[front] || {};
+      $('[data-wheel-count]', root).textContent = !loaded ? 'Loading songs…' : fallback ? (mix.volume || '') : `${pad(front + 1)} / ${pad(songs.length)}`;
+      $('[data-wheel-title]', root).textContent = loaded ? (song.title || '') : mix.title;
+      $('[data-wheel-artist]', root).textContent = loaded ? (song.artist || '') : (mix.mood || '');
+      const src = song.cover || '';
+      if (ambient.dataset.src !== src) {
+        ambient.dataset.src = src;
+        ambient.hidden = true;
+        if (src) { ambient.onload = () => { ambient.hidden = false; }; ambient.src = src; }
+      }
+      sync();
+    };
+
+    const render = () => {
+      const n = songs.length;
+      const base = Math.round(pos);
+      const span = Math.min(WHEEL_SPAN, Math.floor((n - 1) / 2));   // never show a song twice
+      const used = new Set();
+      for (let u = base - span; u <= base + span; u += 1) {
+        const card = cards[((u % SLOTS) + SLOTS) % SLOTS];
+        used.add(card);
+        const off = u - pos;
+        const a = off * WHEEL_STEP;
+        card.hidden = false;
+        card.style.transform = `translate(-50%, -50%) rotateY(${a.toFixed(2)}deg) translateZ(${radius}px)`;
+        card.style.setProperty('--shade', Math.min(1, 1 - Math.cos((a * Math.PI) / 180) + Math.abs(off) * 0.07).toFixed(3));
+        card.classList.toggle('is-front', u === base);
+        if (card.dataset.u !== String(u)) {
+          card.dataset.u = String(u);
+          card.dataset.i = String(wrap(u));
+          paint(card, songs[wrap(u)]);
+        }
+      }
+      cards.forEach((c) => { if (!used.has(c)) { c.hidden = true; delete c.dataset.u; } });
+      const f = wrap(base);
+      if (f !== front) { front = f; describe(); }
+    };
+
+    const tick = () => {
+      raf = 0;
+      if (!drag) {
+        if (REDUCED) { pos = target; vel = 0; } else {
+          vel = (vel + (target - pos) * 0.075) * 0.74;   // damped spring towards the resting song
+          pos += vel;
+          if (Math.abs(target - pos) < 0.002 && Math.abs(vel) < 0.002) { pos = target; vel = 0; }
+        }
+      }
+      render();
+      if (drag || pos !== target) raf = requestAnimationFrame(tick);
+    };
+    const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
+
+    const spin = (n) => { touched = Date.now(); target = Math.round(target) + n; run(); };
+    /** Turn the shortest way round to song `i`. */
+    const goTo = (i) => {
+      const n = songs.length;
+      const base = Math.round(target);
+      let d = (((i - wrap(base)) % n) + n) % n;
+      if (d > n / 2) d -= n;
+      target = base + d;
+      run();
+    };
+    const playFront = () => {
+      if (!loaded) return;
+      touched = Date.now();
+      if (fallback) { player.play(slug); return; }
+      followed = front;
+      player.play(slug, { index: front });
+    };
+
+    function sync() {
+      const cur = current();
+      cards.forEach((c) => c.classList.toggle('is-playing', !fallback && player.playing && c.dataset.i === String(cur)));
+      const on = fallback ? player.isPlaying(slug) : player.playing && cur === front;
+      const ico = $('[data-ico]', playBtn);
+      ico.innerHTML = on ? icon.pause : icon.play;
+      $('[data-label]', playBtn).textContent = on ? 'Pause' : 'Play';
+      playBtn.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${(songs[front] && songs[front].title) || mix.title}`);
+      root.classList.toggle('is-playing', player.isPlaying(slug));
+      // The player moved on to another song: turn to it, unless the visitor is browsing
+      if (loaded && !fallback && cur >= 0 && cur !== followed) {
+        followed = cur;
+        if (cur !== front && !drag && Date.now() - touched > 2500) goTo(cur);
+      }
+    }
+
+    // Drag / swipe. Vertical swipes still scroll the page (touch-action: pan-y).
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || !loaded) return;
+      drag = { x: e.clientX, y: e.clientY, from: pos, last: e.clientX, t: performance.now(), v: 0, moved: false, id: e.pointerId };
+      vel = 0;
+      touched = Date.now();
+      run();
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dx = e.clientX - drag.x;
+      if (!drag.moved) {
+        if (Math.abs(dx) < 6) return;   // still a tap
+        if (Math.abs(e.clientY - drag.y) > Math.abs(dx)) { drag = null; target = Math.round(pos); run(); return; }
+        drag.moved = true;
+        stage.setPointerCapture(e.pointerId);
+        stage.classList.add('is-dragging');
+      }
+      const per = cardW * 0.8;
+      const now = performance.now();
+      pos = drag.from - dx / per;
+      drag.v = 0.6 * drag.v + 0.4 * ((-(e.clientX - drag.last) / per) * (16.7 / Math.max(1, now - drag.t)));
+      drag.last = e.clientX;
+      drag.t = now;
+      touched = Date.now();
+      run();
+    });
+    const release = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = drag;
+      drag = null;
+      stage.classList.remove('is-dragging');
+      if (!d.moved) {
+        const card = e.type === 'pointerup' && e.target.closest('.k-wheel__card');
+        if (card && card.dataset.u != null) {
+          const u = Number(card.dataset.u);
+          if (u === Math.round(pos)) playFront(); else { touched = Date.now(); target = u; }
+        }
+        run();
+        return;
+      }
+      // Flick: carry the speed on and settle on the song it lands near
+      const v = REDUCED || performance.now() - d.t > 90 ? 0 : d.v;
+      vel = v * 0.6;
+      target = Math.round(pos + v * 12);
+      run();
+    };
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+
+    // Scroll: trackpads turn it freely, a mouse wheel moves one song per notch.
+    // Vertical scrolling only turns the wheel while all of it is on screen.
+    stage.addEventListener('wheel', (e) => {
+      if (!loaded || songs.length < 2) return;
+      const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const r = stage.getBoundingClientRect();
+      if (!horiz && (r.top < 0 || r.bottom > window.innerHeight)) return;
+      e.preventDefault();
+      touched = Date.now();
+      let d = horiz ? e.deltaX : e.deltaY;
+      if (e.deltaMode === 1) d *= 32; else if (e.deltaMode === 2) d *= window.innerHeight;
+      if (!horiz && Math.abs(d) >= 50) {
+        const now = performance.now();
+        if (now - wheelLock > 70) { wheelLock = now; spin(Math.sign(d)); }
+        return;
+      }
+      clearTimeout(wheelSnap);
+      vel = 0;
+      pos += d / (cardW * 1.1);
+      target = pos;
+      wheelSnap = setTimeout(() => { target = Math.round(pos); run(); }, 120);
+      run();
+    }, { passive: false });
+
+    stage.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[e.key];
+      if (step && loaded) { e.preventDefault(); spin(step); } else if (e.key === 'Home' && loaded) { e.preventDefault(); touched = Date.now(); goTo(0); } else if (e.key === 'End' && loaded) { e.preventDefault(); touched = Date.now(); goTo(songs.length - 1); } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playFront(); }
+    });
+    $$('[data-wheel-step]', root).forEach((b) => b.addEventListener('click', () => { if (loaded) spin(Number(b.dataset.wheelStep)); }));
+    playBtn.addEventListener('click', playFront);
+
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => { if (!root.isConnected) { ro.disconnect(); return; } measure(); render(); });
+      ro.observe(stage);
+    }
+
+    measure();
+    render();
+    // Idle spin while the songs load
+    if (!REDUCED) { target = 2; run(); }
+    radioTracks.get(mix).then((list) => {
+      if (!root.isConnected) return;
+      loaded = true;
+      fallback = !list.length;
+      songs = list.length ? list : [{ title: mix.title, artist: mix.mood, cover: mix.cover }];
+      cards.forEach((c) => { delete c.dataset.u; });
+      const start = Math.max(0, current());
+      followed = current();
+      front = -1;
+      // Spin in to the song that's playing (or the first)
+      pos = REDUCED || fallback ? start : start - Math.min(6, songs.length);
+      vel = 0;
+      target = start;
+      root.classList.add('is-loaded');
+      run();
+      render();
+    });
+
+    radioWheels.add({ root, sync });
+  }
+
+  function mountWheel(container, slug, first) {
+    if (!container) return;
+    container.innerHTML = radioWheelBlock(slug, first);
+    const root = $('[data-wheel]', container);
+    if (!root) return;
+    reveal(container);
+    hydrateCovers(container);
+    songWheel(root);
+    player.sync();
+    wave.draw();
   }
 
   /* ---------------------------------------------------- shop the look */
@@ -3103,8 +3533,17 @@
   /* ------------------------------------------------------------ radio */
 
   function pageRadio() {
-    const deck = fill('radio', radioBlock((C.mixes || [])[0] && C.mixes[0].slug));
-    bindRadio(deck);
+    const deck = mount('radio');
+    mountWheel(deck, (player.mix && player.mix.slug) || ((C.mixes || [])[0] && C.mixes[0].slug), true);
+    if (deck) {
+      deck.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-wheel-mix]');
+        if (!b || b.getAttribute('aria-pressed') === 'true') return;
+        mountWheel(deck, b.dataset.wheelMix);
+        const again = $(`[data-wheel-mix="${b.dataset.wheelMix}"]`, deck);
+        if (again) again.focus();
+      });
+    }
     fill('tracklists', (C.mixes || []).map((m, n) => {
       const used = features.filter((f) => f.soundtrack === m.slug);
       return `
@@ -3119,7 +3558,7 @@
             <p class="k-body">${esc(m.mood)}</p>
             <canvas class="k-radio-card__wave" data-wave="${esc(m.slug)}" aria-hidden="true"></canvas>
             ${(m.tracks || []).length ? `<ol class="k-rows">
-              ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(t)}</span></li>`).join('')}
+              ${m.tracks.map((t, k) => `<li class="k-row" style="padding:14px 4px;grid-template-columns:44px 1fr"><span class="k-row__num">${pad(k + 1)}</span><span style="font-size:16px">${esc(typeof t === 'string' ? t : [t.title, t.artist].filter(Boolean).join(' — '))}</span></li>`).join('')}
             </ol>` : ''}
             ${used.length ? `<p class="k-small">Scored: ${used.map((f) => `<a href="${storyHref(f)}" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">${esc(f.title)}</a>`).join(', ')}</p>` : ''}
             <div class="k-row-flex">

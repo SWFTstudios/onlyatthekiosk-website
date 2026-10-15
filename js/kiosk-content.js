@@ -776,6 +776,13 @@ window.KIOSK_CONTENT = {
    *   audio:      an MP3 URL for a self-hosted mix
    * Leave every source empty and the mix shows as "drops soon".
    * Radio is free to listen to: nothing here is sold.
+   *
+   * The radio page shows each mix as a 3D song wheel of covers. Spotify
+   * playlists fill it on their own (song titles and album art come from
+   * /api/radio/tracks), SoundCloud links too. To set the songs by hand
+   * (or for an MP3 / Apple Music mix), fill `tracks` with
+   *   { title, artist, cover: 'image URL', spotify: 'track ID', audio: 'MP3 URL' }
+   * (only title is required; plain strings work as titles).
    * -------------------------------------------------------- */
   mixes: [
     {
