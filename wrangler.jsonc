@@ -3,7 +3,7 @@
 // Secrets used by /api (Airtable, Shopify, …) are set on the Worker in the
 // Cloudflare dashboard (Settings → Variables and Secrets), not in this file.
 {
-  "name": "onlyatthekiosk",
+  "name": "onlyatthekiosk-website",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-10-01",
   "assets": {
