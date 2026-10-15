@@ -219,6 +219,7 @@
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
+  const PLANE_ICON = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.5 11.5l14-5-1-2-5 1.4L6.6 2.6 5.3 3.1l2.3 4.6-3.3 1-1.7-1.5-1 .4 1 2.6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 16.5h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
   const TAB_ICONS = {
     home: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
     garage: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 14.5l1.6-4.3A2 2 0 0 1 7 8.9h10a2 2 0 0 1 1.9 1.3l1.6 4.3V18a1 1 0 0 1-1 1h-1.6a1 1 0 0 1-1-1v-1H7.1v1a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.5" cy="14" r="1.1" fill="currentColor"/><circle cx="16.5" cy="14" r="1.1" fill="currentColor"/></svg>',
@@ -264,7 +265,7 @@
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', mode === 'dark' ? '#0b0b0c' : '#ffffff');
     $$('[data-theme-toggle]').forEach((b) => {
-      b.innerHTML = themeIcon(pref);
+      (b.querySelector('[data-theme-ico]') || b).innerHTML = themeIcon(pref);
       b.setAttribute('aria-label', `Theme: ${pref === 'auto' ? `auto (${mode === 'dark' ? 'night' : 'day'})` : pref === 'dark' ? 'night' : 'day'}`);
       b.title = pref === 'auto' ? `Auto · follows your local time (${mode === 'dark' ? 'night' : 'day'} now)` : pref === 'dark' ? 'Night' : 'Day';
     });
@@ -325,22 +326,27 @@
         <p class="k-sheet__clock" aria-hidden="true"><span data-clock>--:--:--</span> <small data-clock-zone></small></p>
       </div>
       <ul class="k-sheet__links">
-        <li><a href="index.html">Home <span>00</span></a></li>
-        ${NAV.map((n, i) => `<li><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
-        <li><a href="lost-and-found.html">Lost &amp; Found <span>${pad(NAV.length + 1)}</span></a></li>
-        <li><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
-        <li><a href="flights.html">Flights <span>${pad(NAV.length + 3)}</span></a></li>
+        <li style="--i:0"><a href="index.html">Home <span>00</span></a></li>
+        ${NAV.map((n, i) => `<li style="--i:${i + 1}"><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
+        <li style="--i:${NAV.length + 1}"><a href="lost-and-found.html">Lost &amp; Found <span>${pad(NAV.length + 1)}</span></a></li>
+        <li style="--i:${NAV.length + 2}"><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
+        <li style="--i:${NAV.length + 3}"><a href="flights.html">Flights <span>${pad(NAV.length + 3)}</span></a></li>
       </ul>
-      <div class="k-sheet__foot">
-        <button class="k-btn k-btn--sm" type="button" data-settings-open>${icon.gear}<span>Settings</span></button>
-        <button class="k-btn k-btn--sm k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
-        <button class="k-btn k-btn--sm is-hidden" type="button" data-account-open hidden>${icon.user}<span>Account</span></button>
-        <button class="k-btn k-btn--sm is-hidden" type="button" data-cart-open hidden>${icon.bag}<span>Cart</span><span class="k-nav__cart-count" data-cart-count hidden>0</span></button>
-        <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
-        <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
-        <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a class="k-btn k-btn--sm" href="about.html">About</a>
-        <a class="k-btn k-btn--sm" href="contact.html">Contact</a>
+      <div class="k-sheet__foot" style="--i:${NAV.length + 4}">
+        <div class="k-sheet__quick">
+          <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings</span></button>
+          <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme</span></button>
+          <button class="k-sheet__q" type="button" data-onboard-open><i>${PLANE_ICON}</i><span>Check in</span></button>
+          <button class="k-sheet__q is-hidden" type="button" data-account-open hidden><i>${icon.user}</i><span>Account</span></button>
+          <button class="k-sheet__q is-hidden" type="button" data-cart-open hidden><i>${icon.bag}<span class="k-nav__cart-count" data-cart-count hidden>0</span></i><span>Cart</span></button>
+        </div>
+        <div class="k-sheet__pills">
+          <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
+          <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
+          <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a class="k-btn k-btn--sm" href="about.html">About</a>
+          <a class="k-btn k-btn--sm" href="contact.html">Contact</a>
+        </div>
       </div>`;
 
     const guides = document.createElement('div');
@@ -387,7 +393,7 @@
       pill.style.setProperty('--i', String($$('.k-tabbar__item', pill).indexOf(a)));
       pill.removeAttribute('data-idle');
     });
-    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open]')) setOpen(false); });
+    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open], [data-onboard-open]')) setOpen(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
     const footer = document.createElement('footer');
@@ -2228,7 +2234,9 @@
       bindPDP(pdpEl);
     }
     const wasOpen = pdpEl.classList.contains('is-open');
-    Object.assign(pdpState, { id, cw: Math.min(cw, Math.max(0, (p.colorways || []).length - 1)), size: (p.sizes || []).length === 1 ? p.sizes[0] : '', img: 0, full });
+    const mine = ((taste() || {}).sizes || {}).top;   // the size from check-in, when this piece comes in it
+    const fits = mine && (p.sizes || []).find((z) => z.toLowerCase() === mine);
+    Object.assign(pdpState, { id, cw: Math.min(cw, Math.max(0, (p.colorways || []).length - 1)), size: (p.sizes || []).length === 1 ? p.sizes[0] : (fits || ''), img: 0, full });
     if (!wasOpen) pdpEl.__return = document.activeElement;
     renderPDP();
     document.documentElement.classList.add('is-pdp-open');
@@ -3872,6 +3880,32 @@
     signal.addEventListener('abort', () => { clearInterval(tick); cancelAnimationFrame(raf); if (S.earth) S.earth.destroy(); });
   }
 
+  /* Check-in answers (js/kiosk-onboard.js) and how they pick posts */
+  const taste = () => { const t = store.get('kiosk:taste', null); return t && t.completedAt ? t : null; };
+  const INTEREST_MATCH = {
+    cars: { desks: ['automotive'], words: /\b(car|cars|meet|stance|drift|jdm|rollers|build|garage|infiniti|bmw|honda civic|night drive)\b/i },
+    motorcycles: { words: /\b(motorcycle|moto|bike|superbike|rider|riders|r1m?|r3|cbr|yamaha|ducati|powersports)\b/i },
+    sports: { words: /\b(sport|race|racing|track|skate|ball|game)\b/i },
+    travel: { desks: ['travel'], words: /\b(travel|trip|road|city|night drive|vhs)\b/i },
+    fashion: { desks: ['fashion'], words: /\b(fashion|streetwear|fit|style|sourcing|thrift)\b/i },
+    skate: { words: /\b(skate|board|park)\b/i },
+    music: { desks: ['music'], words: /\b(music|mix|phonk|record|tape|vhs|sound)\b/i },
+    culture: { words: /\b(culture|people|community|meet|lunar)\b/i },
+    food: { words: /\b(food|eat|kitchen|market)\b/i },
+    photo: { words: /\b(photo|film|camera|frames?|edit|cinematic)\b/i },
+  };
+  const FORMAT_MATCH = { films: 'video', vlogs: 'video', interviews: 'video', photo: 'photo', reads: 'article', audio: 'article' };
+  function pickedFor(t, posts) {
+    const words = (f) => [f.title, f.make, f.model, f.tagline, f.city, (f.tags || []).join(' ')].filter(Boolean).join(' ');
+    const types = new Set((t.formats || []).map((x) => FORMAT_MATCH[x]).filter(Boolean));
+    return posts.map((f) => {
+      let score = 0;
+      (t.interests || []).forEach((k) => { const m = INTEREST_MATCH[k]; if (!m) return; if ((m.desks || []).includes(f.desk)) score += 2; if (m.words && m.words.test(words(f))) score += 3; });
+      if (types.has(postType(f))) score += 1;
+      return { f, score };
+    }).filter((x) => x.score >= 2).sort((a, b) => b.score - a.score || String(b.f.published || '').localeCompare(String(a.f.published || ''))).map((x) => x.f);
+  }
+
   /* Netflix-style rows for the Atlas: featured up top, then by type and desk */
   function atlasTile(f, big) {
     const type = postType(f);
@@ -3890,7 +3924,10 @@
   function atlasRows(posts) {
     const newest = byNewest(posts);
     const featured = worldFeatured();
+    const t = taste();
+    const picks = t ? pickedFor(t, posts) : [];
     const rows = [
+      ...(picks.length ? [{ title: t.name ? `Picked for you, ${t.name}` : 'Picked for you', list: picks }] : []),
       { title: 'Featured', list: featured, big: true },
       { title: 'Latest from the road', list: newest },
       { title: 'Films & vlogs', list: newest.filter((f) => postType(f) === 'video') },
@@ -3898,7 +3935,8 @@
       { title: 'Stories', list: newest.filter((f) => postType(f) === 'article') },
       ...Object.keys(DESKS).map((d) => ({ title: `${DESKS[d]} desk`, list: newest.filter((f) => f.desk === d) })),
     ].filter((r) => r.list.length);
-    return rows.map((r) => `
+    const nudge = t ? '' : `<div class="k-wrap"><div class="k-atlas-checkin"><p>Tell us what you’re into and the Atlas will pick for you.</p><button class="k-btn k-btn--sm k-btn--solid" type="button" data-onboard-open>Check in · 1 min</button></div></div>`;
+    return nudge + rows.map((r) => `
       <div class="k-wrap k-frow k-arow${r.big ? ' k-arow--big' : ''}" data-reveal>
         <div class="k-frow__head"><h2 class="k-frow__title">${esc(r.title)}</h2><span class="k-frow__count">${r.list.length}</span></div>
         ${railShell(r.list.map((f) => atlasTile(f, r.big)).join(''), r.title, `k-hscroll-wrap--films${r.big ? ' k-hscroll-wrap--atlas-big' : ''}`)}
@@ -4038,8 +4076,9 @@
     };
     const paint = () => { fill('lib-controls', controls()); results(); };
     $$('[data-lib-q]').forEach((el) => { el.value = st.q; });
-    fill('atlas-rows', atlasRows(posts));
-    hydrateCovers(mount('atlas-rows') || document);
+    const paintRows = () => { fill('atlas-rows', atlasRows(posts)); hydrateCovers(mount('atlas-rows') || document); reveal(mount('atlas-rows')); };
+    paintRows();
+    document.addEventListener('kiosk:taste', paintRows, { signal });
     paint();
     mountAtlasEarth(posts);
     let t = 0;
@@ -4771,6 +4810,8 @@
     return hit ? { lat: hit[0], lon: hit[1], city: hit[2], approx: true } : null;
   }
   function visitorHome(signal) {
+    const t = taste();
+    if (t && t.home && t.home.lat != null && t.home.lon != null) return Promise.resolve({ lat: t.home.lat, lon: t.home.lon, city: t.home.city });   // the home city from check-in
     const fallback = homeFromZone() || { lat: 40.71, lon: -74.0, city: 'New York', approx: true };
     const ask = fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
       .then((r) => (r.ok ? r.json() : null))

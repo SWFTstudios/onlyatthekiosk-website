@@ -17,6 +17,7 @@ import {
 } from '../_lib/session.js';
 import { customerProfile } from '../_lib/shopify-customer.js';
 import { getCart } from '../_lib/storefront-cart.js';
+import { readProfile } from '../_lib/taste.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -72,6 +73,7 @@ export async function onRequest(context) {
         firstName: session.firstName,
         shopifyCustomerId: session.shopifyCustomerId,
       },
+      profile: await readProfile(env, session.userId),
       wishlist: (wishlistRows.results || []).map((r) => ({
         kind: r.kind,
         ref: r.ref,

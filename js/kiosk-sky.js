@@ -522,6 +522,19 @@
     const fogEl = section.querySelector('.k-sky__fog');
     const route = section.querySelector('[data-sky-route]');
     const tagline = section.querySelector('.k-sky__tagline');
+    // The visitor's local time in the tagline's place (12- or 24-hour, as their device prefers)
+    const clockEl = section.querySelector('[data-sky-clock]');
+    const showTime = () => {
+      if (!clockEl) return;
+      const parts = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).formatToParts(new Date());
+      const hm = parts.filter((p) => p.type !== 'dayPeriod').map((p) => p.value).join('').trim();
+      const ap = (parts.find((p) => p.type === 'dayPeriod') || {}).value || '';
+      clockEl.firstElementChild.textContent = hm;
+      clockEl.lastElementChild.textContent = ap.replace(/\./g, '').toUpperCase();
+      clockEl.setAttribute('datetime', new Date().toISOString());
+    };
+    showTime();
+    const clockTick = setInterval(showTime, 5000);
 
     /* The ꓘIOSK wordmark lives above everything (it flies into the nav), so
      * the clouds that cover its feet are a mask that follows the horizon. */
@@ -655,7 +668,7 @@
     wake();
     return {
       stop() {
-        on = false; clearInterval(tick); tl.kill(); st.kill(); if (sat) sat.destroy(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
+        on = false; clearInterval(tick); clearInterval(clockTick); tl.kill(); st.kill(); if (sat) sat.destroy(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf);
         if (navMark) { navMark.style.opacity = ''; navMark.style.transform = ''; }
         document.documentElement.classList.remove('is-mark-pending');
       },
