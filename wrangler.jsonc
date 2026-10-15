@@ -6,6 +6,9 @@
   "name": "onlyatthekiosk-website",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-10-01",
+  // Build the site into dist/ on every deploy, so `npx wrangler deploy` works
+  // even when the dashboard's build command is left empty.
+  "build": { "command": "bash scripts/build-worker.sh" },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
