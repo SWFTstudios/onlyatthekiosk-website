@@ -22,7 +22,10 @@
   "routes": [
     { "pattern": "onlyatthekiosk.com", "custom_domain": true },
     { "pattern": "www.onlyatthekiosk.com", "custom_domain": true }
-  ]
+  ],
+  // Empty block: preview builds need this key (Wrangler 4.135+); no separate
+  // bindings/vars for previews yet. See Workers Previews configuration docs.
+  "previews": {}
   // Accounts (sign-in, wishlist, cart, check-in) need a D1 database. Until it
   // exists the site runs without it and shows "Accounts are coming soon".
   // To switch accounts on:
