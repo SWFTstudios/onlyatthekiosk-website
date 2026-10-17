@@ -3432,10 +3432,16 @@
     if (machines.length) {
       fill('story-machines', machines.map((m) => `
         <article class="k-machine k-glass" data-reveal>
+          <div class="k-machine__plans">
+          ${m.factory ? `<figure class="k-machine__factory">
+            <div class="k-machine__paper"><img src="${esc(m.factory.src)}" alt="${esc(`${m.make} ${m.model}: ${m.factory.caption}`)}" loading="lazy"></div>
+            <figcaption>Factory drawing · ${esc(m.factory.caption)}<span>${esc(m.factory.credit)}</span></figcaption>
+          </figure>` : ''}
           <figure class="k-machine__plan">
             <div class="k-machine__svg" data-schematic="${esc(m.schematic)}"><img src="${esc(m.schematic)}" alt="${esc(`${m.make} ${m.model} side-elevation schematic`)}" loading="lazy"></div>
             <figcaption>${esc(`${m.make} ${m.model}`)}${m.drawn ? ` · drawn as ${esc(m.drawn)}` : ''} · dimensions in mm</figcaption>
           </figure>
+          </div>
           <div class="k-machine__body">
             <p class="k-eyebrow">${esc(m.make)} · ${esc(m.years || '')}</p>
             <h3>${esc(m.model)}</h3>

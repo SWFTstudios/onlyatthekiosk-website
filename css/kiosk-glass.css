@@ -1751,8 +1751,12 @@ html[data-motion='reduced'] .k-wheel__ambient img { animation: none; }
 /* Spec sheet */
 .k-machines { display: grid; gap: 12px; }
 .k-machine { padding: clamp(16px, 2.4vw, 28px); border-radius: var(--r-lg); display: grid; gap: clamp(20px, 3vw, 36px); }
-@media (min-width: 1000px) { .k-machine { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: start; } .k-machine__plan { position: sticky; top: calc(var(--nav-h) + 24px); } }
-.k-machine__plan { margin: 0; }
+@media (min-width: 1000px) { .k-machine { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: start; } .k-machine__plans { position: sticky; top: calc(var(--nav-h) + 24px); } }
+.k-machine__plans { display: grid; gap: 18px; }
+.k-machine__plan, .k-machine__factory { margin: 0; }
+.k-machine__paper { background: #fff; border: 1px solid var(--line-2); border-radius: var(--r-md); padding: clamp(10px, 2vw, 24px); }
+.k-machine__paper img { display: block; width: 100%; max-width: 680px; height: auto; margin: 0 auto; }
+.k-machine__factory figcaption span { display: block; margin-top: 4px; text-transform: none; letter-spacing: 0.02em; }
 .k-machine__svg {
   --sx-paper: var(--bg-2);
   color: var(--ink);
@@ -1766,7 +1770,7 @@ html[data-motion='reduced'] .k-wheel__ambient img { animation: none; }
 }
 .k-machine__svg svg, .k-machine__svg img { display: block; width: 100%; height: auto; }
 html[data-theme='dark'] .k-machine__svg img { filter: invert(1); }
-.k-machine__plan figcaption { padding: 10px 4px 0; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.k-machine__plan figcaption, .k-machine__factory figcaption { padding: 10px 4px 0; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
 .k-machine__body h3 { font-size: calc(clamp(26px, 2.6vw, 34px) * var(--type, 1)); font-weight: 450; letter-spacing: -0.02em; margin: 6px 0 18px; }
 .k-machine__stats { display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--line); }
 .k-machine__stats div { display: grid; grid-template-columns: minmax(96px, 0.42fr) 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }

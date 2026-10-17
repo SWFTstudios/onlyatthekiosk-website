@@ -726,6 +726,7 @@ window.KIOSK_CONTENT = {
    *   schematic  side-elevation line drawing (scripts/draw-schematics.js)
    *   drawn      which version the drawing and numbers describe
    *   stats      [{ label, value }]   facts  ['…']   sources  [{ label, url }]
+   *   factory    a drawing from that manual { src, caption, credit }
    *   manual     the factory owner’s manual: its parts-location pages are the
    *              manufacturer’s own line drawings (linked, not copied)
    * -------------------------------------------------------- */
@@ -768,6 +769,7 @@ window.KIOSK_CONTENT = {
       years: '2015–present',
       schematic: 'images/schematics/yamaha-r1m.svg',
       drawn: '2025–26 U.S. specification',
+      factory: { src: 'images/schematics/factory/yamaha-r1-right.webp', caption: 'Right view, YZF-R1 (the R1M shares its frame and engine)', credit: 'Yamaha Motor Co., Ltd. · 2021 YZF-R1 Owner’s Manual, p. 2-2' },
       manual: { label: '2021 YZF-R1 series Owner’s Manual (Yamaha, PDF)', url: 'https://www2.yamaha-motor.co.jp/Manual/pdf/mc/2021B3L6.pdf' },
       stats: [
         { label: 'Engine', value: '998 cc inline-four, crossplane crank' },
