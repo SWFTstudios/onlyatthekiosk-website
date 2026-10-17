@@ -4673,7 +4673,7 @@
 
   function shopCarousel(root) {
     root.innerHTML = `
-      <div class="k-wheel k-shopwheel k-dark">
+      <div class="k-wheel k-wheel--clear k-shopwheel">
         <div class="k-wheel__ambient" aria-hidden="true"><img alt="" data-sw-ambient hidden></div>
         <div class="k-wheel__stage k-shopwheel__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Pieces. Left and right arrows turn the carousel, Enter opens the piece in front." data-sw-stage>
           <div class="k-wheel__drum" data-sw-drum aria-hidden="true"></div>
@@ -4766,6 +4766,64 @@
     };
   }
 
+  /* ------------------------------------------------ shop hero carousel
+   * The top of vault.html: promotions (C.promos) and one card per
+   * collection on a 3D drum. Tapping the front card (or its button) runs
+   * its action: jump to a gate, a sort or an availability filter, or a link.
+   * -------------------------------------------------------------------- */
+  function heroCarousel(root, items, onPick) {
+    root.innerHTML = `
+      <div class="k-wheel k-wheel--clear k-herowheel">
+        <div class="k-wheel__stage k-herowheel__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Collections and promotions. Left and right arrows turn the carousel, Enter opens the one in front." data-hw-stage>
+          <div class="k-wheel__drum" data-hw-drum aria-hidden="true"></div>
+        </div>
+        <div class="k-herowheel__now">
+          <button class="k-wheel__step" type="button" data-hw-step="-1" aria-label="Previous">${icon.left}</button>
+          <div class="k-herowheel__info" aria-live="polite" aria-atomic="true">
+            <span class="k-mono k-wheel__count" data-hw-count></span>
+            <span class="k-herowheel__note" data-hw-note></span>
+          </div>
+          <button class="k-wheel__step" type="button" data-hw-step="1" aria-label="Next">${icon.right}</button>
+        </div>
+        <div class="k-herowheel__cta"><button class="k-btn k-btn--solid" type="button" data-hw-go><span data-hw-label></span><span class="k-arrow">${icon.right}</span></button></div>
+      </div>`;
+    const go = $('[data-hw-go]', root);
+    const drum = spinDrum({
+      stage: $('[data-hw-stage]', root),
+      drum: $('[data-hw-drum]', root),
+      step: 32,
+      span: 4,
+      makeCard() {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'k-wheel__card k-herowheel__card';
+        b.tabIndex = -1;
+        b.innerHTML = '<span class="k-shopwheel__media"></span><span class="k-herowheel__tag"><small></small><b></b></span>';
+        return b;
+      },
+      paint(card, i) {
+        const it = items[i];
+        $('.k-shopwheel__media', card).innerHTML = it.image
+          ? `<img class="k-tcard__img" src="${esc(it.image)}" alt="" decoding="async">`
+          : (it.product ? termMedia(it.product, 0).replace(/ loading="lazy"/g, '') : '');
+        $('.k-herowheel__tag small', card).textContent = it.eyebrow;
+        $('.k-herowheel__tag b', card).textContent = it.title;
+        card.classList.toggle('is-promo', it.kind === 'promo');
+      },
+      onFront(i) {
+        const it = items[i];
+        $('[data-hw-count]', root).textContent = `${pad(i + 1)} / ${pad(items.length)} · ${it.eyebrow}`;
+        $('[data-hw-note]', root).textContent = it.note;
+        $('[data-hw-label]', root).textContent = it.cta;
+        go.setAttribute('aria-label', `${it.cta}: ${it.title}`);
+      },
+      onTap: (i) => onPick(items[i]),
+    });
+    $$('[data-hw-step]', root).forEach((b) => b.addEventListener('click', () => drum.spin(Number(b.dataset.hwStep))));
+    go.addEventListener('click', () => onPick(items[drum.front]));
+    drum.setItems(items.length, 0, true);
+  }
+
   function pageVault() {
     const all = (C.products || []);
     const cats = C.categories || [];
@@ -4787,7 +4845,6 @@
     const heroShot = shots.length ? shots[hash(new Date().toDateString()) % shots.length] : '';
     if (heroShot) {
       fill('term-backdrop', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
-      fill('term-life', `<img src="${esc(heroShot)}" alt="" decoding="async">`);
     }
 
     const board = mount('term-board');
@@ -4858,18 +4915,14 @@
 
     const sortSel = mount('vault-sort');
     if (sortSel) sortSel.value = sort;
+    const availOk = (p, a) => (a === 'pickup' ? !!p.pickup : a === 'digital' ? isDigitalP(p) : a === 'ships' ? !p.pickup && !isDigitalP(p) : true);
     const matches = (p) => {
       if (cat !== 'all' && p.category !== cat) return false;
       if (filters.size.size && !(p.sizes || []).some((z) => filters.size.has(z))) return false;
       if (filters.colour.size && !(p.colorways || []).some((w) => filters.colour.has(w.name))) return false;
       if (filters.store.size && !filters.store.has(p.store || 'kiosk')) return false;
       if (filters.max != null && p.price != null && p.price > filters.max) return false;
-      if (filters.avail.size) {
-        const ok = (filters.avail.has('pickup') && p.pickup)
-          || (filters.avail.has('digital') && isDigitalP(p))
-          || (filters.avail.has('ships') && !p.pickup && !isDigitalP(p));
-        if (!ok) return false;
-      }
+      if (filters.avail.size && ![...filters.avail].some((a) => availOk(p, a))) return false;
       return true;
     };
     const order = (list) => {
@@ -4924,6 +4977,7 @@
       filterRoot.classList.toggle('is-open', on);
       const btn = $('[data-filter-open]'); if (btn) btn.setAttribute('aria-expanded', String(on));
       document.documentElement.classList.toggle('is-filter-open', on);
+      const scrim = $('.k-filter__scrim', filterRoot); if (scrim) scrim.hidden = !on;
     };
 
     document.addEventListener('click', (e) => {
@@ -5005,6 +5059,42 @@
     if (sortSel) sortSel.addEventListener('change', () => { sort = sortSel.value; page = 1; render(); }, { signal });
     syncFilterBadge();
     render();
+
+    // Hero carousel: promotions first, then one card per collection
+    const heroRoot = mount('term-hero');
+    if (heroRoot) {
+      const photoOf = (list) => { const p = list.find((x) => lifeOf(x, 0).length) || list[0]; return { product: p, image: p ? lifeOf(p, 0)[0] || '' : '' }; };
+      const heroItems = [];
+      (C.promos || []).forEach((pr) => {
+        let list = all.filter((p) => (!pr.cat || p.category === pr.cat) && (!pr.avail || availOk(p, pr.avail)));
+        if (pr.sort === 'new') list = list.slice().sort((a, b) => String(b.added || '').localeCompare(String(a.added || '')));
+        if (!list.length && !pr.href) return;
+        const ph = photoOf(list);
+        heroItems.push({ kind: 'promo', eyebrow: pr.eyebrow || 'Featured', title: pr.title, note: pr.note || '', cta: pr.cta || 'Shop now', image: pr.image || ph.image, product: ph.product, action: pr });
+      });
+      cats.forEach((c) => {
+        const list = all.filter((p) => p.category === c.id);
+        if (!list.length) return;
+        const ph = photoOf(list);
+        heroItems.push({ kind: 'collection', eyebrow: `Gate ${gateOf(c.id)} · Collection`, title: c.label, note: `${list.length} ${list.length === 1 ? 'piece' : 'pieces'}`, cta: `Shop ${c.label}`, image: ph.image, product: ph.product, action: { cat: c.id } });
+      });
+      if (heroItems.length) {
+        heroCarousel(heroRoot, heroItems, (it) => {
+          const a = it.action || {};
+          if (a.href) { location.href = a.href; return; }
+          cat = a.cat || 'all';
+          sort = a.sort || 'featured';
+          page = 1;
+          filters.size.clear(); filters.colour.clear(); filters.store.clear(); filters.avail.clear(); filters.max = null;
+          if (a.avail) filters.avail.add(a.avail);
+          if (filterBody) filterBody.innerHTML = filterHtml();
+          if (sortSel) sortSel.value = sort;
+          $$('[data-mount="term-gates"] [data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === cat)));
+          render();
+          const sec = document.getElementById('shop'); if (sec) sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+        });
+      } else heroRoot.hidden = true;
+    }
 
     const lounge = all.flatMap((p) => (p.colorways || []).map((w, i) => ({ p, i, w })).filter((x) => (x.w.lifestyle || [])[1]));
     if (lounge.length) {

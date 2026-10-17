@@ -951,6 +951,23 @@ window.KIOSK_CONTENT = {
     { name: 'Sand', hex: '#d2c4b0' }, { name: 'Bone', hex: '#e8e0d4' }, { name: 'Tail Red', hex: '#7a2430' }, { name: 'Racing Blue', hex: '#364679' },
   ],
 
+  /* ----------------------------------------------------------
+   * PROMOS — the cards that lead the shop's 3D hero carousel, ahead of
+   * one card per collection (made from `categories` automatically).
+   * Each: eyebrow, title, note, cta (button text) and what a tap does:
+   *   cat:   a gate (category id below)
+   *   sort:  'new' | 'price-asc' | 'price-desc'
+   *   avail: 'pickup' | 'digital' | 'ships'
+   *   href:  any link instead (a drop page, a story…)
+   * image is optional: it defaults to a photo of a matching piece.
+   * A promo with no matching pieces is skipped.
+   * -------------------------------------------------------- */
+  promos: [
+    { eyebrow: 'Just landed', title: 'New drops', note: 'The newest pieces at the kiosk, first off the plane.', sort: 'new', cta: 'See new drops' },
+    { eyebrow: 'Collect in person', title: 'Pickup only', note: 'Pieces you can only collect at the kiosk.', avail: 'pickup', cta: 'See pickup pieces' },
+    { eyebrow: 'Instant download', title: 'Digital', note: 'Films and LUT packs, delivered straight away.', avail: 'digital', cta: 'See downloads' },
+  ],
+
   categories: [
     { id: 'quotes', label: 'Words to wear', kind: 'physical' },
     { id: 'travel', label: 'Travel goods', kind: 'physical' },
