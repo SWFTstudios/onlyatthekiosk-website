@@ -1527,87 +1527,53 @@
       </div>`;
   }
 
-  function songWheel(root) {
-    const slug = root.dataset.wheel;
-    const mix = mixBySlug(slug);
-    const stage = $('[data-wheel-stage]', root);
-    const drum = $('[data-wheel-drum]', root);
-    const ambient = $('[data-wheel-ambient]', root);
-    const playBtn = $('[data-wheel-play]', root);
-    const SLOTS = WHEEL_SPAN * 2 + 1;
-
-    let songs = Array.from({ length: SLOTS }, () => ({}));   // blank covers while the list loads
-    let fallback = false;      // no song list: the wheel holds the playlist itself
-    let loaded = false;
-    let pos = 0;               // fractional song index facing the front
+  /**
+   * A turning 3D drum of cards: the engine behind the radio's song wheel and
+   * the shop carousel. Drag or swipe it, scroll over it (trackpads turn it
+   * freely, a mouse wheel moves one card per notch; vertical scrolling only
+   * while all of it is on screen) or use the arrow keys. It spins with
+   * momentum and settles on a card; the drum loops round.
+   *   stage, drum      the perspective box and the rotating element inside it
+   *   step, span       degrees between cards, cards drawn either side of the front
+   *   makeCard()       → an element for the pool (kept while it's in view)
+   *   paint(card, i)   fill a card with item i
+   *   onFront(i)       item i came round to the front
+   *   onTap(i)         the front card was tapped, or Enter / Space pressed
+   */
+  function spinDrum({ stage, drum, step = 30, span = 4, makeCard, paint, onFront, onTap }) {
+    const SLOTS = span * 2 + 1;
+    let n = 0;
+    let ready = false;
+    let pos = 0;               // fractional item index facing the front
     let vel = 0;
     let target = 0;
     let raf = 0;
     let front = -1;
-    let followed = -1;         // last song the player reported, so the wheel follows it once
     let drag = null;
-    let touched = 0;           // last time the visitor turned the wheel
+    let touched = 0;           // last time the visitor turned it
     let wheelSnap = 0;
     let wheelLock = 0;
     let cardW = 240;
     let radius = 600;
 
-    const wrap = (i) => { const n = songs.length; return ((i % n) + n) % n; };
-    const current = () => (player.track && player.track.slug === slug ? player.track.index : -1);
-
-    // A fixed pool of covers; each keeps the song it shows while it's in view
-    const cards = Array.from({ length: SLOTS }, () => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'k-wheel__card';
-      b.tabIndex = -1;
-      b.innerHTML = `<span class="plate plate--${esc(mix.tone || 'graphite')}"></span><img alt="" decoding="async" draggable="false" hidden><span class="k-wheel__badge"><span class="k-wheel__eq"><i></i><i></i><i></i></span>${icon.play}</span>`;
-      const img = $('img', b);
-      img.addEventListener('load', () => { if (img.dataset.src) img.hidden = false; });
-      img.addEventListener('error', () => { img.hidden = true; });
-      drum.append(b);
-      return b;
-    });
+    const wrap = (i) => (n ? ((i % n) + n) % n : 0);
+    const cards = Array.from({ length: SLOTS }, () => { const c = makeCard(); drum.append(c); return c; });
 
     const measure = () => {
       cardW = cards[0].offsetWidth || cardW;
-      radius = Math.round(cardW / 2 / Math.tan((WHEEL_STEP * Math.PI) / 360) + cardW * 0.06);
+      radius = Math.round(cardW / 2 / Math.tan((step * Math.PI) / 360) + cardW * 0.06);
       drum.style.setProperty('--r', `${radius}px`);
     };
 
-    const paint = (card, song) => {
-      const img = $('img', card);
-      const src = (song && song.cover) || '';
-      if (img.dataset.src === src) return;
-      img.dataset.src = src;
-      img.hidden = true;
-      if (src) img.src = src; else img.removeAttribute('src');
-    };
-
-    const describe = () => {
-      const song = songs[front] || {};
-      $('[data-wheel-count]', root).textContent = !loaded ? 'Loading songs…' : fallback ? (mix.volume || '') : `${pad(front + 1)} / ${pad(songs.length)}`;
-      $('[data-wheel-title]', root).textContent = loaded ? (song.title || '') : mix.title;
-      $('[data-wheel-artist]', root).textContent = loaded ? (song.artist || '') : (mix.mood || '');
-      const src = song.cover || '';
-      if (ambient.dataset.src !== src) {
-        ambient.dataset.src = src;
-        ambient.hidden = true;
-        if (src) { ambient.onload = () => { ambient.hidden = false; }; ambient.src = src; }
-      }
-      sync();
-    };
-
     const render = () => {
-      const n = songs.length;
       const base = Math.round(pos);
-      const span = Math.min(WHEEL_SPAN, Math.floor((n - 1) / 2));   // never show a song twice
+      const reach = Math.min(span, Math.floor((n - 1) / 2));   // never show an item twice
       const used = new Set();
-      for (let u = base - span; u <= base + span; u += 1) {
+      for (let u = base - reach; n && u <= base + reach; u += 1) {
         const card = cards[((u % SLOTS) + SLOTS) % SLOTS];
         used.add(card);
         const off = u - pos;
-        const a = off * WHEEL_STEP;
+        const a = off * step;
         card.hidden = false;
         card.style.transform = `translate(-50%, -50%) rotateY(${a.toFixed(2)}deg) translateZ(${radius}px)`;
         card.style.setProperty('--shade', Math.min(1, 1 - Math.cos((a * Math.PI) / 180) + Math.abs(off) * 0.07).toFixed(3));
@@ -1615,19 +1581,19 @@
         if (card.dataset.u !== String(u)) {
           card.dataset.u = String(u);
           card.dataset.i = String(wrap(u));
-          paint(card, songs[wrap(u)]);
+          paint(card, wrap(u));
         }
       }
       cards.forEach((c) => { if (!used.has(c)) { c.hidden = true; delete c.dataset.u; } });
       const f = wrap(base);
-      if (f !== front) { front = f; describe(); }
+      if (n && f !== front) { front = f; onFront(f); }
     };
 
     const tick = () => {
       raf = 0;
       if (!drag) {
         if (REDUCED) { pos = target; vel = 0; } else {
-          vel = (vel + (target - pos) * 0.075) * 0.74;   // damped spring towards the resting song
+          vel = (vel + (target - pos) * 0.075) * 0.74;   // damped spring towards the resting card
           pos += vel;
           if (Math.abs(target - pos) < 0.002 && Math.abs(vel) < 0.002) { pos = target; vel = 0; }
         }
@@ -1637,43 +1603,41 @@
     };
     const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
 
-    const spin = (n) => { touched = Date.now(); target = Math.round(target) + n; run(); };
-    /** Turn the shortest way round to song `i`. */
-    const goTo = (i) => {
-      const n = songs.length;
-      const base = Math.round(target);
-      let d = (((i - wrap(base)) % n) + n) % n;
-      if (d > n / 2) d -= n;
-      target = base + d;
-      run();
+    const api = {
+      cards,
+      get front() { return front; },
+      get busy() { return !!drag || Date.now() - touched < 2500; },
+      /** Fill the drum with `count` items, facing item `start`; `spinIn` turns it in from the side. */
+      setItems(count, start = 0, spinIn = true) {
+        n = count;
+        ready = count > 0;
+        front = -1;
+        cards.forEach((c) => { delete c.dataset.u; });
+        pos = REDUCED || !spinIn ? start : start - Math.min(6, count);
+        vel = 0;
+        target = start;
+        run();
+        render();
+      },
+      /** Placeholder cards turning while the real items load. */
+      idle(count) { n = count; ready = false; render(); if (!REDUCED) { target = 2; run(); } },
+      spin(k) { if (!ready) return; touched = Date.now(); target = Math.round(target) + k; run(); },
+      /** Turn the shortest way round to item `i`. */
+      goTo(i, byVisitor) {
+        if (!ready) return;
+        if (byVisitor) touched = Date.now();
+        const base = Math.round(target);
+        let d = (((i - wrap(base)) % n) + n) % n;
+        if (d > n / 2) d -= n;
+        target = base + d;
+        run();
+      },
+      refresh() { cards.forEach((c) => { if (c.dataset.u != null) paint(c, Number(c.dataset.i)); }); },
     };
-    const playFront = () => {
-      if (!loaded) return;
-      touched = Date.now();
-      if (fallback) { player.play(slug); return; }
-      followed = front;
-      player.play(slug, { index: front });
-    };
-
-    function sync() {
-      const cur = current();
-      cards.forEach((c) => c.classList.toggle('is-playing', !fallback && player.playing && c.dataset.i === String(cur)));
-      const on = fallback ? player.isPlaying(slug) : player.playing && cur === front;
-      const ico = $('[data-ico]', playBtn);
-      ico.innerHTML = on ? icon.pause : icon.play;
-      $('[data-label]', playBtn).textContent = on ? 'Pause' : 'Play';
-      playBtn.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${(songs[front] && songs[front].title) || mix.title}`);
-      root.classList.toggle('is-playing', player.isPlaying(slug));
-      // The player moved on to another song: turn to it, unless the visitor is browsing
-      if (loaded && !fallback && cur >= 0 && cur !== followed) {
-        followed = cur;
-        if (cur !== front && !drag && Date.now() - touched > 2500) goTo(cur);
-      }
-    }
 
     // Drag / swipe. Vertical swipes still scroll the page (touch-action: pan-y).
     stage.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0 || !loaded) return;
+      if (e.button !== 0 || !ready) return;
       drag = { x: e.clientX, y: e.clientY, from: pos, last: e.clientX, t: performance.now(), v: 0, moved: false, id: e.pointerId };
       vel = 0;
       touched = Date.now();
@@ -1704,15 +1668,15 @@
       drag = null;
       stage.classList.remove('is-dragging');
       if (!d.moved) {
-        const card = e.type === 'pointerup' && e.target.closest('.k-wheel__card');
-        if (card && card.dataset.u != null) {
+        const card = e.type === 'pointerup' && e.target.closest('[data-u]');
+        if (card && cards.includes(card)) {
           const u = Number(card.dataset.u);
-          if (u === Math.round(pos)) playFront(); else { touched = Date.now(); target = u; }
+          if (u === Math.round(pos)) onTap(front); else { touched = Date.now(); target = u; }
         }
         run();
         return;
       }
-      // Flick: carry the speed on and settle on the song it lands near
+      // Flick: carry the speed on and settle on the card it lands near
       const v = REDUCED || performance.now() - d.t > 90 ? 0 : d.v;
       vel = v * 0.6;
       target = Math.round(pos + v * 12);
@@ -1721,10 +1685,8 @@
     stage.addEventListener('pointerup', release);
     stage.addEventListener('pointercancel', release);
 
-    // Scroll: trackpads turn it freely, a mouse wheel moves one song per notch.
-    // Vertical scrolling only turns the wheel while all of it is on screen.
     stage.addEventListener('wheel', (e) => {
-      if (!loaded || songs.length < 2) return;
+      if (!ready || n < 2) return;
       const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const r = stage.getBoundingClientRect();
       if (!horiz && (r.top < 0 || r.bottom > window.innerHeight)) return;
@@ -1734,7 +1696,7 @@
       if (e.deltaMode === 1) d *= 32; else if (e.deltaMode === 2) d *= window.innerHeight;
       if (!horiz && Math.abs(d) >= 50) {
         const now = performance.now();
-        if (now - wheelLock > 70) { wheelLock = now; spin(Math.sign(d)); }
+        if (now - wheelLock > 70) { wheelLock = now; api.spin(Math.sign(d)); }
         return;
       }
       clearTimeout(wheelSnap);
@@ -1746,37 +1708,116 @@
     }, { passive: false });
 
     stage.addEventListener('keydown', (e) => {
-      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[e.key];
-      if (step && loaded) { e.preventDefault(); spin(step); } else if (e.key === 'Home' && loaded) { e.preventDefault(); touched = Date.now(); goTo(0); } else if (e.key === 'End' && loaded) { e.preventDefault(); touched = Date.now(); goTo(songs.length - 1); } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playFront(); }
+      const k = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[e.key];
+      if (k && ready) { e.preventDefault(); api.spin(k); } else if (e.key === 'Home' && ready) { e.preventDefault(); api.goTo(0, true); } else if (e.key === 'End' && ready) { e.preventDefault(); api.goTo(n - 1, true); } else if ((e.key === 'Enter' || e.key === ' ') && e.target === stage) { e.preventDefault(); if (ready) onTap(front); }
     });
-    $$('[data-wheel-step]', root).forEach((b) => b.addEventListener('click', () => { if (loaded) spin(Number(b.dataset.wheelStep)); }));
-    playBtn.addEventListener('click', playFront);
 
     if ('ResizeObserver' in window) {
-      const ro = new ResizeObserver(() => { if (!root.isConnected) { ro.disconnect(); return; } measure(); render(); });
+      const ro = new ResizeObserver(() => { if (!stage.isConnected) { ro.disconnect(); return; } measure(); render(); });
       ro.observe(stage);
     }
-
     measure();
-    render();
-    // Idle spin while the songs load
-    if (!REDUCED) { target = 2; run(); }
+    return api;
+  }
+
+  /** Swap a cover <img> without flashing a broken image while it loads. */
+  function setCover(img, src) {
+    if (img.dataset.src === (src || '')) return;
+    img.dataset.src = src || '';
+    img.hidden = true;
+    if (src) img.src = src; else img.removeAttribute('src');
+  }
+  function coverImg() {
+    const img = document.createElement('img');
+    img.alt = '';
+    img.decoding = 'async';
+    img.draggable = false;
+    img.hidden = true;
+    img.addEventListener('load', () => { if (img.dataset.src) img.hidden = false; });
+    img.addEventListener('error', () => { img.hidden = true; });
+    return img;
+  }
+
+  function songWheel(root) {
+    const slug = root.dataset.wheel;
+    const mix = mixBySlug(slug);
+    const ambient = $('[data-wheel-ambient]', root);
+    const playBtn = $('[data-wheel-play]', root);
+
+    let songs = [];
+    let fallback = false;      // no song list: the wheel holds the playlist itself
+    let loaded = false;
+    let followed = -1;         // last song the player reported, so the wheel follows it once
+    const current = () => (player.track && player.track.slug === slug ? player.track.index : -1);
+
+    const describe = (front) => {
+      const song = (loaded && songs[front]) || {};
+      $('[data-wheel-count]', root).textContent = !loaded ? 'Loading songs…' : fallback ? (mix.volume || '') : `${pad(front + 1)} / ${pad(songs.length)}`;
+      $('[data-wheel-title]', root).textContent = loaded ? (song.title || '') : mix.title;
+      $('[data-wheel-artist]', root).textContent = loaded ? (song.artist || '') : (mix.mood || '');
+      const src = song.cover || '';
+      if (ambient.dataset.src !== src) {
+        ambient.dataset.src = src;
+        ambient.hidden = true;
+        if (src) { ambient.onload = () => { ambient.hidden = false; }; ambient.src = src; }
+      }
+      sync();
+    };
+
+    const playFront = () => {
+      if (!loaded) return;
+      if (fallback) { player.play(slug); return; }
+      followed = wheel.front;
+      player.play(slug, { index: wheel.front });
+    };
+
+    const wheel = spinDrum({
+      stage: $('[data-wheel-stage]', root),
+      drum: $('[data-wheel-drum]', root),
+      step: WHEEL_STEP,
+      span: WHEEL_SPAN,
+      makeCard() {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'k-wheel__card';
+        b.tabIndex = -1;
+        b.innerHTML = `<span class="plate plate--${esc(mix.tone || 'graphite')}"></span><span class="k-wheel__badge"><span class="k-wheel__eq"><i></i><i></i><i></i></span>${icon.play}</span>`;
+        b.insertBefore(coverImg(), b.children[1]);
+        return b;
+      },
+      paint(card, i) { setCover($('img', card), loaded ? (songs[i] || {}).cover : ''); },
+      onFront: describe,
+      onTap: playFront,
+    });
+
+    function sync() {
+      const cur = current();
+      const front = wheel.front;
+      wheel.cards.forEach((c) => c.classList.toggle('is-playing', !fallback && player.playing && c.dataset.i === String(cur)));
+      const on = fallback ? player.isPlaying(slug) : player.playing && cur === front;
+      $('[data-ico]', playBtn).innerHTML = on ? icon.pause : icon.play;
+      $('[data-label]', playBtn).textContent = on ? 'Pause' : 'Play';
+      playBtn.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${(loaded && songs[front] && songs[front].title) || mix.title}`);
+      root.classList.toggle('is-playing', player.isPlaying(slug));
+      // The player moved on to another song: turn to it, unless the visitor is browsing
+      if (loaded && !fallback && cur >= 0 && cur !== followed) {
+        followed = cur;
+        if (cur !== front && !wheel.busy) wheel.goTo(cur);
+      }
+    }
+
+    $$('[data-wheel-step]', root).forEach((b) => b.addEventListener('click', () => wheel.spin(Number(b.dataset.wheelStep))));
+    playBtn.addEventListener('click', playFront);
+
+    wheel.idle(WHEEL_SPAN * 2 + 1);
     radioTracks.get(mix).then((list) => {
       if (!root.isConnected) return;
       loaded = true;
       fallback = !list.length;
       songs = list.length ? list : [{ title: mix.title, artist: mix.mood, cover: mix.cover }];
-      cards.forEach((c) => { delete c.dataset.u; });
-      const start = Math.max(0, current());
       followed = current();
-      front = -1;
-      // Spin in to the song that's playing (or the first)
-      pos = REDUCED || fallback ? start : start - Math.min(6, songs.length);
-      vel = 0;
-      target = start;
       root.classList.add('is-loaded');
-      run();
-      render();
+      wheel.setItems(songs.length, Math.max(0, current()), !fallback);
     });
 
     radioWheels.add({ root, sync });
@@ -4623,6 +4664,108 @@
     });
   }
 
+  /* ---------------------------------------------------- shop carousel
+   * vault.html's carousel view: the filtered pieces on a turning 3D drum
+   * (spinDrum). The piece in front shows its name, price and status below;
+   * tap it, or "View piece", to open it. The list view is the card grid.
+   * -------------------------------------------------------------------- */
+  const SHOP_VIEW_KEY = 'kiosk:shop-view';
+
+  function shopCarousel(root) {
+    root.innerHTML = `
+      <div class="k-wheel k-shopwheel k-dark">
+        <div class="k-wheel__ambient" aria-hidden="true"><img alt="" data-sw-ambient hidden></div>
+        <div class="k-wheel__stage k-shopwheel__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Pieces. Left and right arrows turn the carousel, Enter opens the piece in front." data-sw-stage>
+          <div class="k-wheel__drum" data-sw-drum aria-hidden="true"></div>
+        </div>
+        <p class="k-shopwheel__empty" data-sw-empty hidden>Nothing matches these filters.</p>
+        <div class="k-wheel__now" data-sw-now>
+          <button class="k-wheel__step" type="button" data-sw-step="-1" aria-label="Previous piece">${icon.left}</button>
+          <div class="k-wheel__info" aria-live="polite" aria-atomic="true">
+            <span class="k-mono k-wheel__count" data-sw-count></span>
+            <b class="k-wheel__title" data-sw-title></b>
+            <span class="k-wheel__artist" data-sw-sub></span>
+          </div>
+          <button class="k-wheel__step" type="button" data-sw-step="1" aria-label="Next piece">${icon.right}</button>
+        </div>
+        <div class="k-wheel__controls" data-sw-controls>
+          <span class="k-shopwheel__fare" data-sw-fare></span>
+          <button class="k-btn k-btn--solid" type="button" data-pdp="" data-cw="0" data-sw-open>View piece<span class="k-arrow">${icon.right}</span></button>
+          <button type="button" class="k-tcard__wish k-shopwheel__wish" data-wish-product="" aria-pressed="false" data-sw-wish>${icon.heart}</button>
+        </div>
+      </div>`;
+    const ambient = $('[data-sw-ambient]', root);
+    const openBtn = $('[data-sw-open]', root);
+    const wish = $('[data-sw-wish]', root);
+    let items = [];
+    let key = '';
+
+    const describe = (i) => {
+      const p = items[i];
+      if (!p) return;
+      const st = statusOf(p, 0);
+      const store = storeOf(p);
+      $('[data-sw-count]', root).textContent = `${pad(i + 1)} / ${pad(items.length)} · Gate ${gateOf(p.category)} · ${categoryLabel(p.category)}`;
+      $('[data-sw-title]', root).textContent = p.title;
+      $('[data-sw-sub]', root).textContent = [p.design, store && store.id !== 'kiosk' ? `by ${store.name}` : '', st.label].filter(Boolean).join(' · ');
+      $('[data-sw-fare]', root).textContent = price(p);
+      openBtn.dataset.pdp = p.id;
+      openBtn.setAttribute('aria-label', `View ${p.title}`);
+      wish.dataset.wishProduct = p.id;
+      wish.setAttribute('aria-label', `Save ${p.title}`);
+      wish.setAttribute('aria-pressed', String(!!(window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.wishlisted && window.KIOSK_ACCOUNT.wishlisted('product', p.id))));
+      const src = lifeOf(p, 0)[0] || '';
+      if (ambient.dataset.src !== src) {
+        ambient.dataset.src = src;
+        ambient.hidden = true;
+        if (src) { ambient.onload = () => { ambient.hidden = false; }; ambient.src = src; }
+      }
+    };
+
+    const drum = spinDrum({
+      stage: $('[data-sw-stage]', root),
+      drum: $('[data-sw-drum]', root),
+      step: 30,
+      span: 4,
+      makeCard() {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'k-wheel__card k-shopwheel__card';
+        b.tabIndex = -1;
+        b.innerHTML = '<span class="k-shopwheel__media"></span><span class="k-board__status k-shopwheel__status"></span>';
+        return b;
+      },
+      paint(card, i) {
+        const p = items[i];
+        if (!p) return;
+        $('.k-shopwheel__media', card).innerHTML = termMedia(p, 0).replace(/ loading="lazy"/g, '');
+        const st = statusOf(p, 0);
+        const chip = $('.k-shopwheel__status', card);
+        chip.className = `k-board__status k-board__status--${st.key} k-shopwheel__status`;
+        chip.textContent = st.label;
+      },
+      onFront: describe,
+      onTap: () => openBtn.click(),
+    });
+
+    $$('[data-sw-step]', root).forEach((b) => b.addEventListener('click', () => drum.spin(Number(b.dataset.swStep))));
+
+    return {
+      /** Show these pieces (spins in only when the selection changed). */
+      show(list) {
+        const k = list.map((p) => p.id).join(',');
+        if (k === key) return;
+        const keep = items[drum.front] && list.findIndex((p) => p.id === items[drum.front].id);
+        key = k;
+        items = list;
+        const empty = !list.length;
+        $('[data-sw-empty]', root).hidden = !empty;
+        ['[data-sw-stage]', '[data-sw-now]', '[data-sw-controls]'].forEach((sel) => { $(sel, root).hidden = empty; });
+        drum.setItems(list.length, keep > 0 ? keep : 0, !(keep >= 0));
+      },
+    };
+  }
+
   function pageVault() {
     const all = (C.products || []);
     const cats = C.categories || [];
@@ -4739,11 +4882,25 @@
     };
     const grid = mount('vault-grid');
     const moreBtn = mount('vault-more');
+    // Carousel or list (the card grid); the choice is remembered on this device
+    const carouselRoot = mount('vault-carousel');
+    let carousel = null;
+    let view = params.get('view') || store.get(SHOP_VIEW_KEY, 'carousel');
+    if (view !== 'list' && view !== 'carousel') view = 'carousel';
+    if (!carouselRoot) view = 'list';
     const render = () => {
       const list = order(all.filter(matches));
       const shown = list.slice(0, page * PAGE);
-      if (grid) grid.innerHTML = shown.map((p) => termCard(p)).join('');
-      if (moreBtn) { moreBtn.hidden = shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
+      const asCarousel = view === 'carousel';
+      $$('[data-shop-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.shopView === view)));
+      if (carouselRoot) carouselRoot.hidden = !asCarousel;
+      if (grid) grid.hidden = asCarousel;
+      if (asCarousel) {
+        if (!carousel) carousel = shopCarousel(carouselRoot);
+        carousel.show(list);
+        if (grid) grid.innerHTML = '';
+      } else if (grid) grid.innerHTML = shown.map((p) => termCard(p)).join('');
+      if (moreBtn) { moreBtn.hidden = asCarousel || shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
       const c = cats.find((x) => x.id === cat);
       const lab = mount('term-gate-label'); if (lab) lab.textContent = c ? `Gate ${gateOf(c.id)} · ${c.label}` : 'All gates';
       const n = mount('vault-count'); if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
@@ -4752,6 +4909,7 @@
       const qs = new URLSearchParams(location.search);
       if (cat === 'all') qs.delete('c'); else qs.set('c', cat);
       if (sort === 'featured') qs.delete('sort'); else qs.set('sort', sort);
+      qs.delete('view');
       [['size', filters.size], ['colour', filters.colour], ['store', filters.store], ['avail', filters.avail]].forEach(([k, set]) => {
         if (!set.size) qs.delete(k); else qs.set(k, [...set].join(','));
       });
@@ -4769,6 +4927,14 @@
     };
 
     document.addEventListener('click', (e) => {
+      const vb = e.target.closest('[data-shop-view]');
+      if (vb) {
+        if (vb.dataset.shopView === view) return;
+        view = vb.dataset.shopView;
+        store.set(SHOP_VIEW_KEY, view);
+        render();
+        return;
+      }
       if (e.target.closest('[data-filter-open]')) { setFilterOpen(!filterRoot.classList.contains('is-open')); return; }
       if (e.target.closest('[data-filter-close]')) { setFilterOpen(false); return; }
       const g = e.target.closest('[data-cat]');
