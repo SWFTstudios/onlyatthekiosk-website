@@ -726,6 +726,8 @@ window.KIOSK_CONTENT = {
    *   schematic  side-elevation line drawing (scripts/draw-schematics.js)
    *   drawn      which version the drawing and numbers describe
    *   stats      [{ label, value }]   facts  ['…']   sources  [{ label, url }]
+   *   manual     the factory owner’s manual: its parts-location pages are the
+   *              manufacturer’s own line drawings (linked, not copied)
    * -------------------------------------------------------- */
   machines: [
     {
@@ -735,6 +737,7 @@ window.KIOSK_CONTENT = {
       years: '2014–2024 model years',
       schematic: 'images/schematics/infiniti-q50.svg',
       drawn: 'V37 sedan, 2018-on dimensions',
+      manual: { label: '2023 Q50 Owner’s Manual (Infiniti, PDF)', url: 'https://www.infinitiusa.com/content/dam/Infiniti/US/manuals_guides/q50/2023/2023-infiniti-q50-owner-manual.pdf' },
       stats: [
         { label: 'Engine', value: '3.0 L twin-turbo V6 (VR30DDTT)' },
         { label: 'Power', value: '300 hp · 400 hp in the Red Sport 400' },
@@ -765,6 +768,7 @@ window.KIOSK_CONTENT = {
       years: '2015–present',
       schematic: 'images/schematics/yamaha-r1m.svg',
       drawn: '2025–26 U.S. specification',
+      manual: { label: '2021 YZF-R1 series Owner’s Manual (Yamaha, PDF)', url: 'https://www2.yamaha-motor.co.jp/Manual/pdf/mc/2021B3L6.pdf' },
       stats: [
         { label: 'Engine', value: '998 cc inline-four, crossplane crank' },
         { label: 'Power', value: '≈200 PS' },
@@ -796,6 +800,7 @@ window.KIOSK_CONTENT = {
       years: '2015–present',
       schematic: 'images/schematics/yamaha-r3.svg',
       drawn: '2025–26 U.S. specification',
+      manual: { label: '2019 YZF-R3 Owner’s Manual (Yamaha Europe, PDF)', url: 'https://cdn2.yamaha-motor.eu/prod/owner-manuals/Motorcycles/PB7PF8199E0E.PDF' },
       stats: [
         { label: 'Engine', value: '321 cc parallel twin, DOHC, 8 valves' },
         { label: 'Bore × stroke', value: '68.0 × 44.1 mm' },
@@ -825,6 +830,7 @@ window.KIOSK_CONTENT = {
       years: '2001–2006',
       schematic: 'images/schematics/honda-cbr600f4i.svg',
       drawn: '2005 U.S. specification',
+      manual: { label: '2006 CBR600F4i Owner’s Manual (Honda, PDF)', url: 'https://www.acura.com/assets/OWNERLINK/Model/own_man/powersports/2006/2006_CBR600F4.pdf' },
       stats: [
         { label: 'Engine', value: '599 cc inline-four, DOHC, 16 valves' },
         { label: 'Bore × stroke', value: '67 × 42.5 mm' },
@@ -856,6 +862,7 @@ window.KIOSK_CONTENT = {
       years: '1985–2007',
       schematic: 'images/schematics/honda-shadow-1100.svg',
       drawn: 'VT1100C Shadow Spirit',
+      manual: { label: '2006 VT1100C Shadow Spirit Owner’s Manual (Honda, PDF)', url: 'https://www.acura.com/assets/OWNERLINK-Temp/OWNERLINK/Model/own_man/powersports/2006/2006_VT1100C.pdf' },
       stats: [
         { label: 'Engine', value: '1,099 cc liquid-cooled 45° V-twin, SOHC, 3 valves per cylinder' },
         { label: 'Bore × stroke', value: '87.5 × 91.4 mm' },

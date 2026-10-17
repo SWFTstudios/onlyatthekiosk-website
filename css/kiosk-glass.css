@@ -1775,6 +1775,7 @@ html[data-theme='dark'] .k-machine__svg img { filter: invert(1); }
 .k-machine__facts { display: grid; gap: 12px; margin-top: 22px; }
 .k-machine__facts li { position: relative; padding-left: 22px; font-size: calc(14.5px * var(--type, 1)); line-height: 1.55; color: var(--ink-2); }
 .k-machine__facts li::before { content: '—'; position: absolute; left: 0; color: var(--ink-4); }
+.k-machine__manual { margin-top: 22px; }
 .k-machine__sources { margin-top: 20px; font-size: calc(12px * var(--type, 1)); line-height: 1.6; color: var(--ink-3); }
 .k-machine__sources a { text-decoration: underline; text-underline-offset: 2px; }
 .k-machine__sources a:hover { color: var(--ink); }

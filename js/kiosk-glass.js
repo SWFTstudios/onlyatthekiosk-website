@@ -3441,6 +3441,7 @@
             <h3>${esc(m.model)}</h3>
             <dl class="k-machine__stats">${(m.stats || []).map((x) => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join('')}</dl>
             ${(m.facts || []).length ? `<ul class="k-machine__facts">${m.facts.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+            ${m.manual ? `<a class="k-bar k-machine__manual" href="${esc(m.manual.url)}" target="_blank" rel="noopener"><span>Factory drawings<small>${esc(m.manual.label)} · parts-location pages</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.sources || []).length ? `<p class="k-machine__sources">Sources: ${m.sources.map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.label)}</a>`).join(' · ')}</p>` : ''}
           </div>
         </article>`).join(''));
