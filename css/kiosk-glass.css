@@ -2587,6 +2587,80 @@ html { transition: background-color 0.5s var(--ease); }
 }
 
 
+/* ------------------------------------------------------------ orbit cover
+ * Home, under the sky intro: the Earth far below, banks of cloud, and the
+ * carousel of jumping-off points floating in between. Colours come from the
+ * intro's hour (--sky-* copied from .k-sky by mountOrbit). */
+.k-orbit {
+  --sky-top: #23305f; --sky-mid: #6a4a86; --sky-low: #e2766a; --sky-hor: #ffb36b; --sky-fog: #f3d6c8;
+  --sky-sun: rgba(255,150,80,.9); --sky-sun-x: 70%; --sky-sun-y: 40%; --sky-sun-s: 55%;
+  background: var(--sky-top); color: #fff;
+}
+.k-orbit__scene { overflow: hidden; }
+.k-orbit__sky { position: absolute; inset: 0; background:
+  radial-gradient(var(--sky-sun-s) calc(var(--sky-sun-s) * .7) at var(--sky-sun-x) var(--sky-sun-y), var(--sky-sun) 0%, rgba(255,255,255,0) 60%),
+  linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 34%, var(--sky-low) 56%, var(--sky-hor) 66%, var(--sky-hor) 100%); }
+.k-orbit__stars { position: absolute; inset: 0 0 40%; opacity: 0; transition: opacity 2s; background:
+  radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 84% 34%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 42%, #fff 50%, transparent 51%),
+  radial-gradient(1px 1px at 52% 24%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 91% 8%, rgba(255,255,255,.7) 50%, transparent 51%); }
+.k-orbit[data-phase='midnight'] .k-orbit__stars, .k-orbit[data-phase='firstlight'] .k-orbit__stars { opacity: .9; }
+/* The Earth: a huge sphere whose curved limb crosses the lower half, turning slowly */
+.k-orbit__earth {
+  position: absolute; left: 50%; top: 62%; width: max(240vmax, 1800px); aspect-ratio: 1; translate: -50% 0;
+  border-radius: 50%; overflow: hidden; background: #1d3b5c;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35), 0 -18px 70px 14px color-mix(in srgb, var(--sky-hor) 55%, #9fd0ff);
+}
+.k-orbit__surface {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 200%;
+  background: url('../images/earth/day-2k.jpg') 0 -30% / 50% auto repeat-x;   /* unstretched; the visible cap shows the mid-latitudes */
+  animation: k-orbit-turn 420s linear infinite;
+}
+.k-orbit[data-phase='midnight'] .k-orbit__surface { background-image: url('../images/earth/night.jpg'); }
+.k-orbit__earth::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background:
+  linear-gradient(180deg, color-mix(in srgb, var(--sky-hor) 70%, transparent) 0%, rgba(255,255,255,0) 4%, rgba(0,0,0,0) 30%),
+  radial-gradient(60% 40% at 50% 0%, rgba(255,255,255,0) 60%, rgba(5,10,30,.35) 100%),
+  linear-gradient(180deg, rgba(0,0,0,0) 2%, color-mix(in srgb, var(--sky-low) 22%, transparent) 10%); }
+@keyframes k-orbit-turn { to { transform: translateX(-50%); } }
+/* Cloud banks: soft blobs in the hour's fog colour, drifting */
+.k-orbit__clouds { position: absolute; left: -25%; right: -25%; pointer-events: none; filter: blur(10px); animation: k-orbit-drift 60s ease-in-out infinite alternate; background:
+  radial-gradient(22% 55% at 8% 60%, var(--sky-fog) 0%, transparent 70%), radial-gradient(26% 60% at 30% 55%, var(--sky-fog) 0%, transparent 70%),
+  radial-gradient(20% 50% at 52% 65%, var(--sky-fog) 0%, transparent 70%), radial-gradient(28% 60% at 74% 55%, var(--sky-fog) 0%, transparent 70%),
+  radial-gradient(22% 55% at 95% 62%, var(--sky-fog) 0%, transparent 70%); }
+.k-orbit__clouds--back { bottom: 30%; height: 18%; opacity: .55; animation-duration: 90s; }
+.k-orbit__clouds--mid { bottom: 6%; height: 38%; opacity: .88; animation-direction: alternate-reverse; }
+.k-orbit__clouds--front { bottom: -10%; height: 30%; opacity: .9; z-index: 1; animation-duration: 45s; }
+@keyframes k-orbit-drift { from { transform: translateX(-5%); } to { transform: translateX(5%); } }
+/* Layout */
+.k-orbit .k-cover__inner.k-orbit__inner { grid-template-rows: auto auto 1fr auto; align-items: center; position: relative; z-index: 2; }
+.k-orbit__head { display: grid; justify-items: center; gap: 10px; text-align: center; text-shadow: 0 2px 24px rgba(10,14,30,.35); }
+.k-orbit__title { margin: 0; font-size: calc(clamp(40px, 6vw, 88px) * var(--type, 1)); font-weight: 450; letter-spacing: -0.04em; line-height: .95; }
+.k-orbit__dek { max-width: 52ch; margin: 0; font-size: calc(clamp(14px, 1.2vw, 17px) * var(--type, 1)); line-height: 1.4; color: rgba(255,255,255,.88); }
+.k-orbit__carousel { position: relative; }
+/* The carousel floats: a slow bob, cards lit like objects in open air */
+.k-orbit .k-herowheel { color: #fff; }
+.k-orbit .k-herowheel__stage { --card: clamp(168px, 19vw, 250px); animation: k-orbit-float 7s ease-in-out infinite; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); }
+@keyframes k-orbit-float { 50% { transform: translateY(-12px); } }
+.k-orbit .k-herowheel .k-wheel__card { -webkit-box-reflect: unset; box-shadow: 0 36px 60px -24px rgba(12,18,40,.6), inset 0 0 0 1px rgba(255,255,255,.22); }
+.k-orbit .k-herowheel .k-wheel__card::after { background: var(--sky-fog); opacity: calc(var(--shade, 0) * 0.65); }
+.k-orbit .k-tcard__img.is-paper { object-fit: contain; background: #fbfaf8; padding: 18% 8% 34%; }
+.k-orbit .k-herowheel__now, .k-orbit .k-herowheel__cta .k-btn { -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); }
+.k-orbit .k-herowheel__now { padding: 6px; border-radius: 999px; background: rgba(12,16,32,.32); border: 1px solid rgba(255,255,255,.18); }
+.k-orbit .k-herowheel__note { color: rgba(255,255,255,.86); }
+.k-orbit .k-wheel__count { color: rgba(255,255,255,.7); }
+.k-orbit .k-wheel__step { background: rgba(255,255,255,.14); color: #fff; }
+.k-orbit .k-herowheel__cta .k-btn { background: #fff; color: #0f0f10; border-color: #fff; }
+.k-orbit .k-cover__index { border-top-color: rgba(255,255,255,.3); }
+@media (max-width: 760px) {
+  .k-orbit__dek { display: none; }
+  .k-orbit__title { font-size: calc(40px * var(--type, 1)); }
+  .k-orbit__earth { top: 66%; }
+  .k-orbit .k-herowheel__note { font-size: calc(13px * var(--type, 1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .k-orbit__surface, .k-orbit__clouds, .k-orbit .k-herowheel__stage { animation: none; }
+}
+
 /* --------------------------------------------------- marketplace: hunt + stores */
 .k-pickup { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 4px 10px 4px 8px; border-radius: var(--r-pill); border: 1px dashed var(--ink-3); font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
 .k-pickup svg { width: 13px; height: 13px; }

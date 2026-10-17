@@ -2297,7 +2297,6 @@
             <h3 id="k-set-motion">Motion</h3>
             <div class="k-set__row"><span>Animations</span>${seg('motion', [['system', 'System'], ['full', 'Full'], ['reduced', 'Reduced']], prefs.motion, 'Animations')}</div>
             <div class="k-set__row"><span>Intro animation</span>${seg('intro', [['once', 'Once per visit'], ['off', 'Off']], prefs.intro, 'Intro animation')}</div>
-            <div class="k-set__row"><span>Autoplay hero videos</span>${seg('autoplay', [['on', 'On'], ['off', 'Off']], prefs.autoplay, 'Autoplay hero videos')}</div>
           </section>
         </div>
         <footer class="k-set__foot">
@@ -2451,7 +2450,8 @@
       if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', !inSky && y > lastY && y > 160); lastY = y; }
       const cover = $('.k-cover');
       if (cover && !REDUCED && prefs.depth !== 'off') {
-        const p = Math.min(1, Math.max(0, y / (cover.offsetHeight || window.innerHeight)));
+        // progress past the cover itself (the sky intro sits above it on the home page)
+        const p = Math.min(1, Math.max(0, (y - cover.offsetTop) / (cover.offsetHeight || window.innerHeight)));
         cover.style.setProperty('--hero-p', p.toFixed(3));
       }
     };
@@ -2929,131 +2929,56 @@
 
   /* ------------------------------------------------------------- home */
 
-  /* --------------------------------------------- hero video slideshow
-   * Full-screen muted clips from C.issue.heroSlides. Each plays once, then
-   * crossfades to the next; story-style bars show progress. Pauses when the
-   * cover scrolls away or the tab is hidden. Reduced motion or Settings ›
-   * "Autoplay hero videos: Off" shows the posters and waits for a tap.
+  /* ------------------------------------------------- orbit carousel
+   * The home cover: high above the Earth in the clouds (the sky takes the
+   * colours of the intro's hour), a floating 3D carousel of jumping-off
+   * points: the lead film, the latest story, the featured film, the newest
+   * pieces, the radio, the Garage and the Atlas. Built from the content, so
+   * new stories, films and drops come round on their own.
    * -------------------------------------------------------------------- */
-  function heroShow(slides) {
-    const bg = mount('hero-bg');
-    if (!bg) return;
-    const cover = bg.closest('.k-cover');
-    const signal = pageAbort.signal;
-    bg.innerHTML = `<div class="k-heroshow" aria-roledescription="carousel" aria-label="KIOSK films">${slides.map((s, i) => `
-      <div class="k-heroshow__slide${i === 0 ? ' is-active' : ''}" role="group" aria-roledescription="slide" aria-label="${esc(s.title)}"${i ? ' aria-hidden="true"' : ''}>
-        <video muted playsinline preload="${i < 2 ? 'auto' : 'metadata'}"${s.poster ? ` poster="${esc(s.poster)}"` : ''} aria-hidden="true">${s.webm ? `<source src="${esc(s.webm)}" type="video/webm">` : ''}<source src="${esc(s.src)}" type="video/mp4"></video>
-      </div>`).join('')}</div>`;
-    fill('hero-bars', slides.map((s, i) => `<button type="button" class="k-heroshow__bar" data-hero-go="${i}" aria-label="${esc(s.title)}"><i></i></button>`).join(''));
-    fill('hero-controls', `
-      <a class="k-heroshow__caption" data-hero-link href="#"><span class="k-heroshow__kicker" data-hero-kicker></span><b data-hero-title></b><small data-hero-caption></small></a>
-      <div class="k-heroshow__btns">
-        <span class="k-heroshow__count" data-hero-count aria-live="polite"></span>
-        <button type="button" class="k-heroshow__btn" data-hero-prev aria-label="Previous slide">${icon.left}</button>
-        <button type="button" class="k-heroshow__btn" data-hero-toggle aria-label="Pause slideshow">${icon.pause}</button>
-        <button type="button" class="k-heroshow__btn" data-hero-next aria-label="Next slide">${icon.right}</button>
-      </div>`);
-
-    const els = $$('.k-heroshow__slide', bg);
-    const vids = els.map((el) => $('video', el));
-    const bars = $$('.k-heroshow__bar');
-    const toggle = $('[data-hero-toggle]');
-    let cur = 0;
-    let playing = !REDUCED && prefs.autoplay !== 'off';
-    let visible = true;
-    let fallback = 0;
-    let raf = 0;
-
-    const caption = () => {
-      const s = slides[cur];
-      const f = featureBySlug(s.story);
-      const link = $('[data-hero-link]');
-      if (link) link.setAttribute('href', f ? storyHref(f) : '#garage');
-      const set = (sel, v) => { const el = $(sel); if (el) el.textContent = v || ''; };
-      set('[data-hero-kicker]', s.kicker);
-      set('[data-hero-title]', s.title || (f && f.title));
-      set('[data-hero-caption]', s.caption);
-      set('[data-hero-count]', `${pad(cur + 1)} / ${pad(slides.length)}`);
-      document.dispatchEvent(new CustomEvent('kiosk:hero-slide', { detail: { story: s.story, title: s.title || (f && f.title), kicker: s.kicker } }));
+  const SKY_VARS = ['--sky-top', '--sky-mid', '--sky-low', '--sky-hor', '--sky-sun', '--sky-sun-x', '--sky-sun-y', '--sky-sun-s', '--sky-fog'];
+  function orbitItems(lead) {
+    const items = [];
+    const watchable = (f) => f && (f.embed || f.video);
+    const film = (f, eyebrow) => ({ eyebrow, title: f.title || featureName(f), note: [featureName(f), place(f)].filter(Boolean).join(' · '), cta: 'Watch the film', image: f.image, vimeo: f.vimeo, act: () => openFilm(f) });
+    if (watchable(lead)) items.push(film(lead, 'Watch · now showing'));
+    const latest = byNewest(features).find((f) => f !== lead && f.image);
+    if (latest) items.push({ eyebrow: `Read · ${formatLabel(latest)}`, title: latest.title || featureName(latest), note: latest.tagline || latest.excerpt || '', cta: 'Read the story', image: latest.image, href: storyHref(latest) });
+    const pick = (C.films || []).find((x) => x.featured);
+    const ff = pick && featureBySlug(pick.story);
+    if (ff && ff !== lead && watchable(ff)) items.push({ ...film(ff, 'Watch · featured film'), title: pick.title || ff.title, note: pick.blurb || '' });
+    byNewest((C.products || []).filter((p) => !isDigitalP(p))).slice(0, 2).forEach((p) => items.push({
+      eyebrow: `Shop · ${((C.categories || []).find((c) => c.id === p.category) || {}).label || 'new at the kiosk'}`, title: p.title, note: [p.detail, price(p)].filter(Boolean).join(' · '), cta: 'Shop the piece', product: p, act: () => openPDP(p.id, {}),
+    }));
+    const mix = (C.mixes || []).find((m) => m.spotify || m.soundcloud || m.apple || m.audio);
+    if (mix) items.push({ eyebrow: 'Listen · KIOSK Radio', title: mix.title, note: mix.mood || 'Keeps playing while you browse', cta: 'Play the radio', image: mix.cover, act: () => player.play(mix.slug) });
+    const garage = (C.machines || []).find((m) => m.street);
+    if (garage) items.push({ eyebrow: 'Read · The Garage', title: 'The Street File', note: 'Schematics, strip numbers and the facts behind every machine', cta: 'Open the Garage', image: garage.schematic, paper: true, href: 'the-garage.html' });
+    items.push({ eyebrow: 'Explore · The Atlas', title: 'Every story, pinned', note: 'Films, vlogs and photo diaries, pinned where they happened', cta: 'Open the Atlas', image: 'images/earth/day-2k.jpg', href: 'atlas.html' });
+    return items;
+  }
+  function mountOrbit(lead) {
+    const root = mount('orbit-carousel');
+    if (!root) return;
+    heroCarousel(root, orbitItems(lead), (it) => { if (it.act) it.act(); else if (it.href) location.href = it.href; }, 'Start here');
+    // The sky over the carousel follows the intro's hour (js/kiosk-sky.js paints it on .k-sky)
+    const sky = $('.k-sky');
+    const cover = root.closest('.k-orbit');
+    if (!sky || !cover) return;
+    const sync = () => {
+      SKY_VARS.forEach((k) => { const v = sky.style.getPropertyValue(k); if (v) cover.style.setProperty(k, v); });
+      if (sky.dataset.phase) cover.dataset.phase = sky.dataset.phase;
     };
-    const paint = () => {
-      bars.forEach((b, i) => {
-        const v = vids[i];
-        const p = i < cur ? 1 : i > cur ? 0 : (v.duration ? Math.min(1, v.currentTime / v.duration) : 0);
-        b.style.setProperty('--p', p.toFixed(4));
-        b.classList.toggle('is-active', i === cur);
-      });
-    };
-    const loop = () => { paint(); raf = requestAnimationFrame(loop); };
-    const run = () => {
-      clearTimeout(fallback);
-      cancelAnimationFrame(raf);
-      const v = vids[cur];
-      if (playing && visible && !document.hidden) {
-        const p = v.play();
-        if (p && p.catch) p.catch(() => { fallback = setTimeout(() => go(cur + 1), 6000); });
-        raf = requestAnimationFrame(loop);
-      } else {
-        v.pause();
-        paint();
-      }
-      toggle.innerHTML = playing ? icon.pause : icon.play;
-      toggle.setAttribute('aria-label', playing ? 'Pause slideshow' : 'Play slideshow');
-      cover.classList.toggle('is-paused', !playing);
-    };
-    function go(i) {
-      const next = (i + slides.length) % slides.length;
-      if (next !== cur) {
-        vids[cur].pause();
-        els[cur].classList.remove('is-active');
-        els[cur].setAttribute('aria-hidden', 'true');
-        cur = next;
-        els[cur].classList.add('is-active');
-        els[cur].removeAttribute('aria-hidden');
-        // Warm the one after this
-        const after = vids[(cur + 1) % slides.length];
-        if (after.preload !== 'auto') { after.preload = 'auto'; after.load(); }
-      }
-      try { vids[cur].currentTime = 0; } catch (e) { /* not loaded yet */ }
-      caption();
-      run();
-    }
-    vids.forEach((v, i) => v.addEventListener('ended', () => { if (i === cur) go(cur + 1); }, { signal }));
-
-    cover.addEventListener('click', (e) => {
-      const to = e.target.closest('[data-hero-go]');
-      if (to) { go(Number(to.dataset.heroGo)); return; }
-      if (e.target.closest('[data-hero-prev]')) { go(cur - 1); return; }
-      if (e.target.closest('[data-hero-next]')) { go(cur + 1); return; }
-      if (e.target.closest('[data-hero-toggle]')) { playing = !playing; run(); }
-    }, { signal });
-
-    // Swipe between slides
-    let sx = 0; let sy = 0;
-    cover.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true, signal });
-    cover.addEventListener('touchend', (e) => {
-      const dx = e.changedTouches[0].clientX - sx; const dy = e.changedTouches[0].clientY - sy;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) go(cur + (dx < 0 ? 1 : -1));
-    }, { passive: true, signal });
-
-    if ('IntersectionObserver' in window) {
-      const io2 = new IntersectionObserver(([en]) => { visible = en.isIntersecting; run(); }, { threshold: 0.15 });
-      io2.observe(bg);   // the media itself: it flips onto the Atlas globe
-      signal.addEventListener('abort', () => io2.disconnect());
-    }
-    document.addEventListener('visibilitychange', run, { signal });
-    signal.addEventListener('abort', () => { clearTimeout(fallback); cancelAnimationFrame(raf); vids.forEach((v) => v.pause()); });
-
-    caption();
-    run();
+    sync();
+    const mo = new MutationObserver(sync);
+    mo.observe(sky, { attributes: true, attributeFilter: ['style', 'data-phase'] });
+    pageAbort.signal.addEventListener('abort', () => mo.disconnect());
   }
 
   /* ------------------------------------------------------- atlas globe
-   * Home page, right under the hero. Up to four featured stories are pinned
-   * to a spinning wireframe globe at their coordinates (story `geo`). Each
-   * pin carries a thumbnail; the first one carries the hero slideshow
-   * itself: scrolling past the hero, GSAP Flip shrinks the hero video into
-   * that thumbnail (and back when you scroll up). Drag to spin, tap a pin.
+   * Home page, right under the cover. Up to four featured stories are pinned
+   * to a spinning wireframe globe at their coordinates (story `geo`), each
+   * pin with a thumbnail. Drag to spin, tap a pin.
    * -------------------------------------------------------------------- */
   const HOME_GEO = { lat: 40.71, lon: -74.0 };
   const geoOf = (f) => (f && f.geo) || HOME_GEO;
@@ -3083,7 +3008,6 @@
     if (!posts.length) { sec.hidden = true; return; }
     const stage = $('[data-wl-stage]', sec);
     const nodesEl = $('[data-wl-nodes]', sec);
-    const hasHero = !!mount('hero-bg');
     nodesEl.innerHTML = posts.map((f, i) => `
       <a class="k-wl-node${i === 0 ? ' k-wl-node--hero' : ''}" href="${storyHref(f)}" data-wl-node="${i}" aria-label="${esc(f.title || featureName(f))}, ${esc(fmtGeo(geoOf(f)))}">
         <span class="k-wl-node__line" aria-hidden="true"></span>
@@ -3122,47 +3046,6 @@
     sec.addEventListener('pointerover', (e) => { const it = e.target.closest('[data-wl-item]'); if (it) { const g = geos[Number(it.dataset.wlItem)]; globe.face(g.lat, g.lon); } }, { signal });
     sec.addEventListener('focusin', (e) => { const it = e.target.closest('[data-wl-item], [data-wl-node]'); if (it) { const g = geos[Number(it.dataset.wlItem || it.dataset.wlNode)]; globe.face(g.lat, g.lon); } }, { signal });
 
-    // The hero pin follows the slideshow: title and coordinates of the slide on screen
-    document.addEventListener('kiosk:hero-slide', (e) => {
-      const f = featureBySlug(e.detail.story);
-      if (!f) return;
-      const n = nodes[0];
-      geos[0] = geoOf(f);
-      n.setAttribute('href', storyHref(f));
-      n.setAttribute('aria-label', `${e.detail.title || f.title}, ${fmtGeo(geos[0])}`);
-      const t = $('[data-wl-title="0"]', n); if (t) t.textContent = e.detail.title || f.title || featureName(f);
-      const c = $('.k-wl-node__label small', n); if (c) c.textContent = fmtGeo(geos[0]);
-    }, { signal });
-
-    // GSAP Flip: hero ⇄ the first pin's thumbnail
-    if (!hasHero || REDUCED) return;
-    loadGsap().then(() => {
-      if (signal.aborted) return;
-      const { gsap, Flip, ScrollTrigger } = window;
-      gsap.registerPlugin(Flip, ScrollTrigger);
-      const hero = mount('hero-bg');
-      const cover = hero.closest('.k-cover');
-      const slot = $('[data-wl-thumb="0"]', sec);
-      const node = nodes[0];
-      let inThumb = false; let tween = null;
-      const move = (toThumb) => {
-        if (toThumb === inThumb || !hero.isConnected) return;
-        inThumb = toThumb;
-        if (tween) tween.progress(1);
-        if (toThumb) { globe.face(geos[0].lat, geos[0].lon); globe.hold(true); }
-        node.classList.add('is-holding');
-        const state = Flip.getState(hero);
-        if (toThumb) slot.prepend(hero); else cover.prepend(hero);
-        hero.classList.toggle('is-thumb', toThumb);
-        sec.classList.toggle('has-hero', toThumb);
-        tween = Flip.from(state, {
-          duration: 1.1, ease: 'power3.inOut', absolute: true, zIndex: 60,
-          onComplete: () => { tween = null; node.classList.remove('is-holding'); globe.hold(false); $$('video', hero).forEach((v) => { if (v.closest('.is-active') && v.paused) v.play().catch(() => {}); }); },
-        });
-      };
-      const st = ScrollTrigger.create({ trigger: sec, start: 'top 65%', onEnter: () => move(true), onLeaveBack: () => move(false) });
-      signal.addEventListener('abort', () => { st.kill(); if (tween) tween.kill(); });
-    }).catch((err) => console.warn('[KIOSK] GSAP unavailable, hero stays put', err));
   }
 
   function pageHome() {
@@ -3170,14 +3053,8 @@
     const lead = featureBySlug(issue.lead) || features[0];
     if (!lead) return;
 
-    // Hero background: video slideshow, else the single reel, else the lead story's cover
-    const fullBleed = { cls: 'k-media--clean', style: 'position:absolute;inset:0' };
-    if ((issue.heroSlides || []).length) heroShow(issue.heroSlides);
-    else fill('hero-bg', issue.reel
-      ? `<div class="k-media k-media--clean" style="position:absolute;inset:0"><video autoplay muted loop playsinline preload="auto"${issue.reelPoster ? ` poster="${esc(issue.reelPoster)}"` : ''} aria-label="KIOSK reel">${issue.reelWebm ? `<source src="${esc(issue.reelWebm)}" type="video/webm">` : ''}<source src="${esc(issue.reel)}" type="video/mp4"></video></div>`
-      : featureMedia(lead, { meta: '', mark: '', eager: true, ...fullBleed }));
-
     mountSky();
+    mountOrbit(lead);
     mountWorldLibrary();
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
     fill('hero-dek', esc(issue.dek || ''));
@@ -3193,12 +3070,6 @@
         ${featureMedia(lead, { meta: '' })}
       </a>
       <a class="k-bar" href="atlas.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
-    fill('hero-watch', `
-      <button class="k-watch" type="button" data-film="${esc(lead.slug)}">
-        <span class="k-watch__thumb">${featureMedia(lead, { meta: '', mark: '', cls: 'k-media--clean', style: 'position:absolute;inset:0' })}<span class="k-play">${icon.play}</span></span>
-        <span><b>Watch film</b><small>${[lead.title, lead.runtime].filter(Boolean).map(esc).join(' · ')}</small></span>
-      </button>`);
-
     // Garage rail with type filter
     const railEl = mount('garage-rail');
     const renderRail = (type) => {
@@ -4973,10 +4844,10 @@
    * collection on a 3D drum. Tapping the front card (or its button) runs
    * its action: jump to a gate, a sort or an availability filter, or a link.
    * -------------------------------------------------------------------- */
-  function heroCarousel(root, items, onPick) {
+  function heroCarousel(root, items, onPick, label = 'Collections and promotions') {
     root.innerHTML = `
       <div class="k-wheel k-wheel--clear k-herowheel">
-        <div class="k-wheel__stage k-herowheel__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Collections and promotions. Left and right arrows turn the carousel, Enter opens the one in front." data-hw-stage>
+        <div class="k-wheel__stage k-herowheel__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="${esc(label)}. Left and right arrows turn the carousel, Enter opens the one in front." data-hw-stage>
           <div class="k-wheel__drum" data-hw-drum aria-hidden="true"></div>
         </div>
         <div class="k-herowheel__now">
@@ -5005,9 +4876,19 @@
       },
       paint(card, i) {
         const it = items[i];
-        $('.k-shopwheel__media', card).innerHTML = it.image
-          ? `<img class="k-tcard__img" src="${esc(it.image)}" alt="" decoding="async">`
+        const media = $('.k-shopwheel__media', card);
+        card.dataset.item = String(i);
+        media.innerHTML = it.image
+          ? `<img class="k-tcard__img${it.paper ? ' is-paper' : ''}" src="${esc(it.image)}" alt="" decoding="async">`
           : (it.product ? termMedia(it.product, 0).replace(/ loading="lazy"/g, '') : '');
+        const img = $('img', media);
+        if (img && it.image) img.addEventListener('error', () => img.remove(), { once: true });   // a cover that won't load leaves the plain card
+        // a film with no still of its own takes its Vimeo thumbnail
+        if (!it.image && !it.product && it.vimeo) {
+          vimeoInfo(it.vimeo).then((d) => {
+            if (d && d.thumbnail_url && card.dataset.item === String(i)) media.innerHTML = `<img class="k-tcard__img" src="${esc(d.thumbnail_url)}" alt="" decoding="async">`;
+          }).catch(() => {});
+        }
         $('.k-herowheel__tag small', card).textContent = it.eyebrow;
         $('.k-herowheel__tag b', card).textContent = it.title;
         card.classList.toggle('is-promo', it.kind === 'promo');

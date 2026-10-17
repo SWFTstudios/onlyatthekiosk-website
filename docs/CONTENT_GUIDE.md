@@ -332,17 +332,25 @@ The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an ai
 
 ---
 
-## 5. Lead story and hero reel
+## 5. Lead story and the home cover
 
 ```js
 issue: {
   number: '01', title: 'Night Shift', dek: '…',
-  lead: 'r32-wangan',                        // story featured in the home hero
-  reel: 'videos/reel.mp4',                   // optional muted autoplay loop behind the hero
-  reelPoster: 'images/garage/reel-poster.webp',
+  lead: 'r32-wangan',                        // the film card at the front of the home carousel
 }
 ```
-Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.264.
+Under the sky intro, the home cover is the Earth far below a layer of clouds, in the same time-of-day colours as the intro, with a floating 3D carousel of jumping-off points. It builds itself from the content, front to back:
+
+1. **Watch** the lead story's film (`issue.lead`, when it has an `embed` or `video`)
+2. **Read** the newest other story with a cover image
+3. **Watch** the featured film (`films[].featured`)
+4. **Shop** the two newest physical pieces (they open the product sheet)
+5. **Listen** to the first radio mix with a source (it starts playing)
+6. **Read** The Garage (when any machine has a `street` file)
+7. **Explore** the Atlas
+
+Drag, swipe or use the arrows to turn it; the button under it (or tapping the front card) goes there. `heroSlides` and `reel` are no longer shown on the home page (`heroSlides` still decides which stories the Atlas globe pins when `featured` is empty).
 
 ---
 
