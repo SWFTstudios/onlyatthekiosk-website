@@ -217,7 +217,7 @@
     { id: 'journal', label: 'Atlas', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
-    { id: 'garage', label: 'Garage', href: 'garage.html' },
+    { id: 'garage', label: 'Garage', href: 'the-garage.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
@@ -3456,7 +3456,7 @@
             <dl class="k-machine__stats">${(m.stats || []).map((x) => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join('')}</dl>
             ${(m.facts || []).length ? `<ul class="k-machine__facts">${m.facts.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
             ${m.manual ? `<a class="k-bar k-machine__manual" href="${esc(m.manual.url)}" target="_blank" rel="noopener"><span>Factory drawings<small>${esc(m.manual.label)} · parts-location pages</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
-            ${m.street ? `<a class="k-bar k-machine__manual" href="garage.html#${esc(m.id)}"><span>Read the Street File<small>${esc(m.street.role)} · strip numbers and lesser-known facts</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
+            ${m.street ? `<a class="k-bar k-machine__manual" href="the-garage.html#${esc(m.id)}"><span>Read the Street File<small>${esc(m.street.role)} · strip numbers and lesser-known facts</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.sources || []).length ? `<p class="k-machine__sources">Sources: ${m.sources.map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.label)}</a>`).join(' · ')}</p>` : ''}
           </div>
         </article>`).join(''));
@@ -5781,7 +5781,7 @@
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
     { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
-    { id: 'garage', t: 'T7', name: 'The Street File', href: 'garage.html', note: 'The machines: schematics, strip numbers and secrets' },
+    { id: 'garage', t: 'T7', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
   ];
   const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
