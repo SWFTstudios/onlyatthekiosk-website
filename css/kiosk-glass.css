@@ -2885,6 +2885,39 @@ html.is-reading .k-gates { top: 6px; }
 
 /* ------------------------------------------------- boarding-pass cards */
 .k-term__toolbar { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: clamp(18px, 2.4vw, 28px); }
+
+/* Shop view switch: carousel (3D drum) or list (card grid) */
+.k-viewtoggle { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--glass); }
+.k-viewtoggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: calc(13px * var(--type, 1));
+  cursor: pointer;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
+}
+.k-viewtoggle button:hover { color: var(--ink); }
+.k-viewtoggle button[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
+.k-viewtoggle svg { width: 16px; height: 16px; }
+
+/* Shop carousel: the song wheel's drum with portrait product cards */
+.k-shopwheel { padding-top: clamp(10px, 2vw, 20px); }
+.k-shopwheel__stage { --card: clamp(170px, 24vw, 270px); height: calc(var(--card) * 1.72); }
+.k-shopwheel__stage .k-wheel__drum { inset: 0 0 calc(var(--card) * 0.28); }
+.k-shopwheel__card { height: calc(var(--card) * 1.25); background: var(--bg-3, #18181b); }
+.k-shopwheel__media { position: absolute; inset: 0; display: block; pointer-events: none; }
+.k-shopwheel__media .k-tcard__img { transition: none; }
+.k-shopwheel__media .k-tcard__img--alt { display: none; }
+.k-shopwheel__status { position: absolute; left: 10px; top: 10px; z-index: 2; pointer-events: none; }
+.k-shopwheel__empty { text-align: center; color: var(--ink-2); padding: 80px 20px; }
+.k-shopwheel__fare { font-family: var(--f-mono); font-size: calc(16px * var(--type, 1)); color: var(--ink); }
+.k-shopwheel .k-shopwheel__wish { position: static; flex: none; }
 .k-term-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: clamp(12px, 1.6vw, 20px); }
 @media (max-width: 560px) { .k-term-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
 .k-tcard { display: flex; flex-direction: column; border-radius: var(--r-lg); border: 1px solid var(--frost-line); background: var(--frost); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); box-shadow: 0 0 0 1px var(--frost-edge), var(--elev-1); overflow: hidden; transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease); }
