@@ -87,6 +87,7 @@ window.KIOSK_CONTENT = {
       tone: 'graphite',
       tags: ['Stance', 'Rollers', 'Film'],
       media: ['photo', 'film'],
+      machines: ['infiniti-q50'],   // spec sheets (MACHINES below)
       specs: [
         { label: 'Car', value: 'Infiniti Q50' },
         { label: 'Stance', value: 'Lowered' },
@@ -212,6 +213,7 @@ window.KIOSK_CONTENT = {
       tone: 'ice',
       tags: ['Superbike', 'Dusk', 'Photo story'],
       media: ['photo'],
+      machines: ['yamaha-r1m'],   // spec sheets (MACHINES below)
       specs: [
         { label: 'Bike', value: 'Yamaha YZF-R1M' },
         { label: 'Finish', value: 'Carbon + black' },
@@ -544,6 +546,7 @@ window.KIOSK_CONTENT = {
       tone: 'graphite',
       tags: ['Build', 'Garage', 'Film'],
       media: ['film'],
+      machines: ['honda-cbr600f4i'],   // spec sheets (MACHINES below)
       specs: [
         { label: 'Bike', value: 'Honda CBR600F4i' },
         { label: 'Job', value: 'Wiring + headlights' },
@@ -678,6 +681,7 @@ window.KIOSK_CONTENT = {
       tone: 'ice',
       tags: ['Superbike', 'Film', 'Riders'],
       media: ['film'],
+      machines: ['yamaha-r3', 'yamaha-r1m'],   // spec sheets (MACHINES below)
       specs: [
         { label: 'Riders', value: 'Ksenia + Moses' },
         { label: 'Bikes', value: 'R3 + Yamaha YZF-R1M' },
@@ -712,6 +716,170 @@ window.KIOSK_CONTENT = {
       gradedWith: '',
       filmProduct: '',
       products: ['cap-kmark', 'tee-q-tired', 'hoodie-q-glitch'],
+    },
+  ],
+
+  /* ----------------------------------------------------------
+   * MACHINES — spec sheets for the cars and bikes in the stories.
+   * A story lists the ones it features in `machines: ['<id>']` and
+   * gets a Spec sheet section: the schematic, the numbers and facts.
+   *   schematic  side-elevation line drawing (scripts/draw-schematics.js)
+   *   drawn      which version the drawing and numbers describe
+   *   stats      [{ label, value }]   facts  ['…']   sources  [{ label, url }]
+   * -------------------------------------------------------- */
+  machines: [
+    {
+      id: 'infiniti-q50',
+      make: 'Infiniti',
+      model: 'Q50',
+      years: '2014–2024 model years',
+      schematic: 'images/schematics/infiniti-q50.svg',
+      drawn: 'V37 sedan, 2018-on dimensions',
+      stats: [
+        { label: 'Engine', value: '3.0 L twin-turbo V6 (VR30DDTT)' },
+        { label: 'Power', value: '300 hp · 400 hp in the Red Sport 400' },
+        { label: 'Torque', value: '350 lb-ft at 1,600–5,200 rpm (Red Sport 400)' },
+        { label: 'Gearbox', value: '7-speed automatic' },
+        { label: 'Wheelbase', value: '2,850 mm · 112.2 in' },
+        { label: 'Length', value: '4,816 mm · 189.6 in' },
+        { label: 'Width', value: '1,824 mm · 71.8 in' },
+        { label: 'Height', value: '1,453 mm · 57.2 in' },
+      ],
+      facts: [
+        'Unveiled at the 2013 Detroit auto show and sold from the 2014 model year, replacing the G37 sedan. It was the first Infiniti to carry the brand’s new Q naming.',
+        'Optional Direct Adaptive Steering, which Infiniti called the world’s first production steer-by-wire system. A clutch in the split steering column re-connects the wheel mechanically if the electronics fail.',
+        'Launched with a 3.7-litre V6 and a V6 hybrid; the 3.0-litre twin-turbo VR30 arrived for 2016. The Red Sport 400 makes 400 hp at 6,400 rpm.',
+        '2024 was the last model year. U.S. sales peaked at 44,007 in 2016, and Infiniti went crossover- and SUV-only for 2025.',
+      ],
+      sources: [
+        { label: 'Infiniti 2016 Q50 specifications', url: 'https://global.infinitinews.com/en/channels/channel-0207b8333061e10e7184bb242a019643' },
+        { label: 'Infiniti 2023 Q50 specifications', url: 'https://canada.infinitinews.com/en-CA/releases/release-5ac4eb09db8c0dedca705b2277000fa3-2023-infiniti-q50-specifications' },
+        { label: 'Infiniti: Direct Adaptive Steering', url: 'https://global.infinitinews.com/en/releases/direct-adaptive-steering' },
+        { label: 'Motor1: Infiniti Q50 is dead', url: 'https://www.motor1.com/news/730907/infiniti-q50-dead/' },
+      ],
+    },
+    {
+      id: 'yamaha-r1m',
+      make: 'Yamaha',
+      model: 'YZF-R1M',
+      years: '2015–present',
+      schematic: 'images/schematics/yamaha-r1m.svg',
+      drawn: '2025–26 U.S. specification',
+      stats: [
+        { label: 'Engine', value: '998 cc inline-four, crossplane crank' },
+        { label: 'Power', value: '≈200 PS' },
+        { label: 'Compression', value: '13.0 : 1' },
+        { label: 'Gearbox', value: '6-speed, assist-and-slipper clutch' },
+        { label: 'Suspension', value: 'Öhlins ERS: 43 mm NPX fork + shock, 4.7 in travel' },
+        { label: 'Rake · trail', value: '24.0° · 102 mm (4.0 in)' },
+        { label: 'Wheelbase', value: '1,405 mm · 55.3 in' },
+        { label: 'Seat height', value: '861 mm · 33.9 in' },
+        { label: 'Wet weight', value: '205 kg · 452 lb' },
+        { label: 'Fuel', value: '17 L · 4.5 gal' },
+      ],
+      facts: [
+        'Launched for 2015 alongside the all-new R1 as its track-focused sibling. U.S. price was $21,990, $5,500 over the R1, and only 500 were built for the U.S. that first year.',
+        'Öhlins Electronic Racing Suspension adjusts damping on the move. It is where Moses’ gold forks come from.',
+        'Carbon-fibre upper fairing, side fairings and front fender, plus a Communication Control Unit that logs laps with GPS and sends them to Yamaha’s Y-TRAC app over Wi-Fi.',
+        'The crossplane crank, first used on the 2009 R1 and taken from Yamaha’s YZR-M1 MotoGP bike, fires at uneven intervals so the rear tyre gets smoother drive out of corners.',
+      ],
+      sources: [
+        { label: 'Yamaha: 2025 YZF-R1M specs', url: 'https://yamahamotorsports.com/models/25-yzf-r1m/specs' },
+        { label: 'Rider: 2015 YZF-R1 and R1M first look', url: 'https://ridermagazine.com/2014/11/05/2015-yamaha-yzf-r1-and-r1m-first-look-review/' },
+        { label: 'Ultimate Motorcycling: 2015 YZF-R1M', url: 'https://ultimatemotorcycling.com/2014/11/04/2015-yamaha-yzf-r1m-first-look/' },
+      ],
+    },
+    {
+      id: 'yamaha-r3',
+      make: 'Yamaha',
+      model: 'YZF-R3',
+      years: '2015–present',
+      schematic: 'images/schematics/yamaha-r3.svg',
+      drawn: '2025–26 U.S. specification',
+      stats: [
+        { label: 'Engine', value: '321 cc parallel twin, DOHC, 8 valves' },
+        { label: 'Bore × stroke', value: '68.0 × 44.1 mm' },
+        { label: 'Power', value: '≈42 hp · 21.8 lb-ft' },
+        { label: 'Tyres', value: '110/70-17 · 140/70-17' },
+        { label: 'Rake · trail', value: '25.0° · 94 mm (3.7 in)' },
+        { label: 'Wheelbase', value: '1,380 mm · 54.3 in' },
+        { label: 'Seat height', value: '780 mm · 30.7 in' },
+        { label: 'Wet weight', value: '169 kg · 373 lb' },
+        { label: 'Fuel', value: '14 L · 3.7 gal' },
+      ],
+      facts: [
+        'Yamaha’s entry-level supersport, sold in the U.S. since 2015. A 250 cc version, the YZF-R25, is sold in Asia.',
+        'The 2019 update brought MotoGP M1-style bodywork that Yamaha says cuts drag by 7%, a 37 mm KYB upside-down fork in place of the old 41 mm conventional one, and handlebars 22 mm lower.',
+        'Wet weight with a full tank is 373 lb on the 2025–26 bikes and 375 lb on 2023–24.',
+      ],
+      sources: [
+        { label: 'Yamaha: 2025 YZF-R3 specs', url: 'https://yamahamotorsports.com/models/25-yzf-r3/specs' },
+        { label: 'Rider: 2019 YZF-R3 first look', url: 'https://ridermagazine.com/2018/10/16/2019-yamaha-yzf-r3-first-look-review/' },
+        { label: 'Visordown: Yamaha unveils updated R3', url: 'https://www.visordown.com/news/new-bikes/yamaha-unveils-updated-r3' },
+      ],
+    },
+    {
+      id: 'honda-cbr600f4i',
+      make: 'Honda',
+      model: 'CBR600F4i',
+      years: '2001–2006',
+      schematic: 'images/schematics/honda-cbr600f4i.svg',
+      drawn: '2005 U.S. specification',
+      stats: [
+        { label: 'Engine', value: '599 cc inline-four, DOHC, 16 valves' },
+        { label: 'Bore × stroke', value: '67 × 42.5 mm' },
+        { label: 'Fuel system', value: 'PGM-FI, 38 mm throttle bodies' },
+        { label: 'Power', value: '≈110 hp at 12,500 rpm' },
+        { label: 'Tyres', value: '120/70ZR-17 · 180/55ZR-17' },
+        { label: 'Rake · trail', value: '24.0° · 96 mm (3.8 in)' },
+        { label: 'Wheelbase', value: '1,385 mm · 54.5 in' },
+        { label: 'Seat height', value: '805 mm · 31.7 in' },
+        { label: 'Dry weight', value: '168 kg · 370 lb' },
+        { label: 'Fuel', value: '18 L · 4.8 gal incl. reserve' },
+      ],
+      facts: [
+        'The “i” is for injection: in 2001 it became Honda’s first fuel-injected 600 cc sport four, with four injectors fed at 50 psi.',
+        'An F4i won the 2002 Supersport World Championship.',
+        'When the race-replica CBR600RR arrived in 2003, the F4i stayed on as Honda’s more street-friendly 600 until 2006.',
+        'Fuel injection added only about 5 hp over the carburetted CBR600F4 it replaced.',
+      ],
+      sources: [
+        { label: 'Honda: 2005 CBR600F4i specifications', url: 'https://hondanews.com/en-US/powersports/releases/release-5ee13d1a1d3d0059c9fb1f004c34c320-2005-honda-cbr600f4i-specifications' },
+        { label: 'Motorcyclist: 2001–2006 CBR600F4i buying tips', url: 'https://motorcyclistonline.com/buying-tips-used-honda-sportbikes-motorcycles-2001-2006-cbr600f4i-smart-money' },
+        { label: 'Total Motorcycle: 2005 CBR600F4i', url: 'https://www.totalmotorcycle.com/photos/2005models/2005models-Honda-CBR600F4i/' },
+      ],
+    },
+    {
+      id: 'honda-shadow-1100',
+      make: 'Honda',
+      model: 'Shadow 1100',
+      years: '1985–2007',
+      schematic: 'images/schematics/honda-shadow-1100.svg',
+      drawn: 'VT1100C Shadow Spirit',
+      stats: [
+        { label: 'Engine', value: '1,099 cc liquid-cooled 45° V-twin, SOHC, 3 valves per cylinder' },
+        { label: 'Bore × stroke', value: '87.5 × 91.4 mm' },
+        { label: 'Carburettors', value: 'Two 36 mm CV' },
+        { label: 'Drive', value: '5-speed, shaft final drive' },
+        { label: 'Tyres', value: '110/90-19 · 170/80-15' },
+        { label: 'Rake · trail', value: '32°40′ · 152.5 mm (6.0 in)' },
+        { label: 'Wheelbase', value: '1,651 mm · 65.0 in' },
+        { label: 'Seat height', value: '729 mm · 28.7 in' },
+        { label: 'Dry weight', value: '≈251 kg · 553 lb' },
+        { label: 'Fuel', value: '15.9 L · 4.2 gal' },
+      ],
+      facts: [
+        'The VT1100 ran from 1985 to 2007 as the Shadow 1100, the Spirit, the A.C.E. (1995–1999), the Aero (1998–2001), the A.C.E. Tourer and the Sabre (2000–2007).',
+        'The A.C.E. and Aero used a single-pin crank for a loping, Harley-style idle. It cost about 10 hp and 10 lb-ft against the dual-pin engine in the other 1100s.',
+        'The first 1985–86 bikes made the most power of any VT1100, around 78 hp.',
+        'Shaft drive means no chain to clean, oil or adjust.',
+      ],
+      sources: [
+        { label: 'webBikeWorld: 2001 Shadow Spirit 1100', url: 'https://www.webbikeworld.com/honda-spirit/' },
+        { label: 'Total Motorcycle: 1999 VT1100C Shadow Spirit', url: 'https://www.totalmotorcycle.com/motorcyclespecshandbook/honda/1999-honda-VT1100CShadowSpirit/' },
+        { label: 'Wikipedia: Honda VT1100', url: 'https://en.wikipedia.org/wiki/Honda_VT1100' },
+        { label: 'Sun Coast Cycle Sports: VT1100 1985–86', url: 'https://suncoastcyclesports.com/vt1100-85-86/' },
+      ],
     },
   ],
 

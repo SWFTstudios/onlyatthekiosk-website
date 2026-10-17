@@ -100,6 +100,7 @@
   const featureBySlug = (slug) => features.find((f) => f.slug === slug);
   const productById = (id) => (C.products || []).find((p) => p.id === id);
   const mixBySlug = (slug) => (C.mixes || []).find((m) => m.slug === slug);
+  const machineById = (id) => (C.machines || []).find((m) => m.id === id);
   const spotifyUrl = (m) => (m && m.spotify ? `https://open.spotify.com/playlist/${encodeURIComponent(m.spotify)}` : '');
   const sourceName = (m) => (m.soundcloud ? 'SoundCloud' : m.apple ? 'Apple Music' : m.spotify ? 'Spotify' : '');
   const appleEmbed = (url) => String(url || '').replace('://music.apple.com', '://embed.music.apple.com');
@@ -3354,6 +3355,31 @@
     const tl = f.timeline || [];
     const tlEl = fill('story-timeline', tl.map((t) => `<li><b>${esc(t.year)}</b><span>${esc(t.label)}</span></li>`).join(''));
     if (tlEl) tlEl.style.setProperty('--n', String(Math.max(tl.length, 1)));
+
+    // SPEC SHEET (schematic, numbers and facts per machine)
+    const machines = (f.machines || []).map(machineById).filter(Boolean);
+    if (machines.length) {
+      fill('story-machines', machines.map((m) => `
+        <article class="k-machine k-glass" data-reveal>
+          <figure class="k-machine__plan">
+            <div class="k-machine__svg" data-schematic="${esc(m.schematic)}"><img src="${esc(m.schematic)}" alt="${esc(`${m.make} ${m.model} side-elevation schematic`)}" loading="lazy"></div>
+            <figcaption>${esc(`${m.make} ${m.model}`)}${m.drawn ? ` · drawn as ${esc(m.drawn)}` : ''} · dimensions in mm</figcaption>
+          </figure>
+          <div class="k-machine__body">
+            <p class="k-eyebrow">${esc(m.make)} · ${esc(m.years || '')}</p>
+            <h3>${esc(m.model)}</h3>
+            <dl class="k-machine__stats">${(m.stats || []).map((x) => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join('')}</dl>
+            ${(m.facts || []).length ? `<ul class="k-machine__facts">${m.facts.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+            ${(m.sources || []).length ? `<p class="k-machine__sources">Sources: ${m.sources.map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.label)}</a>`).join(' · ')}</p>` : ''}
+          </div>
+        </article>`).join(''));
+      // Inline the drawings so their lines follow the page ink (day/night)
+      $$('[data-schematic]').forEach((el) => {
+        fetch(el.dataset.schematic).then((r) => (r.ok ? r.text() : '')).then((svg) => {
+          if (svg.trim().startsWith('<svg')) el.innerHTML = svg;
+        }).catch(() => {});
+      });
+    } else hideSection('machines');
 
     // SUBJECTS
     const subj = f.subjects || [];
