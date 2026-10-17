@@ -229,8 +229,26 @@
     radio: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12v-1a8 8 0 0 1 16 0v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="16.5" y="12" width="4" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>',
     shop: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 11.5H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
     films: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M10 9.3v5.4l4.6-2.7z" fill="currentColor"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20.5s-6-5.6-6-10.5a6 6 0 0 1 12 0c0 4.9-6 10.5-6 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>',
+    store: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5L5.5 5h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12.5V19h13v-6.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19v-4h4v4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    flights: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 16.5l19-6.5-1.2-2.6-6.6 1.8L8.3 3.5 6.6 4.2l3 6.1-4.4 1.3-2.2-2-1.4.5 1.4 3.4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
     more: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
   };
+  const MENU_EXTRA = {
+    journal: { note: 'Every story', icon: 'journal' },
+    films: { note: 'Screening room', icon: 'films' },
+    radio: { note: 'Phonk & mixes', icon: 'radio' },
+    garage: { note: 'The Street File', icon: 'garage' },
+    vault: { note: 'Supply', icon: 'shop' },
+  };
+  const MENU = [
+    { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' },
+    ...NAV.map((n) => ({ ...n, ...(MENU_EXTRA[n.id] || {}) })),
+    { id: 'hunt', label: 'Lost &amp; Found', href: 'lost-and-found.html', note: 'Rare finds', icon: 'pin' },
+    { id: 'store', label: 'Stores', href: 'store.html', note: 'Partner stores', icon: 'store' },
+    { id: 'flights', label: 'Flights', href: 'flights.html', note: 'Live flight deck', icon: 'flights' },
+  ];
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
     { id: 'journal', label: 'Atlas', href: 'atlas.html', icon: TAB_ICONS.journal },
@@ -331,13 +349,9 @@
         <p class="k-sheet__clock" aria-hidden="true"><span data-clock>--:--:--</span> <small data-clock-zone></small></p>
       </div>
       <ul class="k-sheet__links">
-        <li style="--i:0"><a href="index.html">Home <span>00</span></a></li>
-        ${NAV.map((n, i) => `<li style="--i:${i + 1}"><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label} <span>${pad(i + 1)}</span></a></li>`).join('')}
-        <li style="--i:${NAV.length + 1}"><a href="lost-and-found.html">Lost &amp; Found <span>${pad(NAV.length + 1)}</span></a></li>
-        <li style="--i:${NAV.length + 2}"><a href="store.html">Stores <span>${pad(NAV.length + 2)}</span></a></li>
-        <li style="--i:${NAV.length + 3}"><a href="flights.html">Flights <span>${pad(NAV.length + 3)}</span></a></li>
+        ${MENU.map((n, i) => `<li style="--i:${i}"><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}><i class="k-sheet__ico">${TAB_ICONS[n.icon] || ''}</i><b>${n.label}</b><small>${esc(n.note || '')}</small><span>${pad(i)}</span></a></li>`).join('')}
       </ul>
-      <div class="k-sheet__foot" style="--i:${NAV.length + 4}">
+      <div class="k-sheet__foot" style="--i:${MENU.length}">
         <div class="k-sheet__quick">
           <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings<small>Look &amp; feel</small></span></button>
           <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme<small data-theme-sub>Auto</small></span></button>
@@ -385,6 +399,8 @@
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
       more.setAttribute('aria-expanded', String(open));
+      more.setAttribute('aria-label', open ? 'Close menu' : 'More');
+      more.innerHTML = open ? TAB_ICONS.close : TAB_ICONS.more;
       document.documentElement.classList.toggle('is-sheet-open', open);
       sheet.classList.toggle('is-open', open);
       sheet.setAttribute('aria-hidden', String(!open));
@@ -3593,6 +3609,18 @@
   function pageGarage() {
     const list = (C.machines || []).filter((m) => m.street);
     const quarter = (m) => (m.street.numbers || []).find((n) => /¼/.test(n.label));
+    fill('garage-count', `${list.length} machines`);
+    fill('garage-collection', list.map((m, i) => {
+      const seen = machineStories(m);
+      const lead = (m.street.numbers || [])[0];
+      return `<a class="k-coll k-glass" href="#${esc(m.id)}" data-reveal>
+        <span class="k-coll__plate"><img src="${esc(m.schematic)}" alt="" loading="lazy"></span>
+        <span class="k-coll__meta"><span class="k-coll__num">${pad(i + 1)}</span><span class="k-coll__role">${esc(m.street.role)}</span></span>
+        <b class="k-coll__name">${esc(m.model)}</b>
+        <small class="k-coll__sub">${esc(m.make)} · ${esc(m.years || '')}${seen.length ? ` · in ${seen.length} ${seen.length === 1 ? 'story' : 'stories'}` : ''}</small>
+        ${lead ? `<span class="k-coll__stat"><small>${esc(lead.label)}</small>${esc(lead.value)}</span>` : ''}
+      </a>`;
+    }).join(''));
     fill('garage-tape', `
       <div class="k-tape__row k-tape__row--head" aria-hidden="true"><span>Machine</span><span>Engine</span><span>Output</span><span>¼ mile</span></div>
       ${list.map((m) => {
