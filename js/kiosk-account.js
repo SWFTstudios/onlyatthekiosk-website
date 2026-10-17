@@ -160,12 +160,14 @@
       updateCartBadge(state.cart);
       if (state.user) { await mergeLocalWishlist(); await syncTaste(); }
       renderAccountPage();
+      document.dispatchEvent(new CustomEvent('kiosk:account', { detail: { enabled: state.enabled, signedIn: !!state.user } }));
       return state;
     } catch (err) {
       state.enabled = false;
       state.loading = false;
       showAccountButtons(false, !!cartId());
       renderAccountPage();
+      document.dispatchEvent(new CustomEvent('kiosk:account', { detail: { enabled: false, signedIn: false } }));
       return state;
     }
   }
@@ -201,44 +203,79 @@
     return `<div class="k-checkin k-checkin--new ${cls}"><p class="k-checkin__eyebrow">Check-in · 1 minute</p><p class="k-checkin__line">Tell us what you’re into and we’ll pick stories, films and pieces for you.</p><button type="button" class="k-btn k-btn--sm k-btn--solid" data-onboard-open>Check in</button></div>`;
   }
 
+  /* The member card: a boarding pass with what's kept for you, then what an
+   * account adds and one clear next step. */
+  const PERK_ICONS = {
+    save: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13.5S2 10 2 5.8A3 3 0 0 1 8 4.3a3 3 0 0 1 6 1.5C14 10 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    plane: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.5 11.5l14-5-1-2-5 1.4L6.6 2.6 5.3 3.1l2.3 4.6-3.3 1-1.7-1.5-1 .4 1 2.6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    box: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 5l5.5-3 5.5 3v6L8 14l-5.5-3V5z M2.5 5L8 8l5.5-3M8 8v6" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
+    bell: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3L4 11zM6.5 14h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const PERKS = [
+    ['save', 'Saves on every device', 'Hearts on stories and pieces follow you.'],
+    ['plane', 'Your check-in, everywhere', 'Picks for you on the Atlas, your size pre-selected.'],
+    ['box', 'Orders and your bag', 'Track orders; your cart waits for you.'],
+    ['bell', 'First call on drops', 'Hear about rare finds before they board.'],
+  ];
+  const localSaves = () => ((K().store && K().store.get(K().saveKey || 'kiosk:saved', [])) || []).length;
+
+  function memberCard(u) {
+    const t = localTaste();
+    const saves = u ? (state.wishlist || []).length : localSaves();
+    const name = u ? (u.firstName || (u.email || '').split('@')[0] || 'Member') : ((t && t.name) || 'Guest');
+    return `
+      <div class="k-member" aria-label="${u ? 'Your member pass' : 'Guest pass'}">
+        <div class="k-member__top">
+          <span class="k-member__brand">KIOSK</span>
+          <span class="k-member__kind">${u ? 'Member pass' : 'Guest pass'}</span>
+        </div>
+        <p class="k-member__name">${esc(name)}</p>
+        ${u && u.email ? `<p class="k-member__email">${esc(u.email)}</p>` : ''}
+        <dl class="k-member__stats">
+          <div><dt>Saved</dt><dd>${esc(saves)}</dd></div>
+          <div><dt>Check-in</dt><dd>${t && t.completedAt ? 'Done' : '—'}</dd></div>
+          <div><dt>${u ? 'Orders' : 'Status'}</dt><dd>${u ? esc((state.orders || []).length) : 'On this device'}</dd></div>
+        </dl>
+      </div>`;
+  }
+
   function accountSheetHtml() {
     const u = state.user;
-    if (!u) {
-      return `
+    const head = `
         <div class="k-acct__scrim" data-account-close></div>
         <div class="k-acct__panel" role="document">
           <header class="k-acct__head">
             <span class="k-acct__grab" aria-hidden="true"></span>
-            <h2 class="k-acct__title" id="k-acct-title">Account</h2>
+            <h2 class="k-acct__title" id="k-acct-title">${u ? 'Your account' : 'Account'}</h2>
             <button type="button" class="k-acct__x" data-account-close aria-label="Close">${icon().close || '×'}</button>
           </header>
           <div class="k-acct__body">
-            ${state.enabled ? `<p class="k-lede">Make an account to keep your check-in, saves and cart on every device, and see your orders.</p>
-            <a class="k-btn k-btn--solid k-acct__cta" href="${loginUrl()}">Sign in / create account</a>
-            <p class="k-acct__hint">No password: you’ll get a one-time code by email (Shopify’s secure sign-in).</p>` : '<p class="k-lede">Accounts are coming soon. Until then your check-in and saves stay on this device.</p>'}
+            ${memberCard(u)}`;
+    if (!u) {
+      const cta = state.enabled
+        ? `<a class="k-btn k-btn--solid k-acct__cta" href="${loginUrl()}">Sign in or create account</a>
+           <p class="k-acct__hint">No password. We email you a one-time code.</p>`
+        : `<div class="k-acct__soon">
+             <p><b>Member sign-in opens soon.</b> Until then your saves and check-in are kept on this device.</p>
+             <button type="button" class="k-btn k-btn--solid k-acct__cta" data-notify="dispatch" data-notify-title="The Dispatch">Tell me when it opens</button>
+           </div>`;
+      return `${head}
+            ${cta}
+            <ul class="k-perks">${PERKS.map(([ico, title, note]) => `<li><i aria-hidden="true">${PERK_ICONS[ico]}</i><span><b>${title}</b><small>${note}</small></span></li>`).join('')}</ul>
             ${checkinBlock('k-checkin--sheet')}
           </div>
         </div>`;
     }
-    return `
-      <div class="k-acct__scrim" data-account-close></div>
-      <div class="k-acct__panel" role="document">
-        <header class="k-acct__head">
-          <span class="k-acct__grab" aria-hidden="true"></span>
-          <h2 class="k-acct__title" id="k-acct-title">Account</h2>
-          <button type="button" class="k-acct__x" data-account-close aria-label="Close">${icon().close || '×'}</button>
-        </header>
-        <div class="k-acct__body">
-          <p class="k-acct__hello">Hi${u.firstName ? `, ${esc(u.firstName)}` : ''}</p>
-          <p class="k-acct__email">${esc(u.email || '')}</p>
-          ${checkinBlock('k-checkin--sheet')}
-          <div class="k-acct__actions">
-            <a class="k-btn k-btn--solid" href="account.html">Open dashboard</a>
-            <button class="k-btn" type="button" data-cart-open>View cart</button>
-            <a class="k-btn" href="/api/auth/logout">Sign out</a>
+    return `${head}
+            <div class="k-acct__tiles">
+              <a class="k-acct__tile" href="account.html"><i aria-hidden="true">${PERK_ICONS.box}</i><span>Dashboard<small>Orders &amp; saves</small></span></a>
+              <button class="k-acct__tile" type="button" data-cart-open><i aria-hidden="true">${(icon().bag) || PERK_ICONS.box}</i><span>Your bag<small>${esc((state.cart && state.cart.totalQuantity) || 0)} items</small></span></button>
+              <button class="k-acct__tile" type="button" data-onboard-open><i aria-hidden="true">${PERK_ICONS.plane}</i><span>Check-in<small>${localTaste() && localTaste().completedAt ? 'Edit answers' : '1 minute'}</small></span></button>
+            </div>
+            ${checkinBlock('k-checkin--sheet')}
+            <a class="k-btn k-acct__out" href="/api/auth/logout">Sign out</a>
           </div>
-        </div>
-      </div>`;
+        </div>`;
   }
 
   function openAccountSheet() {
