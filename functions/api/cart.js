@@ -72,7 +72,7 @@ export async function onRequest(context) {
     if (action === 'create') {
       const lines = Array.isArray(body.lines) ? body.lines : [];
       const buyerIdentity = session
-        ? { customerAccessToken: session.accessToken }
+        ? { email: session.email }
         : null;
       const cart = await createCart(env, { lines, buyerIdentity });
       if (session && cart) await saveUserCartId(env, session.userId, cart.id);
@@ -95,7 +95,7 @@ export async function onRequest(context) {
       let cart;
       if (!cartId) {
         const buyerIdentity = session
-          ? { customerAccessToken: session.accessToken }
+          ? { email: session.email }
           : null;
         cart = await createCart(env, { lines: [line], buyerIdentity });
       } else {
@@ -141,11 +141,11 @@ export async function onRequest(context) {
     }
 
     if (action === 'attach') {
-      // Link a guest cart to the signed-in Shopify customer.
+      // Link a guest cart to the signed-in member (checkout gets their email).
       if (!session) return withCors(error('Sign in required.', 401), request);
       const cartId = body.cartId;
       if (!cartId) return withCors(error('cartId is required.'), request);
-      const cart = await attachBuyer(env, cartId, session.accessToken);
+      const cart = await attachBuyer(env, cartId, { email: session.email });
       if (cart) await saveUserCartId(env, session.userId, cart.id);
       return withCors(json({ cart }), request);
     }

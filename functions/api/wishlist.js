@@ -1,5 +1,5 @@
 /**
- * /api/wishlist
+ * /api/wishlist — a member's saves (the `locker_items` table)
  * GET                — list items
  * POST { kind, ref } — add one
  * POST { action: 'merge', items: [{kind,ref}] } — merge local saves
@@ -14,8 +14,9 @@ import {
 } from '../_lib/http.js';
 import { requireSession } from '../_lib/session.js';
 
+const KINDS = new Set(['product', 'story', 'video', 'radio', 'content']);
 function normalizeKind(kind) {
-  return kind === 'product' || kind === 'story' ? kind : null;
+  return KINDS.has(kind) ? kind : null;
 }
 
 function normalizeRef(ref) {
@@ -26,7 +27,7 @@ function normalizeRef(ref) {
 
 async function listWishlist(env, userId) {
   const rows = await env.DB.prepare(
-    `SELECT kind, ref, created_at FROM wishlist_items WHERE user_id = ? ORDER BY created_at DESC`
+    `SELECT kind, ref, created_at FROM locker_items WHERE user_id = ? ORDER BY created_at DESC`
   ).bind(userId).all();
   return (rows.results || []).map((r) => ({
     kind: r.kind,
@@ -53,7 +54,7 @@ export async function onRequest(context) {
 
       if (body.action === 'merge' && Array.isArray(body.items)) {
         const stmt = env.DB.prepare(
-          `INSERT OR IGNORE INTO wishlist_items (user_id, kind, ref) VALUES (?, ?, ?)`
+          `INSERT OR IGNORE INTO locker_items (user_id, kind, ref) VALUES (?, ?, ?)`
         );
         const batch = [];
         for (const item of body.items.slice(0, 200)) {
@@ -68,10 +69,10 @@ export async function onRequest(context) {
       const kind = normalizeKind(body.kind);
       const ref = normalizeRef(body.ref);
       if (!kind || !ref) {
-        return withCors(error('kind (story|product) and ref are required.'), request);
+        return withCors(error('kind (product|story|video|radio|content) and ref are required.'), request);
       }
       await env.DB.prepare(
-        `INSERT OR IGNORE INTO wishlist_items (user_id, kind, ref) VALUES (?, ?, ?)`
+        `INSERT OR IGNORE INTO locker_items (user_id, kind, ref) VALUES (?, ?, ?)`
       ).bind(session.userId, kind, ref).run();
       return withCors(json({ items: await listWishlist(env, session.userId) }), request);
     }
@@ -89,7 +90,7 @@ export async function onRequest(context) {
         return withCors(error('kind and ref are required.'), request);
       }
       await env.DB.prepare(
-        `DELETE FROM wishlist_items WHERE user_id = ? AND kind = ? AND ref = ?`
+        `DELETE FROM locker_items WHERE user_id = ? AND kind = ? AND ref = ?`
       ).bind(session.userId, kind, ref).run();
       return withCors(json({ items: await listWishlist(env, session.userId) }), request);
     }

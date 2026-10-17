@@ -195,7 +195,8 @@
     if (b.matches('[data-ob-next]')) { go(i + 1); return; }
     if (b.matches('[data-ob-back]')) { go(i - 1); return; }
     if (b.matches('[data-ob-finish]')) { save(true); close(); if (K().toast) K().toast(t.name ? `Checked in. Welcome, ${t.name}.` : 'Checked in. Welcome aboard.'); return; }
-    if (b.matches('[data-ob-account]')) { save(true); const ret = location.pathname + location.search; location.href = `/api/auth/login?return_to=${encodeURIComponent(ret || '/account.html')}`; return; }
+    // Sign up right here: the account sheet's email-code form (answers upload on sign-in)
+    if (b.matches('[data-ob-account]')) { save(true); close(); if (window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.openAccount) window.KIOSK_ACCOUNT.openAccount(); return; }
     if (b.dataset.ob) {
       const g = b.dataset.ob; const v = b.dataset.v; const list = t[g] || (t[g] = []);
       const on = list.includes(v);

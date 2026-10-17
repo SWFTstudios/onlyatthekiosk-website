@@ -1,7 +1,7 @@
 /**
  * KIOSK accounts — sign-in sheet, cart drawer, wishlist sync, account page.
  * Requires js/kiosk-glass.js (window.KIOSK). Hides itself when /api/me reports
- * accounts disabled (Shopify Customer Account client or D1 not configured).
+ * accounts disabled (the D1 or Email Service binding is missing).
  */
 (function () {
   'use strict';
@@ -122,7 +122,7 @@
     // The account button always shows: check-in works on this device even before accounts are switched on
     $$('[data-account-open]').forEach((el) => setChromeVisible(el, true));
     // Cart chrome can light up for guests once Storefront cart works,
-    // even before Customer Account OAuth is configured.
+    // even before member sign-in is switched on.
     const showCart = !!(accountsOn || cartOn);
     $$('[data-cart-open]').forEach((el) => setChromeVisible(el, showCart));
   }
@@ -186,9 +186,104 @@
     } catch (e) { /* ignore merge failures */ }
   }
 
-  function loginUrl() {
-    const returnTo = location.pathname + location.search + location.hash;
-    return `/api/auth/login?return_to=${encodeURIComponent(returnTo || '/account.html')}`;
+  /* ------------------------------------------------------------- sign in
+   * No passwords: an email, then the six-digit code we email (Cloudflare
+   * Email Service, /api/auth/code), checked by /api/auth/verify. The first
+   * sign-in for an email makes the account and a member number. */
+  const signin = { step: 'email', email: '', firstName: '', msg: '', busy: false, resendAt: 0 };
+  let resendTimer = 0;
+
+  function signinHtml() {
+    if (signin.step === 'code') {
+      return `
+        <form class="k-signin" data-signin="code" novalidate>
+          <p class="k-signin__lead">We sent a six-digit code to <b>${esc(signin.email)}</b>. <button type="button" class="k-signin__link" data-signin-back>Change</button></p>
+          <label class="k-field"><span class="k-sr">Sign-in code</span>
+            <input class="k-otp" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="7" placeholder="000000" aria-describedby="k-signin-msg" required>
+          </label>
+          <button class="k-btn k-btn--solid k-acct__cta" type="submit"${signin.busy ? ' disabled' : ''}>${signin.busy ? 'Checking…' : 'Sign in'}</button>
+          <p class="k-signin__msg" id="k-signin-msg" role="alert">${esc(signin.msg)}</p>
+          <p class="k-acct__hint">The code works for 10 minutes. <button type="button" class="k-signin__link" data-signin-resend disabled>Send a new code</button></p>
+        </form>`;
+    }
+    return `
+      <form class="k-signin" data-signin="email" novalidate>
+        <label class="k-field"><span>Email</span>
+          <input type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" value="${esc(signin.email)}" aria-describedby="k-signin-msg" required>
+        </label>
+        <label class="k-field"><span>First name <small>optional, for new members</small></span>
+          <input name="firstName" autocomplete="given-name" maxlength="60" value="${esc(signin.firstName || ((localTaste() || {}).name) || '')}">
+        </label>
+        <button class="k-btn k-btn--solid k-acct__cta" type="submit"${signin.busy ? ' disabled' : ''}>${signin.busy ? 'Sending…' : 'Email me a code'}</button>
+        <p class="k-signin__msg" id="k-signin-msg" role="alert">${esc(signin.msg)}</p>
+        <p class="k-acct__hint">No password. New here? This makes your account.</p>
+      </form>`;
+  }
+
+  function paintSignin(focusSel) {
+    const box = accountEl && $('[data-signin-box]', accountEl);
+    if (!box) return;
+    box.innerHTML = signinHtml();
+    const f = $(focusSel || (signin.step === 'code' ? '.k-otp' : 'input[name="email"]'), box);
+    if (f) f.focus();
+    tickResend();
+  }
+
+  function tickResend() {
+    clearTimeout(resendTimer);
+    const btn = accountEl && $('[data-signin-resend]', accountEl);
+    if (!btn) return;
+    const left = Math.ceil((signin.resendAt - Date.now()) / 1000);
+    btn.disabled = left > 0;
+    btn.textContent = left > 0 ? `Send a new code in ${left}s` : 'Send a new code';
+    if (left > 0) resendTimer = setTimeout(tickResend, 1000);
+  }
+
+  async function requestCode() {
+    signin.busy = true; signin.msg = ''; paintSignin();
+    try {
+      await api('/api/auth/code', { method: 'POST', body: JSON.stringify({ email: signin.email }) });
+      signin.step = 'code';
+      signin.resendAt = Date.now() + 30_000;
+      toast(`Code sent to ${signin.email}`);
+    } catch (err) {
+      signin.msg = err.message || 'We couldn’t send the code. Try again.';
+    }
+    signin.busy = false;
+    paintSignin();
+  }
+
+  async function verifyCode(code) {
+    if (signin.busy) return;
+    signin.busy = true; signin.msg = ''; paintSignin('.k-otp');
+    try {
+      const data = await api('/api/auth/verify', { method: 'POST', body: JSON.stringify({ email: signin.email, code, firstName: signin.firstName || undefined }) });
+      signin.step = 'email'; signin.busy = false; signin.msg = '';
+      await afterSignIn(data);
+    } catch (err) {
+      signin.busy = false;
+      signin.msg = err.message || 'That didn’t work. Try again.';
+      if (err.data && err.data.expired) signin.resendAt = 0;
+      paintSignin('.k-otp');
+    }
+  }
+
+  /** Signed in: carry the guest cart over, load the account, say hello. */
+  async function afterSignIn(data) {
+    justSignedIn = !!data.isNew;
+    const id = cartId();
+    if (id) await api('/api/cart', { method: 'POST', body: JSON.stringify({ action: 'attach', cartId: id }) }).catch(() => {});
+    await refreshMe();
+    if (accountEl && accountEl.classList.contains('is-open')) accountEl.innerHTML = accountSheetHtml();
+    const u = data.user || {};
+    toast(data.isNew ? `Welcome aboard${u.firstName ? `, ${u.firstName}` : ''}. You’re member ${u.memberNo || ''}.` : `Welcome back${u.firstName ? `, ${u.firstName}` : ''}.`);
+  }
+
+  async function signOut() {
+    await api('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    await refreshMe();
+    if (accountEl && accountEl.classList.contains('is-open')) accountEl.innerHTML = accountSheetHtml();
+    toast('Signed out. Your saves stay in your account.');
   }
 
   /* ---------------------------------------------------------- account sheet */
@@ -217,6 +312,7 @@
     ['box', 'Orders and your bag', 'Track orders; your cart waits for you.'],
     ['bell', 'First call on drops', 'Hear about rare finds before they board.'],
   ];
+  const sinceLabel = (d) => { const t = Date.parse(`${String(d || '').replace(' ', 'T')}Z`); return Number.isFinite(t) ? new Date(t).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '—'; };
   const localSaves = () => ((K().store && K().store.get(K().saveKey || 'kiosk:saved', [])) || []).length;
 
   function memberCard(u) {
@@ -227,14 +323,14 @@
       <div class="k-member" aria-label="${u ? 'Your member pass' : 'Guest pass'}">
         <div class="k-member__top">
           <span class="k-member__brand">KIOSK</span>
-          <span class="k-member__kind">${u ? 'Member pass' : 'Guest pass'}</span>
+          <span class="k-member__kind">${u ? `Member ${esc(u.memberNo || '')}` : 'Guest pass'}</span>
         </div>
         <p class="k-member__name">${esc(name)}</p>
         ${u && u.email ? `<p class="k-member__email">${esc(u.email)}</p>` : ''}
         <dl class="k-member__stats">
           <div><dt>Saved</dt><dd>${esc(saves)}</dd></div>
           <div><dt>Check-in</dt><dd>${t && t.completedAt ? 'Done' : '—'}</dd></div>
-          <div><dt>${u ? 'Orders' : 'Status'}</dt><dd>${u ? esc((state.orders || []).length) : 'On this device'}</dd></div>
+          <div><dt>${u ? 'Since' : 'Status'}</dt><dd>${u ? esc(sinceLabel(u.memberSince)) : 'On this device'}</dd></div>
         </dl>
       </div>`;
   }
@@ -253,8 +349,7 @@
             ${memberCard(u)}`;
     if (!u) {
       const cta = state.enabled
-        ? `<a class="k-btn k-btn--solid k-acct__cta" href="${loginUrl()}">Sign in or create account</a>
-           <p class="k-acct__hint">No password. We email you a one-time code.</p>`
+        ? `<div data-signin-box>${signinHtml()}</div>`
         : `<div class="k-acct__soon">
              <p><b>Member sign-in opens soon.</b> Until then your saves and check-in are kept on this device.</p>
              <button type="button" class="k-btn k-btn--solid k-acct__cta" data-notify="dispatch" data-notify-title="The Dispatch">Tell me when it opens</button>
@@ -273,7 +368,7 @@
               <button class="k-acct__tile" type="button" data-onboard-open><i aria-hidden="true">${PERK_ICONS.plane}</i><span>Check-in<small>${localTaste() && localTaste().completedAt ? 'Edit answers' : '1 minute'}</small></span></button>
             </div>
             ${checkinBlock('k-checkin--sheet')}
-            <a class="k-btn k-acct__out" href="/api/auth/logout">Sign out</a>
+            <button class="k-btn k-acct__out" type="button" data-signout>Sign out</button>
           </div>
         </div>`;
   }
@@ -290,12 +385,38 @@
       accountEl.addEventListener('click', (e) => {
         if (e.target.closest('[data-account-close]')) closeAccountSheet();
         if (e.target.closest('[data-cart-open]')) { closeAccountSheet(); openCartDrawer(); }
+        if (e.target.closest('[data-signin-back]')) { signin.step = 'email'; signin.msg = ''; paintSignin(); }
+        if (e.target.closest('[data-signin-resend]')) requestCode();
+      });
+      accountEl.addEventListener('submit', (e) => {
+        const form = e.target.closest('[data-signin]');
+        if (!form) return;
+        e.preventDefault();
+        if (form.dataset.signin === 'email') {
+          const email = (form.email.value || '').trim();
+          signin.firstName = (form.firstName.value || '').trim();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { signin.email = email; signin.msg = 'Enter a valid email address.'; paintSignin(); return; }
+          signin.email = email;
+          requestCode();
+        } else {
+          const code = (form.code.value || '').replace(/\D/g, '');
+          if (code.length !== 6) { signin.msg = 'Enter the six digits from the email.'; paintSignin('.k-otp'); return; }
+          verifyCode(code);
+        }
+      });
+      // Six digits typed or pasted (or filled from the email on iOS): sign in straight away
+      accountEl.addEventListener('input', (e) => {
+        if (!e.target.matches('.k-otp')) return;
+        const code = e.target.value.replace(/\D/g, '').slice(0, 6);
+        if (e.target.value !== code) e.target.value = code;
+        if (code.length === 6) verifyCode(code);
       });
     }
     accountEl.innerHTML = accountSheetHtml();
     accountReturn = document.activeElement;
     document.documentElement.classList.add('is-account-open');
     accountEl.classList.add('is-open');
+    tickResend();
     const focus = $('[data-account-close], .k-acct__cta, a.k-btn', accountEl);
     if (focus) focus.focus();
   }
@@ -507,7 +628,7 @@
           <p class="k-eyebrow">Account</p>
           <h1 class="k-display">Your KIOSK</h1>
           <p class="k-lede">Make an account to keep your check-in, saves and cart on every device. No password: a one-time code by email.</p>
-          <a class="k-btn k-btn--solid" href="${loginUrl()}">Sign in / create account</a>
+          <button class="k-btn k-btn--solid" type="button" data-account-open>Sign in or create account</button>
           ${checkinBlock('k-checkin--page')}
         </section>`;
       return;
@@ -570,7 +691,7 @@
               <div><dt>Email</dt><dd>${esc(u.email || '—')}</dd></div>
               <div><dt>Name</dt><dd>${esc(u.firstName || '—')}</dd></div>
             </dl>
-            <a class="k-btn k-btn--sm" href="/api/auth/logout">Sign out</a>
+            <button class="k-btn k-btn--sm" type="button" data-signout>Sign out</button>
           </section>
         </div>
       </section>`;
@@ -607,6 +728,7 @@
         }
         openAccountSheet();
       }
+      if (e.target.closest('[data-signout]')) { e.preventDefault(); signOut(); return; }
       const ob = e.target.closest('[data-onboard-open]');
       if (ob) { e.preventDefault(); openOnboarding(ob.dataset.onboardStep ? { step: ob.dataset.onboardStep } : {}); return; }
       if (e.target.closest('[data-cart-open]') && !e.target.closest('.k-cart')) {
@@ -620,31 +742,6 @@
     document.addEventListener('kiosk:save', onSave);
     document.addEventListener('kiosk:add-to-cart', (e) => addToCart(e.detail || {}));
 
-    // After OAuth return, merge guest cart onto the customer
-    const params = new URLSearchParams(location.search);
-    if (params.get('signed_in') === '1') {
-      justSignedIn = true;
-      const id = cartId();
-      if (id) {
-        api('/api/cart', { method: 'POST', body: JSON.stringify({ action: 'attach', cartId: id }) })
-          .then((data) => {
-            state.cart = data.cart || null;
-            updateCartBadge(state.cart);
-            toast('Welcome back.');
-          })
-          .catch(() => {});
-      } else {
-        toast('Welcome back.');
-      }
-      params.delete('signed_in');
-      const clean = location.pathname + (params.toString() ? `?${params}` : '') + location.hash;
-      history.replaceState(null, '', clean);
-    }
-    if (params.get('error') === 'auth') {
-      toast('Sign-in didn’t complete. Please try again.');
-      params.delete('error');
-      history.replaceState(null, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
-    }
   }
 
   function boot() {

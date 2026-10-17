@@ -51,6 +51,12 @@ export function withCors(response, request) {
   return new Response(response.body, { status: response.status, headers });
 }
 
+/** A short single-line string from user input (names), or '' when empty. */
+export function safeText(value, max = 80) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
 /** Only allow same-site relative paths for post-login redirects. */
 export function safeReturnTo(value, fallback = '/') {
   if (!value || typeof value !== 'string') return fallback;

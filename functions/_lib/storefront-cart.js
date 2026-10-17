@@ -158,7 +158,8 @@ export async function removeLines(env, cartId, lineIds) {
   return normalizeCart(payload.cart);
 }
 
-export async function attachBuyer(env, cartId, customerAccessToken) {
+/** Link a cart to a member (buyerIdentity: { email }) so checkout is pre-filled. */
+export async function attachBuyer(env, cartId, buyerIdentity) {
   const mutation = `
     mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
       cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
@@ -168,7 +169,7 @@ export async function attachBuyer(env, cartId, customerAccessToken) {
     }`;
   const data = await storefrontGraphql(env, mutation, {
     cartId,
-    buyerIdentity: { customerAccessToken },
+    buyerIdentity,
   });
   const payload = data.cartBuyerIdentityUpdate;
   if (payload.userErrors && payload.userErrors.length) {

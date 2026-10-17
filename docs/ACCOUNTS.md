@@ -1,113 +1,77 @@
-# KIOSK accounts setup
+# KIOSK accounts
 
-Accounts use **Shopify Customer Accounts** for sign-in and order history, and a **Cloudflare D1** database for sessions, wishlist and cart pointers. Supabase is not used (see the hold note in [AGENT_PLAN.md](AGENT_PLAN.md)).
-
-The UI stays hidden until `SHOPIFY_CUSTOMER_CLIENT_ID` and the D1 binding are live. Merging the PR without secrets is safe.
-
-## Architecture
+Members sign in with **a six-digit code sent to their email**. There are no passwords and no third-party sign-in. The first sign-in for an email creates the account and gives it the next **member number** (#0001, #0002…), plus a welcome email.
 
 | Concern | Service |
 |---|---|
-| Sign-in (email code) | Shopify Customer Account API (hosted OAuth) |
-| Orders | Shopify Customer Account GraphQL |
-| Checkout | Shopify Storefront cart + checkout URL |
-| Session cookie, wishlist, cart id, check-in answers | Cloudflare D1 (`kiosk-accounts`) + Worker `/api/*` |
+| Sign-in codes and welcome emails | Cloudflare Email Service (`send_email` binding `EMAIL`) |
+| Members, sessions, codes, saves, check-in, cart pointer | Cloudflare D1 `kiosk-accounts` (binding `DB`) |
+| Bag and checkout | Shopify Storefront cart (the member's email is passed to checkout) |
+
+Accounts switch on when both bindings exist (`accountsReady` in `functions/_lib/session.js`). Until then the account sheet says "Member sign-in opens soon" and offers the Dispatch sign-up, while check-in and saves stay on the device.
 
 ## Owner checklist
 
-### 1. Shopify Customer Account API client
+### 1. Email Service (once)
 
-1. In Shopify admin, enable **new customer accounts**.
-2. Add a **Headless** channel (or a Customer Account API client for the storefront).
-3. Record the **Client ID** and **Client secret**.
-4. Under application setup, set:
-   - **Callback URL(s):** `https://onlyatthekiosk.com/api/auth/callback` (plus your Pages preview URL, e.g. `https://<preview>.onlyatthekiosk-website.pages.dev/api/auth/callback`)
-   - **Javascript origins:** `https://onlyatthekiosk.com` and the preview origin
-   - **Logout URL:** `https://onlyatthekiosk.com/`
-5. Shopify does not allow `http://localhost` callbacks. Use a tunnel (e.g. Cloudflare Tunnel / ngrok) for local OAuth tests.
+1. The account must be on **Workers Paid**: Email Service only sends to arbitrary recipients on that plan.
+2. Cloudflare dashboard → **Compute → Email Service → Email Sending → Onboard Domain** → pick `onlyatthekiosk.com`. Cloudflare adds the SPF, DKIM, DMARC and bounce records itself; they usually take 5 to 15 minutes.
+3. The sender is `members@onlyatthekiosk.com`. To use another address on the domain, add a **variable** `MAIL_FROM` on the Worker (Settings → Variables and Secrets).
+4. Optional: add a **secret** `AUTH_SECRET` (any long random string). Sign-in codes are then hashed with it. Codes issued before you add it stop working, so add it before launch.
 
-Docs: [Getting started with the Customer Account API](https://shopify.dev/docs/storefronts/headless/building-with-the-customer-account-api/getting-started)
+### 2. Database
 
-### 2. Cloudflare D1
+Already done: `kiosk-accounts` (`539499f7-d26e-4e19-b5e8-6c514397672b`) is bound in `wrangler.jsonc`. Both migrations are applied to it (`0002_profiles.sql` was applied on 2026-10-17). When a new migration is added:
 
 ```bash
-npx wrangler d1 create kiosk-accounts
+npx wrangler d1 migrations apply kiosk-accounts --remote
 ```
 
-Copy the returned `database_id` into [wrangler.jsonc](../wrangler.jsonc) (replace the placeholder UUID), then:
+### 3. Deploy
 
-```bash
-npx wrangler d1 migrations apply kiosk-accounts --local
-npx wrangler d1 migrations apply kiosk-accounts
-```
+Merging to `main` deploys through Workers Builds (`npm run build:worker`, then `wrangler deploy`). After that, `/api/me` returns `{ "enabled": true }` and the account sheet shows the sign-in form.
 
-### 3. Worker secrets
+## How sign-in works
 
-```bash
-npx wrangler secret put SHOPIFY_CUSTOMER_CLIENT_ID
-npx wrangler secret put SHOPIFY_CUSTOMER_CLIENT_SECRET
-# already used by checkout:
-# npx wrangler secret put SHOPIFY_STOREFRONT_TOKEN
-```
+1. `POST /api/auth/code { email }` stores a hashed code in `login_codes` (one per email, 10 minutes) and emails it. It always answers the same way, so it never reveals who has an account. It is limited to 3 codes per email and 8 per IP every 10 minutes.
+2. `POST /api/auth/verify { email, code, firstName? }` allows 5 tries per code. On success it deletes the code, finds or creates the member, and sets the `kiosk_session` cookie (HttpOnly, Secure, SameSite=Lax, 30 days). It also sends the welcome email once.
+3. The site (`js/kiosk-account.js`) then carries over any guest bag and uploads the device's check-in. A new member gets Check-in opened for them, with the name they typed already filled in.
 
-Optional vars (non-secret is fine in the dashboard):
-
-- `SHOPIFY_STORE` — default `onlyatthekiosk.com`
-- `SHOPIFY_STOREFRONT_API_VERSION` — default `2026-07` (buyer identity)
-- `SHOPIFY_CUSTOMER_SHOP_ID` — if discovery needs it
-- `SITE_ORIGIN` — e.g. `https://onlyatthekiosk.com` (for correct OAuth redirect URI behind previews)
-
-### 4. Deploy
-
-```bash
-npm run build:worker
-npx wrangler deploy
-```
-
-After deploy, open the site: sign-in and the cart light up once `/api/me` returns `{ enabled: true }`. The account button itself always shows, because check-in works on the device before accounts are switched on.
-
-The migrations include `0002_profiles.sql` (check-in answers). Run the apply command above again after pulling it; until then `/api/me` simply reports `profile: null`.
+On iPhone the code field uses `autocomplete="one-time-code"`, so iOS offers the code from Mail, and six digits sign in straight away.
 
 ## API surface
 
 | Route | Auth | Purpose |
 |---|---|---|
-| `GET /api/auth/login?return_to=` | — | Start OAuth (PKCE) |
-| `GET /api/auth/callback` | — | Finish OAuth, set `kiosk_session` cookie |
-| `GET /api/auth/logout` | session | Clear session + Shopify logout |
-| `GET /api/me` | cookie | Profile, wishlist, cart, orders (`enabled: false` when not configured) |
-| `GET/POST/DELETE /api/wishlist` | session | Saved stories/products |
+| `POST /api/auth/code` | — | Email a sign-in code |
+| `POST /api/auth/verify` | — | Check the code, sign in (creates the account the first time) |
+| `GET/POST /api/auth/logout` | session | Sign out (GET redirects home, POST answers JSON) |
+| `GET /api/me` | cookie | Member, saves, check-in, cart (`enabled: false` when not configured) |
+| `GET/POST/DELETE /api/wishlist` | session | Saves (`locker_items`: product, story, video, radio, content) |
 | `GET/PUT/DELETE /api/profile` | session | Check-in answers (`taste`), cleaned by `functions/_lib/taste.js` |
-| `GET /api/where` | — | Approximate city of the request (home intro, check-in suggestion) |
 | `GET/POST /api/cart` | optional session | Create/add/update/remove/attach cart |
+| `GET /api/where` | — | Approximate city (home intro, check-in suggestion) |
 
 ## Check-in (onboarding)
 
-Creating an account stays with Shopify: *Sign in / create account* sends people to Shopify's email code, no passwords. Around that, **Check-in** (`js/kiosk-onboard.js`, loaded on demand) asks, all skippable:
-
-1. What to call you
-2. Interests: cars, motorcycles, sports, travel, fashion, skate, music, culture, food, photo & film
-3. Formats (films, vlogs, interviews, photo diaries, long reads, audio notes, playlists) and pace
-4. Home city (suggested from `/api/where`), how you travel, up to six dream destinations
-5. Style, top and waist sizes, fit, colours you wear
-6. What to hear about (drops, stories, rare finds, radio, meets)
-
-It ends on a boarding pass. Answers save as you go on the device (`localStorage['kiosk:taste']`). For members they also save to D1 (`profiles`) through `/api/profile`, and the account copy wins on other devices. Someone who checks in before signing up has their answers carried over on first sign-in; a member signing in for the first time without answers gets Check-in opened for them once.
-
-Where the answers show up: a *Picked for you* row leading the Atlas (`pickedFor` in `js/kiosk-glass.js`), the home intro flying to your home city, your top size pre-picked on product pages, and *Your check-in* on the account page. Open it from the menu (*Check in*), the account sheet or page, or any element with `data-onboard-open` (add `data-onboard-step="fit"` to jump to a step). Option ids live in `TASTE` in both `js/kiosk-onboard.js` and `functions/_lib/taste.js`; change them together.
+**Check-in** (`js/kiosk-onboard.js`, loaded on demand) asks, all skippable: a name, interests, formats and pace, home city and travel, style and sizes, and what to hear about. It ends on a boarding pass. Answers save on the device (`localStorage['kiosk:taste']`). For members they also save to D1 (`profiles`), and the account copy wins on other devices. Option ids live in `TASTE` in both `js/kiosk-onboard.js` and `functions/_lib/taste.js`; change them together.
 
 ## Local tests
 
 ```bash
-node scripts/test-accounts-unit.mjs
-node scripts/test-accounts-ui.mjs
+node scripts/test-accounts-unit.mjs   # codes, hashing, email checks, rate limit
+node scripts/test-accounts-ui.mjs     # sheet, drawer, dashboard (mocked API)
 npm run build:worker
+npx wrangler d1 migrations apply kiosk-accounts --local
+npx wrangler dev                      # local D1; emails are logged, not sent
 ```
+
+With `wrangler dev` the email binding is simulated: each email's subject (which includes the code) is printed in the terminal, so you can sign in locally.
 
 ## Security notes
 
-- Session id is random; only a SHA-256 hash is stored in D1.
-- Shopify access/refresh tokens never reach the browser.
-- `return_to` must be a same-site path (open-redirect safe).
-- Auth routes are rate-limited per IP (best-effort per isolate).
-- CORS on account APIs is same-origin + credentials.
+- Session ids and sign-in codes are random; only hashes are stored.
+- Codes last 10 minutes, allow 5 tries, and are deleted once used.
+- Code requests answer the same whether or not an account exists.
+- Sign-in routes are rate-limited per IP and per email (best effort, per isolate).
+- Account APIs only accept same-origin requests with credentials.
