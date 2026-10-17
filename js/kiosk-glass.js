@@ -2453,6 +2453,9 @@
         // progress past the cover itself (the sky intro sits above it on the home page)
         const p = Math.min(1, Math.max(0, (y - cover.offsetTop) / (cover.offsetHeight || window.innerHeight)));
         cover.style.setProperty('--hero-p', p.toFixed(3));
+        // arriving from the sky intro: the cover rises out of the cloud, which lifts as it settles
+        const arriving = Math.min(1, Math.max(0, (cover.offsetTop - y) / window.innerHeight));
+        cover.style.setProperty('--orbit-fog', Math.min(1, arriving / 0.45).toFixed(3));
       }
     };
     window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
