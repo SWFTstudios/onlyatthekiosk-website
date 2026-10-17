@@ -3935,7 +3935,7 @@ body[data-page='vault'] .k-board__rows { max-height: 11.5rem; }
   position: sticky; top: calc(var(--nav-h) + 8px); z-index: 40;
   display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
   padding: 10px 12px; margin: 0 0 clamp(16px, 2vw, 24px);
-  border-radius: var(--r-pill);
+  border-radius: 28px;
 }
 .k-cmd__search { flex: 1 1 180px; min-width: 0; }
 .k-cmd__search .k-term__field { height: 44px; background: transparent; padding: 0 8px; }
@@ -3988,6 +3988,94 @@ body[data-page='vault'] .k-board__rows { max-height: 11.5rem; }
   .k-filter__grab { display: block; width: 38px; height: 5px; border-radius: 3px; background: var(--ink-4); margin: 4px auto 12px; }
   .k-filter__apply { display: block; width: 100%; margin-top: 12px; }
 }
+
+/* Mobile: a compact command bar (search / gates / count + filter + sort),
+   not sticky, so it never sits over the pieces */
+@media (max-width: 719px) {
+  .k-cmd {
+    position: relative; top: auto;
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px;
+    padding: 8px; border-radius: 22px;
+  }
+  .k-cmd__search .k-term__field { height: 40px; padding: 0 6px; }
+  .k-cmd__search kbd { display: none; }
+  .k-cmd__gates {
+    margin: 0 -8px; padding: 2px 8px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+  }
+  .k-cmd__gates .k-gate { min-height: 40px; padding: 4px 12px 4px 4px; gap: 8px; border-radius: 12px; }
+  .k-cmd__gates .k-gate b { width: 30px; height: 30px; border-radius: 9px; font-size: 15px; }
+  .k-cmd__gates .k-gate span { font-size: 13px; }
+  .k-cmd__meta { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 8px; margin: 0; padding-top: 8px; border-top: 1px solid var(--lux-line); }
+  .k-cmd__count { padding-left: 6px; font-size: 10.5px; }
+  .k-cmd__filter .k-btn { min-height: 40px; padding: 0 16px; }
+  .k-cmd__meta .k-select { min-height: 40px; width: 100%; min-width: 0; }
+  .k-term__toolbar { align-items: center; }
+  .k-term__toolbar .k-h2 { font-size: calc(30px * var(--type, 1)); }
+}
+
+/* Mobile filter sheet: shorter, scrolls on its own (the page stays put),
+   options as wrapping chips, Apply always in reach */
+@media (max-width: 999px) {
+  html.is-filter-open, html.is-filter-open body { overflow: hidden; }
+  .k-filter__scrim { display: block; }
+  .k-filter__scrim[hidden] { display: none; }
+  .k-filter__panel {
+    max-height: min(68svh, 560px); padding-bottom: 0;
+    overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    display: flex; flex-direction: column;
+  }
+  .k-filter__panel > [data-mount='filter-body'] { flex: 1 1 auto; }
+  .k-filter__title { margin-bottom: 10px; }
+  .k-filter__group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .k-filter__group legend { width: 100%; margin-bottom: 8px; }
+  .k-filter__opt {
+    position: relative; min-height: 36px; padding: 0 14px; gap: 6px;
+    border: 1px solid var(--line-2); border-radius: 999px; background: var(--glass);
+    font-size: 13px; transition: background 0.2s, color 0.2s;
+  }
+  .k-filter__opt input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+  .k-filter__opt:has(input:checked) { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .k-filter__opt:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .k-filter__opt small { margin-left: 2px; color: inherit; opacity: 0.6; }
+  .k-filter__range { padding: 0 2px; }
+  .k-filter__apply {
+    position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); flex: none; z-index: 2;
+    width: 100%; min-height: 50px; margin: 6px 0 calc(12px + env(safe-area-inset-bottom));
+    border-radius: 999px; box-shadow: 0 -10px 28px 8px var(--lux-glass, rgba(255, 255, 255, 0.8));
+  }
+}
+
+/* Clear carousels (shop): no panel behind the drum, its sides fade out */
+.k-wheel--clear { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; color: var(--ink); padding: 0; }
+.k-wheel--clear .k-wheel__ambient { display: none; }
+.k-wheel--clear .k-wheel__stage {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+}
+.k-wheel--clear .k-wheel__card { box-shadow: 0 24px 40px -26px rgba(15, 15, 16, 0.55); -webkit-box-reflect: below 6px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.18)); }
+.k-wheel--clear .k-wheel__card::after { background: var(--bg); opacity: calc(var(--shade, 0) * 0.7); }
+.k-wheel--clear .k-wheel__step { background: var(--glass-2, var(--glass)); }
+
+/* Shop hero: collections and promotions on the drum */
+.k-term__bento .k-term__carousel { border: 0; border-radius: 0; overflow: visible; aspect-ratio: auto; min-height: 0; }
+.k-herowheel { gap: 10px; }
+.k-herowheel__stage { --card: clamp(180px, 22vw, 250px); height: calc(var(--card) * 1.55); }
+.k-herowheel__stage .k-wheel__drum { inset: 0 0 calc(var(--card) * 0.2); }
+.k-herowheel__card { height: calc(var(--card) * 1.3); background: var(--bg-3, #18181b); }
+.k-herowheel__card::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.78) 100%);
+}
+.k-herowheel__tag { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; display: grid; gap: 4px; text-align: left; color: #fff; pointer-events: none; }
+.k-herowheel__tag small { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.k-herowheel__tag b { font-weight: 450; font-size: calc(clamp(20px, 2.2vw, 26px) * var(--type, 1)); letter-spacing: -0.02em; line-height: 1.05; }
+.k-herowheel__card.is-promo .k-herowheel__tag small { color: var(--signal); opacity: 1; }
+.k-herowheel__now { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; max-width: 560px; width: 100%; margin: 0 auto; }
+.k-herowheel__info { display: grid; gap: 4px; justify-items: center; text-align: center; min-height: 52px; align-content: center; }
+.k-herowheel__note { color: var(--ink-2); font-size: calc(15px * var(--type, 1)); }
+.k-herowheel__cta { display: flex; justify-content: center; }
 
 /* Luxury product cards */
 .k-term-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
