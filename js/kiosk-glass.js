@@ -217,6 +217,7 @@
     { id: 'journal', label: 'Atlas', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
+    { id: 'garage', label: 'Garage', href: 'garage.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
@@ -3432,31 +3433,18 @@
     if (machines.length) {
       fill('story-machines', machines.map((m) => `
         <article class="k-machine k-glass" data-reveal>
-          <div class="k-machine__plans">
-          ${m.factory ? `<figure class="k-machine__factory">
-            <div class="k-machine__paper"><img src="${esc(m.factory.src)}" alt="${esc(`${m.make} ${m.model}: ${m.factory.caption}`)}" loading="lazy"></div>
-            <figcaption>Factory drawing · ${esc(m.factory.caption)}<span>${esc(m.factory.credit)}</span></figcaption>
-          </figure>` : ''}
-          <figure class="k-machine__plan">
-            <div class="k-machine__svg" data-schematic="${esc(m.schematic)}"><img src="${esc(m.schematic)}" alt="${esc(`${m.make} ${m.model} side-elevation schematic`)}" loading="lazy"></div>
-            <figcaption>${esc(`${m.make} ${m.model}`)}${m.drawn ? ` · drawn as ${esc(m.drawn)}` : ''} · dimensions in mm</figcaption>
-          </figure>
-          </div>
+          ${machinePlates(m)}
           <div class="k-machine__body">
             <p class="k-eyebrow">${esc(m.make)} · ${esc(m.years || '')}</p>
             <h3>${esc(m.model)}</h3>
             <dl class="k-machine__stats">${(m.stats || []).map((x) => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join('')}</dl>
             ${(m.facts || []).length ? `<ul class="k-machine__facts">${m.facts.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
             ${m.manual ? `<a class="k-bar k-machine__manual" href="${esc(m.manual.url)}" target="_blank" rel="noopener"><span>Factory drawings<small>${esc(m.manual.label)} · parts-location pages</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
+            ${m.street ? `<a class="k-bar k-machine__manual" href="garage.html#${esc(m.id)}"><span>Read the Street File<small>${esc(m.street.role)} · strip numbers and lesser-known facts</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
             ${(m.sources || []).length ? `<p class="k-machine__sources">Sources: ${m.sources.map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.label)}</a>`).join(' · ')}</p>` : ''}
           </div>
         </article>`).join(''));
-      // Inline the drawings so their lines follow the page ink (day/night)
-      $$('[data-schematic]').forEach((el) => {
-        fetch(el.dataset.schematic).then((r) => (r.ok ? r.text() : '')).then((svg) => {
-          if (svg.trim().startsWith('<svg')) el.innerHTML = svg;
-        }).catch(() => {});
-      });
+      inlineSchematics();
     } else hideSection('machines');
 
     // SUBJECTS
@@ -3573,6 +3561,88 @@
     const oldLd = document.getElementById('k-ld');
     if (oldLd) oldLd.remove();
     document.head.append(ld);
+  }
+
+  /* ----------------------------------------------------------- garage */
+
+  // Factory drawing (if any) above the dimensioned schematic
+  function machinePlates(m) {
+    return `<div class="k-machine__plans">
+      ${m.factory ? `<figure class="k-machine__factory">
+        <div class="k-machine__paper"><img src="${esc(m.factory.src)}" alt="${esc(`${m.make} ${m.model}: ${m.factory.caption}`)}" loading="lazy"></div>
+        <figcaption>Factory drawing · ${esc(m.factory.caption)}<span>${esc(m.factory.credit)}</span></figcaption>
+      </figure>` : ''}
+      <figure class="k-machine__plan">
+        <div class="k-machine__svg" data-schematic="${esc(m.schematic)}"><img src="${esc(m.schematic)}" alt="${esc(`${m.make} ${m.model} side-elevation schematic`)}" loading="lazy"></div>
+        <figcaption>${esc(`${m.make} ${m.model}`)}${m.drawn ? ` · drawn as ${esc(m.drawn)}` : ''} · dimensions in mm</figcaption>
+      </figure>
+    </div>`;
+  }
+
+  // Swap each schematic <img> for the inline SVG so its lines follow the page ink (day/night)
+  function inlineSchematics(root = document) {
+    $$('[data-schematic]', root).forEach((el) => {
+      fetch(el.dataset.schematic).then((r) => (r.ok ? r.text() : '')).then((svg) => {
+        if (svg.trim().startsWith('<svg')) el.innerHTML = svg;
+      }).catch(() => {});
+    });
+  }
+
+  const machineStories = (m) => features.filter((f) => (f.machines || []).includes(m.id));
+
+  function pageGarage() {
+    const list = (C.machines || []).filter((m) => m.street);
+    const quarter = (m) => (m.street.numbers || []).find((n) => /¼/.test(n.label));
+    fill('garage-tape', `
+      <div class="k-tape__row k-tape__row--head" aria-hidden="true"><span>Machine</span><span>Engine</span><span>Output</span><span>¼ mile</span></div>
+      ${list.map((m) => {
+        const q = quarter(m);
+        const power = (m.stats || []).find((x) => x.label === 'Power');
+        return `<a class="k-tape__row" href="#${esc(m.id)}">
+          <span><b>${esc(m.model)}</b><small>${esc(m.make)} · ${esc(m.street.role)}</small></span>
+          <span>${esc(((m.stats || []).find((x) => x.label === 'Engine') || {}).value || '')}</span>
+          <span>${esc(power ? power.value : ((m.street.numbers || []).find((n) => n.label === 'Output') || {}).value || '—')}</span>
+          <span>${q ? `${esc(q.value)}<small>${esc(q.note)}</small>` : '<small>Built for the boulevard</small>'}</span>
+        </a>`;
+      }).join('')}`);
+
+    fill('garage-files', list.map((m, i) => {
+      const st = m.street;
+      const seen = machineStories(m);
+      const sources = [...(st.sources || []), ...(m.sources || [])];
+      return `
+      <section class="k-section k-file" id="${esc(m.id)}" aria-labelledby="${esc(m.id)}-title">
+        <div class="k-wrap">
+          <header class="k-file__head" data-reveal>
+            <p class="k-file__num">${pad(i + 1)}<small>/ ${pad(list.length)}</small></p>
+            <div>
+              <p class="k-eyebrow">${esc(st.role)} · ${esc(m.make)} · ${esc(m.years || '')}</p>
+              <h2 class="k-file__title" id="${esc(m.id)}-title">${esc(m.model)}</h2>
+              <p class="k-lede k-file__dek">${esc(st.dek)}</p>
+            </div>
+          </header>
+          <div class="k-file__plates" data-reveal>${machinePlates(m)}</div>
+          <div class="k-file__grid">
+            <div>
+              <p class="k-eyebrow">Street numbers</p>
+              <dl class="k-file__numbers">${(st.numbers || []).map((n) => `<div class="k-glass" data-reveal><dt>${esc(n.label)}</dt><dd>${esc(n.value)}</dd>${n.note ? `<small>${esc(n.note)}</small>` : ''}</div>`).join('')}</dl>
+              ${seen.length ? `<p class="k-eyebrow k-mt-l">Seen in</p><div class="k-file__seen">${seen.map((f) => `<a class="k-bar" href="${storyHref(f)}"><span>${esc(f.title || featureName(f))}<small>${esc(featureName(f))}</small></span><span class="k-arrow">${icon.arrow}</span></a>`).join('')}</div>` : ''}
+            </div>
+            <div>
+              <p class="k-eyebrow">What the brochure leaves out</p>
+              <ol class="k-file__secrets">${(st.secrets || []).map((x) => `<li data-reveal>${esc(x)}</li>`).join('')}</ol>
+              <details class="k-file__sheet">
+                <summary>Full spec sheet</summary>
+                <dl class="k-machine__stats">${(m.stats || []).map((x) => `<div><dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd></div>`).join('')}</dl>
+                ${m.manual ? `<a class="k-bar k-machine__manual" href="${esc(m.manual.url)}" target="_blank" rel="noopener"><span>Factory owner’s manual<small>${esc(m.manual.label)}</small></span><span class="k-arrow">${icon.arrow}</span></a>` : ''}
+              </details>
+              <p class="k-machine__sources">Sources: ${sources.map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.label)}</a>`).join(' · ')}</p>
+            </div>
+          </div>
+        </div>
+      </section>`;
+    }).join(''));
+    inlineSchematics();
   }
 
   function hideSection(name) {
@@ -5683,6 +5753,7 @@
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
     { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
+    { id: 'garage', t: 'T7', name: 'The Street File', href: 'garage.html', note: 'The machines: schematics, strip numbers and secrets' },
   ];
   const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
@@ -5736,6 +5807,9 @@
           .concat(byNewest((C.products || []).filter((p) => !isDigitalP(p))).slice(0, 2).map((p) => ({ pdp: p.id, flight: flightOf(p), dest: p.title, gate: gateOf(p.category), time: price(p), status: statusOf(p, 0) })))
           .concat((C.mixes || []).slice(0, 1).map((m) => ({ play: m.slug, flight: 'KR 001', dest: m.title, gate: 'C', time: 'LIVE', status: { key: 'boarding', label: 'On air' } })));
         html = boardHtml({ id: 'home-board', title: 'Departures', sub: 'Every desk · latest first · tap a flight', cols: ['Flight', 'Destination', 'Gate', 'Time', 'Status'], rows: rows });
+      } else if (PAGE === 'garage') {
+        const rows = (C.machines || []).filter((m) => m.street).map((m, i) => ({ href: `#${m.id}`, flight: `KG ${pad(i + 1)}`, dest: `${m.make} ${m.model}`, gate: m.id.startsWith('infiniti') ? 'A' : 'M', time: (m.street.numbers[0] || {}).value || '', status: { key: i ? 'landed' : 'boarding', label: m.street.role } }));
+        html = boardHtml({ id: 'garage-board', title: 'On the lift', sub: 'Five files · tap one to open it', cols: ['File', 'Machine', 'Bay', 'Best', 'Role'], rows });
       } else if (PAGE === 'radio') {
         const rows = (C.mixes || []).map((m, i) => ({ play: m.slug, flight: `KR ${String(i + 1).padStart(3, '0')}`, dest: m.title, gate: 'C', time: m.duration || (i ? 'NEXT' : 'LIVE'), status: i ? { key: 'landed', label: 'Up next' } : { key: 'boarding', label: 'On air' } }));
         html = boardHtml({ id: 'radio-board', title: 'In-flight', sub: 'Channels on board · tap to play', cols: ['Channel', 'Programme', 'Gate', 'Time', 'Status'], rows: deskBoard(rows) });
@@ -5756,7 +5830,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
+  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
