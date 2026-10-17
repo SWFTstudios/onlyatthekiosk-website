@@ -726,6 +726,11 @@ window.KIOSK_CONTENT = {
    *   schematic  side-elevation line drawing (scripts/draw-schematics.js)
    *   drawn      which version the drawing and numbers describe
    *   stats      [{ label, value }]   facts  ['…']   sources  [{ label, url }]
+   *   factory    a drawing from that manual { src, caption, credit }
+   *   street     the Street File editorial (garage.html): { role, dek,
+   *              numbers: [{ label, value, note }], secrets: ['…'], sources }
+   *   manual     the factory owner’s manual: its parts-location pages are the
+   *              manufacturer’s own line drawings (linked, not copied)
    * -------------------------------------------------------- */
   machines: [
     {
@@ -735,6 +740,7 @@ window.KIOSK_CONTENT = {
       years: '2014–2024 model years',
       schematic: 'images/schematics/infiniti-q50.svg',
       drawn: 'V37 sedan, 2018-on dimensions',
+      manual: { label: '2023 Q50 Owner’s Manual (Infiniti, PDF)', url: 'https://www.infinitiusa.com/content/dam/Infiniti/US/manuals_guides/q50/2023/2023-infiniti-q50-owner-manual.pdf' },
       stats: [
         { label: 'Engine', value: '3.0 L twin-turbo V6 (VR30DDTT)' },
         { label: 'Power', value: '300 hp · 400 hp in the Red Sport 400' },
@@ -751,6 +757,28 @@ window.KIOSK_CONTENT = {
         'Launched with a 3.7-litre V6 and a V6 hybrid; the 3.0-litre twin-turbo VR30 arrived for 2016. The Red Sport 400 makes 400 hp at 6,400 rpm.',
         '2024 was the last model year. U.S. sales peaked at 44,007 in 2016, and Infiniti went crossover- and SUV-only for 2025.',
       ],
+      street: {
+        role: 'The sleeper',
+        dek: 'Four doors, a commuter-car silhouette and, in Red Sport 400 trim, the same twin-turbo V6 Nissan later dropped into the Z. Andy’s runs low on polished wheels and gold calipers, rolling across the Hudson.',
+        numbers: [
+          { label: '0–60 mph', value: '4.5 s', note: 'Car and Driver, 2016 Red Sport 400' },
+          { label: '¼ mile', value: '13.0 s @ 112 mph', note: 'Car and Driver, 2016 Red Sport 400' },
+          { label: 'Output', value: '400 hp · 350 lb-ft', note: 'Red Sport 400' },
+        ],
+        secrets: [
+          'The VR30DDTT V6 debuted in the Q50 and is the same engine Nissan put in the 2023 Z: same 400 hp at 6,400 rpm, same 350 lb-ft.',
+          'It made Wards 10 Best Engines twice: in the Q50 for 2017 and in the Q60 coupe for 2018.',
+          'There was almost a GT-R-engined Q50. The Eau Rouge concept made about 560 hp from the GT-R’s 3.8-litre twin-turbo V6, and Infiniti shelved it in 2015 as too expensive to build.',
+          'Tuners say the factory Garrett turbos are small. Dyno builds at Z Car Garage went from about 325–348 whp stock to 388–412 whp with intake, exhaust, a heat exchanger and an EcuTek tune, and Stillen found the turbos’ efficiency caps how much more boost pays off.',
+        ],
+        sources: [
+          { label: '0-60specs: Q50 tested times (Car and Driver)', url: 'https://www.0-60specs.com/infiniti/q50-0-60-times' },
+          { label: 'Motor1: the Nissan Z’s VR30DDTT', url: 'https://www.motor1.com/news/669178/see-through-nissan-z-vr30ddtt-engine-video/' },
+          { label: 'CAR: Q50 Eau Rouge cancelled', url: 'https://www.carmagazine.co.uk/car-news/motor-shows-events/frankfurt/2015/infiniti-kills-off-gtr-powered-q50-eau-rouge/' },
+          { label: 'Z Car Blog: VR30DDTT builds', url: 'https://www.zcarblog.com/tag/vr30ddtt/page/2' },
+          { label: 'Stillen: Red Sport turbo maps', url: 'https://blog.stillen.com/?p=12822' },
+        ],
+      },
       sources: [
         { label: 'Infiniti 2016 Q50 specifications', url: 'https://global.infinitinews.com/en/channels/channel-0207b8333061e10e7184bb242a019643' },
         { label: 'Infiniti 2023 Q50 specifications', url: 'https://canada.infinitinews.com/en-CA/releases/release-5ac4eb09db8c0dedca705b2277000fa3-2023-infiniti-q50-specifications' },
@@ -765,6 +793,8 @@ window.KIOSK_CONTENT = {
       years: '2015–present',
       schematic: 'images/schematics/yamaha-r1m.svg',
       drawn: '2025–26 U.S. specification',
+      factory: { src: 'images/schematics/factory/yamaha-r1-right.webp', caption: 'Right view, YZF-R1 (the R1M shares its frame and engine)', credit: 'Yamaha Motor Co., Ltd. · 2021 YZF-R1 Owner’s Manual, p. 2-2' },
+      manual: { label: '2021 YZF-R1 series Owner’s Manual (Yamaha, PDF)', url: 'https://www2.yamaha-motor.co.jp/Manual/pdf/mc/2021B3L6.pdf' },
       stats: [
         { label: 'Engine', value: '998 cc inline-four, crossplane crank' },
         { label: 'Power', value: '≈200 PS' },
@@ -783,6 +813,27 @@ window.KIOSK_CONTENT = {
         'Carbon-fibre upper fairing, side fairings and front fender, plus a Communication Control Unit that logs laps with GPS and sends them to Yamaha’s Y-TRAC app over Wi-Fi.',
         'The crossplane crank, first used on the 2009 R1 and taken from Yamaha’s YZR-M1 MotoGP bike, fires at uneven intervals so the rear tyre gets smoother drive out of corners.',
       ],
+      street: {
+        role: 'The flagship',
+        dek: 'A superbike sold with the electronics and Öhlins kit of a race bike and a licence plate. Moses’ sits on blue wheels and gold forks under the George Washington Bridge.',
+        numbers: [
+          { label: '¼-mile trap', value: '150.25 mph', note: 'AMCN AUSTest, Western Sydney drag strip' },
+          { label: 'Output', value: '≈200 PS', note: '998 cc crossplane four' },
+          { label: 'Wet weight', value: '452 lb', note: 'Yamaha, 2025–26' },
+        ],
+        secrets: [
+          'The crossplane crank fires at 270°–180°–90°–180°, an uneven beat that sounds more V4 than inline-four. Yamaha says the sound is a side effect: the point is smoother drive at the rear tyre.',
+          'Yamaha first ran an uneven-firing crossplane crank in its M1 MotoGP bike in 2004; the 2009 R1 brought it to the street.',
+          'Its factory model code is YZF1000D. The plain R1 is the YZF1000.',
+          'Only 500 came to the U.S. in its first year, at $21,990.',
+          'At AMCN’s drag-strip test it was one of only three bikes through the quarter-mile traps above 150 mph.',
+        ],
+        sources: [
+          { label: 'AMCN AUSTest: YZF-R1M', url: 'https://amcn.com.au/editorial/amcn-austest-yamaha-yzf-r1m/' },
+          { label: 'Yamaha: the crossplane R1', url: 'https://global.yamaha-motor.com/stories/yamaha-handling/list/vol10/01.html' },
+          { label: 'ManualsLib: YZF1000 / YZF1000D owner’s manual', url: 'https://www.manualslib.com/manual/2755477/Yamaha-Yzf-R1.html' },
+        ],
+      },
       sources: [
         { label: 'Yamaha: 2025 YZF-R1M specs', url: 'https://yamahamotorsports.com/models/25-yzf-r1m/specs' },
         { label: 'Rider: 2015 YZF-R1 and R1M first look', url: 'https://ridermagazine.com/2014/11/05/2015-yamaha-yzf-r1-and-r1m-first-look-review/' },
@@ -796,6 +847,7 @@ window.KIOSK_CONTENT = {
       years: '2015–present',
       schematic: 'images/schematics/yamaha-r3.svg',
       drawn: '2025–26 U.S. specification',
+      manual: { label: '2019 YZF-R3 Owner’s Manual (Yamaha Europe, PDF)', url: 'https://cdn2.yamaha-motor.eu/prod/owner-manuals/Motorcycles/PB7PF8199E0E.PDF' },
       stats: [
         { label: 'Engine', value: '321 cc parallel twin, DOHC, 8 valves' },
         { label: 'Bore × stroke', value: '68.0 × 44.1 mm' },
@@ -812,6 +864,26 @@ window.KIOSK_CONTENT = {
         'The 2019 update brought MotoGP M1-style bodywork that Yamaha says cuts drag by 7%, a 37 mm KYB upside-down fork in place of the old 41 mm conventional one, and handlebars 22 mm lower.',
         'Wet weight with a full tank is 373 lb on the 2025–26 bikes and 375 lb on 2023–24.',
       ],
+      street: {
+        role: 'The gateway',
+        dek: 'The 321 cc way into Yamaha’s R-series: light, low and happy to rev. Ksenia rides one next to Moses’ R1M, 321 cc beside 998.',
+        numbers: [
+          { label: '0–60 mph', value: '5.1 s', note: 'Motostatz test' },
+          { label: '¼ mile', value: '14.0 s @ 95 mph', note: 'Motostatz test' },
+          { label: 'Top speed', value: '≈112 mph', note: 'Motostatz test' },
+        ],
+        secrets: [
+          'Its factory name is the YZF320. “R3” is the street name.',
+          'Even the European owner’s manual carries the copyright of PT Yamaha Indonesia Motor Manufacturing.',
+          'The 2019 facelift’s M1-style bodywork cut drag by 7%, Yamaha says. The bars dropped 22 mm and the fork went upside-down.',
+          'With a 68 mm bore and a 44.1 mm stroke the twin is heavily oversquare: short-stroke, built to rev.',
+          'Full of fuel it weighs 373 lb, about 80 lb less than an R1M.',
+        ],
+        sources: [
+          { label: 'Motostatz: YZF-R3 acceleration', url: 'https://motostatz.com/?p=780' },
+          { label: 'Yamaha Europe: YZF320-A owner’s manual', url: 'https://cdn2.yamaha-motor.eu/prod/owner-manuals/Motorcycles/PB7PF8199E0E.PDF' },
+        ],
+      },
       sources: [
         { label: 'Yamaha: 2025 YZF-R3 specs', url: 'https://yamahamotorsports.com/models/25-yzf-r3/specs' },
         { label: 'Rider: 2019 YZF-R3 first look', url: 'https://ridermagazine.com/2018/10/16/2019-yamaha-yzf-r3-first-look-review/' },
@@ -825,6 +897,7 @@ window.KIOSK_CONTENT = {
       years: '2001–2006',
       schematic: 'images/schematics/honda-cbr600f4i.svg',
       drawn: '2005 U.S. specification',
+      manual: { label: '2006 CBR600F4i Owner’s Manual (Honda, PDF)', url: 'https://www.acura.com/assets/OWNERLINK/Model/own_man/powersports/2006/2006_CBR600F4.pdf' },
       stats: [
         { label: 'Engine', value: '599 cc inline-four, DOHC, 16 valves' },
         { label: 'Bore × stroke', value: '67 × 42.5 mm' },
@@ -843,6 +916,25 @@ window.KIOSK_CONTENT = {
         'When the race-replica CBR600RR arrived in 2003, the F4i stayed on as Honda’s more street-friendly 600 until 2006.',
         'Fuel injection added only about 5 hp over the carburetted CBR600F4 it replaced.',
       ],
+      street: {
+        role: 'The garage build',
+        dek: 'The last of Honda’s do-everything 600s, and the bike on the lift in A Friend’s Garage: wiring cleaned up, headlights wired back in.',
+        numbers: [
+          { label: '¼ mile', value: '11.09 s @ 126 mph', note: 'Motostatz test' },
+          { label: 'Output', value: '≈110 hp', note: 'at 12,500 rpm' },
+          { label: 'Dry weight', value: '370 lb', note: 'Honda' },
+        ],
+        secrets: [
+          'The “i” is for injection: in 2001 it became Honda’s first fuel-injected 600 sport four.',
+          'It won the 2002 World Supersport title, lost its racing job to the CBR600RR a year later, and stayed on as Honda’s street 600 until 2006.',
+          'Injection was worth only about 5 hp over the carburetted F4 it replaced.',
+          'Four injectors, one per 38 mm throttle body, fed at 50 psi.',
+        ],
+        sources: [
+          { label: 'Motostatz: CBR600F4i acceleration', url: 'https://motostatz.com/honda-cbr600f4i-top-speed-acceleration/' },
+          { label: 'Cycle World: CBR600F4i test, March 2001', url: 'https://issues.cycleworld.com/article/2001/3/1/honda-cbr600f4i' },
+        ],
+      },
       sources: [
         { label: 'Honda: 2005 CBR600F4i specifications', url: 'https://hondanews.com/en-US/powersports/releases/release-5ee13d1a1d3d0059c9fb1f004c34c320-2005-honda-cbr600f4i-specifications' },
         { label: 'Motorcyclist: 2001–2006 CBR600F4i buying tips', url: 'https://motorcyclistonline.com/buying-tips-used-honda-sportbikes-motorcycles-2001-2006-cbr600f4i-smart-money' },
@@ -856,6 +948,7 @@ window.KIOSK_CONTENT = {
       years: '1985–2007',
       schematic: 'images/schematics/honda-shadow-1100.svg',
       drawn: 'VT1100C Shadow Spirit',
+      manual: { label: '2006 VT1100C Shadow Spirit Owner’s Manual (Honda, PDF)', url: 'https://www.acura.com/assets/OWNERLINK-Temp/OWNERLINK/Model/own_man/powersports/2006/2006_VT1100C.pdf' },
       stats: [
         { label: 'Engine', value: '1,099 cc liquid-cooled 45° V-twin, SOHC, 3 valves per cylinder' },
         { label: 'Bore × stroke', value: '87.5 × 91.4 mm' },
@@ -874,6 +967,26 @@ window.KIOSK_CONTENT = {
         'The first 1985–86 bikes made the most power of any VT1100, around 78 hp.',
         'Shaft drive means no chain to clean, oil or adjust.',
       ],
+      street: {
+        role: 'The outlier',
+        dek: 'Not a drag bike: a long, low V-twin built for the boulevard, born in the middle of the tariff fight between Harley-Davidson and the Japanese makers.',
+        numbers: [
+          { label: 'Seat height', value: '28.7 in', note: 'VT1100C Spirit' },
+          { label: 'Wheelbase', value: '65.0 in', note: 'VT1100C Spirit' },
+          { label: 'Output', value: '≈78 hp', note: '1985–86 engines, the strongest VT1100s' },
+        ],
+        secrets: [
+          'In 1983, after a Harley-Davidson petition, the U.S. put a tariff starting at 49.4% on imported bikes of 700 cc and up. Honda answered by sleeving its Shadow 750 down to 694 cc and selling it in America as the VT700C.',
+          'The 1100 arrived in 1985, in the middle of the tariff years.',
+          'The A.C.E. and Aero swapped to a single-pin crank just for the loping, Harley-style idle, and gave up about 10 hp to get it.',
+          'One model code, two bikes: VT1100C2 was both the 1995–99 A.C.E. and the 2000–07 Sabre.',
+          'Shaft drive: no chain to clean, oil or adjust.',
+        ],
+        sources: [
+          { label: 'RideApart: the Asian 700s and the tariff', url: 'https://www.rideapart.com/features/254267/kickstand-the-strange-case-of-the-asian-700s-and-hondas-1985-vf700c/' },
+          { label: 'Sun Coast Cycle Sports: VT1100 Sabre', url: 'https://suncoastcyclesports.com/vt1100-sabre/' },
+        ],
+      },
       sources: [
         { label: 'webBikeWorld: 2001 Shadow Spirit 1100', url: 'https://www.webbikeworld.com/honda-spirit/' },
         { label: 'Total Motorcycle: 1999 VT1100C Shadow Spirit', url: 'https://www.totalmotorcycle.com/motorcyclespecshandbook/honda/1999-honda-VT1100CShadowSpirit/' },

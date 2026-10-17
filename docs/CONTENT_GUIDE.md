@@ -81,6 +81,10 @@ Cars and bikes live once in `machines` (in `js/kiosk-content.js`): a side-elevat
 ```js
 machines: ['yamaha-r3', 'yamaha-r1m'],
 ```
+Each machine can also carry:
+- `factory`: a drawing from its owner's manual (`{ src, caption, credit }`), shown above the schematic.
+- `street`: its entry in **The Street File** (`garage.html`), the Garage editorial: `{ role, dek, numbers: [{ label, value, note }], secrets: ['…'], sources }`. Every machine with `street` gets a spread there, in the order of `machines`, and its story spec sheet links to it.
+
 Available: `infiniti-q50`, `yamaha-r1m`, `yamaha-r3`, `honda-cbr600f4i`, `honda-shadow-1100`. The drawings are SVGs in `images/schematics/`, drawn to each machine's published wheelbase, wheel sizes, length, height and seat height by `node scripts/draw-schematics.js`. To add a machine, add its drawing to that script, run it, then add an entry to `machines`.
 
 ### Story body (the blog part)
@@ -366,7 +370,7 @@ Keep the hero reel short (10–20 s), muted, under about 8 MB, and encoded in H.
 
 ## Phone navigation
 
-On phones the tab bar floats at the bottom with icons only (Home, Atlas, Films, Radio, Shop); a soft highlight glides to the current page, and More sits apart in its own circle and opens the menu. The menu fits one screen: every page (including Flights, Lost & Found and Stores), a row of icon buttons (Settings, Theme, Check in, Account, Cart) and a strip of small links, rising in one after another. On the home page the header pill stays hidden until the ꓘIOSK wordmark has flown up and formed the symbol inside it.
+On phones the tab bar floats at the bottom with icons only (Home, Atlas, Films, Radio, Shop); a soft highlight glides to the current page, and More sits apart in its own circle and opens the menu. The menu fits one screen: every page (including Garage, Flights, Lost & Found and Stores) as a two-column grid of tiles with an icon and a one-line note, then a swipeable row of quick actions (Settings, Theme, Check in, Account, Cart) and a strip of small links, rising in one after another. While the menu is open the tab bar folds away and More turns into a close button, so nothing in the menu sits under it. Menu entries come from `NAV` plus `MENU` in `js/kiosk-glass.js`. On the home page the header pill stays hidden until the ꓘIOSK wordmark has flown up and formed the symbol inside it.
 
 ## Brand marks
 
