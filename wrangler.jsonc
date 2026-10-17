@@ -25,15 +25,16 @@
   ],
   // Empty block: preview builds need this key (Wrangler 4.135+); no separate
   // bindings/vars for previews yet. See Workers Previews configuration docs.
-  "previews": {}
-  // Accounts (sign-in, wishlist, cart, check-in) need a D1 database. Until it
-  // exists the site runs without it and shows "Accounts are coming soon".
-  // To switch accounts on:
-  //   npx wrangler d1 create kiosk-accounts
-  //   then add this block above, with the database_id that command prints,
-  //   and run: npx wrangler d1 migrations apply kiosk-accounts
-  //   "d1_databases": [
-  //     { "binding": "DB", "database_name": "kiosk-accounts", "database_id": "<id>", "migrations_dir": "migrations" }
-  //   ]
-  // Also set SHOPIFY_CUSTOMER_CLIENT_ID / SECRET (see docs/ACCOUNTS.md).
+  "previews": {},
+  // Accounts (members, sign-in codes, saves, check-in). See docs/ACCOUNTS.md.
+  // New migrations: npx wrangler d1 migrations apply kiosk-accounts --remote
+  "d1_databases": [
+    { "binding": "DB", "database_name": "kiosk-accounts", "database_id": "539499f7-d26e-4e19-b5e8-6c514397672b", "migrations_dir": "migrations" }
+  ],
+  // Sign-in codes and welcome emails go out through Cloudflare Email Service
+  // (Workers Paid; onlyatthekiosk.com onboarded under Email Service > Email
+  // Sending). Sender: MAIL_FROM, default members@onlyatthekiosk.com.
+  "send_email": [
+    { "name": "EMAIL" }
+  ]
 }

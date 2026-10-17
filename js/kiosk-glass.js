@@ -269,16 +269,19 @@
       b.setAttribute('aria-label', `Theme: ${pref === 'auto' ? `auto (${mode === 'dark' ? 'night' : 'day'})` : pref === 'dark' ? 'night' : 'day'}`);
       b.title = pref === 'auto' ? `Auto · follows your local time (${mode === 'dark' ? 'night' : 'day'} now)` : pref === 'dark' ? 'Night' : 'Day';
     });
+    $$('[data-theme-sub]').forEach((el) => { el.textContent = pref === 'auto' ? `Auto · ${mode === 'dark' ? 'Night' : 'Day'}` : pref === 'dark' ? 'Night' : 'Day'; });
   }
   function bindThemeAndClock() {
     applyTheme();
     document.addEventListener('click', (e) => {
       if (!e.target.closest('[data-theme-toggle]')) return;
+      const inMenu = !!e.target.closest('.k-sheet__q');   // read before applyTheme swaps the icon out
       const order = ['auto', 'light', 'dark'];
       const next = order[(order.indexOf(themePref()) + 1) % order.length];
       store.set(THEME_KEY, next);
       applyTheme();
-      toast(next === 'auto' ? 'Theme follows your local time' : next === 'dark' ? 'Night mode' : 'Day mode');
+      // The menu tile shows the new state itself; elsewhere say it in a toast
+      if (!inMenu) toast(next === 'auto' ? 'Theme follows your local time' : next === 'dark' ? 'Night mode' : 'Day mode', { icon: themeIcon(next) });
     });
     const zone = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' ');
     const fmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -334,11 +337,11 @@
       </ul>
       <div class="k-sheet__foot" style="--i:${NAV.length + 4}">
         <div class="k-sheet__quick">
-          <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings</span></button>
-          <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme</span></button>
-          <button class="k-sheet__q" type="button" data-onboard-open><i>${PLANE_ICON}</i><span>Check in</span></button>
-          <button class="k-sheet__q is-hidden" type="button" data-account-open hidden><i>${icon.user}</i><span>Account</span></button>
-          <button class="k-sheet__q is-hidden" type="button" data-cart-open hidden><i>${icon.bag}<span class="k-nav__cart-count" data-cart-count hidden>0</span></i><span>Cart</span></button>
+          <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings<small>Look &amp; feel</small></span></button>
+          <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme<small data-theme-sub>Auto</small></span></button>
+          <button class="k-sheet__q" type="button" data-onboard-open><i>${PLANE_ICON}</i><span>Check in<small data-checkin-sub>1 minute</small></span></button>
+          <button class="k-sheet__q is-hidden" type="button" data-account-open hidden><i>${icon.user}</i><span>Account<small data-account-sub>Sign in</small></span></button>
+          <button class="k-sheet__q is-hidden" type="button" data-cart-open hidden><i>${icon.bag}<span class="k-nav__cart-count" data-cart-count hidden>0</span></i><span>Cart<small>Your bag</small></span></button>
         </div>
         <div class="k-sheet__pills">
           <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
@@ -370,6 +373,9 @@
     document.body.prepend(sheet);
     document.body.prepend(nav);
     document.body.append(tabbar);
+    syncQuickSubs();
+    document.addEventListener('kiosk:taste', syncQuickSubs);
+    document.addEventListener('kiosk:account', syncQuickSubs);
 
     const btn = $('.k-nav__menu-btn', nav);
     const more = $('[data-tab-more]', tabbar);
@@ -420,20 +426,85 @@
 
   /* ------------------------------------------------------------ toast */
 
+  /* A short note above the tab bar: glass pill, optional icon, tap to
+   * dismiss. Longer messages stay up a little longer. */
   let toastTimer;
-  function toast(msg) {
+  const TOAST_OK = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function toast(msg, opts = {}) {
     let el = $('.k-toast');
     if (!el) {
       el = document.createElement('div');
       el.className = 'k-toast';
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');
+      el.addEventListener('click', () => { clearTimeout(toastTimer); el.classList.remove('is-visible'); });
       document.body.append(el);
     }
-    el.textContent = msg;
+    const ico = opts.icon === false ? '' : (opts.icon || '');
+    el.innerHTML = `${ico ? `<i class="k-toast__ico" aria-hidden="true">${ico}</i>` : ''}<span>${esc(msg)}</span>`;
+    el.classList.toggle('has-ico', !!ico);
+    el.classList.remove('is-visible');
+    void el.offsetWidth;   // restart the entrance when one toast replaces another
     el.classList.add('is-visible');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('is-visible'), 3200);
+    toastTimer = setTimeout(() => el.classList.remove('is-visible'), Math.min(6000, 2400 + String(msg).length * 40));
+  }
+  toast.ok = TOAST_OK;
+
+  /* Desktop tooltips for icon-only buttons: their aria-label (or title)
+   * in a small glass tip, after a short hover or on keyboard focus. */
+  function bindTips() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const tip = document.createElement('div');
+    tip.className = 'k-hint';
+    tip.setAttribute('role', 'tooltip');
+    tip.id = 'k-hint';
+    document.body.append(tip);
+    let timer = 0;
+    let cur = null;
+    const textOf = (el) => (el.dataset.tip || el.getAttribute('title') || el.getAttribute('aria-label') || '').trim();
+    const iconOnly = (el) => el.dataset.tip || !el.textContent.trim();
+    const target = (node) => {
+      const el = node && node.closest && node.closest('button, a, [data-tip]');
+      return el && iconOnly(el) && textOf(el) && !el.closest('.k-hint') ? el : null;
+    };
+    const show = (el) => {
+      if (el.hasAttribute('title')) { el.dataset.tip = el.getAttribute('title'); el.removeAttribute('title'); }
+      tip.textContent = textOf(el);
+      const r = el.getBoundingClientRect();
+      tip.classList.add('is-visible');
+      const w = tip.offsetWidth;
+      const h = tip.offsetHeight;
+      const below = r.top < h + 16;
+      tip.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))}px`;
+      tip.style.top = `${below ? r.bottom + 8 : r.top - h - 8}px`;
+      tip.dataset.side = below ? 'below' : 'above';
+      el.setAttribute('aria-describedby', 'k-hint');
+      cur = el;
+    };
+    const hide = () => {
+      clearTimeout(timer);
+      tip.classList.remove('is-visible');
+      if (cur) cur.removeAttribute('aria-describedby');
+      cur = null;
+    };
+    document.addEventListener('pointerover', (e) => {
+      const el = target(e.target);
+      if (el === cur) return;
+      hide();
+      if (el) timer = setTimeout(() => show(el), 380);
+    });
+    document.addEventListener('focusin', (e) => { const el = target(e.target); hide(); if (el && el.matches(':focus-visible')) show(el); });
+    ['pointerdown', 'scroll', 'keydown', 'focusout'].forEach((t) => document.addEventListener(t, (e) => { if (t !== 'keydown' || e.key === 'Escape') hide(); }, true));
+  }
+
+  /* The menu's quick tiles say where things stand. */
+  function syncQuickSubs() {
+    const t = store.get('kiosk:taste', null);
+    $$('[data-checkin-sub]').forEach((el) => { el.textContent = t && t.completedAt ? 'Done · edit' : '1 minute'; });
+    const st = window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.getState ? window.KIOSK_ACCOUNT.getState() : null;
+    const u = st && st.user;
+    $$('[data-account-sub]').forEach((el) => { el.textContent = u ? (u.firstName || 'Signed in') : 'Sign in'; });
   }
 
   /* --------------------------------------------------------- lightbox */
@@ -5670,6 +5741,7 @@
 
   renderChrome();
   bindThemeAndClock();
+  bindTips();
   bindGlobal();
   bindMagazine();
   bindSoftNav();

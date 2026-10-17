@@ -7,7 +7,7 @@
 > once the owner approves it.
 >
 > **Accounts (PR #21):** while Supabase is on hold, sign-in and the account dashboard use
-> **Shopify Customer Accounts + Cloudflare D1** instead. See [docs/ACCOUNTS.md](ACCOUNTS.md).
+> **Cloudflare D1 + email sign-in codes (Cloudflare Email Service)** instead. See [docs/ACCOUNTS.md](ACCOUNTS.md).
 > When the Supabase bill is paid, decide whether to keep this hybrid or migrate identity to
 > Supabase Auth as originally planned in workstreams A–B.
 

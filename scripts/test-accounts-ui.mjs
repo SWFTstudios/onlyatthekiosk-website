@@ -174,7 +174,7 @@ async function main() {
   await check('open and close account sheet', async () => {
     await page.evaluate(() => window.KIOSK_ACCOUNT.openAccount());
     await page.locator('#k-account.is-open').waitFor({ timeout: 3000 });
-    await page.locator('#k-account [data-account-close]').first().click();
+    await page.locator('#k-account .k-acct__x').click();
     await page.waitForTimeout(300);
     const open = await page.locator('#k-account.is-open').count();
     if (open) throw new Error('sheet still open');
