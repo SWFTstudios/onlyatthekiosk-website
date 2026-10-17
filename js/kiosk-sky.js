@@ -522,6 +522,7 @@
     const fogEl = section.querySelector('.k-sky__fog');
     const route = section.querySelector('[data-sky-route]');
     const tagline = section.querySelector('.k-sky__tagline');
+    const hint = section.querySelector('.k-sky__hint');
     // The visitor's local time in the tagline's place (12- or 24-hour, as their device prefers)
     const clockEl = section.querySelector('[data-sky-clock]');
     const showTime = () => {
@@ -657,8 +658,13 @@
         F.dive = clamp(p / 0.8, 0, 1);
         if (!tl.isActive()) { F.hz = SETTLED_HZ + F.dive * 0.42; F.cam = 1.5 - F.dive * 1.55; }
         tagline.style.opacity = String(clamp(1 - p * 6, 0, 1));
-        layer.style.opacity = String(clamp((1 - p) / 0.22, 0, 1));
-        const gone = p >= 0.999;
+        // the route and the scroll hint leave before the cover shows through
+        if (hint) hint.style.opacity = String(clamp(1 - p * 5, 0, 0.8));
+        if (route) route.style.opacity = String(clamp(1 - p * 4, 0, 1));
+        // fully faded a little before the end, so a stop just short of it
+        // (momentum, a collapsing toolbar) leaves nothing on screen
+        layer.style.opacity = String(clamp((0.97 - p) / 0.2, 0, 1));
+        const gone = p >= 0.97;
         layer.style.visibility = gone ? 'hidden' : '';
         title.style.visibility = T.fly >= 1 ? 'hidden' : '';
         on = !gone; if (on) wake(); else applyTitle();
