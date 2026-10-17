@@ -727,7 +727,7 @@ window.KIOSK_CONTENT = {
    *   drawn      which version the drawing and numbers describe
    *   stats      [{ label, value }]   facts  ['…']   sources  [{ label, url }]
    *   factory    a drawing from that manual { src, caption, credit }
-   *   street     the Street File editorial (garage.html): { role, dek,
+   *   street     the Street File editorial (the-garage.html): { role, dek,
    *              numbers: [{ label, value, note }], secrets: ['…'], sources }
    *   manual     the factory owner’s manual: its parts-location pages are the
    *              manufacturer’s own line drawings (linked, not copied)
