@@ -76,6 +76,13 @@ chapters: [
 specs: [ { label: 'Engine', value: '2.6L RB26DETT' }, { label: 'Power', value: '276 HP' } ]
 ```
 
+### Spec sheet (schematic + facts)
+Cars and bikes live once in `machines` (in `js/kiosk-content.js`): a side-elevation schematic, the key numbers, a few facts and their sources. A story shows the ones it lists:
+```js
+machines: ['yamaha-r3', 'yamaha-r1m'],
+```
+Available: `infiniti-q50`, `yamaha-r1m`, `yamaha-r3`, `honda-cbr600f4i`, `honda-shadow-1100`. The drawings are SVGs in `images/schematics/`, drawn to each machine's published wheelbase, wheel sizes, length, height and seat height by `node scripts/draw-schematics.js`. To add a machine, add its drawing to that script, run it, then add an entry to `machines`.
+
 ### Story body (the blog part)
 An ordered list of blocks:
 ```js
