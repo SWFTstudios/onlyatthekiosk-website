@@ -76,35 +76,38 @@
       <div class="k-sky__title"><h1 class="k-sky__word" id="sky-title" aria-label="Only at the KIOSK"><span class="k-rk">K</span>IOSK</h1></div>
     </section>
 
-    <!-- COVER: full-screen video (below the clouds) -------------------- -->
-    <section class="k-cover k-dark" aria-label="Now showing">
-      <div class="k-cover__media" data-mount="hero-bg"></div>
-      <div class="k-cover__shade" aria-hidden="true"></div>
-      <div class="k-cover__inner">
-        <div class="k-heroshow__bars" data-mount="hero-bars"></div>
+    <!-- COVER: high above the Earth in the clouds, a floating carousel of
+         jumping-off points: films, stories, the shop, the radio, the Garage, the Atlas -->
+    <section class="k-cover k-orbit" aria-labelledby="orbit-title">
+      <div class="k-cover__media k-orbit__scene" aria-hidden="true">
+        <div class="k-orbit__sky"></div>
+        <div class="k-orbit__stars"></div>
+        <div class="k-orbit__earth"><div class="k-orbit__surface"></div></div>
+        <div class="k-orbit__clouds k-orbit__clouds--back"></div>
+        <div class="k-orbit__clouds k-orbit__clouds--mid"></div>
+      </div>
+      <div class="k-cover__inner k-orbit__inner">
         <div class="k-cover__top">
           <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
           <p class="k-eyebrow k-cover__edition"><span class="k-term__t k-term__t--sm">T0</span> Main concourse · <span data-clock>--:--</span> <span data-clock-zone></span></p>
         </div>
-        <p class="k-cover__title" aria-hidden="true"><span class="k-cover__kicker">Only at the</span><span class="k-cover__word"><span class="k-rk">K</span>IOSK</span></p>
-        <p class="k-cover__dek">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, told through films, interviews, vlogs and photo diaries from the road. Read the story, shop the pieces, find the stores and rare finds worth the trip.</p>
-        <div class="k-cover__cta">
-          <a class="k-cover__pill" href="#garage">Open the issue <span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
-          <a class="k-btn" href="vault.html">Shop the kiosk</a>
-          <div data-mount="hero-watch"></div>
+        <div class="k-orbit__head">
+          <h2 class="k-orbit__title" id="orbit-title">Where to <em class="k-serif">next?</em></h2>
+          <p class="k-orbit__dek">A global travel magazine for the curious: cars, motorcycles, culture and fashion in films, stories and pieces from the road. Swipe the carousel and pick a departure.</p>
         </div>
-        <div class="k-heroshow__ui" data-mount="hero-controls"></div>
+        <div class="k-orbit__carousel" data-mount="orbit-carousel"></div>
         <ol class="k-cover__index" aria-label="In this issue">
           <li><a href="atlas.html?desk=automotive"><span>01</span>Automotive</a></li>
           <li><a href="atlas.html"><span>02</span>Travel</a></li>
           <li><a href="radio.html"><span>03</span>Music</a></li>
           <li><a href="vault.html"><span>04</span>Fashion</a></li>
-          <li><a href="lost-and-found.html"><span>05</span>Lost &amp; Found</a></li>
+          <li><a href="the-garage.html"><span>05</span>The Garage</a></li>
         </ol>
       </div>
+      <div class="k-orbit__clouds k-orbit__clouds--front" aria-hidden="true"></div>
     </section>
 
-    <!-- WORLD LIBRARY: the hero flips onto a spinning globe ---------- -->
+    <!-- WORLD LIBRARY: featured stories pinned on a spinning globe ------ -->
     <section class="k-section k-wl" id="world-library" aria-labelledby="wl-title" data-world-library data-home="globe">
       <div class="k-wrap k-wl__inner">
         <div class="k-wl__copy">
