@@ -3910,7 +3910,7 @@ a.k-board__row { display: grid; text-decoration: none; }
 
 /* ------------------------------------------------------------- the Atlas */
 .k-atlas-hero { position: relative; height: min(86svh, 860px); min-height: 560px; overflow: hidden; background: #000; color: #fff; isolation: isolate; }
-.k-atlas-hero__earth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); cursor: grab; }
+.k-atlas-hero__earth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); cursor: grab; color: #dfe9ff; }
 .k-atlas-hero__earth:active { cursor: grabbing; }
 .k-atlas-hero.is-ready .k-atlas-hero__earth { opacity: 1; }
 .k-atlas-hero.is-nogl { background: radial-gradient(120% 90% at 50% 110%, #12305c 0, #061226 45%, #000 70%); }
@@ -3918,6 +3918,14 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-atlas-hero__labels { opacity: 0; transition: opacity 1s .4s; }
 .k-atlas-hero.is-ready .k-atlas-hero__labels { opacity: 1; }
 .k-atlas-hero__pins { z-index: 2; color: #fff; }
+/* Wireframe globe backdrop and zoom buttons */
+.k-atlas-hero { background: radial-gradient(90% 70% at 62% 40%, #0b1730 0%, #04070f 60%, #000 100%); }
+.k-atlas-hero__zoom { position: absolute; right: var(--gutter); top: calc(var(--nav-h) + 24px); z-index: 4; display: grid; gap: 6px; }
+.k-atlas-hero__zoom button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(20,24,34,.55); border: 1px solid rgba(255,255,255,.18); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); cursor: pointer; transition: background .25s, transform .2s var(--ease); }
+.k-atlas-hero__zoom button:hover { background: rgba(40,46,62,.75); }
+.k-atlas-hero__zoom button:active { transform: scale(.94); }
+.k-atlas-hero__zoom svg { width: 18px; height: 18px; }
+@media (max-width: 760px) { .k-atlas-hero__zoom { top: calc(var(--nav-h) + max(10px, env(safe-area-inset-top)) + 8px); } .k-atlas-hero__zoom button { width: 36px; height: 36px; } }
 .k-atlas-pin .k-wl-node__label b { text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 .k-atlas-pin .k-wl-node__label small { color: rgba(255,255,255,.75); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 .k-atlas-hero__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,.45) 0, transparent 22%, transparent 55%, rgba(0,0,0,.55) 82%, var(--bg) 100%); }
