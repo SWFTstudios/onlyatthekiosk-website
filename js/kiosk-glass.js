@@ -4509,8 +4509,10 @@
         ${railShell(r.list.map((f) => atlasTile(f, r.big)).join(''), r.title, `k-hscroll-wrap--films${r.big ? ' k-hscroll-wrap--atlas-big' : ''}`)}
       </div>`).join('');
   }
-  /* The Atlas header: a satellite Earth in quarter view over the stories, with
-   * their pins fanned out, map labels, and drag to look around. */
+  /* The Atlas header: a wireframe globe (js/kiosk-wireglobe.js) with real
+   * coastlines, cities as plot points, map labels and the stories pinned at
+   * their coordinates. Swipe to turn it, pinch / ctrl-scroll / the buttons to
+   * zoom, double-tap to fly in; it drifts slowly until someone takes over. */
   function mountAtlasEarth(posts) {
     const hero = $('[data-atlas-hero]');
     const canvas = $('[data-atlas-earth]');
@@ -4528,25 +4530,22 @@
         </span>
       </a>`).join('');
     const pins = $$('[data-atlas-pin]', pinsEl);
-    loadScript('js/kiosk-earth.js').then(() => {
-      if (signal.aborted || !window.KioskEarth) return;
+    Promise.all([loadScript('js/kiosk-earth.js'), loadScript('js/kiosk-wireglobe.js')]).then(() => {
+      if (signal.aborted || !window.KioskWireGlobe) return;
       const geos = pinned.map((f) => f.geo);
       const c = geos.length ? { lat: geos.reduce((a, g) => a + g.lat, 0) / geos.length, lon: geos.reduce((a, g) => a + g.lon, 0) / geos.length } : HOME_GEO;
       const phone = () => window.innerWidth < 760;
       const home = () => (phone()
-        ? { lat: c.lat + 1, lon: c.lon - 9, alt: 1.05, tilt: 0.62, py: 0.42, fov: 0.62 }
-        : { lat: c.lat + 3, lon: c.lon - 14, alt: 0.62, tilt: 0.86, py: 0.56, fov: 0.55 });
-      let earth;
-      // Light staged for late afternoon over the stories, dusk coming in from the east
-      try { earth = window.KioskEarth.create(canvas, { view: home(), drag: true, relief: 1.1, sun: (v, real) => ({ lat: real.lat * 0.5 + 12, lon: v.lon - 38 }) }); } catch (e) { earth = null; }
-      if (!earth || !earth.gl) { hero.classList.add('is-nogl'); return; }
-      const lbl = window.KioskEarth.labels($('[data-atlas-labels]', hero), earth, { skip: pinned.map(postPlace) });
-      earth.onFrame = () => {
-        const W = hero.clientWidth;
-        const spread = Math.min(W, hero.clientHeight) * (phone() ? 0.2 : 0.17);
+        ? { lat: c.lat - 4, lon: c.lon - 6, zoom: 1.5, cx: 0.5, cy: 0.36, fit: 0.46 }
+        : { lat: c.lat - 2, lon: c.lon - 10, zoom: 1.25, cx: 0.62, cy: 0.46, fit: 0.42 });
+      const cities = (window.KioskEarth ? window.KioskEarth.LABELS : []).filter((l) => l.k === 'city');
+      const globe = window.KioskWireGlobe.create(canvas, { view: home(), cities, grabZoom: home().zoom * 1.2 });
+      const lbl = window.KioskEarth ? window.KioskEarth.labels($('[data-atlas-labels]', hero), globe, { skip: pinned.map(postPlace) }) : null;
+      globe.onFrame = () => {
+        const spread = Math.min(hero.clientWidth, hero.clientHeight) * (phone() ? 0.2 : 0.17);
         const avoid = [];
         pins.forEach((n, i) => {
-          const p = earth.project(geos[i].lat, geos[i].lon);
+          const p = globe.project(geos[i].lat, geos[i].lon);
           const ox = NODE_FAN[i][0] * spread * (phone() ? 1.5 : 1.7); const oy = NODE_FAN[i][1] * spread * (phone() ? 1.55 : 1.3);
           if (p.front) avoid.push({ x: p.x, y: p.y, r: 14 }, { x: p.x + ox, y: p.y + oy, r: phone() ? 56 : 84 });
           n.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
@@ -4556,25 +4555,34 @@
           n.style.opacity = p.front ? '' : '0';
           n.style.pointerEvents = p.front ? '' : 'none';
         });
-        lbl.update(avoid);
+        if (lbl) lbl.update(avoid);
       };
-      earth.ready.then(() => hero.classList.add('is-ready'), () => hero.classList.add('is-nogl'));
+      globe.ready.then(() => hero.classList.add('is-ready'), () => hero.classList.add('is-ready'));
+
       // A slow drift west to east until someone takes the controls
       let drift = !REDUCED; let t0 = performance.now(); let raf = 0; let seen = true;
-      const base = earth.view.lon;
+      const base = globe.view.lon;
       const spin = (now) => {
         raf = 0;
         if (!drift || !seen || signal.aborted) return;
-        earth.view.lon = base + Math.sin((now - t0) / 14000) * 6;
-        earth.invalidate();
+        globe.view.lon = base + Math.sin((now - t0) / 14000) * 6;
+        globe.invalidate();
         raf = requestAnimationFrame(spin);
       };
       if (drift) raf = requestAnimationFrame(spin);
-      canvas.addEventListener('pointerdown', () => { drift = false; }, { signal });
-      const io = new IntersectionObserver(([en]) => { seen = en.isIntersecting; if (seen && drift && !raf) { t0 = performance.now() - 0; raf = requestAnimationFrame(spin); } });
+      globe.onGrab = () => { drift = false; };
+      const io = new IntersectionObserver(([en]) => { seen = en.isIntersecting; if (seen && drift && !raf) raf = requestAnimationFrame(spin); });
       io.observe(hero);
-      window.addEventListener('resize', () => { if (!drift) return; Object.assign(earth.view, home()); earth.invalidate(); }, { signal });
-      signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); earth.destroy(); });
+      // Zoom buttons; the middle one flies back to the stories
+      hero.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-atlas-zoom]');
+        if (!b) return;
+        drift = false;
+        const k = b.dataset.atlasZoom;
+        if (k === 'home') { const h = home(); globe.face(h.lat, h.lon, h.zoom); } else globe.zoomBy(k === 'in' ? 1.6 : 1 / 1.6);
+      }, { signal });
+      window.addEventListener('resize', () => { if (!drift) return; Object.assign(globe.view, home()); globe.invalidate(); }, { signal });
+      signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); globe.destroy(); });
     }).catch(() => hero.classList.add('is-nogl'));
   }
   function pageJournal() {

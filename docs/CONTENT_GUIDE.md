@@ -372,7 +372,11 @@ Drag, swipe or use the arrows to turn it; the button under it (or tapping the fr
 - **Lost & Found** (`lost-and-found.html`, was The Hunt): rare finds and pickup-only pieces on the map.
 - The Garage page is gone; `/garage` redirects to the library and `/hunt` to Lost & Found (`_redirects`).
 
-## Satellite Earth (Atlas header, Flights, home intro)
+## Wireframe globe (Atlas header)
+
+`js/kiosk-wireglobe.js` draws the Atlas header: an orthographic wireframe globe on a 2D canvas with the Natural Earth coastlines from `data/land-110m.geojson`, a graticule that gets finer as you zoom in (15° → 5° → 1°), and the cities in `LABELS` (`js/kiosk-earth.js`) as plot points with their labels. The featured stories are pinned at their `geo`. Swipe or drag to turn it, pinch, ctrl/⌘-scroll or the + / − buttons to zoom (up to 6×), double-tap to fly in, and the globe button to fly back to the stories. On phones, vertical swipes keep scrolling the page until you zoom in. No WebGL needed.
+
+## Satellite Earth (Flights, home intro)
 
 `js/kiosk-earth.js` draws a photographic globe in one WebGL2 pass: NASA Blue Marble (day), Black Marble city lights (night), a relief map for terrain shading, ocean glint, atmosphere and stars. The textures live in `images/earth/` (NASA Visible Earth, public domain; phones load `day-2k.jpg` and `night.jpg`, larger screens the `-4k` versions). Map labels (continents, oceans, cities) are `LABELS` in the same file. Without WebGL2 the header falls back to a dark gradient.
 
