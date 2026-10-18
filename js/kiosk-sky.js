@@ -681,5 +681,29 @@
     };
   }
 
-  window.KioskSky = { mount };
+  /* ----------------------------------------------- the second deck
+   * Under the intro's cloud layer there is another: the home cover's
+   * carousel floats on it. The same cumulus renderer and the same hour's
+   * light, seen from just above its tops. Draws only while on screen;
+   * `still` draws one frame (reduced motion). → { stop() } or null without WebGL.
+   *   view  { hz, pit, cam } as for the intro (horizon, tilt, altitude) */
+  function cloudDeck(canvas, { hz = 0.5, pit = 0.1, cam = 0.45, still = false } = {}) {
+    const F = { hz, pit, cam, dive: 0, pal: skyAt(localHour()) };
+    let fv = null;
+    try { fv = fog(canvas, F); } catch (e) { fv = null; }
+    if (!fv) return null;
+    const t0 = performance.now();
+    let raf = 0; let on = false;
+    const frame = (now) => { raf = 0; if (!on) return; fv.draw((now - t0) / 1000); if (!still) raf = requestAnimationFrame(frame); };
+    const io = new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on && !raf) raf = requestAnimationFrame(frame); });
+    io.observe(canvas);
+    const tick = setInterval(() => { F.pal = skyAt(localHour()); if (still && on) fv.draw(0); }, 60000);
+    const onResize = () => { fv.resize(); if (still) fv.draw(0); };
+    window.addEventListener('resize', onResize);
+    return {
+      stop() { on = false; io.disconnect(); clearInterval(tick); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); },
+    };
+  }
+
+  window.KioskSky = { mount, cloudDeck };
 })();
