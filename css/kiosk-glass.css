@@ -2599,35 +2599,29 @@ html { transition: background-color 0.5s var(--ease); }
 .k-orbit__scene { overflow: hidden; }
 .k-orbit__sky { position: absolute; inset: 0; background:
   radial-gradient(var(--sky-sun-s) calc(var(--sky-sun-s) * .7) at var(--sky-sun-x) var(--sky-sun-y), var(--sky-sun) 0%, rgba(255,255,255,0) 60%),
-  linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 34%, var(--sky-low) 56%, var(--sky-hor) 66%, var(--sky-hor) 100%); }
+  linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 30%, var(--sky-low) 44%, var(--sky-hor) 52%, var(--sky-hor) 100%); }
 .k-orbit__stars { position: absolute; inset: 0 0 40%; opacity: 0; transition: opacity 2s; background:
   radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
   radial-gradient(1.2px 1.2px at 84% 34%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 42%, #fff 50%, transparent 51%),
   radial-gradient(1px 1px at 52% 24%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 91% 8%, rgba(255,255,255,.7) 50%, transparent 51%); }
 .k-orbit[data-phase='midnight'] .k-orbit__stars, .k-orbit[data-phase='firstlight'] .k-orbit__stars { opacity: .9; }
-/* The Earth: a huge sphere whose curved limb crosses the lower half, turning slowly */
-.k-orbit__earth {
-  position: absolute; left: 50%; top: 62%; width: max(240vmax, 1800px); aspect-ratio: 1; translate: -50% 0;
-  border-radius: 50%; overflow: hidden; background: #1d3b5c;
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35), 0 -18px 70px 14px color-mix(in srgb, var(--sky-hor) 55%, #9fd0ff);
-}
-.k-orbit__surface {
-  position: absolute; top: 0; bottom: 0; left: 0; width: 200%;
-  background: url('../images/earth/day-2k.jpg') 0 -30% / 50% auto repeat-x;   /* unstretched; the visible cap shows the mid-latitudes */
-  animation: k-orbit-turn 420s linear infinite;
-}
-.k-orbit[data-phase='midnight'] .k-orbit__surface { background-image: url('../images/earth/night.jpg'); }
-.k-orbit__earth::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background:
-  linear-gradient(180deg, color-mix(in srgb, var(--sky-hor) 70%, transparent) 0%, rgba(255,255,255,0) 4%, rgba(0,0,0,0) 30%),
-  radial-gradient(60% 40% at 50% 0%, rgba(255,255,255,0) 60%, rgba(5,10,30,.35) 100%),
-  linear-gradient(180deg, rgba(0,0,0,0) 2%, color-mix(in srgb, var(--sky-low) 22%, transparent) 10%); }
-@keyframes k-orbit-turn { to { transform: translateX(-50%); } }
+/* The second deck: a sea of cumulus just below the carousel, drawn by the
+ * intro's renderer (js/kiosk-sky.js cloudDeck); its horizon sits at 50% */
+.k-orbit__deck { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); }
+.k-orbit.has-deck .k-orbit__deck { opacity: 1; }
+/* Overhead: the underside of the intro's cloud layer we just came through */
+.k-orbit__ceiling { position: absolute; left: -15%; right: -15%; top: -6%; height: 34%; pointer-events: none; filter: blur(14px); animation: k-orbit-drift 80s ease-in-out infinite alternate-reverse;
+  background:
+    radial-gradient(30% 70% at 12% 20%, var(--sky-fog) 0%, transparent 72%), radial-gradient(26% 80% at 38% 10%, var(--sky-fog) 0%, transparent 70%),
+    radial-gradient(30% 70% at 64% 22%, var(--sky-fog) 0%, transparent 72%), radial-gradient(26% 75% at 90% 12%, var(--sky-fog) 0%, transparent 70%),
+    linear-gradient(180deg, var(--sky-fog) 0%, color-mix(in srgb, var(--sky-fog) 55%, transparent) 30%, transparent 100%); opacity: .85; }
 /* Cloud banks: soft blobs in the hour's fog colour, drifting */
 .k-orbit__clouds { position: absolute; left: -25%; right: -25%; pointer-events: none; filter: blur(10px); animation: k-orbit-drift 60s ease-in-out infinite alternate; background:
   radial-gradient(22% 55% at 8% 60%, var(--sky-fog) 0%, transparent 70%), radial-gradient(26% 60% at 30% 55%, var(--sky-fog) 0%, transparent 70%),
   radial-gradient(20% 50% at 52% 65%, var(--sky-fog) 0%, transparent 70%), radial-gradient(28% 60% at 74% 55%, var(--sky-fog) 0%, transparent 70%),
   radial-gradient(22% 55% at 95% 62%, var(--sky-fog) 0%, transparent 70%); }
 .k-orbit__clouds--back { bottom: 30%; height: 18%; opacity: .55; animation-duration: 90s; }
+.k-orbit.has-deck .k-orbit__clouds--back, .k-orbit.has-deck .k-orbit__clouds--mid { display: none; }
 .k-orbit__clouds--mid { bottom: 6%; height: 38%; opacity: .88; animation-direction: alternate-reverse; }
 .k-orbit__clouds--front { bottom: -10%; height: 30%; opacity: .9; z-index: 1; animation-duration: 45s; }
 /* Arriving from the sky intro the cover rises out of the cloud: a fog bank
@@ -2642,7 +2636,19 @@ html { transition: background-color 0.5s var(--ease); }
 .k-orbit__head { display: grid; justify-items: center; gap: 10px; text-align: center; text-shadow: 0 2px 24px rgba(10,14,30,.35); }
 .k-orbit__title { margin: 0; font-size: calc(clamp(40px, 5vw, 76px) * var(--type, 1)); font-weight: 450; letter-spacing: -0.04em; line-height: .95; }
 .k-orbit__dek { max-width: 52ch; margin: 0; font-size: calc(clamp(14px, 1.2vw, 17px) * var(--type, 1)); line-height: 1.4; color: rgba(255,255,255,.88); }
-.k-orbit__carousel { position: relative; }
+.k-orbit__carousel { position: relative; isolation: isolate; }
+/* The carousel sits in a cloud: a bank swelling up behind the cards, and
+ * wisps drifting across their lower edge (both let touches through) */
+.k-orbit__carousel::before, .k-orbit__carousel::after { content: ''; position: absolute; left: -12%; right: -12%; pointer-events: none; animation: k-orbit-drift 38s ease-in-out infinite alternate; }
+.k-orbit__carousel::before { z-index: -1; top: 18%; bottom: 12%; filter: blur(22px); opacity: .9; background:
+  radial-gradient(24% 46% at 22% 62%, color-mix(in srgb, var(--sky-fog) 92%, #fff) 0%, transparent 70%),
+  radial-gradient(30% 56% at 50% 58%, color-mix(in srgb, var(--sky-fog) 85%, #fff) 0%, transparent 72%),
+  radial-gradient(24% 46% at 78% 64%, color-mix(in srgb, var(--sky-fog) 92%, #fff) 0%, transparent 70%),
+  radial-gradient(60% 34% at 50% 92%, var(--sky-fog) 0%, transparent 75%); }
+.k-orbit__carousel::after { z-index: 1; top: 38%; height: 30%; filter: blur(12px); opacity: .7; animation-duration: 26s; animation-direction: alternate-reverse; background:
+  radial-gradient(16% 34% at 10% 60%, var(--sky-fog) 0%, transparent 72%), radial-gradient(14% 30% at 30% 72%, color-mix(in srgb, var(--sky-fog) 70%, transparent) 0%, transparent 72%),
+  radial-gradient(18% 30% at 70% 70%, color-mix(in srgb, var(--sky-fog) 70%, transparent) 0%, transparent 72%), radial-gradient(16% 34% at 92% 58%, var(--sky-fog) 0%, transparent 72%); }
+.k-orbit .k-herowheel__now, .k-orbit .k-herowheel__cta { position: relative; z-index: 2; }
 /* The carousel floats: a slow bob, cards lit like objects in open air */
 .k-orbit .k-herowheel { color: #fff; }
 .k-orbit .k-herowheel__stage { --card: clamp(220px, min(22vw, 30svh), 310px); animation: k-orbit-float 7s ease-in-out infinite; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); }
@@ -2662,12 +2668,11 @@ html { transition: background-color 0.5s var(--ease); }
   .k-orbit__title { font-size: calc(34px * var(--type, 1)); }
   .k-orbit .k-herowheel__stage { --card: min(64vw, 270px); }
   .k-orbit .k-cover__inner.k-orbit__inner { gap: 10px; padding-top: calc(var(--nav-h) + 4px); }
-  .k-orbit__earth { top: 66%; }
   .k-orbit .k-herowheel__note { font-size: calc(13px * var(--type, 1)); }
 }
 @media (max-height: 820px) { .k-orbit__dek { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .k-orbit__surface, .k-orbit__clouds, .k-orbit .k-herowheel__stage { animation: none; }
+  .k-orbit__ceiling, .k-orbit__clouds, .k-orbit .k-herowheel__stage { animation: none; }
 }
 
 /* --------------------------------------------------- marketplace: hunt + stores */

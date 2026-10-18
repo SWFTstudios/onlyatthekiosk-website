@@ -2933,8 +2933,9 @@
   /* ------------------------------------------------------------- home */
 
   /* ------------------------------------------------- orbit carousel
-   * The home cover: high above the Earth in the clouds (the sky takes the
-   * colours of the intro's hour), a floating 3D carousel of jumping-off
+   * The home cover: between two layers of cloud, the intro's overhead and a
+   * second deck below (js/kiosk-sky.js cloudDeck, the hour's light; CSS
+   * cloud banks without WebGL), a floating 3D carousel of jumping-off
    * points: the lead film, the latest story, the featured film, the newest
    * pieces, the radio, the Garage and the Atlas. Built from the content, so
    * new stories, films and drops come round on their own.
@@ -2965,8 +2966,18 @@
     if (!root) return;
     heroCarousel(root, orbitItems(lead), (it) => { if (it.act) it.act(); else if (it.href) location.href = it.href; }, 'Start here');
     // The sky over the carousel follows the intro's hour (js/kiosk-sky.js paints it on .k-sky)
-    const sky = $('.k-sky');
     const cover = root.closest('.k-orbit');
+    const deck = cover && $('.k-orbit__deck', cover);
+    if (deck && hasWebGL()) {
+      skyScript().then(() => {
+        if (pageAbort.signal.aborted || !window.KioskSky.cloudDeck) return;
+        const layer = window.KioskSky.cloudDeck(deck, { still: REDUCED });
+        if (!layer) return;
+        cover.classList.add('has-deck');
+        pageAbort.signal.addEventListener('abort', () => layer.stop());
+      }).catch(() => {});
+    }
+    const sky = $('.k-sky');
     if (!sky || !cover) return;
     const sync = () => {
       SKY_VARS.forEach((k) => { const v = sky.style.getPropertyValue(k); if (v) cover.style.setProperty(k, v); });
@@ -5621,7 +5632,7 @@
       journey && !window.KioskEarth ? loadScript('js/kiosk-earth.js').catch(() => null) : null,
       journey ? visitorHome(signal).then((h) => { home = h; }) : null,
     ])
-      .then(() => (window.KioskSky ? null : loadScript('js/kiosk-sky.js')))
+      .then(skyScript)
       .then(() => {
         clearTimeout(fail);
         if (signal.aborted) return;
@@ -5634,6 +5645,10 @@
       })
       .catch((err) => { clearTimeout(fail); giveUp(); console.warn('[KIOSK] sky unavailable', err); });
   }
+
+  // js/kiosk-sky.js, loaded once for both the intro and the home cover's cloud deck
+  let skyLoading = null;
+  const skyScript = () => (window.KioskSky ? Promise.resolve() : (skyLoading = skyLoading || loadScript('js/kiosk-sky.js').catch((err) => { skyLoading = null; throw err; })));
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {

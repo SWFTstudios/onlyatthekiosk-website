@@ -340,7 +340,7 @@ issue: {
   lead: 'r32-wangan',                        // the film card at the front of the home carousel
 }
 ```
-Under the sky intro, the home cover is the Earth far below a layer of clouds, in the same time-of-day colours as the intro, with a floating 3D carousel of jumping-off points. It builds itself from the content, front to back:
+Past the sky intro you come out under its cloud layer and over a second one: the home cover is that second deck (drawn by the intro's own cloud renderer, `KioskSky.cloudDeck` in `js/kiosk-sky.js`, in the same time-of-day light; soft CSS cloud banks stand in without WebGL), with the underside of the first layer overhead and a floating 3D carousel of jumping-off points sitting in a cloud between them. It builds itself from the content, front to back:
 
 1. **Watch** the lead story's film (`issue.lead`, when it has an `embed` or `video`)
 2. **Read** the newest other story with a cover image
