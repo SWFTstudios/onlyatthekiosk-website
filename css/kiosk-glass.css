@@ -2830,7 +2830,8 @@ html { -webkit-tap-highlight-color: transparent; }
 html.is-reading:not(.is-sheet-open):not(.is-settings-open) .k-nav { transform: translateY(-130%); }
 html.is-scrolled .k-nav__inner { box-shadow: var(--hairline), var(--elev-1); }
 
-/* Page changes: the new page rises in; the chrome stays put */
+/* Page changes: the chrome stays put while the page changes underneath
+   (the curtain itself is in css/kiosk-editorial.css) */
 /* Names go on the glass itself, not its wrapper: an ancestor with a
    view-transition-name is a backdrop root, so backdrop-filter would blur
    only the empty wrapper instead of the page behind it. */
@@ -2838,12 +2839,6 @@ html.is-scrolled .k-nav__inner { box-shadow: var(--hairline), var(--elev-1); }
 .k-tabbar__pill { view-transition-name: k-tabbar; }
 .k-tabbar__more { view-transition-name: k-tabbar-more; }
 .k-dock { view-transition-name: k-dock; }
-::view-transition-old(root) { animation: k-vt-out 0.28s var(--ease) both; }
-::view-transition-new(root) { animation: k-vt-in 0.55s var(--ease) both; }
-html[data-nav='back']::view-transition-new(root) { animation-name: k-vt-in-back; }
-@keyframes k-vt-out { to { opacity: 0; transform: scale(0.985); } }
-@keyframes k-vt-in { from { opacity: 0; transform: translateY(28px); } }
-@keyframes k-vt-in-back { from { opacity: 0; transform: translateY(-20px); } }
 
 .k-nav__settings svg { width: 18px; height: 18px; }
 .k-sheet__foot .k-btn svg { width: 16px; height: 16px; }

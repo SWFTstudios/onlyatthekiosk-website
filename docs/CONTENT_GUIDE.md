@@ -9,7 +9,7 @@ Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no b
 | Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
 | Atlas | `atlas.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
 | Garage | `atlas.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
-| Story | `story.html?s=<slug>` | One shoot: hero, specs, story, subjects, slideshow, colour guide, behind the scenes, interview, shop the look |
+| Story | `story.html?s=<slug>` | One shoot as a magazine feature: full-bleed cover, standfirst, the story in text-and-photo spreads, swipe gallery, spec sheet, subjects, colour guide, behind the scenes, interview, shop the look, next story |
 | Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
 | Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
 
@@ -97,7 +97,15 @@ story: [
   { type: 'image', src: 'images/garage/r32-wangan/engine.webp', caption: 'RB26, rebuilt over two winters' },
 ]
 ```
-In a `text` block, `lead` renders in white and `body` in grey, using the same two-tone style as the rest of the site.
+The page lays the blocks out like a magazine spread (`css/kiosk-editorial.css`):
+
+- A `text` block's `lead` becomes its serif subheading; the first paragraph gets a drop cap.
+- A `text` block **followed by an `image`** becomes a spread: words beside the photograph, alternating sides down the page.
+- A lone `image` goes full-bleed, the next one inset, and so on in turn; two `image` blocks in a row sit side by side.
+- A `quote` is set as a large centred pull quote.
+- Each written chapter is followed by a gallery frame the body hasn't used, and one more frame closes the read full-bleed.
+
+The `excerpt` is the standfirst under the cover, and `specs` is the "at a glance" row beneath it.
 
 ### Subjects (who and what is in the film)
 ```js
@@ -116,7 +124,7 @@ palette: [
   { name: 'Sodium', hex: '#e8892b', note: 'Overhead lamps' },
 ]
 ```
-If the gallery is still empty, the slideshow shows placeholder frames tinted with these colours.
+If the gallery is still empty, the swipe gallery shows placeholder frames tinted with these colours.
 
 ### Behind the scenes
 ```js

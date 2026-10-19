@@ -14,7 +14,7 @@ The home page and the new sections run on the **KIOSK Glass** design system:
 | `radio.html` | KIOSK Radio: phonk playlists (Spotify) in a site-wide player with a live waveform |
 | `vault.html` | KIOSK Supply skateshop: apparel, headwear, skate, accessories, films and LUT packs |
 
-All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` and styles in `css/kiosk-glass.css`.
+All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` and styles in `css/kiosk-glass.css`. The editorial layer on top (serif headlines, story spreads, smooth scrolling, scroll reveals, swipe galleries and page curtains) is `css/kiosk-editorial.css` + `js/kiosk-editorial.js`, with Lenis vendored in `js/vendor/lenis/`.
 **To add a shoot, film, mix or product, see [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md).**
 
 ## 🏗️ Architecture
