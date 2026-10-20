@@ -4579,7 +4579,8 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
   opacity: var(--gh-in, 0); translate: 0 calc((1 - var(--gh-in, 0)) * 14px); }
 .k-gh__hint-now { font-family: var(--f-serif); font-size: calc(clamp(22px, 2.4vw, 34px) * var(--type, 1)); line-height: 1.1; text-wrap: balance; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
 .k-gh__hint-how { font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.7); }
-.k-gh__live { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; margin: 0; padding: 8px 14px; border-radius: var(--r-pill); border: 1px solid rgba(255,255,255,.18); background: rgba(10,18,40,.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: calc(13px * var(--type, 1)); color: rgba(255,255,255,.88); }
+.k-gh__live { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; height: 38px; margin: 0; padding: 8px 14px; border-radius: var(--r-pill); border: 1px solid rgba(255,255,255,.18); background: rgba(10,18,40,.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: calc(13px * var(--type, 1)); color: rgba(255,255,255,.88); }
+.k-gh__live [data-gh-count] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* long city names wrap to a second line rather than being cut off */
 .k-gh__live { border-radius: 18px; text-align: left; }
 .k-gh__live span:last-child { min-width: 0; text-wrap: balance; overflow-wrap: anywhere; }

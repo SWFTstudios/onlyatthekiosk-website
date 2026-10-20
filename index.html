@@ -37,16 +37,20 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&family=Inter+Tight:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet"></noscript>
   <link href="css/kiosk-glass.css" rel="stylesheet">
   <link href="css/kiosk-editorial.css" rel="stylesheet">
+  <link rel="preload" href="fonts/GeneralSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ"></script>
+  <!-- Google tag (gtag.js): loaded after the page (or first interaction) so
+       analytics never competes with first paint on mobile -->
+  <script>(function(){var done=false;function load(){if(done)return;done=true;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-MCKHRGGYRJ';document.head.appendChild(s);}window.addEventListener('load',function(){if(window.requestIdleCallback)requestIdleCallback(load,{timeout:4000});else setTimeout(load,3000);},{once:true});['pointerdown','keydown','touchstart'].forEach(function(e){window.addEventListener(e,load,{once:true,passive:true});});setTimeout(load,12000);})();</script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -274,10 +278,6 @@
           <div class="k-films__lead" data-mount="films-lead" data-reveal></div>
           <div class="k-rows" data-mount="films-rows"></div>
         </div>
-        <div class="k-vimeo k-mt-l" data-vimeo-section>
-          <p class="k-eyebrow">On Vimeo</p>
-          <div class="k-vimeo__grid k-mt-m" data-mount="films-vimeo"></div>
-        </div>
       </div>
     </section>
 
@@ -368,11 +368,11 @@
 
   </main>
 
-  <script src="js/kiosk-content.js"></script>
-  <script src="js/kiosk-mockups.js"></script>
-  <script src="js/kiosk-glass.js"></script>
-  <script src="js/vendor/lenis/lenis.min.js"></script>
-  <script src="js/kiosk-editorial.js"></script>
-  <script src="js/kiosk-account.js"></script>
+  <script defer src="js/kiosk-content.js"></script>
+  <script defer src="js/kiosk-mockups.js"></script>
+  <script defer src="js/kiosk-glass.js"></script>
+  <script defer src="js/vendor/lenis/lenis.min.js"></script>
+  <script defer src="js/kiosk-editorial.js"></script>
+  <script defer src="js/kiosk-account.js"></script>
 </body>
 </html>
