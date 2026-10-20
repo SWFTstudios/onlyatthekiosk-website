@@ -73,7 +73,11 @@
 
   /* ------------------------------------------------------------- reveals */
 
+  // A masked headline or photograph is clipped to nothing until it shows, and
+  // browsers count clip-path when measuring visibility, so each one is watched
+  // through its (unclipped) parent instead of itself.
   let io = null;
+  const waiting = new Map();   // parent → elements it reveals
   function observe(els) {
     if (!els.length) return;
     if (!('IntersectionObserver' in window) || reduced()) { els.forEach((el) => el.classList.add('is-in')); return; }
@@ -81,12 +85,17 @@
       io = new IntersectionObserver((entries) => {
         entries.forEach((en) => {
           if (!en.isIntersecting) return;
-          en.target.classList.add('is-in');
+          (waiting.get(en.target) || []).forEach((el) => el.classList.add('is-in'));
+          waiting.delete(en.target);
           io.unobserve(en.target);
         });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
     }
-    els.forEach((el) => io.observe(el));
+    els.forEach((el) => {
+      const host = el.parentElement || el;
+      if (!waiting.has(host)) { waiting.set(host, new Set()); io.observe(host); }
+      waiting.get(host).add(el);
+    });
   }
 
   // Site-wide: section headlines rise, photographs in cards settle
@@ -244,6 +253,24 @@
     $$('.k-hscroll-wrap--ed', root).forEach((w) => { if (!w.dataset.ed) w.dataset.ed = 'rail'; });
   }
 
+  /* ------------------------------------------------- titles set edge to edge */
+
+  // [data-fit]: one line of capitals scaled to fill its column exactly
+  function fit() {
+    $$('[data-fit]').forEach((el) => {
+      el.style.fontSize = '';
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      const w = r.getBoundingClientRect().width;
+      const avail = el.clientWidth;
+      if (!w || !avail) return;
+      const size = parseFloat(getComputedStyle(el).fontSize);
+      el.style.fontSize = `${Math.min(size * (avail / w) * 0.985, window.innerHeight * 0.42).toFixed(1)}px`;   // glyphs overhang their box a little
+    });
+  }
+  window.addEventListener('resize', fit, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+
   /* ---------------------------------------------------------------- refresh */
 
   function refresh() {
@@ -257,6 +284,7 @@
     live.par = $$('[data-parallax]', main);
     live.fill = $$('[data-ed="fill"]', main);
     buildIndex();
+    fit();
     // The soft navigation swapped <main> and jumped to the top: start Lenis from there
     if (lenis) { lenis.resize(); lenis.scrollTo(window.scrollY, { immediate: true, force: true }); }
     frame();

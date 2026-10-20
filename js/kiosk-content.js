@@ -56,6 +56,17 @@ window.KIOSK_CONTENT = {
   },
 
   /* ----------------------------------------------------------
+   * THE JOURNAL — one volume a month (archive.html, archive.html?v=YYYY-MM)
+   * Volumes build themselves from what's dated below: stories published
+   * or shot that month, timeline milestones and shop drops (`added`).
+   * Write a month up here to give it a cover, a caption and a note, or to
+   * add a month that has nothing dated in it yet:
+   *   '2026-10': { title: 'Lead line on the shelf', cover: 'images/…webp',
+   *                caption: 'Under the cover photo. By Name.', note: 'A paragraph from the desk.' },
+   * -------------------------------------------------------- */
+  journal: {},
+
+  /* ----------------------------------------------------------
    * GARAGE — every shoot is a story
    * Source footage: Google Drive › RollerReels Video Files
    * -------------------------------------------------------- */

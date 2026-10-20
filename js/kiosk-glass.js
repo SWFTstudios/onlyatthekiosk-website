@@ -245,9 +245,12 @@
   const MENU = [
     { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' },
     ...NAV.map((n) => ({ ...n, ...(MENU_EXTRA[n.id] || {}) })),
+    { id: 'archive', label: 'The Journal', href: 'archive.html', note: 'Monthly archive', icon: 'journal' },
+    { id: 'gallery', label: 'Gallery', href: 'gallery.html', note: 'Every frame', icon: 'films' },
     { id: 'hunt', label: 'Lost &amp; Found', href: 'lost-and-found.html', note: 'Rare finds', icon: 'pin' },
     { id: 'store', label: 'Stores', href: 'store.html', note: 'Partner stores', icon: 'store' },
     { id: 'flights', label: 'Flights', href: 'flights.html', note: 'Live flight deck', icon: 'flights' },
+    { id: 'partner', label: 'Partner Hub', href: 'partner.html', note: 'Stores, brands & sponsors', icon: 'store' },
   ];
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
@@ -259,7 +262,7 @@
 
   function currentNav() {
     const params = new URLSearchParams(location.search);
-    if (PAGE === 'story') return 'journal';
+    if (PAGE === 'story' || PAGE === 'archive' || PAGE === 'gallery') return 'journal';
     if (PAGE === 'hunt' || PAGE === 'store') return 'vault';   // both live under Shop
     return PAGE;
   }
@@ -429,8 +432,8 @@
             <p class="k-eyebrow">Only at the KIOSK</p>
             <p class="k-lede k-mt-s">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, plus pieces and rare finds you can only get at the kiosk.</p>
           </div>
-          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Atlas</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li></ul></div>
+          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Atlas</a></li><li><a href="archive.html">The Journal</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
+          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li><li><a href="partner.html">Partner Hub</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true"><span class="k-rk">K</span>IOSK</div>
@@ -705,6 +708,8 @@
           ? `<p class="k-h3">Join <span class="k-serif">the Dispatch.</span></p><p class="k-body k-mt-s">New films, new playlists, Supply drops and Lost &amp; Found coordinates — one email per release.</p>`
           : id === 'stockist'
           ? `<p class="k-h3">Sell at <span class="k-serif">the KIOSK.</span></p><p class="k-body k-mt-s">Independent stores, thrift curators and makers: stock your pieces here. You sell through your own Shopify and keep your store; the kiosk takes a small share of each sale. Leave your email and we’ll send the stockist pack.</p>`
+          : id === 'partner'
+          ? `<p class="k-h3">Partner with <span class="k-serif">the KIOSK.</span></p><p class="k-body k-mt-s">Stores, brands and sponsors: get a page on the kiosk, list your pieces or back a film. Leave your email and the desk will set up your Partner Hub account.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
         <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
@@ -1319,7 +1324,7 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'films', 'flights', 'atlas', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
+  const SOFT_PAGES = new Set(['', 'index', 'films', 'flights', 'atlas', 'archive', 'gallery', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
   let pageAbort = new AbortController();
   // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
   const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
@@ -4597,7 +4602,7 @@
       if (k === 'tag') { if (st.tags.has(v)) st.tags.delete(v); else st.tags.add(v); } else st[k] = v;
       paint();
     }, { signal });
-    fillMosaic('journal-mosaic', mosaicItems(), { label: 'The archive' });
+    if (fill('atlas-library', libraryHtml(journalVolumes(), { title: 'Monthly volumes' }))) bindLibrary();
   }
 
 
@@ -5600,6 +5605,567 @@
     } catch (e) { return false; }
   }
 
+  /* ======================================================== the journal
+   * One volume a month for the KIOSK Archive, laid out like a monthly field report: a cover,
+   * the month in numbers, a section per story with its log, then everything
+   * else that happened. A month gets a volume when something in the content
+   * file is dated in it (a story published or shot, a timeline milestone, a
+   * shop drop), or when it's written up in `journal` (js/kiosk-content.js).
+   *
+   * archive.html files every volume on a wireframe shelf; archive.html?v=
+   * YYYY-MM opens one. gallery.html is every photograph, film and clip.
+   * -------------------------------------------------------------------- */
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MON = Object.fromEntries(MONTHS.map((m, i) => [m.slice(0, 3).toLowerCase(), i + 1]));
+  /** 'YYYY-MM' from '2025-11-28', '28 Nov 2025' or 'Nov 2025'; '' when undated ('Soon', 'Issue 01'). */
+  function monthKey(s) {
+    const v = String(s || '').trim();
+    let m = v.match(/^(\d{4})-(\d{2})/);
+    if (m) return `${m[1]}-${m[2]}`;
+    m = v.match(/(?:^|\s)([A-Za-z]{3})[a-z]*\.?\s+(\d{4})$/);
+    return m && MON[m[1].toLowerCase()] ? `${m[2]}-${pad(MON[m[1].toLowerCase()])}` : '';
+  }
+  const monthName = (k) => `${MONTHS[Number(k.slice(5)) - 1]} ${k.slice(0, 4)}`;
+  const shotMonth = (f) => {
+    const c = ((f.bts || {}).conditions || []).find((x) => /^date$/i.test(x.label));
+    return monthKey(c && c.value) || monthKey(f.published);
+  };
+  const upperDate = (d) => (d ? longDate(d).toUpperCase() : '');
+  const productImage = (p) => { const w = (p.colorways || []).find((x) => x.image); return (w && w.image) || ''; };
+
+  let volumesCache = null;
+  /** Every volume, newest first: { key, no, name, year, stories, notes, drops, report, cover, desks, entries }. */
+  function journalVolumes() {
+    if (volumesCache) return volumesCache;
+    const map = new Map();
+    const vol = (k) => {
+      if (!map.has(k)) map.set(k, { key: k, stories: [], notes: [], drops: [], report: (C.journal || {})[k] || null });
+      return map.get(k);
+    };
+    features.forEach((f) => {
+      const pub = monthKey(f.published);
+      const shot = shotMonth(f);
+      if (pub) vol(pub).stories.push(f);
+      if (shot && shot !== pub) vol(shot).notes.push({ f, when: shot, label: 'Shot' });
+      (f.timeline || []).forEach((t) => {
+        const k = monthKey(t.year);
+        if (k && k !== pub && k !== shot) vol(k).notes.push({ f, when: t.year, label: t.label });
+      });
+    });
+    (C.products || []).forEach((p) => { const k = monthKey(p.added); if (k) vol(k).drops.push(p); });
+    Object.keys(C.journal || {}).forEach((k) => { if (/^\d{4}-\d{2}$/.test(k)) vol(k); });
+    const list = Array.from(map.values()).sort((a, b) => a.key.localeCompare(b.key));
+    list.forEach((v, i) => {
+      v.no = i + 1;
+      v.name = monthName(v.key);
+      v.year = v.key.slice(0, 4);
+      v.stories.sort((a, b) => String(a.published).localeCompare(String(b.published)));
+      v.drops.sort((a, b) => String(a.added).localeCompare(String(b.added)));
+      const lead = v.stories.find((f) => f.image) || v.notes.map((n) => n.f).find((f) => f.image);
+      const r = v.report || {};
+      const drop = v.drops.find(productImage);
+      v.cover = r.cover ? { src: r.cover, caption: r.caption || '' }
+        : lead ? { src: lead.image, focus: lead.focus, caption: `${lead.tagline || lead.title}${lead.author ? ` By ${lead.author}.` : ''}`, story: lead }
+          : drop ? { src: productImage(drop), caption: `${drop.title}, new in the shop.`, product: drop } : null;
+      v.lead = r.title || (v.stories[0] && (v.stories[0].title || featureName(v.stories[0]))) || (v.notes[0] && v.notes[0].label) || (v.drops.length ? `${v.drops.length} new in the shop` : 'Notes');
+      v.desks = Array.from(new Set(v.stories.concat(v.notes.map((n) => n.f)).map((f) => DESKS[f.desk]).concat(v.drops.length ? ['Shop'] : []).filter(Boolean)));
+      v.entries = v.stories.length + v.notes.length + v.drops.length;
+    });
+    volumesCache = list.reverse();
+    return volumesCache;
+  }
+
+  /** "Bridge roller · 12:07 · 28mm" → { time: '12:07', scene: 'Bridge roller', detail: '28mm' } */
+  const TIME_RE = /\b(\d{1,2}:\d{2}|\d{1,2}(?::\d{2})?\s?[ap]\.?m\.?|noon|midnight)\b/i;
+  function logRows(f) {
+    return (f.story || []).map((b) => {
+      if (b.type === 'image' && b.caption) {
+        const parts = b.caption.split(/\s+·\s+/);
+        const t = parts.findIndex((x) => TIME_RE.test(x));
+        return { time: t >= 0 ? parts[t] : '—', scene: parts[0], detail: parts.filter((_, i) => i && i !== t).join(' · ') || 'Frame' };
+      }
+      if (b.type === 'text' || !b.type) {
+        const m = String(b.lead || '').match(TIME_RE);
+        return { time: m ? m[0] : '—', scene: String(b.lead || '').replace(/\.$/, '') || '—', detail: b.body || b.text || '' };
+      }
+      return null;
+    }).filter(Boolean);
+  }
+
+  /* ------------------------------------------------- the archive (shelf) */
+
+  function libraryHtml(vols, { search = true, years = true, title = 'Every volume' } = {}) {
+    const ys = Array.from(new Set(vols.map((v) => v.year)));
+    return `
+      <section class="k-lib3d" data-lib3d aria-label="${esc(title)}">
+        <svg class="k-lib3d__room" data-lib3d-room aria-hidden="true"></svg>
+        <div class="k-wrap k-lib3d__inner">
+          <div class="k-lib3d__head" data-lib3d-head>
+            <p><b>KIOSK Archive</b> — ${esc(title)}</p>
+            <div class="k-lib3d__tools">
+              ${years && ys.length > 1 ? `<div class="k-lib3d__years" role="group" aria-label="Year">${['all'].concat(ys).map((y, i) => `<button type="button" data-lib3d-year="${y}" aria-pressed="${!i}">${y === 'all' ? 'All' : y}</button>`).join('')}</div>` : ''}
+              <button class="k-lib3d__tool" type="button" data-lib3d-previews aria-pressed="true" aria-label="Cover previews" title="Cover previews">${icon.camera}</button>
+            </div>
+          </div>
+          <div class="k-lib3d__table" data-lib3d-table>
+            <div class="k-lib3d__cols">
+              <span>Year</span><span>Vol.</span><span>Month</span><span class="k-lib3d__lead">Lead</span><span class="k-lib3d__desk">Desks</span>
+              ${search ? `<label class="k-lib3d__search"><span class="k-sr">Search the archive</span><input type="search" data-lib3d-q placeholder="Search" autocomplete="off" enterkeyhint="search">${icon.search}</label>` : '<span></span>'}
+            </div>
+            <ol class="k-lib3d__rows">${vols.map((v, i) => `
+              <li data-ed="flip" style="--i:${i % 8}" data-year="${v.year}" data-find="${esc([v.name, v.lead, v.desks.join(' '), v.stories.map((f) => `${f.title} ${featureName(f)} ${place(f)}`).join(' '), v.drops.map((p) => p.title).join(' ')].join(' ').toLowerCase())}">
+                <a class="k-lib3d__row" href="archive.html?v=${v.key}"${v.cover ? ` data-cover="${esc(v.cover.src)}"` : ''}>
+                  <span>${esc(v.year)}</span><span>${pad(v.no)}</span><span>${esc(MONTHS[Number(v.key.slice(5)) - 1])}</span>
+                  <span class="k-lib3d__lead">${esc(v.lead)}</span><span class="k-lib3d__desk">${esc(v.desks.join(' · ') || '—')}</span>
+                  <span class="k-lib3d__go" aria-hidden="true">${icon.right}</span>
+                </a>
+              </li>`).join('')}
+            </ol>
+            <p class="k-lib3d__empty" data-lib3d-empty hidden>No volume matches that. Try a month, a place or a machine.</p>
+          </div>
+        </div>
+        <span class="k-lib3d__peek" data-lib3d-peek aria-hidden="true"></span>
+      </section>`;
+  }
+
+  /** Wireframe room, year filter, search and cover previews for every shelf on the page. */
+  function bindLibrary(root = document) {
+    const signal = pageAbort.signal;
+    $$('[data-lib3d]', root).forEach((lib) => {
+      const svg = $('[data-lib3d-room]', lib);
+      const head = $('[data-lib3d-head]', lib);
+      const table = $('[data-lib3d-table]', lib);
+      // Perspective lines from the top of the room to the header box and the shelf
+      const draw = () => {
+        const r = lib.getBoundingClientRect();
+        const h = head.getBoundingClientRect();
+        const t = table.getBoundingClientRect();
+        const W = r.width; const H = r.height;
+        const x = (v) => (v - r.left).toFixed(1); const y = (v) => (v - r.top).toFixed(1);
+        const back = Math.max(24, (h.top - r.top) * 0.42);
+        svg.setAttribute('viewBox', `0 0 ${W.toFixed(0)} ${H.toFixed(0)}`);
+        svg.innerHTML = `
+          <path d="M${(W * 0.16).toFixed(1)} 0 L${x(h.left)} ${y(h.top)} M${(W * 0.84).toFixed(1)} 0 L${x(h.right)} ${y(h.top)}"/>
+          <path d="M${(W * 0.19).toFixed(1)} ${back.toFixed(1)} H${(W * 0.81).toFixed(1)} M${(W * 0.19).toFixed(1)} ${back.toFixed(1)} L${x(t.left)} ${y(t.top)} M${(W * 0.81).toFixed(1)} ${back.toFixed(1)} L${x(t.right)} ${y(t.top)}"/>
+          <path d="M${x(t.left)} ${y(t.bottom)} L0 ${H.toFixed(1)} M${x(t.right)} ${y(t.bottom)} L${W.toFixed(1)} ${H.toFixed(1)}"/>`;
+      };
+      draw();
+      window.addEventListener('resize', draw, { passive: true, signal });
+      if ('ResizeObserver' in window) { const ro = new ResizeObserver(draw); ro.observe(lib); signal.addEventListener('abort', () => ro.disconnect()); }
+
+      const rows = $$('.k-lib3d__rows > li', lib);
+      const empty = $('[data-lib3d-empty]', lib);
+      const q = $('[data-lib3d-q]', lib);
+      let year = 'all';
+      const apply = () => {
+        const words = (q ? q.value : '').toLowerCase().split(/\s+/).filter(Boolean);
+        let n = 0;
+        rows.forEach((li) => {
+          const ok = (year === 'all' || li.dataset.year === year) && words.every((w) => li.dataset.find.includes(w));
+          li.hidden = !ok;
+          if (ok) n += 1;
+        });
+        if (empty) empty.hidden = n > 0;
+        draw();
+      };
+      if (q) q.addEventListener('input', apply);
+      $$('[data-lib3d-year]', lib).forEach((b) => b.addEventListener('click', () => {
+        year = b.dataset.lib3dYear;
+        $$('[data-lib3d-year]', lib).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        apply();
+      }));
+
+      // Cover preview that trails the pointer over a row (mouse only)
+      const peek = $('[data-lib3d-peek]', lib);
+      const toggle = $('[data-lib3d-previews]', lib);
+      let previews = true;
+      if (toggle) toggle.addEventListener('click', () => { previews = !previews; toggle.setAttribute('aria-pressed', String(previews)); peek.classList.remove('is-on'); });
+      lib.addEventListener('pointermove', (e) => {
+        const row = e.pointerType === 'mouse' && previews && e.target.closest('.k-lib3d__row[data-cover]');
+        if (!row) { peek.classList.remove('is-on'); return; }
+        if (peek.dataset.src !== row.dataset.cover) { peek.dataset.src = row.dataset.cover; peek.innerHTML = `<img src="${esc(row.dataset.cover)}" alt="" decoding="async">`; }
+        const r = lib.getBoundingClientRect();
+        peek.style.transform = `translate(${(e.clientX - r.left + 28).toFixed(0)}px, ${(e.clientY - r.top - 90).toFixed(0)}px)`;
+        peek.classList.add('is-on');
+      });
+      lib.addEventListener('pointerleave', () => peek.classList.remove('is-on'));
+    });
+  }
+
+  function pageArchive() {
+    const key = new URLSearchParams(location.search).get('v');
+    const vols = journalVolumes();
+    const v = key && vols.find((x) => x.key === key);
+    if (v) { renderVolume(v, vols); return; }
+    const latest = vols.find((x) => x.cover && !x.cover.product) || vols.find((x) => x.cover);
+    const first = vols[vols.length - 1];
+    fill('archive', `
+      <header class="k-wrap k-arc-hero">
+        <p class="k-ed-label">The KIOSK Archive${first ? ` · since ${esc(first.name)}` : ''}</p>
+        <h1 class="k-ed-giant" data-ed="mask" data-fit>The Journal</h1>
+        <p class="k-lede">One volume every month: what we shot, what we published, where we went and what dropped in the shop. Filed below, newest first.</p>
+      </header>
+      ${latest && latest.cover ? `
+      <a class="k-wrap k-arc-cover" href="archive.html?v=${latest.key}">
+        <span class="k-arc-cover__media" data-ed="img"><span class="k-ed-par" data-parallax="0.06">${media({ image: latest.cover.src, focus: latest.cover.focus, alt: latest.cover.caption, cls: 'k-media--clean' })}</span></span>
+        <span class="k-arc-cover__cap"><span class="k-ed-label">${latest === vols[0] ? 'Latest' : 'Cover story'} · Volume ${pad(latest.no)}</span><b>${esc(latest.name)}</b><span class="k-ed-link">Read the volume ${icon.arrow}</span></span>
+      </a>` : ''}
+      ${libraryHtml(vols)}
+      <section class="k-wrap k-arc-more">
+        <p class="k-ed-label">Every frame</p>
+        <p class="k-ed-standfirst">Every photograph, film and clip from every volume is in the Gallery: search it by date, place, issue or story.</p>
+        <a class="k-ed-link" href="gallery.html">Open the Gallery ${icon.arrow}</a>
+      </section>`);
+    bindLibrary();
+  }
+
+  /* --------------------------------------------- a volume (monthly report) */
+
+  function renderVolume(v, vols) {
+    const i = vols.indexOf(v);
+    const newer = vols[i - 1];
+    const older = vols[i + 1];
+    const r = v.report || {};
+    document.title = `Volume ${pad(v.no)} · ${v.name} · The Journal · KIOSK`;
+    const desc = $('meta[name="description"]');
+    if (desc) desc.setAttribute('content', `The KIOSK Archive for ${v.name}: ${v.lead}.`);
+
+    const frames = v.stories.reduce((n, f) => n + (f.gallery || []).length, 0);
+    const clips = v.stories.reduce((n, f) => n + ((f.bts || {}).clips || []).length + ((f.bts || {}).driveClips || []).length, 0);
+    const films = v.stories.filter((f) => f.format === 'film').length;
+    const places = Array.from(new Set(v.stories.map((f) => place(f) || f.location).filter(Boolean)));
+    const H = (t, sub) => `<h2 class="k-jr-h">${esc(t)}${sub ? ` <em>— ${esc(sub)}</em>` : ''}</h2>`;
+
+    // On the road: subjects grouped by type, like a sightings breakdown
+    const groups = {};
+    v.stories.forEach((f) => { (groups[typeLabel(f.type)] = groups[typeLabel(f.type)] || []).push(f); });
+    const roadRows = Object.keys(groups).map((g) => `<tr><th scope="row">${esc(g === 'Meet' ? 'Meets' : `${g}s`)}</th><td>${groups[g].length}</td><td>${groups[g].map((f) => `${esc(featureName(f) || f.title)}${place(f) || f.location ? ` · ${esc(place(f) || f.location)}` : ''}${(f.gallery || []).length ? ` · ${(f.gallery || []).length} frames` : ''}`).join('<br>')}</td></tr>`)
+      .concat(v.drops.length ? [`<tr><th scope="row">The shop</th><td>${v.drops.length}</td><td>${v.drops.slice(0, 6).map((p) => esc(p.title)).join(', ')}${v.drops.length > 6 ? ` and ${v.drops.length - 6} more` : ''}</td></tr>`] : []);
+
+    const storySections = v.stories.map((f) => {
+      const log = logRows(f);
+      const thumbs = (f.gallery || []).slice(0, 3).map((g) => (typeof g === 'string' ? { src: g } : g));
+      return `
+        <section class="k-jr-sec" id="${esc(f.slug)}">
+          ${H(f.title || featureName(f))}
+          <p class="k-jr-sub">${esc(featureName(f) || formatLabel(f))}${f.tagline ? ` — <em>${esc(f.tagline)}</em>` : ''}</p>
+          ${(f.specs || []).length || (f.subjects || []).length ? `<dl class="k-jr-facts">
+            ${(f.specs || []).map((s) => `<div><dt>${esc(s.label)}</dt><dd>${esc(s.value)}</dd></div>`).join('')}
+            ${(f.subjects || []).map((s) => `<div><dt>${esc(s.role || 'Subject')}</dt><dd>${esc(s.name)}</dd></div>`).join('')}
+          </dl>` : ''}
+          <dl class="k-jr-seen">
+            <div><dt>${(f.gallery || []).length ? `${(f.gallery || []).length} frames` : esc(formatLabel(f))}</dt><dd>${esc([upperDate(f.published), f.shotOn].filter(Boolean).join(' · ') || '—')}</dd></div>
+            <div><dt>Generally seen in</dt><dd>${esc([f.location, place(f)].filter(Boolean).join(', ').toUpperCase() || '—')}</dd></div>
+          </dl>
+          ${log.length ? `<table class="k-jr-table k-jr-log"><thead><tr><th>Time</th><th>Scene</th><th>Details</th></tr></thead><tbody>
+            ${log.map((x) => `<tr><td>${esc(x.time)}</td><td>${esc(x.scene)}</td><td>${esc(x.detail)}</td></tr>`).join('')}
+          </tbody></table>` : ''}
+          ${thumbs.length ? `<div class="k-jr-thumbs">${thumbs.map((t) => `<a href="gallery.html?story=${encodeURIComponent(f.slug)}" class="k-jr-thumb">${media({ image: thumbOf(t.src), alt: t.caption || '', cls: 'k-media--clean' })}</a>`).join('')}</div>` : ''}
+          <a class="k-ed-link" href="${storyHref(f)}">Read the story ${icon.arrow}</a>
+        </section>`;
+    }).join('');
+
+    fill('archive', `
+      <article class="k-jr" aria-labelledby="jr-title">
+        <header class="k-jr-cover">
+          <div class="k-wrap">
+            <p class="k-jr-kicker">${esc(v.name.toUpperCase())} · VOLUME ${pad(v.no)}</p>
+            <h1 class="k-jr-title" id="jr-title" data-ed="mask"><span>Monthly</span><span>Archive</span></h1>
+          </div>
+          <figure class="k-jr-lead">
+            <div class="k-jr-lead__media" data-ed="img">${v.cover ? media({ image: v.cover.src, focus: v.cover.focus, alt: v.cover.caption, eager: true, cls: 'k-media--clean' }) : `<div class="k-media"><div class="plate plate--graphite"><span class="plate__mark">${pad(v.no)}</span></div></div>`}</div>
+            <figcaption>${esc(r.caption || (v.cover && v.cover.caption) || v.lead)}</figcaption>
+          </figure>
+          <div class="k-wrap k-jr-actions">
+            <button class="k-ed-link" type="button" data-print>Download PDF ${icon.arrow}</button>
+            <a class="k-ed-link" href="gallery.html?issue=${v.key}">Photos &amp; films ${icon.arrow}</a>
+            <a class="k-ed-link" href="archive.html">The archive ${icon.arrow}</a>
+          </div>
+        </header>
+
+        <div class="k-wrap k-jr-body">
+          ${r.note ? `<section class="k-jr-sec"><p class="k-jr-note">${esc(r.note)}</p></section>` : ''}
+
+          <section class="k-jr-sec">
+            ${H('Month summary')}
+            <table class="k-jr-table k-jr-grid">
+              <thead><tr><th>Stories</th><th>Films</th><th>Frames</th><th>Raw clips</th><th>Places</th><th>New in the shop</th></tr></thead>
+              <tbody><tr><td>${v.stories.length}</td><td>${films}</td><td>${frames}</td><td>${clips}</td><td>${places.length}</td><td>${v.drops.length}</td></tr></tbody>
+            </table>
+          </section>
+
+          ${roadRows.length ? `<section class="k-jr-sec">
+            ${H('On the road')}
+            <table class="k-jr-table k-jr-break"><thead><tr><th colspan="2">Total</th><th>Breakdown</th></tr></thead><tbody>${roadRows.join('')}</tbody></table>
+            <p class="k-jr-fine"><b>Note.</b> <em>Frames are photographs published with each story; raw clips are the unedited footage filed with it.</em></p>
+          </section>` : ''}
+
+          <section class="k-jr-sec">
+            ${H('About this report')}
+            <ul class="k-jr-about">
+              <li>This volume covers what KIOSK shot, published and released in ${esc(v.name)}.</li>
+              <li>Times are local to each shoot and come from the camera.</li>
+              <li>Stories still marked “In the edit” have their films being cut; they move to the volume of the month they’re published.</li>
+              <li>Every photograph and film in this report is in the Gallery.</li>
+            </ul>
+          </section>
+
+          ${storySections}
+
+          ${v.notes.length ? `<section class="k-jr-sec">
+            ${H('Also this month', 'from earlier and later stories')}
+            <table class="k-jr-table"><thead><tr><th>Story</th><th>When</th><th>Details</th></tr></thead><tbody>
+              ${v.notes.map((n) => `<tr><td><a href="${storyHref(n.f)}">${esc(n.f.title || featureName(n.f))}</a></td><td>${esc(n.when.length === 7 ? monthName(n.when) : n.when)}</td><td>${esc(n.label)}</td></tr>`).join('')}
+            </tbody></table>
+          </section>` : ''}
+
+          ${v.drops.length ? `<section class="k-jr-sec">
+            ${H('In the shop', 'new this month')}
+            <table class="k-jr-table"><thead><tr><th>Piece</th><th>Added</th><th>Details</th></tr></thead><tbody>
+              ${v.drops.map((p) => `<tr><td><button type="button" class="k-jr-linkbtn" data-pdp="${esc(p.id)}">${esc(p.title)}</button></td><td>${esc(shortDate(p.added))}</td><td>${esc([categoryLabel(p.category), p.detail, price(p)].filter(Boolean).join(' · '))}</td></tr>`).join('')}
+            </tbody></table>
+          </section>` : ''}
+
+          <footer class="k-jr-foot">
+            <p>Photos and films from this report are in the <a href="gallery.html?issue=${v.key}">Gallery</a> and on <a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>.</p>
+            <p class="k-small">Compiled by the KIOSK desk</p>
+          </footer>
+        </div>
+
+        <nav class="k-wrap k-jr-pager" aria-label="Other volumes">
+          ${older ? `<a href="archive.html?v=${older.key}"><span class="k-ed-label">← Volume ${pad(older.no)}</span><b>${esc(older.name)}</b></a>` : '<span></span>'}
+          ${newer ? `<a href="archive.html?v=${newer.key}"><span class="k-ed-label">Volume ${pad(newer.no)} →</span><b>${esc(newer.name)}</b></a>` : '<span></span>'}
+        </nav>
+      </article>`);
+    document.addEventListener('click', (e) => { if (e.target.closest('[data-print]')) window.print(); }, { signal: pageAbort.signal });
+  }
+
+  /* ---------------------------------------------------------- the gallery */
+
+  const GAL_KINDS = { photo: 'Photographs', film: 'Films', clip: 'Clips', raw: 'Raw footage' };
+  let galleryCache = null;
+  /** Every photograph, film and clip, each tagged with its story, issue, place, desk and date. */
+  function galleryItems() {
+    if (galleryCache) return galleryCache;
+    const out = [];
+    const seen = new Set();
+    const add = (it) => { const id = `${it.kind}:${it.src || it.ref}`; if (seen.has(id)) return; seen.add(id); out.push({ ...it, n: out.length }); };
+    features.forEach((f) => {
+      const issue = monthKey(f.published) || shotMonth(f);
+      const base = {
+        story: f.slug, storyTitle: f.title || featureName(f), desk: DESKS[f.desk] ? f.desk : 'automotive',
+        place: place(f) || f.location || '', date: f.published || '', issue,
+        words: [f.title, featureName(f), f.tagline, f.location, f.city, f.country, ...(f.tags || []), ...(f.vibes || []), f.season, typeLabel(f.type), formatLabel(f), DESKS[f.desk], issue ? monthName(issue) : ''].filter(Boolean).join(' '),
+      };
+      if (f.vimeo || f.embed || f.video) add({ ...base, kind: 'film', ref: f.slug, src: f.poster || f.image || '', caption: f.title || featureName(f), meta: [formatLabel(f), f.runtime].filter(Boolean).join(' · '), vimeo: f.vimeo });
+      (f.gallery || []).map((g) => (typeof g === 'string' ? { src: g } : g)).forEach((g) => add({ ...base, kind: 'photo', src: g.src, thumb: thumbOf(g.src), caption: g.caption || base.storyTitle, meta: g.meta || '' }));
+      (f.story || []).filter((b) => b.type === 'image' && b.src).forEach((b) => add({ ...base, kind: 'photo', src: b.src, thumb: thumbOf(b.src), caption: b.caption || base.storyTitle, meta: '' }));
+      const bts = f.bts || {};
+      (bts.frames || []).forEach((src) => add({ ...base, kind: 'photo', src, thumb: src, caption: 'Behind the scenes', meta: '' }));
+      (bts.clips || []).forEach((c) => add({ ...base, kind: 'clip', src: c.src, webm: c.webm, poster: c.poster, caption: c.caption || 'Clip', meta: c.meta || '' }));
+      (bts.driveClips || []).forEach((c) => add({ ...base, kind: 'raw', ref: c.id, caption: `Clip ${c.clip}`, meta: c.time || '' }));
+    });
+    galleryCache = out;
+    return out;
+  }
+
+  function pageGallery() {
+    const signal = pageAbort.signal;
+    const all = galleryItems();
+    const vols = journalVolumes();
+    const params = new URLSearchParams(location.search);
+    const set = (k) => new Set((params.get(k) || '').split(',').filter(Boolean));
+    const st = {
+      q: params.get('q') || '', sort: params.get('sort') || 'newest',
+      type: set('type'), story: set('story'), issue: set('issue'), place: set('place'), year: set('year'), desk: set('desk'),
+    };
+    const PAGE_SIZE = 36;
+    let shown = PAGE_SIZE;
+    let list = [];
+
+    const uniq = (arr) => Array.from(new Set(arr.filter(Boolean)));
+    const groups = [
+      { key: 'type', label: 'Type', opts: Object.keys(GAL_KINDS).filter((k) => all.some((it) => it.kind === k)).map((k) => [k, GAL_KINDS[k]]) },
+      { key: 'story', label: 'Story', opts: uniq(all.map((it) => it.story)).map((s) => [s, (featureBySlug(s) || {}).title || s]) },
+      { key: 'issue', label: 'Issue', opts: vols.filter((v) => all.some((it) => it.issue === v.key)).map((v) => [v.key, `Vol. ${pad(v.no)} · ${v.name}`]) },
+      { key: 'place', label: 'Location', opts: uniq(all.map((it) => it.place)).sort().map((p) => [p, p]) },
+      { key: 'year', label: 'Year', opts: uniq(all.map((it) => it.date.slice(0, 4))).sort().reverse().map((y) => [y, y]) },
+      { key: 'desk', label: 'Desk', opts: uniq(all.map((it) => it.desk)).map((d) => [d, DESKS[d]]) },
+    ].filter((g) => g.opts.length > 1);
+    const labelOf = (key, val) => ((groups.find((g) => g.key === key) || { opts: [] }).opts.find((o) => o[0] === val) || [val, val])[1];
+    const count = (key, val) => all.filter((it) => (key === 'year' ? it.date.slice(0, 4) : it[key === 'type' ? 'kind' : key]) === val).length;
+
+    const collections = features.filter((f) => all.some((it) => it.story === f.slug)).map((f) => ({ key: 'story', val: f.slug, title: f.title || featureName(f), sub: [formatLabel(f), place(f) || f.location].filter(Boolean).join(' · '), n: all.filter((it) => it.story === f.slug && it.kind !== 'raw').length, f }))
+      .concat(vols.filter((v) => all.some((it) => it.issue === v.key)).map((v) => ({ key: 'issue', val: v.key, title: v.name, sub: `Volume ${pad(v.no)}`, n: all.filter((it) => it.issue === v.key && it.kind !== 'raw').length, v })))
+      .filter((c) => c.n > 0);
+
+    fill('gallery', `
+      <header class="k-wrap k-gal-hero">
+        <p class="k-ed-label">Photographs · films · clips</p>
+        <h1 class="k-ed-giant" data-ed="mask" data-fit>Gallery</h1>
+        <p class="k-lede">Every frame from every story and every volume of the Journal. Search it, sort it, or narrow it down by date, place, issue and story.</p>
+      </header>
+      <div class="k-wrap k-gal-bar">
+        <label class="k-gal-search">${icon.search}<span class="k-sr">Search the gallery</span><input type="search" data-gal-q placeholder="Search places, machines, stories, months…" value="${esc(st.q)}" autocomplete="off" enterkeyhint="search"></label>
+        <label class="k-gal-sort"><span>Sort</span><select data-gal-sort>
+          ${[['newest', 'Newest'], ['oldest', 'Oldest'], ['story', 'Story A–Z'], ['place', 'Location A–Z'], ['type', 'Type']].map(([k, l]) => `<option value="${k}"${st.sort === k ? ' selected' : ''}>${l}</option>`).join('')}
+        </select></label>
+        <button class="k-gal-filterbtn" type="button" data-gal-panel-open aria-expanded="false">Filter<span data-gal-nf></span></button>
+      </div>
+      <div class="k-wrap k-gal-active" data-gal-active></div>
+      ${collections.length ? `<section class="k-gal-coll" aria-label="Collections">
+        <div class="k-wrap"><p class="k-ed-label">Collections</p></div>
+        ${railShell(collections.map((c) => `
+          <button type="button" class="k-gal-coll__card" data-gal-coll="${c.key}:${esc(c.val)}">
+            <span class="k-gal-coll__media">${c.f ? featureMedia(c.f, { meta: '', cls: 'k-media--clean' }) : media({ image: c.v.cover && c.v.cover.src, alt: '', cls: 'k-media--clean', mark: pad(c.v.no) })}</span>
+            <span class="k-ed-label">${esc(c.sub)} · ${c.n}</span>
+            <b>${esc(c.title)}</b>
+          </button>`).join(''), 'Collections', 'k-hscroll-wrap--coll')}
+      </section>` : ''}
+      <div class="k-wrap">
+        <p class="k-gal-count k-ed-label" data-gal-count aria-live="polite"></p>
+        <ul class="k-gal-grid" data-gal-grid></ul>
+        <p class="k-gal-empty" data-gal-empty hidden>Nothing matches. Clear a filter or try another word.</p>
+        <div class="k-gal-more"><button class="k-ed-link" type="button" data-gal-more hidden>Show more ${icon.arrow}</button></div>
+      </div>
+      <div class="k-gal-pill" role="group" aria-label="Gallery filters">
+        <button type="button" data-gal-clear>All <sup data-gal-total>${all.filter((it) => it.kind !== 'raw').length}</sup></button>
+        <button type="button" data-gal-panel-open aria-expanded="false">Filter</button>
+      </div>
+      <aside class="k-gal-panel" data-gal-panel aria-label="Filter the gallery" aria-hidden="true">
+        <div class="k-gal-panel__head"><p class="k-ed-label">Filter</p><button class="k-lightbox__close" type="button" data-gal-panel-close aria-label="Close filters">${icon.close}</button></div>
+        <div class="k-gal-panel__body" data-lenis-prevent>
+          ${groups.map((g) => `<fieldset class="k-gal-group"><legend>${esc(g.label)}</legend><div>${g.opts.map(([val, lab]) => `<button class="k-chip" type="button" data-gal-chip="${g.key}" data-val="${esc(val)}" aria-pressed="false">${esc(lab)} <span class="k-count">${count(g.key, val)}</span></button>`).join('')}</div></fieldset>`).join('')}
+        </div>
+        <div class="k-gal-panel__foot"><button class="k-btn" type="button" data-gal-clear>Clear all</button><button class="k-btn k-btn--solid" type="button" data-gal-panel-close data-gal-show>Show results</button></div>
+      </aside>`);
+
+    const grid = mount('gallery');
+    const $g = (s) => $(s, grid);
+    const SPANS = [7, 5, 4, 4, 4, 6, 6];
+    const sorters = {
+      newest: (a, b) => b.date.localeCompare(a.date) || a.n - b.n,
+      oldest: (a, b) => (a.date || '9').localeCompare(b.date || '9') || a.n - b.n,
+      story: (a, b) => a.storyTitle.localeCompare(b.storyTitle) || a.n - b.n,
+      place: (a, b) => (a.place || '~').localeCompare(b.place || '~') || a.n - b.n,
+      type: (a, b) => Object.keys(GAL_KINDS).indexOf(a.kind) - Object.keys(GAL_KINDS).indexOf(b.kind) || a.n - b.n,
+    };
+    const field = (it, k) => (k === 'type' ? it.kind : k === 'year' ? it.date.slice(0, 4) : it[k]);
+
+    const tile = (it, i) => {
+      const span = SPANS[i % SPANS.length];
+      let vis;
+      if (it.kind === 'photo') vis = `<img src="${esc(it.thumb || it.src)}" data-full="${esc(it.src)}" alt="${esc(it.caption)}" loading="lazy" decoding="async">`;
+      else if (it.kind === 'clip') vis = `<video muted loop playsinline preload="none"${it.poster ? ` poster="${esc(it.poster)}"` : ''} aria-hidden="true">${it.webm ? `<source src="${esc(it.webm)}" type="video/webm">` : ''}<source src="${esc(it.src)}" type="video/mp4"></video>`;
+      else if (it.kind === 'film') vis = it.src ? `<img src="${esc(it.src)}" alt="" loading="lazy" decoding="async">` : `<span class="plate plate--${esc((featureBySlug(it.story) || {}).tone || 'graphite')}"${it.vimeo ? ` data-vimeo-cover="${esc(it.vimeo.id)}"` : ''}><span class="plate__mark">${esc((featureBySlug(it.story) || {}).code || '')}</span></span>`;
+      else vis = `<span class="k-gal-raw"><b>${esc(String(it.meta).slice(0, 5) || '—')}</b><small>${esc(it.caption)}</small></span>`;
+      return `<li class="k-gal-tile" style="--span:${span}" data-reveal>
+        <button type="button" class="k-gal-tile__open" data-gal-open="${it.n}" aria-label="${esc(`${GAL_KINDS[it.kind]}: ${it.caption}`)}">
+          <span class="k-gal-tile__media${it.kind !== 'photo' ? ' k-dark' : ''}">${vis}${it.kind !== 'photo' ? `<span class="k-gal-tile__kind">${it.kind === 'raw' ? 'Raw' : it.kind === 'clip' ? 'Clip' : 'Film'} ${icon.play}</span>` : ''}</span>
+        </button>
+        <p class="k-gal-tile__meta"><span>${esc(upperDate(it.date) || 'UNDATED')}</span>${it.place ? `<span>${esc(it.place)}</span>` : ''}</p>
+        <p class="k-gal-tile__title">${esc(it.caption)}</p>
+        <a class="k-gal-tile__story" href="story.html?s=${encodeURIComponent(it.story)}">${esc(it.storyTitle)}</a>
+      </li>`;
+    };
+
+    const syncUrl = () => {
+      const p = new URLSearchParams();
+      if (st.q) p.set('q', st.q);
+      if (st.sort !== 'newest') p.set('sort', st.sort);
+      ['type', 'story', 'issue', 'place', 'year', 'desk'].forEach((k) => { if (st[k].size) p.set(k, Array.from(st[k]).join(',')); });
+      const qs = p.toString();
+      history.replaceState(history.state, '', `${location.pathname}${qs ? `?${qs}` : ''}`);
+      renderedKey = pageKey();
+    };
+
+    const paint = () => {
+      const words = st.q.toLowerCase().split(/\s+/).filter(Boolean);
+      const match = all.filter((it) => ['story', 'issue', 'place', 'year', 'desk'].every((k) => !st[k].size || st[k].has(field(it, k)))
+        && words.every((w) => `${it.caption} ${it.meta} ${it.words}`.toLowerCase().includes(w)));
+      // Raw footage (dozens of unedited clips a shoot) only shows when asked for,
+      // or when it's all there is (a meet still in the edit)
+      list = match.filter((it) => (st.type.size ? st.type.has(it.kind) : it.kind !== 'raw'));
+      if (!st.type.size && !list.length) list = match;
+      list.sort(sorters[st.sort] || sorters.newest);
+      $g('[data-gal-grid]').innerHTML = list.slice(0, shown).map(tile).join('');
+      $g('[data-gal-empty]').hidden = list.length > 0;
+      $g('[data-gal-more]').hidden = list.length <= shown;
+      const raw = list.some((it) => it.kind === 'raw') ? 0 : match.filter((it) => it.kind === 'raw').length;
+      $g('[data-gal-count]').innerHTML = `${list.length} ${list.length === 1 ? 'item' : 'items'}${raw && !st.type.size ? ` · <button type="button" class="k-gal-rawbtn" data-gal-chip="type" data-val="raw">+ ${raw} raw clips</button>` : ''}`;
+      const nf = ['type', 'story', 'issue', 'place', 'year', 'desk'].reduce((n, k) => n + st[k].size, 0);
+      $g('[data-gal-nf]').textContent = nf ? ` · ${nf}` : '';
+      $$('[data-gal-show]', grid).forEach((b) => { b.textContent = `Show ${list.length}`; });
+      $$('[data-gal-chip]', grid).forEach((b) => b.setAttribute('aria-pressed', String(st[b.dataset.galChip].has(b.dataset.val))));
+      $$('[data-gal-coll]', grid).forEach((b) => { const [k, val] = b.dataset.galColl.split(':'); b.setAttribute('aria-pressed', String(st[k].has(val))); });
+      const chips = [];
+      if (st.q) chips.push(`<button class="k-chip is-active" type="button" data-gal-drop="q">“${esc(st.q)}” ${icon.close}</button>`);
+      ['type', 'story', 'issue', 'place', 'year', 'desk'].forEach((k) => st[k].forEach((val) => chips.push(`<button class="k-chip is-active" type="button" data-gal-drop="${k}" data-val="${esc(val)}">${esc(labelOf(k, val))} ${icon.close}</button>`)));
+      $g('[data-gal-active]').innerHTML = chips.join('');
+      hydrateCovers(grid);
+      reveal(grid);
+      document.dispatchEvent(new CustomEvent('kiosk:page', { detail: { page: PAGE, partial: true } }));
+    };
+    const update = () => { shown = PAGE_SIZE; syncUrl(); paint(); };
+
+    const panel = $g('[data-gal-panel]');
+    const setPanel = (open) => {
+      panel.classList.toggle('is-open', open);
+      panel.setAttribute('aria-hidden', String(!open));
+      document.documentElement.classList.toggle('is-filter-open', open);
+      $$('[data-gal-panel-open]', grid).forEach((b) => b.setAttribute('aria-expanded', String(open)));
+      if (open) { const f = $('[data-gal-chip]', panel); if (f) f.focus(); }
+    };
+
+    let qTimer = 0;
+    $g('[data-gal-q]').addEventListener('input', (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { st.q = e.target.value.trim(); update(); }, 160); });
+    $g('[data-gal-sort]').addEventListener('change', (e) => { st.sort = e.target.value; update(); });
+    grid.addEventListener('click', (e) => {
+      const t = e.target;
+      const chip = t.closest('[data-gal-chip]');
+      if (chip) { const s = st[chip.dataset.galChip]; if (s.has(chip.dataset.val)) s.delete(chip.dataset.val); else s.add(chip.dataset.val); update(); return; }
+      const coll = t.closest('[data-gal-coll]');
+      if (coll) {
+        const [k, val] = coll.dataset.galColl.split(':');
+        const on = st[k].has(val);
+        st.story.clear(); st.issue.clear();
+        if (!on) st[k].add(val);
+        update();
+        $g('[data-gal-count]').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+        return;
+      }
+      const drop = t.closest('[data-gal-drop]');
+      if (drop) { if (drop.dataset.galDrop === 'q') { st.q = ''; $g('[data-gal-q]').value = ''; } else st[drop.dataset.galDrop].delete(drop.dataset.val); update(); return; }
+      if (t.closest('[data-gal-clear]')) { st.q = ''; $g('[data-gal-q]').value = ''; ['type', 'story', 'issue', 'place', 'year', 'desk'].forEach((k) => st[k].clear()); update(); return; }
+      if (t.closest('[data-gal-panel-open]')) { setPanel(!panel.classList.contains('is-open')); return; }
+      if (t.closest('[data-gal-panel-close]')) { setPanel(false); return; }
+      if (t.closest('[data-gal-more]')) { shown += PAGE_SIZE; paint(); return; }
+      const open = t.closest('[data-gal-open]');
+      if (!open) return;
+      const it = all[Number(open.dataset.galOpen)];
+      if (it.kind === 'photo') {
+        const photos = list.filter((x) => x.kind === 'photo');
+        photoNav = { photos, i: Math.max(0, photos.indexOf(it)) };
+        showPhoto();
+      } else if (it.kind === 'film') {
+        const f = featureBySlug(it.story);
+        if (f && f.vimeo && !f.embed && !f.video) openVimeo(vimeoById(f.vimeo.id) || f.vimeo); else if (f) openFilm(f);
+      } else if (it.kind === 'clip') {
+        player.pause();
+        openLightbox(`
+          <div class="k-lightbox__head"><div><p class="k-eyebrow">${esc(it.storyTitle)} · Clip</p><p class="k-h3 k-mt-s">${esc(it.caption)}</p></div><button class="k-lightbox__close" type="button" data-close aria-label="Close">${icon.close}</button></div>
+          <div class="k-lightbox__screen"><video controls autoplay playsinline${it.poster ? ` poster="${esc(it.poster)}"` : ''}>${it.webm ? `<source src="${esc(it.webm)}" type="video/webm">` : ''}<source src="${esc(it.src)}" type="video/mp4"></video></div>
+          ${it.meta ? `<p class="k-small k-mt-s">${esc(it.meta)}</p>` : ''}`, it.caption);
+      } else openDriveClip(it.ref, `${it.storyTitle} · ${it.caption}${it.meta ? ` · ${it.meta}` : ''}`);
+    }, { signal });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('is-open')) setPanel(false); }, { signal });
+    signal.addEventListener('abort', () => document.documentElement.classList.remove('is-filter-open'));
+    // Clips play while the pointer rests on them
+    grid.addEventListener('pointerover', (e) => { const v = e.target.closest('.k-gal-tile__open') && $('video', e.target.closest('.k-gal-tile__open')); if (v && !REDUCED) v.play().catch(() => {}); });
+    grid.addEventListener('pointerout', (e) => { const v = e.target.closest('.k-gal-tile__open') && $('video', e.target.closest('.k-gal-tile__open')); if (v && !e.target.closest('.k-gal-tile__open').contains(e.relatedTarget)) v.pause(); });
+    paint();
+  }
+
   /* --------------------------------------------------------- terminal
    * The whole magazine is an airport. Every page is a terminal with its
    * own sign and split-flap board, stories travel as boarding passes, and
@@ -5615,7 +6181,7 @@
     { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
     { id: 'garage', t: 'T7', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
   ];
-  const TERMINAL_OF = { story: 'journal', store: 'vault', account: 'home' };
+  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
   const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
   const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
@@ -5690,7 +6256,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, store: pageStore, hunt: pageHunt, account: () => {} };
+  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, archive: pageArchive, gallery: pageGallery, store: pageStore, hunt: pageHunt, account: () => {}, partner: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();
