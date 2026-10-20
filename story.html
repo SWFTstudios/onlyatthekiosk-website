@@ -19,6 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
   <link href="css/kiosk-glass.css" rel="stylesheet">
+  <link href="css/kiosk-editorial.css" rel="stylesheet">
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="images/favicon.ico" sizes="any">
@@ -27,38 +28,64 @@
 </head>
 <body class="k" data-page="story">
   <a class="k-skip" href="#main">Skip to content</a>
-  <main id="main">
+  <main id="main" class="k-ed">
 
-    <!-- Hero: subject, tagline, excerpt, frames, film + shop CTAs -->
-    <section class="k-story-hero" data-mount="story-hero" aria-label="Story"></section>
+    <!-- Cover: full-bleed photograph, title, standfirst line, byline -->
+    <header class="k-ed-hero k-dark" data-mount="story-hero" aria-label="Story"></header>
 
-    <!-- Specs -->
-    <section class="k-section k-section--tight" aria-label="Specifications">
-      <div class="k-wrap">
-        <dl class="k-specs" data-mount="story-specs" data-reveal></dl>
-      </div>
-    </section>
-
-    <!-- Story body (blog) + shoot sheet -->
-    <section class="k-section" style="padding-top:clamp(24px,4vw,48px)" aria-labelledby="story-title">
-      <div class="k-wrap k-story-layout">
-        <aside class="k-story-aside" data-mount="story-aside" aria-label="Shoot details"></aside>
-        <div>
-          <p class="k-eyebrow">01 / The story</p>
-          <h2 class="k-sr" id="story-title">The story</h2>
-          <div class="k-prose k-mt-m" data-mount="story-body"></div>
-          <ol class="k-timeline k-mt-l" data-mount="story-timeline" aria-label="Timeline"></ol>
+    <!-- The read: standfirst, at a glance, then text and photographs in spreads -->
+    <article class="k-ed-article" data-ed-article aria-labelledby="story-title">
+      <section class="k-ed-intro" data-ed-chapter data-ed-title="The story">
+        <div class="k-wrap k-ed-grid">
+          <p class="k-ed-label">01 / The story</p>
+          <div>
+            <h2 class="k-sr" id="story-title">The story</h2>
+            <p class="k-ed-standfirst" data-mount="story-standfirst" data-ed="fill"></p>
+            <dl class="k-ed-glance" data-mount="story-specs"></dl>
+          </div>
         </div>
+      </section>
+
+      <div class="k-ed-flow" data-mount="story-body"></div>
+
+      <!-- Shoot notes + timeline -->
+      <section class="k-ed-colophon" aria-label="Shoot notes">
+        <div class="k-wrap k-ed-grid">
+          <p class="k-ed-label">Shoot notes</p>
+          <div class="k-ed-colophon__notes" data-mount="story-aside"></div>
+          <ol class="k-timeline" data-mount="story-timeline" aria-label="Timeline"></ol>
+        </div>
+      </section>
+    </article>
+
+    <!-- In this story: built from every [data-ed-chapter] (js/kiosk-editorial.js) -->
+    <nav class="k-ed-index" data-ed-index aria-label="In this story"></nav>
+
+    <!-- Gallery: swipe / drag through every frame -->
+    <section class="k-section k-section--tight" data-section="gallery" data-ed-chapter data-ed-title="Gallery" aria-labelledby="gallery-title">
+      <div class="k-wrap">
+        <div class="k-section-head">
+          <div>
+            <p class="k-eyebrow">02 / Gallery</p>
+            <h2 class="k-h2" id="gallery-title">The <em class="k-serif">frames.</em></h2>
+          </div>
+          <p class="k-small">Swipe, drag or use ← →.</p>
+        </div>
+      </div>
+      <div data-mount="story-gallery"></div>
+      <div class="k-wrap k-mt-l" data-mosaic-section>
+        <p class="k-eyebrow">Contact sheet</p>
+        <div class="k-mt-m" data-mount="story-mosaic"></div>
       </div>
     </section>
 
     <!-- Spec sheet: schematic + numbers + facts for each machine in the story -->
-    <section class="k-section k-section--tight" data-section="machines" aria-labelledby="machines-title">
+    <section class="k-section k-section--tight" data-section="machines" data-ed-chapter data-ed-title="Spec sheet" aria-labelledby="machines-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">Spec sheet</p>
-            <h2 class="k-h2" id="machines-title" data-reveal>The <em class="k-serif">blueprint.</em></h2>
+            <p class="k-eyebrow">03 / Spec sheet</p>
+            <h2 class="k-h2" id="machines-title">The <em class="k-serif">blueprint.</em></h2>
           </div>
           <p class="k-lede">Side elevations drawn to each machine’s published dimensions, with the numbers and history behind it.</p>
         </div>
@@ -67,43 +94,25 @@
     </section>
 
     <!-- Subjects -->
-    <section class="k-section k-section--tight" data-section="subjects" aria-labelledby="subjects-title">
+    <section class="k-section k-section--tight" data-section="subjects" data-ed-chapter data-ed-title="In the frame" aria-labelledby="subjects-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">02 / In the frame</p>
-            <h2 class="k-h2" id="subjects-title" data-reveal>Who &amp; <em class="k-serif">what.</em></h2>
+            <p class="k-eyebrow">04 / In the frame</p>
+            <h2 class="k-h2" id="subjects-title">Who &amp; <em class="k-serif">what.</em></h2>
           </div>
         </div>
         <div class="k-subjects" data-mount="story-subjects"></div>
       </div>
     </section>
 
-    <!-- Gallery slideshow -->
-    <section class="k-section k-section--tight" data-section="gallery" aria-labelledby="gallery-title">
-      <div class="k-wrap">
-        <div class="k-section-head">
-          <div>
-            <p class="k-eyebrow">03 / Gallery</p>
-            <h2 class="k-h2" id="gallery-title" data-reveal>The <em class="k-serif">frames.</em></h2>
-          </div>
-          <p class="k-small">Use ← → or swipe. Click a frame below to jump.</p>
-        </div>
-        <div data-mount="story-slideshow" data-reveal></div>
-        <div class="k-mt-l" data-mosaic-section>
-          <p class="k-eyebrow">Contact sheet</p>
-          <div class="k-mt-m" data-mount="story-mosaic"></div>
-        </div>
-      </div>
-    </section>
-
     <!-- Colour guide -->
-    <section class="k-section k-section--tight" data-section="palette" aria-labelledby="palette-title">
+    <section class="k-section k-section--tight" data-section="palette" data-ed-chapter data-ed-title="Colour guide" aria-labelledby="palette-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">04 / Colour guide</p>
-            <h2 class="k-h2" id="palette-title" data-reveal>The <em class="k-serif">palette.</em></h2>
+            <p class="k-eyebrow">05 / Colour guide</p>
+            <h2 class="k-h2" id="palette-title">The <em class="k-serif">palette.</em></h2>
           </div>
           <p class="k-lede">The tones we built the grade around. Tap a swatch to copy its hex.</p>
         </div>
@@ -112,12 +121,12 @@
     </section>
 
     <!-- Behind the scenes -->
-    <section class="k-section k-section--tight" data-section="bts" aria-labelledby="bts-title">
+    <section class="k-section k-section--tight" data-section="bts" data-ed-chapter data-ed-title="Behind the scenes" aria-labelledby="bts-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">05 / Behind the scenes</p>
-            <h2 class="k-h2" id="bts-title" data-reveal>How it was <em class="k-serif">made.</em></h2>
+            <p class="k-eyebrow">06 / Behind the scenes</p>
+            <h2 class="k-h2" id="bts-title">How it was <em class="k-serif">made.</em></h2>
           </div>
         </div>
         <div class="k-bts" data-mount="story-bts"></div>
@@ -125,12 +134,12 @@
     </section>
 
     <!-- Interview -->
-    <section class="k-section k-section--tight" data-section="interview" aria-labelledby="qa-title">
+    <section class="k-section k-section--tight" data-section="interview" data-ed-chapter data-ed-title="Interview" aria-labelledby="qa-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">06 / Interview</p>
-            <h2 class="k-h2" id="qa-title" data-mount="story-qa-title" data-reveal>In conversation</h2>
+            <p class="k-eyebrow">07 / Interview</p>
+            <h2 class="k-h2" id="qa-title" data-mount="story-qa-title">In conversation</h2>
           </div>
         </div>
         <div class="k-qa" data-mount="story-qa"></div>
@@ -138,12 +147,12 @@
     </section>
 
     <!-- Shop the look -->
-    <section class="k-section" id="look" data-section="look" aria-labelledby="look-title">
+    <section class="k-section" id="look" data-section="look" data-ed-chapter data-ed-title="Shop the look" aria-labelledby="look-title">
       <div class="k-wrap">
         <div class="k-section-head">
           <div>
-            <p class="k-eyebrow">07 / Shop the look</p>
-            <h2 class="k-h2 k-stagger" id="look-title" data-reveal>
+            <p class="k-eyebrow">08 / Shop the look</p>
+            <h2 class="k-h2 k-stagger" id="look-title">
               <span>Matched to</span>
               <span>the <em class="k-serif">mood.</em></span>
             </h2>
@@ -159,25 +168,22 @@
         <div class="k-section-head">
           <div>
             <p class="k-eyebrow">Keep reading / The Journal</p>
-            <h2 class="k-h2 k-stagger" data-reveal><span>More from</span><span>the <em class="k-serif">road.</em></span></h2>
+            <h2 class="k-h2 k-stagger"><span>More from</span><span>the <em class="k-serif">road.</em></span></h2>
           </div>
-          
         </div>
         <div data-mount="story-more"></div>
       </div>
     </section>
 
-    <!-- Prev / next -->
-    <section class="k-section k-section--tight" aria-label="More stories">
-      <div class="k-wrap">
-        <nav class="k-pager" data-mount="story-pager" aria-label="Previous and next story"></nav>
-      </div>
-    </section>
+    <!-- Next story: full-bleed, the whole frame is the link -->
+    <nav class="k-ed-pager" data-mount="story-pager" aria-label="Previous and next story"></nav>
 
   </main>
   <script src="js/kiosk-content.js"></script>
   <script src="js/kiosk-mockups.js"></script>
   <script src="js/kiosk-glass.js"></script>
+  <script src="js/vendor/lenis/lenis.min.js"></script>
+  <script src="js/kiosk-editorial.js"></script>
   <script src="js/kiosk-account.js"></script>
 </body>
 </html>

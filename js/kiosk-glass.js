@@ -3240,45 +3240,32 @@
     const lut = productById(f.gradedWith);
     const filmProduct = productById(f.filmProduct);
 
-    // HERO
+    // COVER: full-bleed photograph, title out of a mask, byline
+    const kicker = [DESKS[f.desk], place(f), formatLabel(f)].filter(Boolean);
     fill('story-hero', `
-      <div class="k-story-hero__frame">
-        <div class="k-story-hero__bg">${featureMedia(f, { meta: '', mark: '', eager: true, cls: 'k-media--clean', style: 'position:absolute;inset:0' })}</div>
-        <div class="k-story-hero__head">
-          <p class="k-pass" aria-label="Boarding pass"><span class="k-pass__t">T3</span><span><small>Flight</small>KSK ${esc(f.code || '')}</span><span><small>From</small>${esc(f.city || f.location || '—')}</span><span><small>Gate</small>${esc(DESK_GATE[f.desk] || 'A')}</span><span><small>Date</small>${esc(shortDate(f.published))}</span><span><small>Class</small>${esc(formatLabel(f))}</span></p>
-          <p class="k-eyebrow">${[f.year, f.make].filter(Boolean).length ? `<b>${esc([f.year, f.make].filter(Boolean).join(' '))}</b> · ` : ''}${esc(formatLabel(f))}</p>
-          <h1 class="k-story-hero__code">${esc(f.code)}</h1>
-          <p class="k-story-hero__tagline">${f.make ? `${esc(f.model)} — ` : ''}<span class="k-serif">${esc(f.tagline)}</span></p>
-          <div class="k-story-hero__tags">
-            ${place(f) ? `<span class="k-tag">${esc(place(f))}</span>` : ''}
-            ${f.runtime ? `<span class="k-tag">${esc(f.runtime)}</span>` : ''}
-            ${f.season ? `<span class="k-tag" style="text-transform:capitalize">${esc(f.season)}</span>` : ''}
-            ${(f.vibes || []).slice(0, 3).map((v) => `<span class="k-tag" style="text-transform:capitalize">${esc(v.replace(/-/g, ' '))}</span>`).join('')}
+      <div class="k-ed-hero__media" data-parallax="0.3">${featureMedia(f, { meta: '', mark: '', eager: true, cls: 'k-media--clean' })}</div>
+      <div class="k-ed-hero__shade" aria-hidden="true"></div>
+      <div class="k-wrap k-ed-hero__inner">
+        <p class="k-ed-kicker">${kicker.map((t) => `<span>${esc(t)}</span>`).join('')}</p>
+        <h1 class="k-ed-hero__title" data-ed="mask">${esc(f.title || featureName(f))}</h1>
+        <p class="k-ed-hero__sub">${featureName(f) !== f.title ? `${esc(featureName(f))} — ` : ''}<em class="k-serif">${esc(f.tagline || '')}</em></p>
+        <div class="k-ed-hero__foot">
+          <p class="k-ed-meta"><span>Words &amp; pictures <b>${esc(f.author || 'KIOSK')}</b></span>${f.published ? `<span>${esc(longDate(f.published))}</span>` : ''}<span>${readMinutes(f)} min read</span>${f.code ? `<span>KSK ${esc(f.code)}</span>` : ''}</p>
+          <div class="k-ed-hero__cta">
+            ${hasFilm ? `<button class="k-ed-link" type="button" data-film="${esc(f.slug)}">${icon.play} Watch the film</button>` : ''}
+            <a class="k-ed-link" href="#look">Shop the look ${icon.arrow}</a>
           </div>
         </div>
-        <div class="k-story-hero__panel k-glass k-glass--dark">
-          <p class="k-duo"><strong>${esc(f.title || f.model)}.</strong> ${esc(f.excerpt || '')}</p>
-          ${f.palette && f.palette.length ? `<div class="k-palette-strip k-mt-m" aria-hidden="true">${f.palette.map((c) => `<i style="--swatch:${esc(c.hex)}"></i>`).join('')}</div>` : ''}
-        </div>
-        <div class="k-story-hero__side">
-          ${frames.length || (f.palette || []).length ? `<div class="k-story-hero__thumbs">
-            ${[0, 1, 2].map((i) => {
-              const fr = frames[i];
-              const sw = (f.palette || [])[i];
-              return `<button type="button" data-goto-slide="${i}" aria-label="View frame ${i + 1}">${media({ image: fr && fr.src, tone: f.tone, swatch: !fr && sw ? sw.hex : '', meta: fr ? '' : `${pad(i + 1)} · ${sw ? sw.name : 'Frame'}`, alt: (fr && fr.caption) || `${featureName(f)} frame ${i + 1}` })}</button>`;
-            }).join('')}
-          </div>` : ''}
-          ${hasFilm ? `<button class="k-bar" type="button" data-film="${esc(f.slug)}" style="width:100%;text-align:left">Watch the film<span class="k-arrow">${icon.play}</span></button>` : ''}
-          <a class="k-bar" href="#look">Shop the look<span class="k-arrow">${icon.arrow}</span></a>
-        </div>
-      </div>`);
+      </div>
+      <span class="k-ed-hero__cue" aria-hidden="true"><i></i>Scroll</span>`);
 
-    // SPECS
-    fill('story-specs', (f.specs || []).map((s) => `<div class="k-spec"><dt>${esc(s.label)}</dt><dd>${esc(s.value)}</dd></div>`).join(''));
+    // STANDFIRST + AT A GLANCE
+    fill('story-standfirst', esc(f.excerpt || f.tagline || ''));
+    fill('story-specs', (f.specs || []).map((s) => `<div><dt>${esc(s.label)}</dt><dd>${esc(s.value)}</dd></div>`).join(''));
 
-    // ASIDE (shoot sheet)
+    // SHOOT NOTES
     fill('story-aside', `
-      <dl class="k-meta-list k-glass">
+      <dl class="k-ed-notes">
         <div><dt>Subject</dt><dd>${esc(featureName(f))}</dd></div>
         ${(f.owner || {}).name ? `<div><dt>Owner</dt><dd>${esc(f.owner.name)}</dd></div>` : ''}
         ${f.location ? `<div><dt>Location</dt><dd>${esc(f.location)}</dd></div>` : ''}
@@ -3294,35 +3281,63 @@
       ${filmProduct ? `<button class="k-bar" type="button" data-notify="${esc(filmProduct.id)}" data-notify-title="${esc(filmProduct.title)}" style="width:100%;text-align:left"><span>Own the film<small>${esc(filmProduct.detail)} · ${esc(price(filmProduct))}</small></span><span class="k-arrow">${icon.arrow}</span></button>` : ''}
       <button class="k-btn" type="button" data-save="${esc(f.slug)}" aria-pressed="${saved.has(f.slug)}">${icon.heart.replace('<svg', '<svg width="16" height="16"')} Save to your garage</button>`);
 
-    // STORY BODY
-    const blocks = (f.story || []).map((b) => {
-      if (b.type === 'quote') return `<blockquote class="k-prose__quote" data-reveal><p>“${esc(b.text)}”</p>${b.cite ? `<cite>— ${esc(b.cite)}</cite>` : ''}</blockquote>`;
-      if (b.type === 'heading') return `<h3 class="k-prose__heading" data-reveal>${esc(b.text)}</h3>`;
-      if (b.type === 'image') return `<figure class="k-prose__figure" data-reveal>${media({ image: b.src, tone: f.tone, alt: b.caption || '' })}${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>`;
-      return `<p class="k-prose__text" data-reveal>${b.lead ? `<strong>${esc(b.lead)}</strong> ` : ''}${esc(b.body || b.text || '')}</p>`;
-    }).join('');
-    const ownerQuote = f.owner && f.owner.quote && !(f.story || []).some((b) => b.type === 'quote')
-      ? `<blockquote class="k-prose__quote" data-reveal><p>“${esc(f.owner.quote)}”</p><cite>— ${esc(f.owner.name)}</cite></blockquote>` : '';
+    // THE READ: a text block followed by a photograph becomes a spread (sides
+    // alternate); lone photographs go full-bleed then inset in turn; two in a
+    // row become a pair. Written chapters each take a gallery frame the body
+    // hasn't used, and one more closes the read full-bleed.
+    const story = f.story || [];
+    const inline = new Set(story.filter((b) => b.type === 'image').map((b) => b.src));
+    const spare = frames.filter((fr) => fr.src && !inline.has(fr.src) && fr.src !== f.image);
+    let figN = 0; let spreadN = 0; let soloN = 0; let dropCap = true;
+    const fig = (b, cls = '') => `
+      <figure class="k-ed-fig${cls}">
+        <div class="k-ed-fig__media" data-ed="img"><div class="k-ed-par" data-parallax="0.06">${media({ image: b.src, tone: f.tone, alt: b.caption || featureName(f), cls: 'k-media--clean' })}</div></div>
+        ${b.caption ? `<figcaption><b>${pad(++figN)}</b><span>${esc(b.caption)}</span></figcaption>` : ''}
+      </figure>`;
+    const text = (b) => {
+      const cls = dropCap ? ' k-ed-text--first' : '';
+      dropCap = false;
+      return `<div class="k-ed-text${cls}">${b.lead ? `<h3 class="k-ed-sub" data-ed="mask">${esc(b.lead)}</h3>` : ''}<p>${esc(b.body || b.text || '')}</p></div>`;
+    };
+    const solo = (b) => (soloN++ % 2 === 0 ? fig(b, ' k-ed-fig--full') : `<div class="k-wrap k-ed-inset">${fig(b)}</div>`);
+    const quote = (q, cite) => `<blockquote class="k-wrap k-ed-quote"><p data-ed="mask">“${esc(q)}”</p>${cite ? `<cite>— ${esc(cite)}</cite>` : ''}</blockquote>`;
+    const flow = [];
+    for (let i = 0; i < story.length; i++) {
+      const b = story[i];
+      const nx = story[i + 1];
+      if (b.type === 'image') {
+        if (nx && nx.type === 'image') { flow.push(`<div class="k-wrap k-ed-pair">${fig(b)}${fig(nx)}</div>`); i++; } else flow.push(solo(b));
+      } else if (b.type === 'quote') flow.push(quote(b.text, b.cite));
+      else if (b.type === 'heading') flow.push(`<div class="k-wrap k-ed-measure"><h3 class="k-ed-sub" data-ed="mask">${esc(b.text)}</h3></div>`);
+      else if (nx && nx.type === 'image') { flow.push(`<section class="k-wrap k-ed-spread${spreadN++ % 2 ? ' k-ed-spread--l' : ''}">${text(b)}${fig(nx)}</section>`); i++; }
+      else flow.push(`<div class="k-wrap k-ed-measure">${text(b)}</div>`);
+    }
+    if (f.owner && f.owner.quote && !story.some((b) => b.type === 'quote')) flow.splice(Math.min(2, flow.length), 0, quote(f.owner.quote, f.owner.name));
+    if (!story.length) flow.push(`<div class="k-wrap k-ed-measure">${text({ lead: f.tagline, body: f.excerpt || '' })}</div>`);
+
     const done = written(f);
-    const chapters = (f.chapters || []).map((c, n) => {
+    (f.chapters || []).forEach((c, n) => {
       const body = paragraphs(c.body);
       if (body.length) {
-        return `<section class="k-chapter" id="${esc(c.id)}" data-reveal>
-          <p class="k-chapter__num">Chapter ${pad(n + 1)}</p>
-          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
-          ${body.map((t) => `<p class="k-prose__text">${esc(t)}</p>`).join('')}
-        </section>`;
+        flow.push(`<section class="k-wrap k-ed-measure k-ed-chapter" id="${esc(c.id)}">
+          <p class="k-ed-chapter__num">Chapter ${pad(n + 1)}</p>
+          <h3 data-ed="mask">${esc(c.heading)}</h3>
+          ${body.map((t) => `<p>${esc(t)}</p>`).join('')}
+        </section>`);
+        if (spare.length) flow.push(solo(spare.shift()));
+      } else if (DRAFT) {
+        flow.push(`<section class="k-wrap k-ed-measure"><div class="k-ed-chapter k-ed-chapter--draft" id="${esc(c.id)}">
+          <p class="k-ed-chapter__num">Chapter ${pad(n + 1)} · <code>${esc(c.id)}</code> · not written yet</p>
+          <h3>${esc(c.heading)}</h3>
+          <p>${esc(c.prompt || '')}</p>
+        </div></section>`);
       }
-      return DRAFT ? `<section class="k-chapter k-chapter--draft" id="${esc(c.id)}">
-          <p class="k-chapter__num">Chapter ${pad(n + 1)} · <code>${esc(c.id)}</code> · not written yet</p>
-          <h3 class="k-prose__heading">${esc(c.heading)}</h3>
-          <p class="k-prose__text">${esc(c.prompt || '')}</p>
-        </section>` : '';
-    }).join('');
+    });
+    if (spare.length) flow.push(fig(spare[Math.floor(spare.length / 2)], ' k-ed-fig--full'));
     const pending = (f.chapters || []).length - done.length;
-    const byline = `<p class="k-byline">By ${esc(f.author || 'KIOSK')}${f.published ? ` · ${esc(longDate(f.published))}` : ''} · ${readMinutes(f)} min read${DRAFT ? ` · <b>Draft view: ${done.length} of ${(f.chapters || []).length} chapters written</b>` : ''}</p>`;
-    const more = !DRAFT && pending > 0 ? `<p class="k-small k-chapter__more">${done.length ? 'More chapters' : 'The full story'} coming soon, told by ${esc(f.author || 'KIOSK')}.</p>` : '';
-    fill('story-body', byline + ((blocks + ownerQuote) || `<p class="k-prose__text"><strong>${esc(f.tagline)}</strong> ${esc(f.excerpt || '')}</p>`) + chapters + more);
+    if (DRAFT) flow.unshift(`<p class="k-wrap k-ed-measure k-ed-label">Draft view: ${done.length} of ${(f.chapters || []).length} chapters written</p>`);
+    else if (pending > 0) flow.push(`<p class="k-wrap k-ed-measure"><span class="k-ed-note k-small" style="display:block">${done.length ? 'More chapters' : 'The full story'} coming soon, told by ${esc(f.author || 'KIOSK')}.</span></p>`);
+    fill('story-body', flow.join(''));
 
     // TIMELINE
     const tl = f.timeline || [];
@@ -3359,16 +3374,23 @@
         </article>`).join(''));
     } else hideSection('subjects');
 
-    // SLIDESHOW
+    // GALLERY: a swipe rail of every frame (palette plates while photos are in post)
     const palette = f.palette || [];
-    if (!frames.length && !palette.length) hideSection('gallery');
-    const slides = frames.length ? frames : Array.from({ length: Math.max(3, Math.min(palette.length, 6)) }, (_, i) => ({
+    const slides = frames.length ? frames : palette.slice(0, 6).map((c) => ({
       src: '',
-      caption: (palette[i] && `${palette[i].name} — ${palette[i].note || ''}`) || `Frame ${pad(i + 1)}`,
+      caption: `${c.name}${c.note ? ` — ${c.note}` : ''}`,
       meta: 'Awaiting upload',
-      swatch: palette[i] && palette[i].hex,
+      swatch: c.hex,
     }));
-    buildSlideshow(mount('story-slideshow'), slides, f);
+    if (slides.length) {
+      const gal = fill('story-gallery', railShell(slides.map((sl, i) => `
+        <figure class="k-ed-slide">
+          <div class="k-ed-slide__media">${media({ image: sl.src, tone: f.tone, swatch: sl.swatch, alt: sl.caption || featureName(f), cls: 'k-media--clean' })}</div>
+          <figcaption><b>${pad(i + 1)}</b><span>${esc(sl.caption || '')}${sl.meta ? `<small>${esc(sl.meta)}</small>` : ''}</span></figcaption>
+        </figure>`).join(''), `${featureName(f)} gallery`, 'k-hscroll-wrap--ed'));
+      const ui = gal && $('.k-hscroll__ui', gal);
+      if (ui) ui.insertAdjacentHTML('afterbegin', `<span class="k-hscroll__count" data-ed-count>01 / ${pad(slides.length)}</span>`);
+    } else hideSection('gallery');
 
     // PALETTE
     if (palette.length) {
@@ -3431,17 +3453,15 @@
     const next = features[(idx + 1) % features.length];
     if (features.length > 1) {
       fill('story-pager', `
-        <a href="${storyHref(prev)}">${featureMedia(prev, { meta: '' })}<span class="k-eyebrow">← Previous</span><span><b>${esc(prev.title || prev.model)}</b><span class="k-small" style="display:block">${esc(featureName(prev))}</span></span></a>
-        <a href="${storyHref(next)}">${featureMedia(next, { meta: '' })}<span class="k-eyebrow">Next →</span><span><b>${esc(next.title || next.model)}</b><span class="k-small" style="display:block">${esc(featureName(next))}</span></span></a>`);
+        <a class="k-ed-next k-dark" href="${storyHref(next)}">
+          <span class="k-ed-next__media" data-ed="img">${featureMedia(next, { meta: '', mark: '', cls: 'k-media--clean' })}</span>
+          <span class="k-ed-label">Next story</span>
+          <span class="k-ed-next__title">${esc(next.title || next.model)}</span>
+          <span class="k-ed-next__sub">${esc([featureName(next) !== next.title ? featureName(next) : '', next.tagline].filter(Boolean).join(' — '))}</span>
+          <span class="k-ed-link">Read the story ${icon.arrow}</span>
+        </a>
+        ${prev !== next ? `<a class="k-ed-prev" href="${storyHref(prev)}">← Previous: ${esc(prev.title || prev.model)}</a>` : ''}`);
     }
-
-    // Hero thumbs jump to slideshow
-    document.addEventListener('click', (e) => {
-      const g = e.target.closest('[data-goto-slide]');
-      if (!g) return;
-      const ss = mount('story-slideshow');
-      if (ss && ss.kGoto) { ss.kGoto(Number(g.dataset.gotoSlide)); ss.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    }, { signal: pageAbort.signal });
 
     // JSON-LD for search engines
     const ld = document.createElement('script');
@@ -3561,101 +3581,6 @@
   function hideSection(name) {
     const el = $(`[data-section="${name}"]`);
     if (el) el.classList.add('k-hide');
-  }
-
-  function buildSlideshow(root, slides, f) {
-    if (!root || !slides.length) return;
-    const DURATION = 6000;
-    root.classList.add('k-slideshow');
-    root.style.setProperty('--dur', `${DURATION}ms`);
-    root.innerHTML = `
-      <div class="k-slideshow__stage" aria-roledescription="carousel" aria-label="${esc(featureName(f))} gallery">
-        ${slides.map((s, i) => `<div class="k-slide${i === 0 ? ' is-active' : ''}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${slides.length}" aria-hidden="${i !== 0}">${media({ image: s.src, tone: f.tone, swatch: s.swatch, alt: s.caption || featureName(f), mark: i === 0 ? f.code : '' })}</div>`).join('')}
-        <div class="k-slideshow__progress" aria-hidden="true">${slides.map(() => '<i></i>').join('')}</div>
-        <div class="k-slideshow__ui">
-          <div class="k-slideshow__caption k-glass k-glass--dark" aria-live="polite"><b></b><small></small></div>
-          <div class="k-slideshow__nav k-glass k-glass--dark">
-            <button type="button" data-ss="prev" aria-label="Previous frame">${icon.left}</button>
-            <span class="k-slideshow__count"></span>
-            <button type="button" data-ss="toggle" aria-label="Pause slideshow">${icon.pause}</button>
-            <button type="button" data-ss="next" aria-label="Next frame">${icon.right}</button>
-          </div>
-        </div>
-      </div>
-      <div class="k-thumbs">${slides.map((s, i) => `<button type="button" data-ss-go="${i}" aria-label="Go to frame ${i + 1}">${media({ image: s.src, tone: f.tone, swatch: s.swatch, alt: '' })}</button>`).join('')}</div>`;
-
-    const slideEls = $$('.k-slide', root);
-    const bars = $$('.k-slideshow__progress i', root);
-    const thumbs = $$('[data-ss-go]', root);
-    const cap = $('.k-slideshow__caption', root);
-    const cnt = $('.k-slideshow__count', root);
-    const toggle = $('[data-ss="toggle"]', root);
-    let i = 0;
-    let timer = null;
-    let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const show = (n) => {
-      if (!root.isConnected) { clearTimeout(timer); return; }   // page was swapped out
-      i = (n + slides.length) % slides.length;
-      slideEls.forEach((el, k) => { el.classList.toggle('is-active', k === i); el.setAttribute('aria-hidden', String(k !== i)); });
-      bars.forEach((b, k) => {
-        b.classList.toggle('is-done', k < i);
-        b.classList.remove('is-active');
-        if (k === i) { void b.offsetWidth; b.classList.add('is-active'); }
-      });
-      thumbs.forEach((t, k) => t.classList.toggle('is-active', k === i));
-      $('b', cap).textContent = slides[i].caption || `Frame ${pad(i + 1)}`;
-      $('small', cap).textContent = slides[i].meta || `${f.shotOn} · ${f.lens}`;
-      cnt.textContent = `${pad(i + 1)} / ${pad(slides.length)}`;
-      schedule();
-    };
-    const schedule = () => {
-      clearTimeout(timer);
-      if (!paused) timer = setTimeout(() => show(i + 1), DURATION);
-    };
-    const setPaused = (p) => {
-      paused = p;
-      root.classList.toggle('is-paused', p);
-      toggle.innerHTML = p ? icon.play : icon.pause;
-      toggle.setAttribute('aria-label', p ? 'Play slideshow' : 'Pause slideshow');
-      schedule();
-    };
-
-    root.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-ss]');
-      if (b) {
-        if (b.dataset.ss === 'prev') show(i - 1);
-        if (b.dataset.ss === 'next') show(i + 1);
-        if (b.dataset.ss === 'toggle') setPaused(!paused);
-        return;
-      }
-      const g = e.target.closest('[data-ss-go]');
-      if (g) show(Number(g.dataset.ssGo));
-    });
-    root.tabIndex = 0;
-    root.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') show(i + 1);
-      if (e.key === 'ArrowLeft') show(i - 1);
-    });
-    // Swipe
-    let x0 = null;
-    root.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
-    root.addEventListener('touchend', (e) => {
-      if (x0 == null) return;
-      const dx = e.changedTouches[0].clientX - x0;
-      if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
-      x0 = null;
-    });
-    // Pause when off-screen
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(([en]) => {
-        if (!en.isIntersecting) clearTimeout(timer); else schedule();
-      }).observe(root);
-    }
-
-    root.kGoto = show;
-    setPaused(paused);
-    show(0);
   }
 
   /* ------------------------------------------------------------ radio */
@@ -5775,6 +5700,7 @@
       hydrateCovers();
       bindRails();
       mountGlobes();
+      document.dispatchEvent(new CustomEvent('kiosk:page', { detail: { page: PAGE } }));
     } catch (err) {
       // Never leave a blank page if content has a typo
       console.error('[KIOSK] render error', err);
