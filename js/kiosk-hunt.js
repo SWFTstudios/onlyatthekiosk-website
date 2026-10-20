@@ -188,8 +188,27 @@
     }
     drops.forEach(beacon);
     stores.forEach(beacon);
+    // Zoomed out, beacons at nearby places land on the same spot and only the
+    // top one can be tapped: fan any that overlap round the point they share
+    let spreadRaf = 0;
+    function spread() {
+      spreadRaf = 0;
+      const groups = [];
+      beacons.filter((b) => !b.el.hidden).forEach((b) => {
+        const p = map.project([b.item.lon, b.item.lat]);
+        const g = groups.find((gr) => Math.hypot(gr.p.x - p.x, gr.p.y - p.y) < 30);
+        if (g) g.list.push(b); else groups.push({ p, list: [b] });
+      });
+      groups.forEach(({ list }) => list.forEach((b, i) => {
+        if (list.length < 2) { b.mk.setOffset([0, 0]); return; }
+        const a = (i / list.length) * Math.PI * 2 - Math.PI / 2; const r = 16 + list.length * 3;
+        b.mk.setOffset([Math.round(Math.cos(a) * r), Math.round(Math.sin(a) * r)]);
+      }));
+    }
+    map.on('move', () => { if (!spreadRaf) spreadRaf = requestAnimationFrame(spread); });
+    spread();
     const layersOn = { hunt: true, store: true };
-    function showLayers() { beacons.forEach((b) => { b.el.hidden = !layersOn[b.item.kind]; }); tips.forEach((t) => { t.el.hidden = !layersOn[t.item.kind]; }); }
+    function showLayers() { beacons.forEach((b) => { b.el.hidden = !layersOn[b.item.kind]; }); tips.forEach((t) => { t.el.hidden = !layersOn[t.item.kind]; }); spread(); }
 
     /* ---- search tooltips: small cards around the globe ---- */
     let tips = [];
@@ -489,19 +508,38 @@
     const sortSel = els.root.querySelector('[data-mount="finds-sort"]');
     if (sortSel) sortSel.addEventListener('change', () => { sortBy = sortSel.value; renderDrops(); });
 
-    // Mobile finds sheet snap
+    // Mobile finds sheet: swipe the handle up or down, or tap it to step
+    // tucked → half → full → tucked. Tucked away, the list is out of reach
+    // of the keyboard too (inert), so focus never lands under the tab bar.
     const finds = els.root.querySelector('[data-mount="hunt-finds"]');
     if (finds) {
-      let startY = 0;
-      finds.addEventListener('touchstart', (e) => { if (e.target.closest('[data-finds-grab]') || e.target === finds.querySelector('.k-finds__grab')) startY = e.touches[0].clientY; else startY = 0; }, { passive: true });
+      const grab = finds.querySelector('[data-finds-grab]');
+      const list = finds.querySelector('.k-finds__list');
+      const phone = window.matchMedia('(max-width: 899px)');
+      const snap = (to) => {
+        finds.dataset.snap = to;
+        const tucked = phone.matches && to === 'peek';
+        if (list) list.inert = tucked;
+        if (grab) { grab.setAttribute('aria-expanded', String(!tucked)); grab.setAttribute('aria-label', to === 'full' ? 'Tuck finds away' : 'Show more finds'); }
+      };
+      snap(finds.dataset.snap || 'peek');
+      if (phone.addEventListener) phone.addEventListener('change', () => snap(finds.dataset.snap || 'peek'));
+      let startY = 0; let swiped = false;
+      finds.addEventListener('touchstart', (e) => { startY = e.target.closest('[data-finds-grab]') ? e.touches[0].clientY : 0; swiped = false; }, { passive: true });
       finds.addEventListener('touchend', (e) => {
         if (!startY) return;
         const dy = e.changedTouches[0].clientY - startY;
         const cur = finds.dataset.snap || 'peek';
-        if (dy < -40) finds.dataset.snap = cur === 'peek' ? 'half' : 'full';
-        else if (dy > 40) finds.dataset.snap = cur === 'full' ? 'half' : 'peek';
+        if (dy < -40) { snap(cur === 'peek' ? 'half' : 'full'); swiped = true; } else if (dy > 40) { snap(cur === 'full' ? 'half' : 'peek'); swiped = true; }
         startY = 0;
       }, { passive: true });
+      if (grab) {
+        grab.addEventListener('click', () => {
+          if (swiped) { swiped = false; return; }
+          const cur = finds.dataset.snap || 'peek';
+          snap(cur === 'peek' ? 'half' : cur === 'half' ? 'full' : 'peek');
+        });
+      }
     }
 
     // Sync projection button + initial style once map is ready

@@ -59,35 +59,35 @@
 
   <main id="main">
 
-    <!-- ABOVE THE CLOUDS: around the globe, up into the sky, ꓘIOSK rises.
-         Scroll to descend through the clouds onto the page (js/kiosk-sky.js) -->
-    <section class="k-sky is-boot" data-sky aria-labelledby="sky-title">
-      <div class="k-sky__layer">
-        <div class="k-sky__air" aria-hidden="true"><div class="k-sky__streaks"></div></div>
-        <div class="k-sky__space" aria-hidden="true"></div>
-        <canvas class="k-sky__earth" aria-hidden="true"></canvas>
-        <canvas class="k-sky__globe" aria-hidden="true"></canvas>
-        <canvas class="k-sky__fog" aria-hidden="true"></canvas>
-        <div class="k-sky__fogcss" aria-hidden="true"></div>
-        <p class="k-sky__tagline k-sky__time"><time data-sky-clock aria-label="Local time"><b>--:--</b><small></small></time></p>
-        <p class="k-sky__route" data-sky-route aria-hidden="true">KSK 001</p>
-        <p class="k-sky__hint" aria-hidden="true"><span>Scroll to descend</span><i></i></p>
+    <!-- GLOBE HERO: the opening flight lands on the visitor's town, then the
+         planet settles under the headline with them pinned (sonar), everyone
+         else on the site right now pinned too (/api/live) and flights
+         streaking between them (js/kiosk-globe-hero.js) -->
+    <section class="k-gh" data-globe-hero aria-labelledby="gh-title">
+      <div class="k-gh__stage" aria-hidden="true">
+        <div class="k-gh__space"></div>
+        <canvas class="k-gh__earth" data-gh-earth></canvas>
+        <canvas class="k-gh__fx" data-gh-fx></canvas>
+        <div class="k-gh__fade"></div>
       </div>
-      <!-- the wordmark sits above the nav so it can fly into the nav icon -->
-      <div class="k-sky__title"><h1 class="k-sky__word" id="sky-title" aria-label="Only at the KIOSK"><span class="k-rk">K</span>IOSK</h1></div>
+      <p class="k-gh__route" data-gh-route aria-hidden="true">KSK 001</p>
+      <div class="k-wrap k-gh__copy">
+        <p class="k-gh__live" data-gh-live><span class="k-gh__dot" aria-hidden="true"></span><span data-gh-count>Travelers from everywhere</span></p>
+        <h1 class="k-gh__title" id="gh-title">Where the world’s travelers <em class="k-serif">meet.</em></h1>
+        <p class="k-gh__dek">A global culture magazine and store. Films, stories and fresh threads from the road, and a community of travelers from every corner of the map.</p>
+        <div class="k-gh__cta">
+          <a class="k-btn k-btn--solid k-gh__btn" href="atlas.html">Start exploring</a>
+          <a class="k-btn k-gh__btn k-gh__btn--ghost" href="vault.html">Shop the kiosk</a>
+        </div>
+      </div>
     </section>
 
-    <!-- COVER: below the intro's cloud layer and above a second one, a
-         floating carousel of jumping-off points: films, stories, the shop,
-         the radio, the Garage, the Atlas -->
+    <!-- COVER: under the globe, a floating carousel of jumping-off points:
+         films, stories, the shop, the radio, the Garage, the Atlas -->
     <section class="k-cover k-orbit" aria-labelledby="orbit-title">
       <div class="k-cover__media k-orbit__scene" aria-hidden="true">
         <div class="k-orbit__sky"></div>
         <div class="k-orbit__stars"></div>
-        <div class="k-orbit__ceiling"></div>
-        <canvas class="k-orbit__deck"></canvas>
-        <div class="k-orbit__clouds k-orbit__clouds--back"></div>
-        <div class="k-orbit__clouds k-orbit__clouds--mid"></div>
       </div>
       <div class="k-cover__inner k-orbit__inner">
         <div class="k-cover__top">
@@ -107,7 +107,6 @@
           <li><a href="the-garage.html"><span>05</span>The Garage</a></li>
         </ol>
       </div>
-      <div class="k-orbit__clouds k-orbit__clouds--front" aria-hidden="true"></div>
     </section>
 
     <!-- WORLD LIBRARY: featured stories pinned on a spinning globe ------ -->
@@ -340,7 +339,7 @@
         </div>
         <div class="k-toolbar" style="border-bottom:0;margin-bottom:8px">
           <p class="k-eyebrow">New in</p>
-          <a class="k-small" href="vault.html?sort=new" style="text-decoration:underline;text-underline-offset:3px">View all</a>
+          <a class="k-small" href="vault.html?sort=new" style="display:inline-flex;align-items:center;min-height:32px;text-decoration:underline;text-underline-offset:3px">View all</a>
         </div>
         <div class="k-term-grid" data-mount="vault"></div>
       </div>

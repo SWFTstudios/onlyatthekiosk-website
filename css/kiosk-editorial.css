@@ -466,7 +466,7 @@ html[data-nav='back']::view-transition-new(root) { animation-name: k-ed-vt-in-ba
 .k-ed-next__title { max-width: 12ch; font-family: var(--f-serif); font-size: calc(clamp(56px, 10vw, 180px) * var(--type, 1)); line-height: 0.88; letter-spacing: -0.02em; }
 .k-ed-next__sub { font-size: calc(clamp(15px, 1.3vw, 18px) * var(--type, 1)); color: var(--ink-2); }
 .k-ed-next .k-ed-link { margin-top: 12px; }
-.k-ed-prev { justify-self: center; margin: 28px 0 8px; color: var(--ink-3); font-size: var(--ed-label); letter-spacing: 0.16em; text-transform: uppercase; }
+.k-ed-prev { justify-self: center; margin: 18px 0 0; padding: 12px 0; color: var(--ink-3); font-size: var(--ed-label); letter-spacing: 0.16em; text-transform: uppercase; }
 .k-ed-prev:hover { color: var(--ink); }
 
 /* ------------------------------------------------------- reduced motion */
@@ -727,7 +727,8 @@ html[data-motion='reduced'] .k-ed-hero__cue i::after { animation: none; }
 .k-gal-search svg { width: 18px; height: 18px; flex: none; color: var(--ink-3); }
 .k-gal-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: calc(16px * var(--type, 1)); }
 .k-gal-sort span { font-size: var(--ed-label); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
-.k-gal-sort select { border: 0; background: transparent; color: inherit; font: inherit; font-size: calc(14px * var(--type, 1)); outline: 0; }
+.k-gal-sort select { align-self: stretch; min-width: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: calc(16px * var(--type, 1)); outline: 0; }
+.k-gal-sort { padding-right: 8px; }
 .k-gal-filterbtn { font-size: var(--ed-label); letter-spacing: 0.16em; text-transform: uppercase; }
 .k-gal-active { display: flex; flex-wrap: wrap; gap: 8px; }
 .k-gal-active:not(:empty) { margin-top: 6px; }

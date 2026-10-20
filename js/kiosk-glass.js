@@ -2449,18 +2449,15 @@
       ticking = false;
       const y = window.scrollY;
       d.classList.toggle('is-scrolled', y > 8);
-      // Not over the sky intro: ꓘIOSK flies into the nav icon there
-      const sky = $('.k-sky.is-live');
-      const inSky = sky && y < sky.offsetTop + sky.offsetHeight;
-      if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', !inSky && y > lastY && y > 160); lastY = y; }
+      // The nav stays put over the globe hero
+      const hero = $('[data-globe-hero]');
+      const inHero = hero && y < hero.offsetTop + hero.offsetHeight * 0.8;
+      if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', !inHero && y > lastY && y > 160); lastY = y; }
       const cover = $('.k-cover');
       if (cover && !REDUCED && prefs.depth !== 'off') {
-        // progress past the cover itself (the sky intro sits above it on the home page)
+        // progress past the cover itself (the globe hero sits above it on the home page)
         const p = Math.min(1, Math.max(0, (y - cover.offsetTop) / (cover.offsetHeight || window.innerHeight)));
         cover.style.setProperty('--hero-p', p.toFixed(3));
-        // arriving from the sky intro: the cover rises out of the cloud, which lifts as it settles
-        const arriving = Math.min(1, Math.max(0, (cover.offsetTop - y) / window.innerHeight));
-        cover.style.setProperty('--orbit-fog', Math.min(1, arriving / 0.45).toFixed(3));
       }
     };
     window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -2485,7 +2482,7 @@
 
   /* Sections rise into view as you scroll */
   function markRise(root = document) {
-    $$('main > section:not(.k-cover), main > .k-section, main > .k-wrap > section', root).forEach((s) => {
+    $$('main > section:not(.k-cover):not(.k-gh), main > .k-section, main > .k-wrap > section', root).forEach((s) => {
       if (!s.hasAttribute('data-reveal')) s.setAttribute('data-reveal', 'rise');
     });
   }
@@ -2938,14 +2935,12 @@
   /* ------------------------------------------------------------- home */
 
   /* ------------------------------------------------- orbit carousel
-   * The home cover: between two layers of cloud, the intro's overhead and a
-   * second deck below (js/kiosk-sky.js cloudDeck, the hour's light; CSS
-   * cloud banks without WebGL), a floating 3D carousel of jumping-off
-   * points: the lead film, the latest story, the featured film, the newest
-   * pieces, the radio, the Garage and the Atlas. Built from the content, so
-   * new stories, films and drops come round on their own.
+   * The home cover, under the globe hero in the same night sky: a floating
+   * 3D carousel of jumping-off points: the lead film, the latest story, the
+   * featured film, the newest pieces, the radio, the Garage and the Atlas.
+   * Built from the content, so new stories, films and drops come round on
+   * their own.
    * -------------------------------------------------------------------- */
-  const SKY_VARS = ['--sky-top', '--sky-mid', '--sky-low', '--sky-hor', '--sky-sun', '--sky-sun-x', '--sky-sun-y', '--sky-sun-s', '--sky-fog'];
   function orbitItems(lead) {
     const items = [];
     const watchable = (f) => f && (f.embed || f.video);
@@ -2970,28 +2965,6 @@
     const root = mount('orbit-carousel');
     if (!root) return;
     heroCarousel(root, orbitItems(lead), (it) => { if (it.act) it.act(); else if (it.href) location.href = it.href; }, 'Start here');
-    // The sky over the carousel follows the intro's hour (js/kiosk-sky.js paints it on .k-sky)
-    const cover = root.closest('.k-orbit');
-    const deck = cover && $('.k-orbit__deck', cover);
-    if (deck && hasWebGL()) {
-      skyScript().then(() => {
-        if (pageAbort.signal.aborted || !window.KioskSky.cloudDeck) return;
-        const layer = window.KioskSky.cloudDeck(deck, { still: REDUCED });
-        if (!layer) return;
-        cover.classList.add('has-deck');
-        pageAbort.signal.addEventListener('abort', () => layer.stop());
-      }).catch(() => {});
-    }
-    const sky = $('.k-sky');
-    if (!sky || !cover) return;
-    const sync = () => {
-      SKY_VARS.forEach((k) => { const v = sky.style.getPropertyValue(k); if (v) cover.style.setProperty(k, v); });
-      if (sky.dataset.phase) cover.dataset.phase = sky.dataset.phase;
-    };
-    sync();
-    const mo = new MutationObserver(sync);
-    mo.observe(sky, { attributes: true, attributeFilter: ['style', 'data-phase'] });
-    pageAbort.signal.addEventListener('abort', () => mo.disconnect());
   }
 
   /* ------------------------------------------------------- atlas globe
@@ -3002,13 +2975,6 @@
   const HOME_GEO = { lat: 40.71, lon: -74.0 };
   const geoOf = (f) => (f && f.geo) || HOME_GEO;
   const fmtGeo = (g) => `${Math.abs(g.lat).toFixed(2)}° ${g.lat >= 0 ? 'N' : 'S'}, ${Math.abs(g.lon).toFixed(2)}° ${g.lon >= 0 ? 'E' : 'W'}`;
-  const GSAP_SCRIPTS = ['js/vendor/gsap/gsap.min.js', 'js/vendor/gsap/Flip.min.js', 'js/vendor/gsap/ScrollTrigger.min.js'];
-  let gsapReady = null;
-  function loadGsap() {
-    if (window.gsap && window.Flip && window.ScrollTrigger) return Promise.resolve();
-    if (!gsapReady) gsapReady = GSAP_SCRIPTS.reduce((pr, src) => pr.then(() => loadScript(src)), Promise.resolve()).catch((err) => { gsapReady = null; throw err; });
-    return gsapReady;
-  }
   function worldFeatured() {
     const issue = C.issue || {};
     const slugs = (issue.featured && issue.featured.length) ? issue.featured : [issue.lead].concat((issue.heroSlides || []).map((x) => x.story));
@@ -3072,7 +3038,7 @@
     const lead = featureBySlug(issue.lead) || features[0];
     if (!lead) return;
 
-    mountSky();
+    mountGlobeHero();
     mountOrbit(lead);
     mountWorldLibrary();
     fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
@@ -3670,6 +3636,10 @@
         if (wrap) {
           wrap.classList.toggle('is-start', el.scrollLeft < 4);
           wrap.classList.toggle('is-end', el.scrollLeft > max - 4);
+          // at either end the arrow that can't go further is disabled, not just dimmed
+          const prev = $('[data-rail-prev]', wrap); const next = $('[data-rail-next]', wrap);
+          if (prev) prev.disabled = el.scrollLeft < 4;
+          if (next) next.disabled = el.scrollLeft > max - 4;
           wrap.classList.toggle('is-static', max <= 4);
         }
       };
@@ -5504,12 +5474,12 @@
     });
   }
 
-  /* ------------------------------------------------------ above the clouds
-   * Top of the home page: around the globe, up into a golden sky over a
-   * bank of low clouds, ꓘIOSK rises from behind them; scrolling sinks the
-   * camera into the clouds and dissolves onto the page (js/kiosk-sky.js,
-   * GSAP + the world dots loaded only here). The globe journey plays once
-   * per session (Settings › Intro animation: Off skips it).
+  /* ---------------------------------------------------------- globe hero
+   * Top of the home page: the opening flight round the satellite Earth lands
+   * on the visitor's town, then the planet settles under the headline with
+   * them pinned and everyone else here now pinned too (js/kiosk-globe-hero.js
+   * and js/kiosk-earth.js, loaded only here). The flight plays once per
+   * session (Settings › Intro animation: Off skips it).
    * -------------------------------------------------------------------- */
   /* Where the visitor roughly is, so the opening flight lands over their town:
    * the city Cloudflare attaches to the request (/api/where, no permission
@@ -5550,43 +5520,73 @@
     return Promise.race([ask, new Promise((r) => setTimeout(() => r(fallback), 1500))]);
   }
 
-  function mountSky() {
-    const sec = $('[data-sky]');
+  function mountGlobeHero() {
+    const sec = $('[data-globe-hero]');
     if (!sec || sec.dataset.on) return;
     sec.dataset.on = '1';
     const signal = pageAbort.signal;
     let seen = false;
     try { seen = sessionStorage.getItem('kiosk:sky') === '1'; sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { seen = true; }
-    const quick = seen || prefs.intro === 'off';
-    const root = document.documentElement;
-    root.classList.add('is-mark-pending');
-    const giveUp = () => { sec.classList.remove('is-boot'); root.classList.remove('is-mark-pending'); };
-    signal.addEventListener('abort', () => root.classList.remove('is-mark-pending'));
-    const fail = setTimeout(giveUp, 3500);
-    const journey = !quick && !REDUCED;
+    const journey = !seen && prefs.intro !== 'off' && !REDUCED;
+    const count = $('[data-gh-count]', sec);
     let home = null;
+    let hero = null;
+    // Live viewers: the chip counts everyone here, the globe pins them
+    const showLive = () => {
+      if (!count) return;
+      const others = live.count > 1 ? live.count - 1 : 0;
+      count.textContent = live.enabled && others
+        ? `${live.count} travelers here now${home && home.city ? ` · you’re in ${home.city}` : ''}`
+        : `You’re here${home && home.city ? ` from ${home.city}` : ''} · travelers from everywhere`;
+      if (hero) hero.setLive(live.viewers, live.count);
+    };
+    document.addEventListener('kiosk:live', showLive, { signal });
+    if (!hasWebGL()) { sec.classList.add('is-flat'); visitorHome(signal).then((h) => { home = h; showLive(); }); return; }
     Promise.all([
-      loadGsap(), window.KIOSK_WORLD ? null : loadScript('js/kiosk-world.js'),
-      journey && !window.KioskEarth ? loadScript('js/kiosk-earth.js').catch(() => null) : null,
-      journey ? visitorHome(signal).then((h) => { home = h; }) : null,
+      window.KioskEarth ? null : loadScript('js/kiosk-earth.js'),
+      window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js'),
+      visitorHome(signal).then((h) => { home = h; }),
     ])
-      .then(skyScript)
       .then(() => {
-        clearTimeout(fail);
         if (signal.aborted) return;
-        window.gsap.registerPlugin(window.ScrollTrigger);
-        sec.classList.add('is-live');
-        const sky = window.KioskSky.mount(sec, { gsap: window.gsap, ScrollTrigger: window.ScrollTrigger, world: window.KIOSK_WORLD, Earth: window.KioskEarth, home, quick, reduced: REDUCED });
-        sec.classList.remove('is-boot');
-        window.ScrollTrigger.refresh();
-        signal.addEventListener('abort', () => sky.stop());
+        hero = window.KioskGlobeHero.mount(sec, { Earth: window.KioskEarth, home, journey, reduced: REDUCED });
+        showLive();
+        signal.addEventListener('abort', () => hero.stop());
       })
-      .catch((err) => { clearTimeout(fail); giveUp(); console.warn('[KIOSK] sky unavailable', err); });
+      .catch((err) => { sec.classList.add('is-flat'); console.warn('[KIOSK] globe hero unavailable', err); });
   }
 
-  // js/kiosk-sky.js, loaded once for both the intro and the home cover's cloud deck
-  let skyLoading = null;
-  const skyScript = () => (window.KioskSky ? Promise.resolve() : (skyLoading = skyLoading || loadScript('js/kiosk-sky.js').catch((err) => { skyLoading = null; throw err; })));
+  /* ------------------------------------------------------- live presence
+   * Every open tab checks in about once a minute (/api/live) so the home
+   * globe can pin who's on the site right now, at city level. Nothing runs
+   * where the API isn't there (no database), and a closing tab checks out. */
+  const live = { enabled: false, count: 0, viewers: [] };
+  function bindLive() {
+    let id = '';
+    try {
+      id = sessionStorage.getItem('kiosk:live') || '';
+      if (!id) { id = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join(''); sessionStorage.setItem('kiosk:live', id); }
+    } catch (e) { return; }
+    let timer = 0; let off = false;
+    const beat = () => {
+      clearTimeout(timer);
+      if (off || document.hidden) return;
+      fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!d || !d.enabled) { off = true; return; }
+          Object.assign(live, d);
+          document.dispatchEvent(new CustomEvent('kiosk:live', { detail: live }));
+          timer = setTimeout(beat, 60000);
+        })
+        .catch(() => { off = true; });
+    };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
+    window.addEventListener('pagehide', () => {
+      if (!off && navigator.sendBeacon) navigator.sendBeacon('/api/live', new Blob([JSON.stringify({ id, leave: true })], { type: 'application/json' }));
+    });
+    beat();
+  }
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -6281,6 +6281,7 @@
   bindSoftNav();
   bindSettingsOpen();
   bindDepth();
+  bindLive();
   runPage();
   syncPDPFromUrl();
   bootI18n();
