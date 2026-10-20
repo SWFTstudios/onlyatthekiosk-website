@@ -927,26 +927,7 @@ body.k::after {
 .k-marquee__track .k-serif { color: var(--ink); }
 @keyframes k-marquee { to { transform: translateX(-50%); } }
 
-/* ------------------------------------------------------ garage cards */
-
-.k-rail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(270px, 82vw);
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
-  margin: 0 calc(var(--gutter) * -1);
-  padding-left: var(--gutter);
-  padding-right: var(--gutter);
-  scroll-padding: 0 var(--gutter);
-  scrollbar-width: none;
-}
-.k-rail::-webkit-scrollbar { display: none; }
-.k-rail > * { scroll-snap-align: start; }
-@media (min-width: 700px) { .k-rail { grid-auto-columns: minmax(300px, 44vw); } }
-@media (min-width: 1100px) { .k-rail { grid-auto-columns: minmax(320px, calc((min(100vw, var(--max)) - var(--gutter) * 2 - 36px) / 4)); } }
+/* ------------------------------------------------------ story cards */
 
 .k-card {
   position: relative;
@@ -2305,8 +2286,8 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
 }
 .k-hscroll::-webkit-scrollbar { display: none; }
 .k-hscroll > * { scroll-snap-align: start; }
-.k-hscroll.is-dragging, .k-rail.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.k-hscroll.is-dragging *, .k-rail.is-dragging * { pointer-events: none; }
+.k-hscroll.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.k-hscroll.is-dragging * { pointer-events: none; }
 .k-hscroll__ui { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
 .k-hscroll__bar { flex: 1; height: 2px; border-radius: 2px; background: var(--line-2); overflow: hidden; }
 .k-hscroll__bar i { display: block; height: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0.08); transition: transform 0.2s linear; }
@@ -2321,6 +2302,14 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
 @media (min-width: 700px) { .k-hscroll-wrap--depts .k-hscroll { grid-auto-columns: minmax(340px, 46%); } }
 @media (min-width: 1100px) { .k-hscroll-wrap--depts .k-hscroll { grid-auto-columns: calc((100% - 24px) / 2.6); } }
 .k-hscroll-wrap--look .k-hscroll { grid-auto-columns: minmax(86%, 1fr); }
+/* Latest stories: the departments' columns (above) and their height, with the type to match */
+.k-hscroll-wrap--stories .k-card .k-media { aspect-ratio: auto; height: clamp(380px, 46vw, 560px); }
+.k-hscroll-wrap--stories .k-card__top { top: clamp(14px, 1.8vw, 22px); left: clamp(14px, 1.8vw, 22px); right: clamp(14px, 1.8vw, 22px); }
+.k-hscroll-wrap--stories .k-card__caption { left: clamp(10px, 1.2vw, 16px); right: clamp(10px, 1.2vw, 16px); bottom: clamp(10px, 1.2vw, 16px); padding: clamp(16px, 1.8vw, 24px) clamp(18px, 2vw, 26px); }
+.k-hscroll-wrap--stories .k-card__pass { font-size: calc(11.5px * var(--type, 1)); }
+.k-hscroll-wrap--stories .k-card__title { font-size: calc(clamp(24px, 2.6vw, 38px) * var(--type, 1)); line-height: 1.05; letter-spacing: -0.03em; }
+.k-hscroll-wrap--stories .k-card__sub { font-size: calc(clamp(13px, 1.1vw, 16px) * var(--type, 1)); margin-top: 6px; }
+.k-hscroll-wrap--stories .k-card__meta { font-size: calc(11.5px * var(--type, 1)); }
 @media (min-width: 700px) { .k-hscroll-wrap--look .k-hscroll { grid-auto-columns: minmax(380px, 58%); } }
 @media (min-width: 1100px) { .k-hscroll-wrap--look .k-hscroll { grid-auto-columns: calc((100% - 12px) / 2.25); } }
 
@@ -2684,7 +2673,7 @@ html[data-corners='square'] { --r-xs: 2px; --r-sm: 2px; --r-md: 3px; --r-lg: 3px
 html[data-density='compact'] .k-section { padding: clamp(40px, 6vw, 92px) 0; }
 html[data-density='compact'] .k-section--tight { padding: clamp(28px, 4vw, 60px) 0; }
 html[data-density='compact'] .k-section-head { margin-bottom: clamp(18px, 2.4vw, 32px); }
-html[data-density='compact'] .k-rail, html[data-density='compact'] .k-shop-grid { gap: 10px; }
+html[data-density='compact'] .k-shop-grid { gap: 10px; }
 
 html[data-motion='reduced'] *, html[data-motion='reduced'] *::before, html[data-motion='reduced'] *::after {
   animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important;
@@ -3081,11 +3070,31 @@ html:not([data-theme='dark']) .k-sr-list { background: rgba(251,250,248,.94); }
 .k-board__status--boarding::before { animation: k-pulse 1.2s var(--ease-io) infinite alternate; }
 .k-board__status--soon { color: #fbbf24; background: rgba(251,191,36,.12); }
 .k-board__status--pickup { color: var(--signal); background: color-mix(in srgb, var(--signal) 16%, transparent); }
-@media (max-width: 640px) {
-  .k-board { padding: 10px; }
-  .k-board__cols, .k-board__row { grid-template-columns: 5.4em minmax(0, 1fr) 4.4em; }
-  .k-board__cols span:nth-child(3), .k-board__cols span:nth-child(5), .k-board__row .k-board__gate, .k-board__row .k-board__status { display: none; }
-  .k-board__dest .k-flap i:nth-child(n+13) { display: none; }
+/* Legibility: the board's type is sized from its own width (a container
+ * query), 14–17px, with flaps a full character wide; on narrow boards each
+ * flight takes two lines so the destination gets the whole width. */
+.k-board { container-type: inline-size; }
+.k-board__title { font-size: calc(26px * var(--type, 1)); }
+.k-board__title svg { width: 30px; height: 30px; }
+.k-board__sub { font-size: calc(12px * var(--type, 1)); }
+.k-board__cols, .k-board__row { font-size: calc(clamp(14px, (100cqi - 116px) / 45, 17px) * var(--type, 1)); grid-template-columns: calc(7 * (0.98em + 2px)) minmax(0, 1fr) 2.4em 5em 7.8em; }
+.k-board__cols span { font-size: 0.72em; white-space: nowrap; }
+.k-board__row { padding: 11px 8px; }
+.k-flap { gap: 2px; }
+.k-flap i { width: 0.98em; height: 1.55em; border-radius: 3px; }
+.k-board__fare { font-size: 0.95em; }
+.k-board__status { font-size: 0.74em; padding: 5px 9px; }
+@media (max-width: 640px) { .k-board { padding: 10px; } }
+/* a board too narrow for one line per flight at that size (phones, the
+ * Vault's side column) gives each flight two lines instead */
+@container (max-width: 720px) {
+  .k-board__cols { display: none; }
+  .k-board__row { font-size: calc(clamp(13.5px, (100cqi - 40px) / 22, 17px) * var(--type, 1)); grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: 'flight status fare' 'dest dest dest'; row-gap: 8px; column-gap: 10px; padding: 12px 8px; }
+  .k-board__flight { grid-area: flight; }
+  .k-board__dest { grid-area: dest; }
+  .k-board__fare { grid-area: fare; justify-self: end; }
+  .k-board__status { grid-area: status; justify-self: start; }
+  .k-board__row .k-board__gate { display: none; }
 }
 
 /* ------------------------------------------------------------- gates */
@@ -3654,7 +3663,16 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-board__status--landed::before { opacity: .6; }
 
 .k-concourse-home__inner { display: grid; gap: clamp(20px, 3vw, 40px); align-items: start; }
-@media (min-width: 1000px) { .k-concourse-home__inner { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } }
+/* side by side only where the board gets ~830px for its bigger type; stacked below that */
+@media (min-width: 1200px) { .k-concourse-home__inner { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); } }
+/* The logo globe tucks under the board and slides out below it as the board
+ * rises up the screen (--vg-p 0 → 1, set by js/kiosk-logo-globe.js) */
+.k-concourse-home__board { display: grid; min-width: 0; isolation: isolate; }
+.k-concourse-home__board > [data-mount='term-page-board'] { position: relative; z-index: 2; min-width: 0; }
+.k-vglobe { position: relative; z-index: 1; justify-self: center; width: min(100%, 600px); aspect-ratio: 1.3; margin-top: clamp(8px, 2vw, 24px); pointer-events: none;
+  transform: translateY(calc((1 - var(--vg-p, 1)) * -66%)) scale(calc(0.8 + var(--vg-p, 1) * 0.2)); opacity: calc(0.15 + var(--vg-p, 1) * 0.85); will-change: transform; }
+.k-vglobe canvas { display: block; width: 100%; height: 100%; }
+@media (max-width: 640px) { .k-vglobe { width: min(100%, 420px); } }
 .k-dir { display: grid; gap: 8px; }
 .k-dir__sign { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: var(--board); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.06); transition: transform .25s var(--ease), background .25s; }
 .k-dir__sign:hover, .k-dir__sign:focus-visible { transform: translateX(4px); background: color-mix(in srgb, var(--board) 88%, var(--signal)); outline: none; }
@@ -4191,7 +4209,6 @@ body[data-page='store'] .k-term__title {
 /* Compact bento hero */
 body[data-page='vault'] .k-term__hero { padding: calc(var(--nav-h) + 20px) 0 clamp(20px, 3vw, 36px); }
 body[data-page='vault'] .k-term__title { font-size: calc(clamp(40px, 6.4vw, 88px) * var(--type, 1)); }
-body[data-page='vault'] .k-board__rows { max-height: 11.5rem; }
 .k-term__bento { display: grid; gap: clamp(12px, 1.8vw, 20px); }
 .k-term__bento .k-term__life { border-radius: var(--r-xl); overflow: hidden; border: 1px solid var(--lux-line); min-height: 220px; aspect-ratio: 4 / 5; }
 .k-term__bento .k-term__life img { width: 100%; height: 100%; object-fit: cover; display: block; }

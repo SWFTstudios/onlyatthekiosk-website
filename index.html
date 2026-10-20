@@ -113,7 +113,9 @@
       </div>
     </div>
 
-    <!-- MAIN CONCOURSE: departures from every desk + terminal directory -->
+    <!-- MAIN CONCOURSE: departures from every desk + terminal directory; the
+         logo globe slides out from under the board as it scrolls up
+         (js/kiosk-logo-globe.js) -->
     <section class="k-section k-section--tight k-concourse-home" aria-labelledby="concourse-title">
       <div class="k-wrap k-concourse-home__inner">
         <div class="k-concourse-home__sign">
@@ -122,7 +124,10 @@
           <p class="k-lede k-mt-s">Every desk leaves from here. Films, interviews, vlogs, audio notes and the pieces we make and source along the way.</p>
           <nav class="k-dir k-mt-m" data-mount="term-directory" aria-label="Terminal directory"></nav>
         </div>
-        <div data-mount="term-page-board"></div>
+        <div class="k-concourse-home__board">
+          <div data-mount="term-page-board"></div>
+          <div class="k-vglobe" data-vglobe aria-hidden="true"><canvas></canvas></div>
+        </div>
       </div>
     </section>
 
@@ -145,7 +150,7 @@
             </div>
           </div>
         </div>
-        <div class="k-rail" data-mount="garage-rail"></div>
+        <div data-mount="garage-rail"></div>
         <div class="k-row-flex k-mt-m" style="justify-content:space-between">
           <p class="k-small">Films, photo stories and owner interviews. Shot on location.</p>
           <a class="k-bar" href="atlas.html" style="min-width:260px">The Atlas<span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
