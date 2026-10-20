@@ -69,7 +69,9 @@ db.prepare('UPDATE presence SET seen_at = seen_at - 400 WHERE city = ?').run('La
 await call('POST', { id: 'd'.repeat(24) }, TOKYO);
 assert(db.prepare('SELECT COUNT(*) AS n FROM presence').get().n === 1, 'old rows swept on the next heartbeat');
 r = await call('POST', { id: 'e'.repeat(24) });
-assert(r.status === 200 && db.prepare('SELECT COUNT(*) AS n FROM presence').get().n === 1, 'no location → not pinned');
+assert(r.status === 200 && r.data.count === 2, 'no location → still counted');
+r = await call('GET');
+assert(r.data.viewers.length === 1 && r.data.viewers[0].city === 'Tokyo', 'no location → no pin');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
