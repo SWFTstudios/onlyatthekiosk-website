@@ -87,7 +87,7 @@
       </aside>
 
       <aside class="k-finds" data-mount="hunt-finds" data-snap="peek" aria-label="Finds">
-        <span class="k-finds__grab" data-finds-grab aria-hidden="true"></span>
+        <button type="button" class="k-finds__grab" data-finds-grab aria-expanded="false" aria-controls="finds-list" aria-label="Show more finds"></button>
         <div class="k-finds__head">
           <h2 class="k-finds__title">Finds</h2>
           <div class="k-finds__chips" role="group" aria-label="Show">
@@ -101,7 +101,7 @@
             <option value="price">Price</option>
           </select>
         </div>
-        <div class="k-finds__list" data-mount="hunt-drops" role="list"></div>
+        <div class="k-finds__list" id="finds-list" data-mount="hunt-drops" role="list"></div>
       </aside>
 
       <div class="k-hud__bottom">

@@ -2588,73 +2588,35 @@ html { transition: background-color 0.5s var(--ease); }
 
 
 /* ------------------------------------------------------------ orbit cover
- * Home, under the sky intro: the Earth far below, banks of cloud, and the
- * carousel of jumping-off points floating in between. Colours come from the
- * intro's hour (--sky-* copied from .k-sky by mountOrbit). */
+ * Home, under the globe hero: the same night sky carries on, stars above,
+ * the planet's glow along the top edge, and the carousel of jumping-off
+ * points floating in it. */
 .k-orbit {
-  --sky-top: #23305f; --sky-mid: #6a4a86; --sky-low: #e2766a; --sky-hor: #ffb36b; --sky-fog: #f3d6c8;
-  --sky-sun: rgba(255,150,80,.9); --sky-sun-x: 70%; --sky-sun-y: 40%; --sky-sun-s: 55%;
+  --sky-top: #02040b; --sky-mid: #050b1d; --sky-low: #0a1634; --sky-hor: #0d1c40;
+  --sky-sun: rgba(96,150,255,.22); --sky-sun-x: 50%; --sky-sun-y: 0%; --sky-sun-s: 90%;
   background: var(--sky-top); color: #fff;
 }
 .k-orbit__scene { overflow: hidden; }
 .k-orbit__sky { position: absolute; inset: 0; background:
   radial-gradient(var(--sky-sun-s) calc(var(--sky-sun-s) * .7) at var(--sky-sun-x) var(--sky-sun-y), var(--sky-sun) 0%, rgba(255,255,255,0) 60%),
   linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 30%, var(--sky-low) 44%, var(--sky-hor) 52%, var(--sky-hor) 100%); }
-.k-orbit__stars { position: absolute; inset: 0 0 40%; opacity: 0; transition: opacity 2s; background:
+.k-orbit__stars { position: absolute; inset: 0 0 40%; opacity: .85; background:
   radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
   radial-gradient(1.2px 1.2px at 84% 34%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 42%, #fff 50%, transparent 51%),
   radial-gradient(1px 1px at 52% 24%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 91% 8%, rgba(255,255,255,.7) 50%, transparent 51%); }
-.k-orbit[data-phase='midnight'] .k-orbit__stars, .k-orbit[data-phase='firstlight'] .k-orbit__stars { opacity: .9; }
-/* The second deck: a sea of cumulus just below the carousel, drawn by the
- * intro's renderer (js/kiosk-sky.js cloudDeck); its horizon sits at 50% */
-.k-orbit__deck { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); }
-.k-orbit.has-deck .k-orbit__deck { opacity: 1; }
-/* Overhead: the underside of the intro's cloud layer we just came through */
-.k-orbit__ceiling { position: absolute; left: -15%; right: -15%; top: -6%; height: 34%; pointer-events: none; filter: blur(14px); animation: k-orbit-drift 80s ease-in-out infinite alternate-reverse;
-  background:
-    radial-gradient(30% 70% at 12% 20%, var(--sky-fog) 0%, transparent 72%), radial-gradient(26% 80% at 38% 10%, var(--sky-fog) 0%, transparent 70%),
-    radial-gradient(30% 70% at 64% 22%, var(--sky-fog) 0%, transparent 72%), radial-gradient(26% 75% at 90% 12%, var(--sky-fog) 0%, transparent 70%),
-    linear-gradient(180deg, var(--sky-fog) 0%, color-mix(in srgb, var(--sky-fog) 55%, transparent) 30%, transparent 100%); opacity: .85; }
-/* Cloud banks: soft blobs in the hour's fog colour, drifting */
-.k-orbit__clouds { position: absolute; left: -25%; right: -25%; pointer-events: none; filter: blur(10px); animation: k-orbit-drift 60s ease-in-out infinite alternate; background:
-  radial-gradient(22% 55% at 8% 60%, var(--sky-fog) 0%, transparent 70%), radial-gradient(26% 60% at 30% 55%, var(--sky-fog) 0%, transparent 70%),
-  radial-gradient(20% 50% at 52% 65%, var(--sky-fog) 0%, transparent 70%), radial-gradient(28% 60% at 74% 55%, var(--sky-fog) 0%, transparent 70%),
-  radial-gradient(22% 55% at 95% 62%, var(--sky-fog) 0%, transparent 70%); }
-.k-orbit__clouds--back { bottom: 30%; height: 18%; opacity: .55; animation-duration: 90s; }
-.k-orbit.has-deck .k-orbit__clouds--back, .k-orbit.has-deck .k-orbit__clouds--mid { display: none; }
-.k-orbit__clouds--mid { bottom: 6%; height: 38%; opacity: .88; animation-direction: alternate-reverse; }
-.k-orbit__clouds--front { bottom: -10%; height: 30%; opacity: .9; z-index: 1; animation-duration: 45s; }
-/* Arriving from the sky intro the cover rises out of the cloud: a fog bank
- * hangs from its top edge (the same colour the intro whites out into) and
- * shrinks away as the cover settles (--orbit-fog: 1 → 0, set on scroll). */
-.k-orbit::after { content: ''; position: absolute; left: 0; right: 0; top: 0; z-index: 3; pointer-events: none;
-  height: calc(var(--orbit-fog, 0) * 140%);
-  background: linear-gradient(180deg, var(--sky-fog) 0%, var(--sky-fog) 32%, color-mix(in srgb, var(--sky-fog) 75%, transparent) 55%, color-mix(in srgb, var(--sky-fog) 30%, transparent) 78%, color-mix(in srgb, var(--sky-fog) 0%, transparent) 100%); }
-@keyframes k-orbit-drift { from { transform: translateX(-5%); } to { transform: translateX(5%); } }
 /* Layout */
 .k-orbit .k-cover__inner.k-orbit__inner { grid-template-rows: auto auto 1fr auto; align-items: center; position: relative; z-index: 2; }
 .k-orbit__head { display: grid; justify-items: center; gap: 10px; text-align: center; text-shadow: 0 2px 24px rgba(10,14,30,.35); }
 .k-orbit__title { margin: 0; font-size: calc(clamp(40px, 5vw, 76px) * var(--type, 1)); font-weight: 450; letter-spacing: -0.04em; line-height: .95; }
 .k-orbit__dek { max-width: 52ch; margin: 0; font-size: calc(clamp(14px, 1.2vw, 17px) * var(--type, 1)); line-height: 1.4; color: rgba(255,255,255,.88); }
 .k-orbit__carousel { position: relative; isolation: isolate; }
-/* The carousel sits in a cloud: a bank swelling up behind the cards, and
- * wisps drifting across their lower edge (both let touches through) */
-.k-orbit__carousel::before, .k-orbit__carousel::after { content: ''; position: absolute; left: -12%; right: -12%; pointer-events: none; animation: k-orbit-drift 38s ease-in-out infinite alternate; }
-.k-orbit__carousel::before { z-index: -1; top: 18%; bottom: 12%; filter: blur(22px); opacity: .9; background:
-  radial-gradient(24% 46% at 22% 62%, color-mix(in srgb, var(--sky-fog) 92%, #fff) 0%, transparent 70%),
-  radial-gradient(30% 56% at 50% 58%, color-mix(in srgb, var(--sky-fog) 85%, #fff) 0%, transparent 72%),
-  radial-gradient(24% 46% at 78% 64%, color-mix(in srgb, var(--sky-fog) 92%, #fff) 0%, transparent 70%),
-  radial-gradient(60% 34% at 50% 92%, var(--sky-fog) 0%, transparent 75%); }
-.k-orbit__carousel::after { z-index: 1; top: 38%; height: 30%; filter: blur(12px); opacity: .7; animation-duration: 26s; animation-direction: alternate-reverse; background:
-  radial-gradient(16% 34% at 10% 60%, var(--sky-fog) 0%, transparent 72%), radial-gradient(14% 30% at 30% 72%, color-mix(in srgb, var(--sky-fog) 70%, transparent) 0%, transparent 72%),
-  radial-gradient(18% 30% at 70% 70%, color-mix(in srgb, var(--sky-fog) 70%, transparent) 0%, transparent 72%), radial-gradient(16% 34% at 92% 58%, var(--sky-fog) 0%, transparent 72%); }
 .k-orbit .k-herowheel__now, .k-orbit .k-herowheel__cta { position: relative; z-index: 2; }
 /* The carousel floats: a slow bob, cards lit like objects in open air */
 .k-orbit .k-herowheel { color: #fff; }
 .k-orbit .k-herowheel__stage { --card: clamp(220px, min(22vw, 30svh), 310px); animation: k-orbit-float 7s ease-in-out infinite; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); }
 @keyframes k-orbit-float { 50% { transform: translateY(-12px); } }
 .k-orbit .k-herowheel .k-wheel__card { -webkit-box-reflect: unset; box-shadow: 0 36px 60px -24px rgba(12,18,40,.6), inset 0 0 0 1px rgba(255,255,255,.22); }
-.k-orbit .k-herowheel .k-wheel__card::after { background: var(--sky-fog); opacity: calc(var(--shade, 0) * 0.65); }
+.k-orbit .k-herowheel .k-wheel__card::after { background: #050915; opacity: calc(var(--shade, 0) * 0.65); }
 .k-orbit .k-tcard__img.is-paper { object-fit: contain; background: #fbfaf8; padding: 18% 8% 34%; }
 .k-orbit .k-herowheel__now, .k-orbit .k-herowheel__cta .k-btn { -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); }
 .k-orbit .k-herowheel__now { padding: 6px; border-radius: 999px; background: rgba(12,16,32,.32); border: 1px solid rgba(255,255,255,.18); }
@@ -2672,7 +2634,7 @@ html { transition: background-color 0.5s var(--ease); }
 }
 @media (max-height: 820px) { .k-orbit__dek { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .k-orbit__ceiling, .k-orbit__clouds, .k-orbit .k-herowheel__stage { animation: none; }
+  .k-orbit .k-herowheel__stage { animation: none; }
 }
 
 /* --------------------------------------------------- marketplace: hunt + stores */
@@ -2952,7 +2914,6 @@ html.is-scrolled .k-nav__inner { box-shadow: var(--hairline), var(--elev-1); }
 
   /* On the home page the top pill waits until the ꓘIOSK wordmark has flown into it */
   .k-nav__inner { transition: background-color .45s var(--ease), border-color .45s var(--ease), box-shadow .45s var(--ease), -webkit-backdrop-filter .45s, backdrop-filter .45s; }
-  html.is-mark-pending .k-nav__inner { background: transparent; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 
   /* The top bar keeps just the logo (and tucks away as you read) */
   .k-nav__actions { display: none !important; }
@@ -3826,7 +3787,7 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-cover__media.is-thumb .k-heroshow, .k-cover__media.is-thumb .k-heroshow__slide, .k-cover__media.is-thumb video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 640px) { .k-wl-node__label small { display: none; } .k-wl-node__card { width: 96px; } .k-wl-node--hero .k-wl-node__card { width: 120px; } }
 
-.k-lib__more > summary { cursor: pointer; list-style: none; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.k-lib__more > summary { display: flex; align-items: center; min-height: 36px; cursor: pointer; list-style: none; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
 .k-lib__more > summary::-webkit-details-marker { display: none; }
 .k-lib__more > summary::after { content: ' +'; }
 .k-lib__more[open] > summary::after { content: ' −'; }
@@ -3841,58 +3802,6 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-logo .k-rk { margin-right: 0.14em; }
 .k-cover__word .k-rk { margin-right: -0.065em; }
 .k-footer__mark .k-rk { margin-right: -0.07em; }
-
-/* ------------------------------------------------------- above the clouds
- * Home opening (js/kiosk-sky.js). Without JS it is a plain first screen;
- * with it (.is-live) the layer is fixed and the section is the scroll
- * runway for the descent into the clouds. */
-.k-sky { position: relative; height: 100svh; }
-.k-sky.is-live { height: 175svh; }
-.k-sky__layer { position: absolute; left: 0; right: 0; top: 0; height: 100svh; overflow: hidden; z-index: 50; background: #8db6e4; color: #fff; }
-.k-sky.is-live .k-sky__layer { position: fixed; inset: 0; height: auto; pointer-events: none; }
-.k-sky { background: var(--sky-fog); }   /* the fog the layer whites out into, so the cover rises out of the same colour */
-.k-sky { --sky-top: #154aa6; --sky-mid: #2a68c9; --sky-low: #6c9fe0; --sky-hor: #dbe7f4; --sky-sun: rgba(255,255,255,.32); --sky-sun-x: 78%; --sky-sun-y: 8%; --sky-sun-s: 70%; --sky-streak: rgba(255,255,255,.7); --sky-fog: #eef1f5; }
-.k-sky__air { position: absolute; inset: 0; background:
-  radial-gradient(var(--sky-sun-s) calc(var(--sky-sun-s) * .7) at var(--sky-sun-x) var(--sky-sun-y), var(--sky-sun) 0%, rgba(255,255,255,0) 60%),
-  linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 30%, var(--sky-low) 50%, var(--sky-hor) 58%, var(--sky-hor) 100%); }
-.k-sky__streaks { position: absolute; left: -10%; right: -10%; top: 42%; height: 15%; pointer-events: none; background:
-  radial-gradient(38% 9% at 70% 40%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%),
-  radial-gradient(30% 6% at 28% 62%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%),
-  radial-gradient(45% 7% at 55% 80%, var(--sky-streak) 0%, rgba(255,255,255,0) 100%);
-  filter: blur(2px); }
-.k-sky__space { position: absolute; inset: 0; opacity: 0; background:
-  radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 68% 12%, #fff 50%, transparent 51%),
-  radial-gradient(1.2px 1.2px at 84% 44%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 72%, #fff 50%, transparent 51%),
-  radial-gradient(1px 1px at 52% 34%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 22% 52%, rgba(255,255,255,.6) 50%, transparent 51%),
-  radial-gradient(1px 1px at 91% 82%, rgba(255,255,255,.7) 50%, transparent 51%), radial-gradient(1px 1px at 6% 88%, rgba(255,255,255,.6) 50%, transparent 51%),
-  radial-gradient(120% 90% at 50% 50%, #0b1630 0%, #04070f 70%); }
-.k-sky.is-boot .k-sky__space { opacity: 1; }
-.k-sky__globe, .k-sky__fog, .k-sky__earth { position: absolute; inset: 0; width: 100%; height: 100%; }
-.k-sky__earth { display: block; opacity: 0; pointer-events: none; }
-.k-sky:not(.is-live) .k-sky__earth { display: none; }
-.k-sky__fogcss { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 52%; pointer-events: none; display: none;
-  background: radial-gradient(40% 60% at 20% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(40% 60% at 60% 75%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 55% at 92% 70%, var(--sky-fog) 0%, rgba(255,255,255,0) 70%), linear-gradient(0deg, var(--sky-fog) 0%, var(--sky-fog) 45%, rgba(255,255,255,0) 100%);
-  filter: blur(6px); }
-.k-sky.is-nogl .k-sky__fogcss, .k-sky:not(.is-live) .k-sky__fogcss { display: block; }
-.k-sky__title { position: absolute; left: 0; right: 0; top: 0; height: 100svh; z-index: 105; pointer-events: none; }
-.k-sky.is-live .k-sky__title { position: fixed; }
-.k-sky__word { position: absolute; left: 50%; top: calc(64% - .76em); margin: 0; translate: -50% 0; color: #fff; font-size: calc(clamp(118px, 27vw, 470px) * var(--type, 1)); line-height: .8; letter-spacing: -0.065em; font-weight: 600; white-space: nowrap; transform-origin: 50% 50%; will-change: transform, opacity;
-  --cut: 200%; --feather: 40px;
-  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 var(--cut), transparent calc(var(--cut) + var(--feather)));
-  mask-image: linear-gradient(180deg, #000 0, #000 var(--cut), transparent calc(var(--cut) + var(--feather)));
-  text-shadow: 0 10px 50px rgba(10,30,70,.18); }
-.k-sky__word .k-rk { margin-right: -0.065em; }
-.k-sky.is-boot .k-sky__word { opacity: 0; }
-.k-sky__tagline { position: absolute; left: 0; right: 0; top: 70%; margin: 0; padding: 0 var(--gutter); text-align: center; color: var(--sky-ink, #13223d); font-family: var(--f-serif); font-style: italic; font-size: calc(clamp(22px, 2.6vw, 40px) * var(--type, 1)); line-height: 1.15; letter-spacing: -0.01em; }
-.k-sky[data-phase='midnight'] .k-sky__tagline { text-shadow: 0 2px 18px rgba(0,0,0,.45); }
-.k-sky:not([data-phase='midnight']) .k-sky__tagline { text-shadow: 0 1px 14px rgba(255,255,255,.55); }
-.k-sky__route { position: absolute; left: var(--gutter); top: calc(var(--nav-h) + 12px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
-.k-sky__hint { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px rgba(20,40,80,.45); opacity: 0; transition: opacity .8s var(--ease); }
-.k-sky.is-settled .k-sky__hint { opacity: .8; }
-.k-sky__hint i { width: 1px; height: 28px; background: currentColor; animation: k-sky-hint 1.6s var(--ease-io) infinite; transform-origin: top; }
-@keyframes k-sky-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
-/* the cover below takes the logo's place: no second wordmark */
-.k-sky ~ .k-cover .k-cover__title { display: none; }
 
 /* ---------------------------------------------------------- satellite Earth
  * js/kiosk-earth.js: map labels in the style of a flight tracker */
@@ -4056,7 +3965,6 @@ body[data-page='flights'] .k-footer { display: none; }
   .k-fcard__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body[data-page='flights'].k { padding-bottom: 0; }
 }
-@media (max-width: 760px) { .k-sky__hint { bottom: calc(var(--tabbar-h) + 18px); } }
 
 /* ------------------------------------------------------------ menu sheet
  * Everything in one view on a phone: compact links that rise in one after
@@ -4083,7 +3991,6 @@ body[data-page='flights'] .k-footer { display: none; }
 .k-sheet__q .k-nav__cart-count { position: absolute; top: -4px; right: -4px; }
 .k-sheet__q.is-hidden { display: none !important; }
 .k-sheet__pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-html.is-sheet-open .k-sky__title { opacity: 0 !important; visibility: hidden; }
 @media (max-width: 760px) {
   .k-sheet {
     justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain;
@@ -4256,14 +4163,6 @@ html.is-onboard-open, html.is-onboard-open body { overflow: hidden; }
 .k-atlas-checkin { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 18px; border: 1px dashed var(--line-2); }
 .k-atlas-checkin p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
 
-/* The local time under ꓘIOSK, in place of a subheadline: heavy, tight and
- * white, with a soft shadow so it holds against any sky or cloud */
-.k-sky__time { top: 66%; font-family: 'Inter Tight', var(--f-sans); font-style: normal; color: #fff !important; text-shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 28px rgba(0,0,0,.35) !important; }
-.k-sky[data-phase='noon'] .k-sky__time, .k-sky[data-phase='evening'] .k-sky__time { text-shadow: 0 1px 3px rgba(10,25,50,.45), 0 8px 34px rgba(10,25,50,.45) !important; }
-.k-sky__time time { display: inline-flex; align-items: baseline; gap: .04em; font-variant-numeric: tabular-nums; }
-.k-sky__time b { font-weight: 800; font-size: calc(clamp(44px, 6.4vw, 92px) * var(--type, 1)); letter-spacing: -0.045em; line-height: 1; }
-.k-sky__time small { font-weight: 700; font-size: calc(clamp(15px, 1.7vw, 24px) * var(--type, 1)); letter-spacing: -0.01em; }
-.k-sky__time small:empty { display: none; }
 .k-ob__x { grid-row: 1; grid-column: 2; }
 /* ==========================================================================
    Elysium terminal — luxury shop + Lost & Found
@@ -4597,11 +4496,11 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
   background: var(--lux-glass-dark); color: #f4f4f5;
   border-color: rgba(255,255,255,.12);
 }
-.k-finds__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 2px; }
+.k-finds__head { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 2px; }
 .k-finds__title { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: var(--lux-track); text-transform: uppercase; }
 .k-finds__sort { margin-left: auto; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); color: #fff; border-radius: 10px; padding: 6px 10px; font: inherit; font-size: 12px; }
 .k-finds__chips { display: flex; gap: 6px; }
-.k-finds__list { display: grid; gap: 10px; overflow-y: auto; overscroll-behavior: contain; padding: 2px; }
+.k-finds__list { min-height: 0; display: grid; gap: 10px; overflow-y: auto; overscroll-behavior: contain; padding: 2px; }
 .k-find {
   display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 10px;
   border-radius: 16px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04);
@@ -4622,16 +4521,144 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
   .k-hud__bottom .k-hud__drops { display: none; }
 }
 @media (max-width: 899px) {
+  /* The drawer rides on top of the floating tab bar, so its handle, title,
+   * filter chips and sort stay visible and tappable when it's tucked away */
   .k-finds {
-    left: 8px; right: 8px; bottom: 0; max-height: 72svh;
-    padding: 8px 14px calc(14px + env(safe-area-inset-bottom));
-    border-radius: 24px 24px 0 0; border-bottom: 0;
-    transform: translateY(calc(100% - 88px)); transition: transform .4s var(--ease);
+    left: 8px; right: 8px; bottom: calc(var(--tabbar-h) + 4px);
+    max-height: min(72svh, calc(100svh - var(--tabbar-h) - var(--nav-h) - 24px));
+    padding: 8px 14px 14px;
+    border-radius: 24px;
+    transform: translateY(calc(100% - 92px)); transition: transform .4s var(--ease);
+    clip-path: inset(0 0 calc(100% - 92px) 0 round 24px);
   }
+  .k-finds[data-snap='half'], .k-finds[data-snap='full'] { clip-path: inset(0 0 0 0 round 24px); }
   .k-finds[data-snap='half'] { transform: translateY(42%); }
   .k-finds[data-snap='full'] { transform: translateY(0); }
-  .k-finds__grab { display: block; width: 38px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.3); margin: 2px auto 8px; }
+  /* the handle is a button: a wide 28px target round the little bar */
+  .k-finds__grab { position: relative; display: block; flex: none; width: 72px; height: 28px; margin: -4px auto 0; padding: 0; border: 0; background: none; cursor: pointer; }
+  .k-finds__grab::before { content: ''; position: absolute; left: 17px; right: 17px; top: 11px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.3); }
+  .k-finds__grab:focus-visible { outline: 2px solid #fff; outline-offset: -2px; border-radius: 8px; }
+  /* map credits sit above the tucked drawer, not under it */
+  .k-hmap .maplibregl-ctrl-bottom-right { bottom: calc(var(--tabbar-h) + 104px); }
+}
+@media (max-width: 379px) {
+  /* the chips and sort only just fit one row on the smallest phones; the
+   * title stays for screen readers so the tucked strip keeps its height */
+  .k-finds__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 @media (min-width: 900px) { .k-finds__grab { display: none; } }
 
 .k-hunt-fallback .k-finds-static { display: grid; gap: 12px; padding: 20px var(--gutter); }
+
+/* ------------------------------------------------------------ globe hero
+ * Home, top of the page (js/kiosk-globe-hero.js): the real Earth across the
+ * bottom of the screen under the headline, the visitor pinned with a sonar
+ * pulse, everyone else here right now pinned too, flights streaking between
+ * them. Always night sky, whatever the theme. */
+.k-gh { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; min-height: 100vh; min-height: 100svh; color: #fff; background: #02040b; }
+.k-gh__stage { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.k-gh__space { position: absolute; inset: 0; background:
+  radial-gradient(1px 1px at 8% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 22% 36%, rgba(255,255,255,.6) 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 38% 9%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 57% 28%, rgba(255,255,255,.7) 50%, transparent 51%),
+  radial-gradient(1px 1px at 71% 11%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 86% 31%, #fff 50%, transparent 51%),
+  radial-gradient(1px 1px at 94% 6%, rgba(255,255,255,.6) 50%, transparent 51%), radial-gradient(1px 1px at 4% 46%, rgba(255,255,255,.5) 50%, transparent 51%),
+  radial-gradient(1px 1px at 64% 44%, rgba(255,255,255,.45) 50%, transparent 51%), radial-gradient(1px 1px at 31% 52%, rgba(255,255,255,.4) 50%, transparent 51%),
+  radial-gradient(80% 55% at 50% 100%, rgba(40,110,255,.32) 0%, rgba(40,110,255,0) 70%),
+  linear-gradient(180deg, #02040b 0%, #050a1c 60%, #071230 100%); }
+.k-gh__earth, .k-gh__fx { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.k-gh__earth { opacity: 0; transition: opacity 1.4s var(--ease); }
+.k-gh__earth.is-ready { opacity: 1; }
+/* the bottom edge melts into the night sky of the cover below */
+.k-gh__fade { position: absolute; left: 0; right: 0; bottom: 0; height: 14%; background: linear-gradient(180deg, rgba(2,4,11,0) 0%, #02040b 100%); }
+.k-gh__route { position: absolute; left: var(--gutter); right: var(--gutter); top: calc(var(--nav-h) + 14px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .6s var(--ease); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-gh__route.is-on { opacity: 1; }
+
+.k-gh__copy { position: relative; z-index: 2; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: clamp(14px, 2vh, 22px); padding-top: calc(var(--nav-h) + clamp(36px, 9vh, 110px)); text-align: center;
+  /* room for the planet under the buttons: on short screens the hero grows rather than overlapping */
+  padding-bottom: clamp(220px, 34svh, 360px); }
+.k-gh__live { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; margin: 0; padding: 8px 14px; border-radius: var(--r-pill); border: 1px solid rgba(255,255,255,.18); background: rgba(10,18,40,.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: calc(13px * var(--type, 1)); color: rgba(255,255,255,.88); }
+/* long city names wrap to a second line rather than being cut off */
+.k-gh__live { border-radius: 18px; text-align: left; }
+.k-gh__live span:last-child { min-width: 0; text-wrap: balance; overflow-wrap: anywhere; }
+.k-gh__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #ff5a1f; box-shadow: 0 0 0 0 rgba(255,90,31,.6); animation: k-pulse 2s infinite; }
+.k-gh__title { max-width: 15ch; margin: 0; font-family: var(--f-serif); font-weight: 400; font-size: calc(clamp(42px, 6.6vw, 104px) * var(--type, 1)); line-height: .96; letter-spacing: -0.015em; text-wrap: balance; text-shadow: 0 2px 30px rgba(0,0,0,.5); }
+.k-gh__dek { max-width: 46ch; margin: 0; font-size: calc(clamp(15px, 1.25vw, 18px) * var(--type, 1)); line-height: 1.45; color: rgba(255,255,255,.78); text-wrap: pretty; text-shadow: 0 1px 14px rgba(0,0,0,.6); }
+.k-gh__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 4px; }
+.k-gh .k-gh__btn { min-height: 48px; padding: 0 24px; border-radius: var(--r-pill); font-size: calc(15px * var(--type, 1)); }
+.k-gh .k-btn--solid.k-gh__btn { background: #fff; color: #0b1020; border-color: #fff; }
+.k-gh .k-gh__btn--ghost { background: rgba(32,72,170,.45); color: #fff; border: 1px solid rgba(140,180,255,.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.k-gh .k-gh__btn--ghost:hover { background: rgba(48,96,210,.6); }
+/* during the opening flight the copy waits; it rises in as the planet settles */
+.k-gh.is-flying:not(.is-hero) .k-gh__copy > * { opacity: 0; }
+.k-gh.is-hero .k-gh__copy > * { animation: k-gh-in 1.1s var(--ease) both; }
+.k-gh.is-hero .k-gh__copy > :nth-child(2) { animation-delay: .12s; }
+.k-gh.is-hero .k-gh__copy > :nth-child(3) { animation-delay: .24s; }
+.k-gh.is-hero .k-gh__copy > :nth-child(4) { animation-delay: .36s; }
+@keyframes k-gh-in { from { opacity: 0; transform: translateY(18px); } }
+/* without WebGL: a still planet from the day imagery */
+.k-gh.is-flat .k-gh__space::after { content: ''; position: absolute; left: 50%; top: 58%; width: max(130vw, 900px); aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0) 40%, rgba(2,4,11,.85) 72%), url('../images/earth/day-2k.jpg') center 30% / 200% auto;
+  box-shadow: 0 0 80px 20px rgba(60,130,255,.35), inset 0 30px 60px rgba(120,180,255,.35); }
+@media (max-width: 759px) {
+  .k-gh__copy { padding-top: calc(var(--nav-h) + 22px); gap: 14px; }
+  .k-gh__title { font-size: calc(clamp(38px, 11vw, 52px) * var(--type, 1)); }
+  .k-gh__dek { font-size: calc(15px * var(--type, 1)); }
+  .k-gh__cta { width: 100%; }
+  .k-gh .k-gh__btn { flex: 1 1 140px; }
+  .k-gh__route { top: calc(var(--nav-h) + 6px); font-size: 10px; letter-spacing: .12em; }
+}
+@media (prefers-reduced-motion: reduce) { html:not([data-motion='full']) .k-gh__dot, html:not([data-motion='full']) .k-gh.is-hero .k-gh__copy > * { animation: none; } }
+html[data-motion='reduced'] .k-gh__dot, html[data-motion='reduced'] .k-gh.is-hero .k-gh__copy > * { animation: none; }
+
+/* ---------------------------------------------------------- phone fixes
+ * Found by scripts/audit-mobile-controls.mjs: every control reachable,
+ * uncovered and big enough to tap at 320–430 px wide. */
+@media (max-width: 759px) {
+  /* The home cover is taller than a phone screen: pinned (sticky) it slid
+   * under the next section before its carousel arrows and buttons ever
+   * scrolled into view. On phones it scrolls with the page. */
+  html:not([data-depth='off']) main > .k-cover { position: relative; }
+  html:not([data-depth='off']) main > .k-cover + * { margin-top: 0; }
+  /* Footer links: a full 32px row each instead of a 17px line of text */
+  .k-footer li + li { margin-top: 0; }
+  .k-footer li a { display: inline-flex; align-items: center; min-height: 32px; }
+  .k-footer__base a { display: inline-flex; align-items: center; min-height: 32px; }
+}
+/* Map beacons: the glow stays small, the tap target doesn't */
+.k-beacon { width: 36px; height: 36px; }
+.k-beacon .k-beacon__core { inset: 13px; }
+.k-beacon .k-beacon__pulse { inset: 7px; }
+.k-beacon--hunt { z-index: 2; }
+.k-hunt-app.is-near .k-beacon { width: 40px; height: 40px; }
+.k-hunt-app.is-near .k-beacon .k-beacon__core { inset: 13px; }
+.k-hunt-app.is-near .k-beacon .k-beacon__pulse { inset: 5px; }
+/* The shop's 3D carousel turned cards past the screen edge and made phones
+ * scroll sideways; its edges already fade out, so clip them */
+.k-wheel--clear { overflow-x: clip; }
+/* Colour dots: the swatch stays its size, the button around it is a 24px
+ * target (WCAG 2.2 minimum); the ring marks the picked one */
+.k-dot { width: 24px; height: 24px; background: none; box-shadow: none; }
+.k-dot::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14); }
+.k-dot::after { inset: 0; }
+.k-dot--lg { width: 30px; height: 30px; }
+.k-tcard .k-dots { gap: 2px; }
+@media (max-width: 560px) {
+  .k-tcard .k-dot { width: 24px; height: 24px; }
+  .k-tcard .k-dot::before { inset: 5px; }
+  .k-tcard .k-dot::after { inset: 2px; }
+}
+/* Touch screens always show the quick-add bag: it sits on the photo under
+ * the heart, clear of the price and colour dots */
+@media (hover: none) { .k-tcard__qa { bottom: auto; top: 62px; } }
+/* Two cards side by side leave a 138px column on the smallest phones,
+ * too narrow for a title, a price and the colour dots: one per row there */
+@media (max-width: 379px) { .k-term-grid { grid-template-columns: minmax(0, 1fr); } }
+/* Small text links and titles get a taller hit row */
+.k-tcard__title button, .k-shop-card__title button { min-height: 28px; }
+.k-gal-tile__story { padding: 4px 0; margin-top: 2px; }
+/* The cover is always night sky: its eyebrow labels stay light in either theme */
+.k-orbit .k-eyebrow, .k-orbit .k-eyebrow b { color: rgba(255,255,255,.9); }
+/* Lost & Found: the map's HUD lets taps through to the globe, and its Finds
+ * drawer and info button inherited that, so filters, sort, Reserve and Fly to
+ * never received a tap. They take taps again. */
+.k-finds, .k-hud__tele-toggle { pointer-events: auto; }

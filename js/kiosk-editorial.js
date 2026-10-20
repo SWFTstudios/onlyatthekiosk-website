@@ -102,7 +102,7 @@
   function tag(root) {
     $$('.k-section-head .k-h2, .k-page-head .k-display', root).forEach((el) => { if (!el.dataset.ed) el.dataset.ed = 'mask'; });
     $$('main .k-media', root).forEach((el) => {
-      if ('edSeen' in el.dataset || el.closest('[data-ed="img"], .k-ed-hero, .k-ed-slide, .k-hero, .k-cover, .k-sky')) return;
+      if ('edSeen' in el.dataset || el.closest('[data-ed="img"], .k-ed-hero, .k-ed-slide, .k-hero, .k-cover, .k-gh')) return;
       el.dataset.edSeen = '';
     });
   }
