@@ -12,7 +12,9 @@
  * Then the menu, settings, account and page-specific panels are opened and
  * their controls checked the same way.
  *
- *   node scripts/audit-mobile-controls.mjs [--base-url=http://localhost:8099] [--pages=index.html,vault.html] [--json=out.json]
+ *   node scripts/audit-mobile-controls.mjs [--base-url=http://localhost:8099] [--pages=index.html,vault.html] [--json=out.json] [--live]
+ * --live answers /api/live with a handful of travelers, so the nav's live
+ * count and the globe pins (hidden without the API) get checked too.
  * Needs Playwright with Chromium, and the site served (e.g. python3 -m http.server 8099).
  */
 
@@ -26,6 +28,8 @@ const PAGES = arg('pages', [
   'radio.html', 'vault.html', 'store.html', 'flights.html', 'lost-and-found.html', 'account.html', 'story.html?s=andy-q50', 'the-garage.html',
 ].join(',')).split(',');
 const VIEWPORTS = [[320, 568], [360, 740], [390, 844], [430, 932]];
+const LIVE = process.argv.includes('--live');
+const LIVE_REPLY = JSON.stringify({ enabled: true, count: 128, viewers: [{ lat: 51.5, lon: -0.1, city: 'London', country: 'GB', n: 4 }, { lat: 6.5, lon: 3.4, city: 'Lagos', country: 'NG', n: 2 }] });
 
 // Panels to open on every page: [label, opener(s), panel]; on phones settings
 // and account are reached from the menu, so their openers go through it
@@ -136,6 +140,7 @@ const browser = await chromium.launch();
 for (const [w, h] of VIEWPORTS) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await ctx.addInitScript(() => { try { localStorage.setItem('kiosk:onboarded', 'true'); sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { /* storage blocked */ } });
+  if (LIVE) await ctx.route('**/api/live', (r) => r.fulfill({ contentType: 'application/json', body: LIVE_REPLY }));
   for (const path of PAGES) {
     const page = await ctx.newPage();
     const errors = [];

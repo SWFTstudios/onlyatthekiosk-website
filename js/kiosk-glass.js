@@ -326,10 +326,13 @@
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
-    // Glass header: local clock · the KIOSK symbol (centre) · day/night · radio · menu. Everything else lives in the menu.
+    // Glass header: local clock and who's here now · the KIOSK symbol (centre) · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
-        <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
+        <div class="k-nav__left">
+          <div class="k-nav__clock" aria-hidden="true"><span data-clock>--:--:--</span><small data-clock-zone></small></div>
+          <a class="k-nav__live" href="index.html" data-live-nav hidden><span class="k-nav__live-dot" aria-hidden="true"></span><b data-live-count>1</b><span class="k-nav__live-label">online</span></a>
+        </div>
         <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">${KIOSK_SYMBOL}</span></a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
@@ -5503,6 +5506,9 @@
       count.textContent = live.enabled && others
         ? `${live.count} travelers here now${home && home.city ? ` · you’re in ${home.city}` : ''}`
         : `You’re here${home && home.city ? ` from ${home.city}` : ''} · travelers from everywhere`;
+      // the chip's dot glows the nav's "online" green once the count is real
+      const chip = $('[data-gh-live]', sec);
+      if (chip) chip.classList.toggle('is-live', live.enabled);
       if (hero) hero.setLive(live.viewers, live.count);
     };
     document.addEventListener('kiosk:live', showLive, { signal });
@@ -5522,35 +5528,72 @@
   }
 
   /* ------------------------------------------------------- live presence
-   * Every open tab checks in about once a minute (/api/live) so the home
-   * globe can pin who's on the site right now, at city level. Nothing runs
-   * where the API isn't there (no database), and a closing tab checks out. */
+   * Every open tab checks in every half minute (/api/live) so the nav can
+   * count who's on the site right now and the home globe can pin them, at
+   * city level. Nothing shows where the API isn't there (no database), and a
+   * closing tab checks out. */
   const live = { enabled: false, count: 0, viewers: [] };
+  const LIVE_BEAT = 30000;
   function bindLive() {
     let id = '';
     try {
       id = sessionStorage.getItem('kiosk:live') || '';
       if (!id) { id = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join(''); sessionStorage.setItem('kiosk:live', id); }
     } catch (e) { return; }
-    let timer = 0; let off = false;
+    let timer = 0; let off = false; let fails = 0;
+    const publish = () => { showNavLive(); document.dispatchEvent(new CustomEvent('kiosk:live', { detail: live })); };
+    // a network blip retries; an API that says it's off (or keeps failing) stops for this page
+    const miss = () => { fails += 1; if (fails >= 3) off = true; else timer = setTimeout(beat, LIVE_BEAT * 2); };
     const beat = () => {
       clearTimeout(timer);
       if (off || document.hidden) return;
       fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (!d || !d.enabled) { off = true; return; }
+          if (d && d.enabled === false) { off = true; live.enabled = false; publish(); return; }
+          if (!d || !d.enabled) { miss(); return; }
+          fails = 0;
           Object.assign(live, d);
-          document.dispatchEvent(new CustomEvent('kiosk:live', { detail: live }));
-          timer = setTimeout(beat, 60000);
+          publish();
+          timer = setTimeout(beat, LIVE_BEAT);
         })
-        .catch(() => { off = true; });
+        .catch(miss);
     };
     document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
     window.addEventListener('pagehide', () => {
+      clearTimeout(timer);
       if (!off && navigator.sendBeacon) navigator.sendBeacon('/api/live', new Blob([JSON.stringify({ id, leave: true })], { type: 'application/json' }));
     });
+    // back from the back/forward cache: it checked out on the way away, so check in again
+    window.addEventListener('pageshow', (e) => { if (e.persisted) beat(); });
+    // the nav's dot takes you to the globe; on the home page, down to where the whole planet's in view
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('[data-live-nav]');
+      const hero = a && $('[data-globe-hero]');
+      if (!hero) return;
+      e.preventDefault();
+      const top = hero.offsetTop + Math.max(0, hero.offsetHeight - window.innerHeight) * 0.45;
+      const lenis = window.KioskEditorial && window.KioskEditorial.lenis;
+      if (lenis) lenis.scrollTo(top, { duration: 1.6 }); else window.scrollTo({ top, behavior: REDUCED ? 'auto' : 'smooth' });
+    }, true);   // (capture: ahead of the page router, which would reload the home page)
     beat();
+  }
+  // The nav's glowing dot: everyone on the site right now, you included
+  function showNavLive() {
+    const n = Math.max(1, live.count || 0);
+    const said = n === 1 ? 'You’re the only traveler on KIOSK right now' : `${n} travelers on KIOSK right now`;
+    $$('[data-live-nav]').forEach((a) => {
+      a.hidden = !live.enabled;
+      const c = $('[data-live-count]', a);
+      if (c && c.textContent !== String(n)) {
+        c.textContent = String(n);
+        a.classList.remove('is-bump'); void a.offsetWidth; a.classList.add('is-bump');
+      }
+      a.title = said;
+      a.setAttribute('aria-label', `${said}. See them on the globe`);
+    });
+    const nav = $('.k-nav');
+    if (nav) nav.classList.toggle('has-live', live.enabled);
   }
 
   function loadScript(src) {

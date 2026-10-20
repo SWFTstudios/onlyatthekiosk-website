@@ -256,11 +256,19 @@
         viewers.forEach((v) => {
           const s = earth.project(v.lat, v.lon);
           if (!s.front || s.x < -20 || s.x > w + 20 || s.y < -20 || s.y > h + 20) return;
+          // a glowing green dot, the same "online" green as the dot in the nav,
+          // bigger where more people are; a slow ring breathes off it
           const ph = ((now / 3200) + (v.lat * 7 + v.lon) / 97) % 1;
-          ctx.strokeStyle = `rgba(190,220,255,${(1 - ph) * 0.55 * heroK})`; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(s.x, s.y, 4 + ph * 14, 0, 6.283); ctx.stroke();
-          ctx.fillStyle = `rgba(230,242,255,${heroK})`;
-          ctx.beginPath(); ctx.arc(s.x, s.y, v.n > 1 ? 3.6 : 2.8, 0, 6.283); ctx.fill();
+          const r = Math.min(5.5, 2.8 + Math.log2(v.n || 1) * 0.9);
+          const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 4.5);
+          glow.addColorStop(0, `rgba(46,232,138,${0.55 * heroK})`); glow.addColorStop(1, 'rgba(46,232,138,0)');
+          ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(s.x, s.y, r * 4.5, 0, 6.283); ctx.fill();
+          ctx.strokeStyle = `rgba(46,232,138,${(1 - ph) * 0.6 * heroK})`; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(s.x, s.y, r + 2 + ph * 16, 0, 6.283); ctx.stroke();
+          ctx.fillStyle = `rgba(46,232,138,${heroK})`;
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, 6.283); ctx.fill();
+          ctx.fillStyle = `rgba(225,255,238,${heroK})`;
+          ctx.beginPath(); ctx.arc(s.x, s.y, r * 0.45, 0, 6.283); ctx.fill();
           if (labelled < maxLabels && v.city && angle(v, home) > 6 && s.y > labelFrom) { labelled += 1; ctx.globalAlpha = heroK; label(`${v.city}${v.n > 1 ? ` · ${v.n}` : ''}`, s.x, s.y, false); ctx.globalAlpha = 1; }
         });
       }
