@@ -2445,26 +2445,74 @@
    * header that tucks away while you read, and cards that tilt toward the
    * pointer. Off with Settings › Depth: Flat or reduced motion.
    * -------------------------------------------------------------------- */
+  /* ------------------------------------------------- one scroll pass
+   * Everything that follows the scroll runs in one pass per frame. With
+   * Lenis (smooth scroll) the pass runs inside Lenis's own frame, right after
+   * it moves the page: no frame of lag, no second loop. Without it, on the
+   * next frame after a scroll event. Listeners get scrollY and work from
+   * geometry they measured on resize (see measured()), never reading layout
+   * mid-scroll, so one listener's style writes can't force a layout for the
+   * next. -------------------------------------------------------------- */
+  const scrollFns = new Set();
+  let scrollRaf = 0; let lenisOn = null;
+  const runScroll = () => { scrollRaf = 0; const y = window.scrollY; scrollFns.forEach((fn) => fn(y)); };
+  const smoothLenis = () => { const l = window.KioskEditorial && window.KioskEditorial.lenis; return l || null; };
+  function hookLenis() {
+    const l = smoothLenis();
+    if (l && l !== lenisOn) { l.on('scroll', runScroll); lenisOn = l; }
+  }
+  window.addEventListener('scroll', () => {
+    hookLenis();
+    // Lenis reports its own scrolls (native ones included) through runScroll
+    if (smoothLenis() && smoothLenis() === lenisOn) return;
+    if (!scrollRaf) scrollRaf = requestAnimationFrame(runScroll);
+  }, { passive: true });
+  function onScrollFrame(fn, signal) {
+    scrollFns.add(fn);
+    if (signal) signal.addEventListener('abort', () => scrollFns.delete(fn));
+    hookLenis();
+    fn(window.scrollY);
+  }
+  /** Where an element sits in the page, ignoring transforms (reveals, the roaming globe). */
+  function docBox(el) {
+    let x = 0; let y = 0;
+    for (let e = el; e; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+    return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+  }
+  /** Calls measure() now, on resize, and whenever the page changes height (late images, rails, fonts). */
+  function measured(measure, signal) {
+    let raf = 0;
+    const again = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; measure(); runScroll(); }); };
+    measure();
+    window.addEventListener('resize', again, { passive: true, signal });
+    window.addEventListener('load', again, { signal });
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(again); ro.observe(document.body); if (signal) signal.addEventListener('abort', () => ro.disconnect()); }
+  }
+
   function bindDepth() {
     const d = document.documentElement;
-    let lastY = window.scrollY; let ticking = false;
-    const onScroll = () => {
-      ticking = false;
-      const y = window.scrollY;
+    let lastY = window.scrollY;
+    // the hero's extent and the cover, looked up once per page (kiosk:page) rather than every frame
+    let heroEnd = 0; let cover = null; let coverTop = 0; let coverH = 0;
+    const measure = () => {
+      const hero = $('[data-globe-hero]');
+      heroEnd = hero ? hero.offsetTop + hero.offsetHeight * 0.8 : 0;
+      cover = $('.k-cover');
+      if (cover) { coverTop = cover.offsetTop; coverH = cover.offsetHeight || window.innerHeight; }
+    };
+    const onScroll = (y) => {
       d.classList.toggle('is-scrolled', y > 8);
       // The nav stays put over the globe hero
-      const hero = $('[data-globe-hero]');
-      const inHero = hero && y < hero.offsetTop + hero.offsetHeight * 0.8;
+      const inHero = y < heroEnd;
       if (Math.abs(y - lastY) > 6) { d.classList.toggle('is-reading', !inHero && y > lastY && y > 160); lastY = y; }
-      const cover = $('.k-cover');
       if (cover && !REDUCED && prefs.depth !== 'off') {
-        // progress past the cover itself (the globe hero sits above it on the home page)
-        const p = Math.min(1, Math.max(0, (y - cover.offsetTop) / (cover.offsetHeight || window.innerHeight)));
+        const p = Math.min(1, Math.max(0, (y - coverTop) / coverH));
         cover.style.setProperty('--hero-p', p.toFixed(3));
       }
     };
-    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-    onScroll();
+    measured(measure);
+    document.addEventListener('kiosk:page', () => requestAnimationFrame(() => { measure(); onScroll(window.scrollY); }));
+    onScrollFrame(onScroll);
 
     if (REDUCED || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     const TILT = '.k-card, .k-tile, .k-feature-card, .k-shop-card__media, .k-vimeo__card';
@@ -3025,84 +3073,94 @@
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
     const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     const shown = (el) => el && !el.hidden && el.offsetParent !== null;
-    let ticking = false; let lastRes = 1;
-    const update = () => {
-      ticking = false;
-      const vh = window.innerHeight; const vw = document.documentElement.clientWidth; const y = window.scrollY;
-      const N = stage.getBoundingClientRect();
-      if (!N.width) return;
-      const ncx = N.left + N.width / 2; const ncy = N.top + N.height / 2;
-      // the spots, each with the scroll position where it's "in focus"
-      const home = { at: y + ncy - vh / 2, cx: ncx, cy: ncy, w: N.width, o: 1, dock: 1 };
+    // page geometry, measured on resize (not per frame)
+    let G = null;
+    const measure = () => {
+      G = {
+        vh: window.innerHeight, vw: document.documentElement.clientWidth,
+        stage: docBox(stage),
+        slot: shown(slot) && board ? docBox(slot) : null,
+        boardBottom: board ? docBox(board).y + board.offsetHeight : 0,
+        stories: shown(stories) ? docBox(stories) : null,
+      };
+    };
+    let lastRes = 1; let wasDocked = null; let shownNodes = -1;
+    const update = (y) => {
+      if (!G || !G.stage.w) return;
+      const { vh, vw } = G; const N = G.stage;
+      // every position in page coordinates; only the camera (y) moves
+      const ncx = N.x + N.w / 2; const ncy = N.y + N.h / 2;
+      const home = { at: ncy - vh / 2, cx: ncx, cy: ncy, w: N.w, o: 1, dock: 1 };
       const spots = [];
-      if (shown(slot) && board) {
-        const sr = slot.getBoundingClientRect(); const b = board.getBoundingClientRect();
-        // tucked under the board while its bottom edge is low on the screen, out by the time it's risen past the middle
-        const e = clamp01((vh * 0.95 - b.bottom) / (vh * 0.5));
-        spots.push({ at: y + b.bottom - vh * 0.45, cx: sr.left + sr.width / 2, cy: sr.top + sr.height / 2 - (1 - e) * 0.62 * sr.height, w: sr.width * (0.8 + 0.2 * e), o: 0.15 + 0.85 * e, dock: 0 });
+      if (G.slot) {
+        const S = G.slot;
+        // tucked under the board while its bottom edge is low on the screen, out once it's risen past the middle
+        const e = clamp01((vh * 0.95 - (G.boardBottom - y)) / (vh * 0.5));
+        spots.push({ at: G.boardBottom - vh * 0.45, cx: S.x + S.w / 2, cy: S.y + S.h / 2 - (1 - e) * 0.62 * S.h, w: S.w * (0.8 + 0.2 * e), o: 0.15 + 0.85 * e, dock: 0 });
       }
-      if (shown(stories)) {
-        const r = stories.getBoundingClientRect();
-        spots.push({ at: y + r.top + r.height / 2 - vh / 2, cx: vw / 2, cy: r.top + r.height / 2, w: Math.min(vw * 0.96, Math.max(r.height * 1.25, N.width * 1.3)), o: 0.14, dock: 0 });
+      if (G.stories) {
+        const R = G.stories;
+        spots.push({ at: R.y + R.h / 2 - vh / 2, cx: vw / 2, cy: R.y + R.h / 2, w: Math.min(vw * 0.96, Math.max(R.h * 1.25, N.w * 1.3)), o: 0.14, dock: 0 });
       }
       // only the spots above the Atlas lead into it
-      const path = spots.filter((p) => p.at < home.at).sort((a, b) => a.at - b.at).concat(home);
-      let T = path[path.length - 1];
+      const path = spots.filter((pt) => pt.at < home.at).sort((m, n) => m.at - n.at).concat(home);
+      let T = home;
       if (y <= path[0].at) T = path[0];
-      else if (y < T.at) {
+      else if (y < home.at) {
         let i = 0; while (y >= path[i + 1].at) i += 1;
-        const a = path[i]; const b = path[i + 1]; const k = ease((y - a.at) / Math.max(1, b.at - a.at));
-        T = { cx: lerp(a.cx, b.cx, k), cy: lerp(a.cy, b.cy, k), w: lerp(a.w, b.w, k), o: lerp(a.o, b.o, k), dock: lerp(a.dock, b.dock, k) };
+        const m = path[i]; const n = path[i + 1]; const k = ease((y - m.at) / Math.max(1, n.at - m.at));
+        T = { cx: lerp(m.cx, n.cx, k), cy: lerp(m.cy, n.cy, k), w: lerp(m.w, n.w, k), o: lerp(m.o, n.o, k), dock: lerp(m.dock, n.dock, k) };
       }
-      const sc = T.w / N.width;
+      const sc = T.w / N.w;
       const docked = T.dock > 0.999;
+      // page-coordinate offsets: the float rides in the page, so the scroll itself never has to be chased
       float.style.transform = docked ? '' : `translate3d(${(T.cx - ncx).toFixed(1)}px, ${(T.cy - ncy).toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
       float.style.opacity = T.o.toFixed(3);
-      float.style.pointerEvents = docked ? '' : 'none';
+      if (docked !== wasDocked) { wasDocked = docked; float.style.pointerEvents = docked ? '' : 'none'; sec.classList.toggle('is-docked', docked); }
       // the thumbnails come up as it lands
-      const nk = clamp01((T.dock - 0.55) / 0.45);
-      nodesEl.style.opacity = nk.toFixed(3);
-      nodesEl.style.visibility = nk < 0.02 ? 'hidden' : '';
-      sec.classList.toggle('is-docked', docked);
-      // draw finer while it's shown bigger than its canvas
-      const r2 = sc > 1.15 ? 2 : 1;
+      const nk = Math.round(clamp01((T.dock - 0.55) / 0.45) * 100) / 100;
+      if (nk !== shownNodes) { shownNodes = nk; nodesEl.style.opacity = String(nk); nodesEl.style.visibility = nk < 0.02 ? 'hidden' : ''; }
+      // draw finer while it's shown bigger than its canvas (only where the screen isn't already sharp)
+      const r2 = sc > 1.15 && (window.devicePixelRatio || 1) < 1.5 ? 1.6 : 1;
       if (r2 !== lastRes) { lastRes = r2; setRes(r2); }
     };
-    const kick = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    window.addEventListener('scroll', kick, { passive: true, signal });
-    window.addEventListener('resize', kick, { passive: true, signal });
-    // the rails and photos above it settle their heights after load
-    if ('ResizeObserver' in window) { const ro = new ResizeObserver(kick); ro.observe(document.body); signal.addEventListener('abort', () => ro.disconnect()); }
+    measured(measure, signal);
+    onScrollFrame(update, signal);
     signal.addEventListener('abort', () => { float.style.transform = ''; float.style.opacity = ''; nodesEl.style.opacity = ''; nodesEl.style.visibility = ''; });
-    update();
   }
 
   /* The dark stretch of the home page: as the departments come up the
-   * screen the whole page fades to black, and stays black through Why the
-   * kiosk, fading back as the next section comes up. --zone (0 → 1 on
-   * <html>) drives the page's colours (css: "home: the dark zone"). */
+   * screen the page fades to black, stays black through Why the kiosk and
+   * fades back as the next section comes up. The black is one fixed layer
+   * behind the sections whose opacity follows the scroll (the compositor
+   * does that alone, nothing is restyled); the text flips to light once,
+   * halfway, with a short CSS transition (html.is-zone-dark). */
   function bindZone() {
     const d = document.documentElement;
+    const main = $('main');
     const secs = ['departments', 'about'].map((k) => $(`[data-home="${k}"]`)).filter((s) => s && !s.hidden);
-    if (!secs.length) return;
+    if (!secs.length || !main) return;
     const signal = pageAbort.signal;
+    const layer = document.createElement('div');
+    layer.className = 'k-zone'; layer.setAttribute('aria-hidden', 'true');
+    main.prepend(layer);
     const c01 = (v) => Math.max(0, Math.min(1, v));
-    let shown = -1; let ticking = false;
-    const update = () => {
-      ticking = false;
-      const vh = window.innerHeight;
+    let boxes = []; let vh = window.innerHeight;
+    const measure = () => { vh = window.innerHeight; boxes = secs.map(docBox); };
+    let shown = -1; let dark = false;
+    const update = (y) => {
       // each dark section: in as its top rises from 90% to 40% of the screen, out as its bottom does
       // (summed, so back-to-back sections hand over without a dip)
       let z = 0;
-      secs.forEach((s) => { const r = s.getBoundingClientRect(); z += c01((vh * 0.9 - r.top) / (vh * 0.5)) * (1 - c01((vh * 0.9 - r.bottom) / (vh * 0.5))); });
-      z = c01(z);
-      if (Math.abs(z - shown) > 0.003 || ((z === 0 || z === 1) && z !== shown)) { shown = z; d.style.setProperty('--zone', z.toFixed(3)); }
+      boxes.forEach((b) => { const top = b.y - y; z += c01((vh * 0.9 - top) / (vh * 0.5)) * (1 - c01((vh * 0.9 - (top + b.h)) / (vh * 0.5))); });
+      z = Math.round(c01(z) * 200) / 200;
+      if (z !== shown) { shown = z; layer.style.opacity = String(z); }
+      const nowDark = dark ? z > 0.4 : z > 0.6;   // a little hysteresis so it can't flicker at the midpoint
+      if (nowDark !== dark) { dark = nowDark; d.classList.toggle('is-zone-dark', dark); }
     };
-    const kick = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    window.addEventListener('scroll', kick, { passive: true, signal });
-    window.addEventListener('resize', kick, { passive: true, signal });
-    signal.addEventListener('abort', () => d.style.removeProperty('--zone'));
-    update();
+    measured(measure, signal);
+    onScrollFrame(update, signal);
+    signal.addEventListener('abort', () => { layer.remove(); d.classList.remove('is-zone-dark'); });
   }
 
   /* ---------------------------------------------------- why the kiosk
@@ -5495,7 +5553,7 @@
       const w = canvas.clientWidth; const h = canvas.clientHeight;
       if (!w || !h) return;
       // (opts.res: an extra factor while the canvas is shown scaled up)
-      const dpr = Math.min((window.devicePixelRatio || 1) * (opts.res ? opts.res() : 1), 3);
+      const dpr = Math.min((window.devicePixelRatio || 1) * (opts.res ? opts.res() : 1), 2);
       if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -5505,14 +5563,22 @@
       ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
 
       // Wireframe: back half faint, front half crisp
+      // (runs of segments that share an alpha, rounded to 1/16, go down as one
+      // stroke: a few dozen strokes a frame instead of ~1,600)
       const line = (pts, front, back, width) => {
         ctx.lineWidth = width;
+        let a = -1; let open = false;
         for (let i = 1; i < pts.length; i += 1) {
           const p = pts[i - 1]; const q = pts[i];
           const z = (p[2] + q[2]) / 2;
-          ctx.globalAlpha = z > 0 ? front * (0.45 + 0.55 * z) : back;
-          ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+          const al = Math.round((z > 0 ? front * (0.45 + 0.55 * z) : back) * 16) / 16;
+          if (al !== a) {
+            if (open) ctx.stroke();
+            a = al; ctx.globalAlpha = al; ctx.beginPath(); ctx.moveTo(p[0], p[1]); open = true;
+          }
+          ctx.lineTo(q[0], q[1]);
         }
+        if (open) ctx.stroke();
       };
       for (let la = -75; la <= 75; la += 15) {
         const pts = [];

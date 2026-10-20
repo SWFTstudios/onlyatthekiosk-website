@@ -4670,29 +4670,39 @@ html[data-motion='reduced'] .k-gh__dot, html[data-motion='reduced'] .k-gh.is-her
  * under the board, swells behind the latest stories, settles in the Atlas),
  * so those sections stack above the Atlas and let the page colour show
  * through instead of painting their own. */
-html body.k[data-page='home'] { background: var(--zone-bg); }
 body[data-page='home'] main { overflow-x: clip; }
 html body[data-page='home'] main > .k-gh ~ * { position: relative; z-index: 1; background: transparent; }
-html body[data-page='home'] main > .k-gh + * { background: var(--zone-bg); }
+html body[data-page='home'] main > .k-gh + * { background: var(--bg); }
 html body[data-page='home'] main > .k-concourse-home { z-index: 4; }
 html body[data-page='home'] main > [data-home='garage'] { z-index: 3; }
 html body[data-page='home'] main > [data-home='globe'] { z-index: 2; overflow: visible; }
 
 /* ---------------------------------------------------- home: the dark zone
- * --zone (0 → 1, set on <html> by bindZone) fades the page to black as the
- * departments come up and back again after Why the kiosk. The colours are
- * mixed once here, against the theme's own, and every section after the
- * hero reads them in place of the theme tokens. */
-body[data-page='home'] {
-  --zone-bg: color-mix(in srgb, #060607 calc(var(--zone, 0) * 100%), var(--bg));
-  --zone-ink: color-mix(in srgb, #f2f0eb calc(var(--zone, 0) * 100%), var(--ink));
-  --zone-ink-2: color-mix(in srgb, rgba(242,240,235,.7) calc(var(--zone, 0) * 100%), var(--ink-2));
-  --zone-ink-3: color-mix(in srgb, rgba(242,240,235,.48) calc(var(--zone, 0) * 100%), var(--ink-3));
-  --zone-line: color-mix(in srgb, rgba(255,255,255,.1) calc(var(--zone, 0) * 100%), var(--line));
-  --zone-line-2: color-mix(in srgb, rgba(255,255,255,.18) calc(var(--zone, 0) * 100%), var(--line-2));
-  --zone-glass: color-mix(in srgb, rgba(255,255,255,.06) calc(var(--zone, 0) * 100%), var(--glass));
+ * The page fades to black as the departments come up and back after Why
+ * the kiosk. The black is one fixed layer behind the sections (.k-zone,
+ * opacity set by bindZone: compositor only, nothing restyles while you
+ * scroll). The ink flips once, halfway (html.is-zone-dark), and eases over
+ * via registered colours so the change is a short fade, not a snap. */
+.k-zone { position: fixed; inset: 0; z-index: 0; background: #060607; opacity: 0; pointer-events: none; will-change: opacity; }
+@property --zk-ink { syntax: '<color>'; inherits: true; initial-value: #0f0f10; }
+@property --zk-ink-2 { syntax: '<color>'; inherits: true; initial-value: #555; }
+@property --zk-ink-3 { syntax: '<color>'; inherits: true; initial-value: #888; }
+@property --zk-line { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --zk-line-2 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --zk-glass { syntax: '<color>'; inherits: true; initial-value: transparent; }
+/* the theme's own values, taken once where the theme defines them */
+body[data-page='home'] { --theme-ink: var(--ink); --theme-ink-2: var(--ink-2); --theme-ink-3: var(--ink-3); --theme-line: var(--line); --theme-line-2: var(--line-2); --theme-glass: var(--glass); }
+body[data-page='home'] main > .k-gh ~ * {
+  --zk-ink: var(--theme-ink); --zk-ink-2: var(--theme-ink-2); --zk-ink-3: var(--theme-ink-3);
+  --zk-line: var(--theme-line); --zk-line-2: var(--theme-line-2); --zk-glass: var(--theme-glass);
+  --ink: var(--zk-ink); --ink-2: var(--zk-ink-2); --ink-3: var(--zk-ink-3); --line: var(--zk-line); --line-2: var(--zk-line-2); --glass: var(--zk-glass);
+  color: var(--ink);
+  transition: --zk-ink .45s var(--ease), --zk-ink-2 .45s var(--ease), --zk-ink-3 .45s var(--ease), --zk-line .45s var(--ease), --zk-line-2 .45s var(--ease), --zk-glass .45s var(--ease);
 }
-body[data-page='home'] main > .k-gh ~ * { --ink: var(--zone-ink); --ink-2: var(--zone-ink-2); --ink-3: var(--zone-ink-3); --line: var(--zone-line); --line-2: var(--zone-line-2); --glass: var(--zone-glass); --bg: var(--zone-bg); color: var(--ink); }
+html.is-zone-dark body[data-page='home'] main > .k-gh ~ * {
+  --zk-ink: #f2f0eb; --zk-ink-2: rgba(242,240,235,.7); --zk-ink-3: rgba(242,240,235,.48);
+  --zk-line: rgba(255,255,255,.1); --zk-line-2: rgba(255,255,255,.18); --zk-glass: rgba(255,255,255,.06);
+}
 
 /* ----------------------------------------------------------- why the kiosk
  * A two-sided slider: the quote and its reader on one half, a lifestyle

@@ -51,8 +51,12 @@
         lerp: 0.09,
         wheelMultiplier: 0.95,
         allowNestedScroll: true,
-        // Globes, maps, the radio drum and open panels keep their own wheel
-        prevent: (node) => locked() || !!(node.closest && node.closest('canvas, iframe, .maplibregl-map, [data-lenis-prevent]')),
+        // Maps, embeds and open panels keep their own wheel. Canvases don't: the
+        // home page is mostly canvas (hero planet, Atlas globe), and scrolling
+        // natively over them but smoothly everywhere else made the page jump
+        // back and forth. The ones that zoom or turn on the wheel take it with
+        // preventDefault, which virtualScroll below respects.
+        prevent: (node) => locked() || !!(node.closest && node.closest('iframe, .maplibregl-map, [data-lenis-prevent]')),
         // A component that already handled the wheel (preventDefault) wins
         virtualScroll: (e) => !e.event.defaultPrevented,
       });
