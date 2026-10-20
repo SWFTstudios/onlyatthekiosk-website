@@ -97,7 +97,7 @@
     const ctx = fx.getContext('2d');
     let w = 0; let h = 0; let dpr = 1;
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 760 ? 1.25 : 2);
       w = fx.clientWidth; h = fx.clientHeight;
       fx.width = Math.max(2, Math.round(w * dpr)); fx.height = Math.max(2, Math.round(h * dpr));
     };
@@ -326,7 +326,7 @@
       // following the scroll or a hand: every frame; idling: half rate is
       // plenty for a slow planet, and kind to phones
       const busy = drag || Math.abs(scene.p - scene.P) > 0.0004 || Math.abs(D.vel) > 0.0004;
-      if (busy || now - lastT > 30) {
+      if (busy || now - lastT > (w < 760 ? 50 : 30)) {
         lastT = now;
         // Lenis already eases the page; easing again on top would leave the planet trailing it
         const smooth = !!(window.KioskEditorial && window.KioskEditorial.lenis);

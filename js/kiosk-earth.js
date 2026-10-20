@@ -47,7 +47,7 @@
   const FRAG = `#version 300 es
     precision highp float;
     uniform vec2 res; uniform vec3 cam; uniform vec3 fw; uniform vec3 rt; uniform vec3 upv;
-    uniform float fov; uniform float px; uniform float py; uniform vec3 sun; uniform float relief; uniform float nightK;
+    uniform float fov; uniform float px; uniform float py; uniform vec3 sun; uniform float relief; uniform float nightK; uniform float lowQ;
     uniform sampler2D dayT; uniform sampler2D nightT; uniform sampler2D reliefT; uniform sampler2D waterT;
     out vec4 o;
     const float PI = 3.14159265;
@@ -73,14 +73,19 @@
         vec3 P = normalize(cam + d * (-b - sqrt(h)));
         float lat = asin(clamp(P.y, -1.0, 1.0)); float lon = atan(P.x, P.z);
         vec2 uv = vec2(lon / (2.0 * PI) + 0.5, 0.5 - lat / PI);
-        // terrain: tilt the normal along the relief gradient
-        vec3 E = normalize(vec3(cos(lon), 0.0, -sin(lon)));
-        vec3 N = cross(P, E);
-        vec2 px = vec2(1.0 / 2048.0, 1.0 / 1024.0);
-        float hE = texture(reliefT, uv + vec2(px.x, 0.0)).r - texture(reliefT, uv - vec2(px.x, 0.0)).r;
-        float hN = texture(reliefT, uv - vec2(0.0, px.y)).r - texture(reliefT, uv + vec2(0.0, px.y)).r;
-        vec3 n = normalize(P - (E * hE / max(cos(lat), 0.15) + N * hN) * relief);
-        float water = tex(waterT, uv).r;
+        // terrain: tilt the normal along the relief gradient (skipped in
+        // lowQ: phones save 5 texture taps per pixel and keep the photo look)
+        vec3 n = P;
+        float water = 0.0;
+        if (lowQ < 0.5) {
+          vec3 E = normalize(vec3(cos(lon), 0.0, -sin(lon)));
+          vec3 N = cross(P, E);
+          vec2 px = vec2(1.0 / 2048.0, 1.0 / 1024.0);
+          float hE = texture(reliefT, uv + vec2(px.x, 0.0)).r - texture(reliefT, uv - vec2(px.x, 0.0)).r;
+          float hN = texture(reliefT, uv - vec2(0.0, px.y)).r - texture(reliefT, uv + vec2(0.0, px.y)).r;
+          n = normalize(P - (E * hE / max(cos(lat), 0.15) + N * hN) * relief);
+          water = tex(waterT, uv).r;
+        }
         vec3 day = pow(tex(dayT, uv).rgb, vec3(1.08));
         float sunUp = dot(P, sunN);
         float lit = smoothstep(-0.10, 0.22, sunUp);
@@ -136,7 +141,7 @@
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    ['res', 'cam', 'fw', 'rt', 'upv', 'fov', 'px', 'py', 'sun', 'relief', 'nightK', 'dayT', 'nightT', 'reliefT', 'waterT'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
+    ['res', 'cam', 'fw', 'rt', 'upv', 'fov', 'px', 'py', 'sun', 'relief', 'nightK', 'lowQ', 'dayT', 'nightT', 'reliefT', 'waterT'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
 
     // Placeholder pixels until the images arrive
     const textures = {};
@@ -155,22 +160,28 @@
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       const ext = gl.getExtension('EXT_texture_filter_anisotropic');
-      if (ext) gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+      if (ext && !small) gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
       invalidate();
     };
     const base = opts.base || 'images/earth/';
     const hd = opts.hd != null ? opts.hd : Math.min(window.innerWidth, window.innerHeight) > 700;
+    // Small screens get 1k textures: half the download and a quarter of the
+    // GPU texture memory, indistinguishable under the hero headline on a phone.
+    const small = Math.min(window.innerWidth, window.innerHeight) < 520;
     api.ready = Promise.all([
-      loadImage(`${base}${hd ? 'day-4k' : 'day-2k'}.jpg`).then((im) => upload('dayT', im)),
-      loadImage(`${base}relief.jpg`).then((im) => upload('reliefT', im)),
+      loadImage(`${base}${small ? 'day-1k' : hd ? 'day-4k' : 'day-2k'}.jpg`).then((im) => upload('dayT', im)),
+      loadImage(`${base}${small ? 'relief-1k' : 'relief'}.jpg`).then((im) => upload('reliefT', im)),
       loadImage(`${base}water.jpg`).then((im) => upload('waterT', im)),
-      loadImage(`${base}${hd ? 'night-4k' : 'night'}.jpg`).then((im) => upload('nightT', im)),
+      loadImage(`${base}${small ? 'night-1k' : hd ? 'night-4k' : 'night'}.jpg`).then((im) => upload('nightT', im)),
     ]).then(() => { canvas.classList.add('is-ready'); });
     api.ready.catch(() => {});
 
     let w = 0; let h = 0; let dpr = 1;
     function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, opts.maxDpr || 1.75);
+      // The fragment shader runs per pixel: on phones cap the render scale at
+      // 1x (up to 4x fewer pixels than a 2x retina canvas, same look at arm's length).
+      const maxDpr = window.innerWidth < 760 ? 1 : (opts.maxDpr || 1.75);
+      dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = Math.max(2, Math.round(w * dpr)); canvas.height = Math.max(2, Math.round(h * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -219,7 +230,7 @@
       gl.uniform2f(U.res, canvas.width, canvas.height);
       gl.uniform3fv(U.cam, C); gl.uniform3fv(U.fw, F); gl.uniform3fv(U.rt, R); gl.uniform3fv(U.upv, UP);
       gl.uniform1f(U.fov, view.fov); gl.uniform1f(U.px, view.px); gl.uniform1f(U.py, view.py);
-      gl.uniform3fv(U.sun, s); gl.uniform1f(U.relief, state.relief); gl.uniform1f(U.nightK, state.nightK);
+      gl.uniform3fv(U.sun, s); gl.uniform1f(U.relief, state.relief); gl.uniform1f(U.nightK, state.nightK); gl.uniform1f(U.lowQ, small ? 1 : 0);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       if (api.onFrame) api.onFrame(api);
     }

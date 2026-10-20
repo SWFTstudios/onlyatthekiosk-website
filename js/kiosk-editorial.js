@@ -44,7 +44,9 @@
 
   let lenis = null;
   function smooth() {
-    const want = !reduced() && typeof window.Lenis === 'function';
+    // Touch devices scroll natively already; running Lenis' RAF loop there
+    // only burns main-thread time on phones, so smooth wheel is mouse-only.
+    const want = !reduced() && finePointer.matches && typeof window.Lenis === 'function';
     if (want && !lenis) {
       lenis = new window.Lenis({
         autoRaf: true,
