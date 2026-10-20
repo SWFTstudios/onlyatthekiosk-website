@@ -2934,41 +2934,8 @@
 
   /* ------------------------------------------------------------- home */
 
-  /* ------------------------------------------------- orbit carousel
-   * The home cover, under the globe hero in the same night sky: a floating
-   * 3D carousel of jumping-off points: the lead film, the latest story, the
-   * featured film, the newest pieces, the radio, the Garage and the Atlas.
-   * Built from the content, so new stories, films and drops come round on
-   * their own.
-   * -------------------------------------------------------------------- */
-  function orbitItems(lead) {
-    const items = [];
-    const watchable = (f) => f && (f.embed || f.video);
-    const film = (f, eyebrow) => ({ eyebrow, title: f.title || featureName(f), note: [featureName(f), place(f)].filter(Boolean).join(' · '), cta: 'Watch the film', image: f.image, vimeo: f.vimeo, act: () => openFilm(f) });
-    if (watchable(lead)) items.push(film(lead, 'Watch · now showing'));
-    const latest = byNewest(features).find((f) => f !== lead && f.image);
-    if (latest) items.push({ eyebrow: `Read · ${formatLabel(latest)}`, title: latest.title || featureName(latest), note: latest.tagline || latest.excerpt || '', cta: 'Read the story', image: latest.image, href: storyHref(latest) });
-    const pick = (C.films || []).find((x) => x.featured);
-    const ff = pick && featureBySlug(pick.story);
-    if (ff && ff !== lead && watchable(ff)) items.push({ ...film(ff, 'Watch · featured film'), title: pick.title || ff.title, note: pick.blurb || '' });
-    byNewest((C.products || []).filter((p) => !isDigitalP(p))).slice(0, 2).forEach((p) => items.push({
-      eyebrow: `Shop · ${((C.categories || []).find((c) => c.id === p.category) || {}).label || 'new at the kiosk'}`, title: p.title, note: [p.detail, price(p)].filter(Boolean).join(' · '), cta: 'Shop the piece', product: p, act: () => openPDP(p.id, {}),
-    }));
-    const mix = (C.mixes || []).find((m) => m.spotify || m.soundcloud || m.apple || m.audio);
-    if (mix) items.push({ eyebrow: 'Listen · KIOSK Radio', title: mix.title, note: mix.mood || 'Keeps playing while you browse', cta: 'Play the radio', image: mix.cover, act: () => player.play(mix.slug) });
-    const garage = (C.machines || []).find((m) => m.street);
-    if (garage) items.push({ eyebrow: 'Read · The Garage', title: 'The Street File', note: 'Schematics, strip numbers and the facts behind every machine', cta: 'Open the Garage', image: garage.schematic, paper: true, href: 'the-garage.html' });
-    items.push({ eyebrow: 'Explore · The Atlas', title: 'Every story, pinned', note: 'Films, vlogs and photo diaries, pinned where they happened', cta: 'Open the Atlas', image: 'images/earth/day-2k.jpg', href: 'atlas.html' });
-    return items;
-  }
-  function mountOrbit(lead) {
-    const root = mount('orbit-carousel');
-    if (!root) return;
-    heroCarousel(root, orbitItems(lead), (it) => { if (it.act) it.act(); else if (it.href) location.href = it.href; }, 'Start here');
-  }
-
   /* ------------------------------------------------------- atlas globe
-   * Home page, right under the cover. Up to four featured stories are pinned
+   * Home page, right under the globe hero. Up to four featured stories are pinned
    * to a spinning wireframe globe at their coordinates (story `geo`), each
    * pin with a thumbnail. Drag to spin, tap a pin.
    * -------------------------------------------------------------------- */
@@ -3039,9 +3006,7 @@
     if (!lead) return;
 
     mountGlobeHero();
-    mountOrbit(lead);
     mountWorldLibrary();
-    fill('hero-issue', `<span class="k-live" aria-hidden="true"></span><b>Issue ${esc(issue.number || '01')}</b> · ${esc(issue.title || '')}`);
     fill('hero-dek', esc(issue.dek || ''));
     fill('hero-stats', `
       <div><dt>Now showing</dt><dd>${esc(lead.title)} · ${esc([lead.make, lead.code].filter(Boolean).join(' '))}</dd></div>

@@ -10,6 +10,10 @@
  *      (/api/live, city level), and flights streaking between them.
  *   3. Idle: the planet turns slowly back and forth under the pins, new
  *      flights keep taking off; everything stops while the hero is off screen.
+ *   4. Scroll: the stage stays pinned while the page scrolls through the
+ *      section. The headline lifts away, the whole planet rises into view and
+ *      turns with the page: clockwise (seen from the north pole) going down,
+ *      back again going up. Drag it (or swipe sideways) to spin it by hand.
  *
  * The Earth is real: NASA day and night imagery with the sun where it is
  * right now, so the day/night line is the actual one. Return visits skip the
@@ -24,6 +28,7 @@
   const D2R = Math.PI / 180;
   const vec = (la, lo) => { const a = la * D2R; const b = lo * D2R; return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)]; };
   const angle = (a, b) => { const p = vec(a.lat, a.lon); const q = vec(b.lat, b.lon); return Math.acos(clamp(p[0] * q[0] + p[1] * q[1] + p[2] * q[2], -1, 1)) / D2R; };
+  const lerp = (a, b, k) => a + (b - a) * k;
   const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   const easeOut = (x) => 1 - Math.pow(1 - x, 3);
 
@@ -78,6 +83,8 @@
     const earthEl = section.querySelector('[data-gh-earth]');
     const fx = section.querySelector('[data-gh-fx]');
     const route = section.querySelector('[data-gh-route]');
+    const pin = section.querySelector('[data-gh-pin]') || section;
+    const copy = section.querySelector('.k-gh__copy');
     const reduced = !!opts.reduced;
     const journey = !!opts.journey && !reduced;
     let alive = true;
@@ -85,6 +92,8 @@
 
     const earth = Earth && earthEl ? Earth.create(earthEl, { view: { lat: home.lat, lon: home.lon, alt: 3, tilt: 0, fov: 0.55, px: 0.5, py: 0.5 }, maxDpr: 1.5, relief: 1 }) : null;
     if (!earth || !earth.gl) { section.classList.add('is-flat'); if (earth) earth.destroy(); return { setLive() {}, stop() {} }; }
+    // the tall scroll scene only once there's a planet to turn
+    if (!reduced) section.classList.add('is-scene');
     const ctx = fx.getContext('2d');
     let w = 0; let h = 0; let dpr = 1;
     const resize = () => {
@@ -102,8 +111,9 @@
       const mobile = w < 760;
       const R = mobile ? Math.max(w * 0.96, h * 0.36) : Math.max(w * 0.6, h * 0.86);
       // the planet's edge sits just under the headline and buttons, however tall they wrap
-      const last = section.querySelector('.k-gh__copy > :last-child');
-      const below = last ? last.getBoundingClientRect().bottom - section.getBoundingClientRect().top + 22 : 0;
+      // (offsets, not boxes: the copy may be mid-lift when this runs)
+      const last = copy && copy.lastElementChild;
+      const below = last ? copy.offsetTop + last.offsetTop + last.offsetHeight + 22 : 0;
       const top = clamp(Math.max(mobile ? 0.6 : 0.52, below / Math.max(1, h)), 0.3, 0.8);
       const rh = R / Math.max(1, h);
       const tanT = 2 * 0.55 * rh;
@@ -124,13 +134,50 @@
     const farAlt = () => { const tanR = 0.55 * 0.62 * Math.min(w, h) / Math.max(1, h); return Math.sqrt(1 + 1 / (tanR * tanR)) - 1; };
     let frame = heroFrame();
 
+    /* Scrolled down: the whole planet, centred in what's left of the screen
+     * between the nav and the caption (and the tab bar on phones) */
+    function fullFrame() {
+      const mobile = w < 760;
+      const vh = Math.min(h, window.innerHeight || h);
+      const top = (h - vh) + 84; const bottom = mobile ? 168 : 104;
+      const avail = Math.max(120, vh - 84 - bottom);
+      const R = Math.min(w * 0.46, avail * 0.48);
+      const D = 1 / Math.sin(Math.atan(2 * 0.55 * R / Math.max(1, h)));
+      return { alt: D - 1, py: (top + avail / 2) / Math.max(1, h), lat: clamp(home.lat * 0.7, -35, 45) };
+    }
+    let full = fullFrame();
+
+    /* Scroll and drag. P eases after the page's scroll position p; the
+     * framing (hero → whole planet) happens over the first stretch, the spin
+     * over the whole section. Drag adds its own turn, with a little coast. */
+    const SPIN = 320;            // degrees of turn across the section
+    const scene = { p: 0, P: 0, s: 0 };
+    const D = { lat: 0, lon: 0, vel: 0 };
+    let drag = null; let swayOff = false;
+    const progress = () => {
+      const r = section.getBoundingClientRect();
+      const run = r.height - (window.innerHeight || h);
+      return run > 1 ? clamp(-r.top / run, 0, 1) : 0;
+    };
+    let outShown = -1; let inShown = -1;
+    function syncCopy() {
+      const out = clamp(scene.P / 0.2, 0, 1);
+      const inn = clamp((scene.P - 0.3) / 0.14, 0, 1) * V.hero;
+      if (Math.abs(out - outShown) > 0.002) { outShown = out; section.style.setProperty('--gh-out', out.toFixed(3)); section.classList.toggle('is-away', out > 0.5); }
+      if (Math.abs(inn - inShown) > 0.002) { inShown = inn; section.style.setProperty('--gh-in', inn.toFixed(3)); }
+    }
+    // short screens: the pinned stage is taller than the window, so it pins
+    // by its bottom edge and the headline scrolls up out of the way first
+    const stick = () => { section.style.setProperty('--gh-stick', `${Math.min(0, Math.round((window.innerHeight || 0) - pin.offsetHeight))}px`); };
+    stick();
+
     /* Pins and flights */
     let viewers = [];            // [{ lat, lon, city, n }]
     let count = 0;
     const flights = [];          // { pts, t0, dur, home }
     const SONAR = 2600;
     let lastSpawn = 0;
-    const visibleFrom = (p, k = 1.5) => angle(p, { lat: V.lat, lon: V.lon + V.sway }) < frame.cap * k;
+    const visibleFrom = (p, k = 1.5) => angle(p, earth.view) < (Math.acos(1 / (earth.view.alt + 1)) / D2R) * k;
     function spawn(now) {
       const places = viewers.length ? viewers : [];
       const pool = HUBS.concat(places.map((v) => ({ n: v.city, lat: v.lat, lon: v.lon, viewer: true })));
@@ -174,7 +221,8 @@
         // flights: a bright head with a fading trail that runs out behind it,
         // kept below the planet's edge so they never cross the headline
         ctx.save();
-        ctx.beginPath(); ctx.rect(0, frame.top - 36 * (1 - Math.min(1, frame.top / h)), w, h); ctx.clip();
+        // (scrolled down to the whole planet there's no headline left to dodge)
+        ctx.beginPath(); ctx.rect(0, (frame.top - 36 * (1 - Math.min(1, frame.top / h))) * (1 - scene.s), w, h); ctx.clip();
         flights.forEach((f) => {
           const u = (now - f.t0) / f.dur;
           if (u > 1.45) return;
@@ -203,6 +251,8 @@
         ctx.restore();
         // everyone else here right now
         let labelled = 0;
+        const maxLabels = scene.s > 0.5 ? 5 : 3;
+        const labelFrom = lerp(h * 0.5, h - Math.min(h, window.innerHeight || h) + 90, scene.s);
         viewers.forEach((v) => {
           const s = earth.project(v.lat, v.lon);
           if (!s.front || s.x < -20 || s.x > w + 20 || s.y < -20 || s.y > h + 20) return;
@@ -211,7 +261,7 @@
           ctx.beginPath(); ctx.arc(s.x, s.y, 4 + ph * 14, 0, 6.283); ctx.stroke();
           ctx.fillStyle = `rgba(230,242,255,${heroK})`;
           ctx.beginPath(); ctx.arc(s.x, s.y, v.n > 1 ? 3.6 : 2.8, 0, 6.283); ctx.fill();
-          if (labelled < 3 && v.city && angle(v, home) > 6 && s.y > h * 0.5) { labelled += 1; ctx.globalAlpha = heroK; label(`${v.city}${v.n > 1 ? ` · ${v.n}` : ''}`, s.x, s.y, false); ctx.globalAlpha = 1; }
+          if (labelled < maxLabels && v.city && angle(v, home) > 6 && s.y > labelFrom) { labelled += 1; ctx.globalAlpha = heroK; label(`${v.city}${v.n > 1 ? ` · ${v.n}` : ''}`, s.x, s.y, false); ctx.globalAlpha = 1; }
         });
       }
       // the visitor: sonar rings off a bright pin
@@ -227,7 +277,8 @@
           ctx.fillStyle = `rgba(255,106,46,${0.3 * k})`; ctx.beginPath(); ctx.arc(me.x, me.y, 10, 0, 6.283); ctx.fill();
           ctx.fillStyle = `rgba(255,255,255,${k})`; ctx.beginPath(); ctx.arc(me.x, me.y, 5, 0, 6.283); ctx.fill();
           ctx.fillStyle = `rgba(255,90,31,${k})`; ctx.beginPath(); ctx.arc(me.x, me.y, 3.4, 0, 6.283); ctx.fill();
-          if (heroK > 0.5) { ctx.globalAlpha = heroK; label(`You · ${home.city || 'here'}`, me.x, me.y, true); ctx.globalAlpha = 1; }
+          // (no label pinned to the screen edge once the town has turned out of view)
+          if (heroK > 0.5 && me.x > 0 && me.x < w && me.y > 0 && me.y < h) { ctx.globalAlpha = heroK; label(`You · ${home.city || 'here'}`, me.x, me.y, true); ctx.globalAlpha = 1; }
         }
       }
       if (journeyDraw) journeyDraw(now);
@@ -236,23 +287,43 @@
     let journeyDraw = null;
 
     /* The loop: move the camera, let the Earth repaint, draw on top */
-    let raf = 0; let on = true; let lastT = 0; const t0 = performance.now();
+    let raf = 0; let on = true; let lastT = 0; let prevT = 0; const t0 = performance.now();
+    // The camera: the flight/hero framing in V, eased toward the whole planet
+    // as the page scrolls, turned by the scroll and by hand. Scroll and drag
+    // only count once the planet has settled (V.hero), so nothing jumps.
     const apply = () => {
-      Object.assign(earth.view, { lat: V.lat, lon: V.lon + V.sway, alt: V.alt, py: V.py, px: 0.5, tilt: 0 });
+      scene.s = ease(clamp((scene.P - 0.02) / 0.36, 0, 1)) * V.hero;
+      const s = scene.s;
+      Object.assign(earth.view, {
+        lat: clamp(lerp(V.lat, full.lat, s) + D.lat * V.hero, -72, 72),
+        lon: V.lon + V.sway * (1 - s) + (scene.P * SPIN + D.lon) * V.hero,
+        alt: lerp(V.alt, full.alt, s),
+        py: lerp(V.py, full.py, s),
+        px: 0.5,
+        tilt: 0,
+      });
       earth.invalidate();
     };
     earth.onFrame = () => overlay(performance.now());
     const loop = (now) => {
       raf = 0;
       if (!alive || !on) return;
-      if (reduced) { apply(); return; }   // one still frame (repainted when textures or pins arrive)
-      // half rate is plenty for a slow planet, and kind to phones
-      if (now - lastT > 30) {
+      if (reduced) { apply(); return; }   // one still frame (repainted when textures, pins or a drag arrive)
+      const dt = Math.min(64, now - (prevT || now)); prevT = now;
+      scene.p = progress();
+      // following the scroll or a hand: every frame; idling: half rate is
+      // plenty for a slow planet, and kind to phones
+      const busy = drag || Math.abs(scene.p - scene.P) > 0.0004 || Math.abs(D.vel) > 0.0004;
+      if (busy || now - lastT > 30) {
         lastT = now;
-        if (V.hero > 0.99 && !reduced) {
-          V.sway = Math.sin((now - t0) / 9000) * frame.cap * frame.sway;
+        scene.P += (scene.p - scene.P) * (1 - Math.pow(0.82, dt / 16));
+        if (Math.abs(scene.p - scene.P) < 0.0004) scene.P = scene.p;
+        if (!drag && D.vel) { D.lon += D.vel * dt; D.vel *= Math.pow(0.94, dt / 16); if (Math.abs(D.vel) < 0.0004) D.vel = 0; }
+        if (V.hero > 0.99) {
+          if (!swayOff) V.sway = Math.sin((now - t0) / 9000) * frame.cap * frame.sway;
           if (now - lastSpawn > 900) { lastSpawn = now; spawn(now); }
         }
+        syncCopy();
         apply();
       }
       raf = requestAnimationFrame(loop);
@@ -260,8 +331,50 @@
     const wake = () => { if (alive && on && !raf) raf = requestAnimationFrame(loop); };
     const io = new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) wake(); }, { threshold: 0 });
     io.observe(section);
-    const onResize = () => { resize(); frame = heroFrame(); if (V.hero >= 1) Object.assign(V, { alt: frame.alt, py: frame.py, lat: frame.lat }); apply(); };
+    const onResize = () => { resize(); stick(); frame = heroFrame(); full = fullFrame(); if (V.hero >= 1) Object.assign(V, { alt: frame.alt, py: frame.py, lat: frame.lat }); apply(); };
     window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', wake, { passive: true });
+
+    /* Drag to spin: sideways turns the planet under the finger (touch keeps
+     * vertical swipes for scrolling the page); a mouse can tip it north and
+     * south too. Let go mid-swipe and it coasts to a stop. */
+    fx.style.touchAction = 'pan-y';
+    const how = section.querySelector('.k-gh__hint-how');
+    if (how && window.matchMedia('(pointer: coarse)').matches) how.textContent = 'Swipe sideways or scroll to spin the globe';
+    const nowEl = section.querySelector('[data-gh-now]');
+    const dragK = () => 60 * earth.view.alt / Math.max(240, Math.min(w, h));
+    const onDown = (e) => {
+      if (e.button > 0 || V.hero < 0.99 || drag) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), mouse: e.pointerType === 'mouse' };
+      D.vel = 0;
+      // fold the idle sway into the hand's turn so the planet doesn't jump
+      if (!swayOff) { swayOff = true; D.lon += V.sway * (1 - scene.s); V.sway = 0; }
+      try { fx.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+      section.classList.add('is-dragging');
+      wake();
+    };
+    const onMove = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const now = performance.now(); const k = dragK();
+      const dx = e.clientX - drag.x; const dy = e.clientY - drag.y;
+      D.lon -= dx * k;
+      if (drag.mouse) D.lat = clamp(D.lat + dy * k * 0.6, -50, 50);
+      D.vel = reduced ? 0 : (-dx * k) / Math.max(8, now - drag.t);
+      Object.assign(drag, { x: e.clientX, y: e.clientY, t: now });
+      wake();
+    };
+    const onUp = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      // a hand that stopped before letting go doesn't coast
+      if (e.type === 'pointercancel' || performance.now() - drag.t > 90) D.vel = 0;
+      drag = null;
+      section.classList.remove('is-dragging');
+      wake();
+    };
+    fx.addEventListener('pointerdown', onDown);
+    fx.addEventListener('pointermove', onMove);
+    fx.addEventListener('pointerup', onUp);
+    fx.addEventListener('pointercancel', onUp);
 
     async function settle(ms) {
       frame = heroFrame();
@@ -349,9 +462,15 @@
     earth.ready.then(() => { if (alive) apply(); }).catch(() => {});
 
     return {
-      setLive(list, n) { viewers = (list || []).filter((v) => Number.isFinite(v.lat) && Number.isFinite(v.lon)); count = n || 0; if (reduced) apply(); return count; },
+      setLive(list, n) {
+        viewers = (list || []).filter((v) => Number.isFinite(v.lat) && Number.isFinite(v.lon)); count = n || 0;
+        if (nowEl) nowEl.textContent = count > 1 ? `${count} travelers on the map right now` : 'You’re on the map';
+        if (reduced) apply();
+        return count;
+      },
       stop() {
-        alive = false; io.disconnect(); window.removeEventListener('resize', onResize);
+        alive = false; io.disconnect(); window.removeEventListener('resize', onResize); window.removeEventListener('scroll', wake);
+        section.classList.remove('is-scene', 'is-away', 'is-dragging');
         if (raf) cancelAnimationFrame(raf);
         earth.destroy();
       },
