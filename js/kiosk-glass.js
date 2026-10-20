@@ -3009,6 +3009,7 @@
     if (!lead) return;
 
     mountGlobeHero();
+    mountLogoGlobe();
     mountWorldLibrary();
     fill('hero-dek', esc(issue.dek || ''));
     fill('hero-stats', `
@@ -3023,11 +3024,17 @@
         ${featureMedia(lead, { meta: '' })}
       </a>
       <a class="k-bar" href="atlas.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
-    // Garage rail with type filter
+    // Latest stories: the same rail (and card size) as the departments, with a type filter
     const railEl = mount('garage-rail');
     const renderRail = (type) => {
       const list = features.filter((f) => type === 'all' || f.type === type);
-      railEl.innerHTML = list.map(featureCard).join('');
+      const track = $('[data-hscroll]', railEl);
+      if (!track) railEl.innerHTML = railShell(list.map(featureCard).join(''), 'Latest stories', 'k-hscroll-wrap--depts k-hscroll-wrap--stories');
+      else {
+        track.innerHTML = list.map(featureCard).join('');
+        track.scrollLeft = 0;
+        track.dispatchEvent(new Event('scroll'));   // re-measure the arrows and progress bar
+      }
       reveal(railEl);
     };
     if (railEl) {
@@ -3592,7 +3599,7 @@
 
   /** Drag-to-scroll, arrow buttons and progress for every horizontal scroller. */
   function bindRails(root = document) {
-    $$('[data-hscroll], .k-rail', root).forEach((el) => {
+    $$('[data-hscroll]', root).forEach((el) => {
       if (el.dataset.railBound) return;
       el.dataset.railBound = '1';
       const wrap = el.closest('.k-hscroll-wrap');
@@ -4827,7 +4834,7 @@
         const st = statusOf(p, 0);
         return `<li><button type="button" class="k-board__row" data-pdp="${esc(p.id)}">
           <span class="k-board__flight">${flapText(flightOf(p), 7)}</span>
-          <span class="k-board__dest">${flapText(p.title, 22)}</span>
+          <span class="k-board__dest">${flapText(p.title, 26)}</span>
           <span class="k-board__gate">${flapText(gateOf(p.category), 1)}</span>
           <span class="k-board__fare">${esc(price(p))}</span>
           <span class="k-board__status k-board__status--${st.key}">${esc(st.label)}</span>
@@ -5527,6 +5534,23 @@
       .catch((err) => { sec.classList.add('is-flat'); console.warn('[KIOSK] globe hero unavailable', err); });
   }
 
+  /* ----------------------------------------------------- the logo globe
+   * Home, under the departures board: the KIOSK mark's globe in ink, sliding
+   * out from beneath the board as it scrolls up (js/kiosk-logo-globe.js). */
+  function mountLogoGlobe() {
+    const el = $('[data-vglobe]');
+    if (!el || el.dataset.on) return;
+    el.dataset.on = '1';
+    const signal = pageAbort.signal;
+    (window.KioskLogoGlobe ? Promise.resolve() : loadScript('js/kiosk-logo-globe.js'))
+      .then(() => {
+        if (signal.aborted) return;
+        const g = window.KioskLogoGlobe.mount(el, { anchor: $('[data-mount="term-page-board"]') || el, reduced: REDUCED });
+        signal.addEventListener('abort', () => g.stop());
+      })
+      .catch((err) => { el.hidden = true; console.warn('[KIOSK] logo globe unavailable', err); });
+  }
+
   /* ------------------------------------------------------- live presence
    * Every open tab checks in every half minute (/api/live) so the nav can
    * count who's on the site right now and the home globe can pin them, at
@@ -6204,7 +6228,7 @@
       <div class="k-board__cols" aria-hidden="true">${cols.map((c) => `<span>${esc(c)}</span>`).join('')}</div>
       <ol class="k-board__rows">${rows.map((r) => {
         const inner = `<span class="k-board__flight">${flapText(r.flight, 7)}</span>
-          <span class="k-board__dest">${flapText(r.dest, 22)}</span>
+          <span class="k-board__dest">${flapText(r.dest, 26)}</span>
           <span class="k-board__gate">${flapText(r.gate, 1)}</span>
           <span class="k-board__fare">${esc(r.time)}</span>
           <span class="k-board__status k-board__status--${esc(r.status.key)}">${esc(r.status.label)}</span>`;
