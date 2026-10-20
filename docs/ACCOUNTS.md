@@ -21,7 +21,7 @@ Accounts switch on when both bindings exist (`accountsReady` in `functions/_lib/
 
 ### 2. Database
 
-Already done: `kiosk-accounts` (`539499f7-d26e-4e19-b5e8-6c514397672b`) is bound in `wrangler.jsonc`. Both migrations are applied to it (`0002_profiles.sql` was applied on 2026-10-17). When a new migration is added:
+Already done: `kiosk-accounts` (`539499f7-d26e-4e19-b5e8-6c514397672b`) is bound in `wrangler.jsonc`. `0001` and `0002` are applied to it (`0002_profiles.sql` was applied on 2026-10-17). `0003_partners.sql` (Partner Hub, `docs/PARTNER_HUB.md`) still needs applying. When a new migration is added:
 
 ```bash
 npx wrangler d1 migrations apply kiosk-accounts --remote
