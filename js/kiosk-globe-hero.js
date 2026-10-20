@@ -154,10 +154,14 @@
     const scene = { p: 0, P: 0, s: 0 };
     const D = { lat: 0, lon: 0, vel: 0 };
     let drag = null; let swayOff = false;
+    // the section's place in the page, measured on resize: reading it per frame
+    // would force a layout in the middle of every scroll
+    let secTop = 0; let secH = 0;
+    const measureSec = () => { let y = 0; for (let e = section; e; e = e.offsetParent) y += e.offsetTop; secTop = y; secH = section.offsetHeight; };
+    measureSec();
     const progress = () => {
-      const r = section.getBoundingClientRect();
-      const run = r.height - (window.innerHeight || h);
-      return run > 1 ? clamp(-r.top / run, 0, 1) : 0;
+      const run = secH - (window.innerHeight || h);
+      return run > 1 ? clamp((window.scrollY - secTop) / run, 0, 1) : 0;
     };
     let outShown = -1; let inShown = -1;
     function syncCopy() {
@@ -324,7 +328,9 @@
       const busy = drag || Math.abs(scene.p - scene.P) > 0.0004 || Math.abs(D.vel) > 0.0004;
       if (busy || now - lastT > 30) {
         lastT = now;
-        scene.P += (scene.p - scene.P) * (1 - Math.pow(0.82, dt / 16));
+        // Lenis already eases the page; easing again on top would leave the planet trailing it
+        const smooth = !!(window.KioskEditorial && window.KioskEditorial.lenis);
+        scene.P = smooth ? scene.p : scene.P + (scene.p - scene.P) * (1 - Math.pow(0.7, dt / 16));
         if (Math.abs(scene.p - scene.P) < 0.0004) scene.P = scene.p;
         if (!drag && D.vel) { D.lon += D.vel * dt; D.vel *= Math.pow(0.94, dt / 16); if (Math.abs(D.vel) < 0.0004) D.vel = 0; }
         if (V.hero > 0.99) {
@@ -339,7 +345,7 @@
     const wake = () => { if (alive && on && !raf) raf = requestAnimationFrame(loop); };
     const io = new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) wake(); }, { threshold: 0 });
     io.observe(section);
-    const onResize = () => { resize(); stick(); frame = heroFrame(); full = fullFrame(); if (V.hero >= 1) Object.assign(V, { alt: frame.alt, py: frame.py, lat: frame.lat }); apply(); };
+    const onResize = () => { resize(); stick(); measureSec(); frame = heroFrame(); full = fullFrame(); if (V.hero >= 1) Object.assign(V, { alt: frame.alt, py: frame.py, lat: frame.lat }); apply(); };
     window.addEventListener('resize', onResize);
     window.addEventListener('scroll', wake, { passive: true });
 
