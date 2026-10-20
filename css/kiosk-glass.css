@@ -671,7 +671,6 @@ body.k::after {
 .k-story-hero__thumbs button > .k-media,
 .k-thumbs button > .k-media,
 .k-radio__cover > .k-media,
-.k-quote__inline > .k-media,
 .k-row__thumb > .k-media,
 .k-films__lead > .k-media { position: absolute; inset: 0; }
 
@@ -989,29 +988,6 @@ body.k::after {
 .k-save svg { width: 16px; height: 16px; }
 .k-save[aria-pressed='true'] { background: var(--bone); color: var(--bone-ink); border-color: var(--bone); }
 .k-save[aria-pressed='true'] svg path { fill: currentColor; }
-
-/* ------------------------------------------------- manifesto / quote */
-
-.k-quote {
-  font-size: calc(clamp(26px, 3.8vw, 54px) * var(--type, 1));
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-  font-weight: 450;
-  max-width: 22ch;
-}
-.k-quote__inline {
-  display: inline-block;
-  vertical-align: middle;
-  width: clamp(80px, 11vw, 160px);
-  height: clamp(40px, 5vw, 64px);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-  position: relative;
-  margin: 0 0.15em;
-  transform: translateY(-0.08em);
-}
-.k-quote__aside { display: inline-block; max-width: 26ch; vertical-align: bottom; text-transform: none; font-size: calc(13px * var(--type, 1)); letter-spacing: 0; line-height: 1.4; color: var(--ink-3); margin-left: 12px; }
 
 /* ------------------------------------------------------------ bento */
 
@@ -3665,14 +3641,13 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-concourse-home__inner { display: grid; gap: clamp(20px, 3vw, 40px); align-items: start; }
 /* side by side only where the board gets ~830px for its bigger type; stacked below that */
 @media (min-width: 1200px) { .k-concourse-home__inner { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); } }
-/* The logo globe tucks under the board and slides out below it as the board
- * rises up the screen (--vg-p 0 → 1, set by js/kiosk-logo-globe.js) */
-.k-concourse-home__board { display: grid; min-width: 0; isolation: isolate; }
+/* The slot under the board where the Atlas globe first slides out
+ * (js/kiosk-glass.js, roamGlobe); the globe itself lives in the Atlas */
+.k-concourse-home__board { display: grid; min-width: 0; }
 .k-concourse-home__board > [data-mount='term-page-board'] { position: relative; z-index: 2; min-width: 0; }
-.k-vglobe { position: relative; z-index: 1; justify-self: center; width: min(100%, 600px); aspect-ratio: 1.3; margin-top: clamp(8px, 2vw, 24px); pointer-events: none;
-  transform: translateY(calc((1 - var(--vg-p, 1)) * -66%)) scale(calc(0.8 + var(--vg-p, 1) * 0.2)); opacity: calc(0.15 + var(--vg-p, 1) * 0.85); will-change: transform; }
-.k-vglobe canvas { display: block; width: 100%; height: 100%; }
-@media (max-width: 640px) { .k-vglobe { width: min(100%, 420px); } }
+.k-vglobe { justify-self: center; width: min(100%, 520px); aspect-ratio: 1; margin-top: clamp(8px, 2vw, 24px); pointer-events: none; }
+.k-vglobe[hidden] { display: none; }
+@media (max-width: 640px) { .k-vglobe { width: min(100%, 380px); } }
 .k-dir { display: grid; gap: 8px; }
 .k-dir__sign { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: var(--board); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.06); transition: transform .25s var(--ease), background .25s; }
 .k-dir__sign:hover, .k-dir__sign:focus-visible { transform: translateX(4px); background: color-mix(in srgb, var(--board) 88%, var(--signal)); outline: none; }
@@ -3768,6 +3743,7 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-wl__go svg { width: 100%; height: 100%; }
 @media (max-width: 999px) { .k-wl__stage { order: -1; max-width: 560px; } }
 .k-wl__stage { position: relative; aspect-ratio: 1; width: 100%; max-width: 760px; justify-self: center; color: var(--ink); }
+.k-wl__float { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform, opacity; }
 .k-wl__globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; color: var(--ink); }
 .k-wl__globe.is-dragging { cursor: grabbing; }
 .k-wl__nodes { position: absolute; inset: 0; pointer-events: none; }
@@ -3776,8 +3752,9 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-wl-node__pin::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--signal); animation: k-wl-ping 2.4s var(--ease-io) infinite; }
 @keyframes k-wl-ping { from { transform: scale(.6); opacity: .9; } to { transform: scale(2.2); opacity: 0; } }
 .k-wl-node__line { position: absolute; left: 0; top: 0; height: 1px; width: var(--len); background: currentColor; opacity: .55; transform-origin: 0 50%; transform: rotate(var(--ang)); }
-.k-wl-node__card { position: absolute; left: var(--ox); top: var(--oy); transform: translate(-50%, -50%); display: grid; gap: 6px; width: clamp(104px, 15vw, 150px); }
-.k-wl-node--hero .k-wl-node__card { width: clamp(128px, 19vw, 200px); }
+.k-wl-node__card { position: absolute; left: var(--ox); top: var(--oy); transform: translate(-50%, -50%); display: grid; gap: 6px; width: clamp(84px, 10.5vw, 118px); }
+.k-wl-node--hero .k-wl-node__card { width: clamp(104px, 13.5vw, 150px); }
+.k-wl-node__label small { white-space: nowrap; }
 .k-wl-node__thumb { position: relative; display: block; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: var(--bg-3); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent), 0 14px 30px -14px rgba(0,0,0,.55); transition: transform .3s var(--ease); }
 .k-wl-node:hover .k-wl-node__thumb, .k-wl-node:focus-visible .k-wl-node__thumb { transform: scale(1.06); }
 .k-wl-node:focus-visible { outline: none; }
@@ -4687,3 +4664,65 @@ html[data-motion='reduced'] .k-gh__dot, html[data-motion='reduced'] .k-gh.is-her
  * drawer and info button inherited that, so filters, sort, Reserve and Fly to
  * never received a tap. They take taps again. */
 .k-finds, .k-hud__tele-toggle { pointer-events: auto; }
+
+/* ------------------------------------------------ home: the roaming globe
+ * The Atlas globe travels behind the sections above it (it slides out from
+ * under the board, swells behind the latest stories, settles in the Atlas),
+ * so those sections stack above the Atlas and let the page colour show
+ * through instead of painting their own. */
+html body.k[data-page='home'] { background: var(--zone-bg); }
+body[data-page='home'] main { overflow-x: clip; }
+html body[data-page='home'] main > .k-gh ~ * { position: relative; z-index: 1; background: transparent; }
+html body[data-page='home'] main > .k-gh + * { background: var(--zone-bg); }
+html body[data-page='home'] main > .k-concourse-home { z-index: 4; }
+html body[data-page='home'] main > [data-home='garage'] { z-index: 3; }
+html body[data-page='home'] main > [data-home='globe'] { z-index: 2; overflow: visible; }
+
+/* ---------------------------------------------------- home: the dark zone
+ * --zone (0 → 1, set on <html> by bindZone) fades the page to black as the
+ * departments come up and back again after Why the kiosk. The colours are
+ * mixed once here, against the theme's own, and every section after the
+ * hero reads them in place of the theme tokens. */
+body[data-page='home'] {
+  --zone-bg: color-mix(in srgb, #060607 calc(var(--zone, 0) * 100%), var(--bg));
+  --zone-ink: color-mix(in srgb, #f2f0eb calc(var(--zone, 0) * 100%), var(--ink));
+  --zone-ink-2: color-mix(in srgb, rgba(242,240,235,.7) calc(var(--zone, 0) * 100%), var(--ink-2));
+  --zone-ink-3: color-mix(in srgb, rgba(242,240,235,.48) calc(var(--zone, 0) * 100%), var(--ink-3));
+  --zone-line: color-mix(in srgb, rgba(255,255,255,.1) calc(var(--zone, 0) * 100%), var(--line));
+  --zone-line-2: color-mix(in srgb, rgba(255,255,255,.18) calc(var(--zone, 0) * 100%), var(--line-2));
+  --zone-glass: color-mix(in srgb, rgba(255,255,255,.06) calc(var(--zone, 0) * 100%), var(--glass));
+}
+body[data-page='home'] main > .k-gh ~ * { --ink: var(--zone-ink); --ink-2: var(--zone-ink-2); --ink-3: var(--zone-ink-3); --line: var(--zone-line); --line-2: var(--zone-line-2); --glass: var(--zone-glass); --bg: var(--zone-bg); color: var(--ink); }
+
+/* ----------------------------------------------------------- why the kiosk
+ * A two-sided slider: the quote and its reader on one half, a lifestyle
+ * photo filling the other; stacked on phones (photo first). */
+.k-why__head { margin-bottom: clamp(18px, 2.4vw, 32px); }
+.k-why__grid { display: grid; gap: clamp(20px, 3vw, 48px); align-items: stretch; }
+@media (min-width: 900px) { .k-why__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .k-why__media { order: 2; } }
+.k-why__media { position: relative; display: grid; overflow: hidden; border-radius: var(--r-xl); background: #111; aspect-ratio: 4 / 5; }
+@media (min-width: 900px) { .k-why__media { aspect-ratio: auto; min-height: min(78svh, 760px); } }
+.k-why__img { grid-area: 1 / 1; opacity: 0; transition: opacity 1.1s var(--ease); }
+.k-why__img.is-on { opacity: 1; }
+.k-why__img img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); transition: transform 7.5s linear; }
+.k-why__img.is-on img { transform: scale(1); }
+.k-why__side { display: flex; flex-direction: column; justify-content: space-between; gap: clamp(20px, 3vw, 40px); min-width: 0; }
+.k-why__slides { display: grid; flex: 1; align-items: center; }
+.k-why__slide { grid-area: 1 / 1; margin: 0; opacity: 0; visibility: hidden; transform: translateY(24px); transition: opacity .8s var(--ease), transform 1s var(--ease), visibility 0s linear .8s; }
+.k-why__slide.is-on { opacity: 1; visibility: visible; transform: none; transition: opacity .9s var(--ease) .15s, transform 1.1s var(--ease) .15s, visibility 0s; }
+.k-why__quote { margin: 0; }
+.k-why__quote p { margin: 0; font-family: var(--f-serif); font-weight: 400; font-size: calc(clamp(30px, 3.6vw, 60px) * var(--type, 1)); line-height: 1.04; letter-spacing: -0.015em; text-wrap: balance; }
+.k-why__who { display: grid; gap: 4px; margin-top: clamp(18px, 2.4vw, 30px); }
+.k-why__who b { font-weight: 500; font-size: calc(16px * var(--type, 1)); }
+.k-why__who span { font-family: var(--f-mono); font-size: calc(11.5px * var(--type, 1)); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.k-why__who a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.k-why__ui { display: flex; align-items: center; gap: 10px; }
+.k-why__count { font-family: var(--f-mono); font-size: calc(12px * var(--type, 1)); letter-spacing: .08em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.k-why__count b { color: var(--ink); font-weight: 500; }
+.k-why__bar { flex: 1; height: 2px; border-radius: 2px; background: var(--line-2); overflow: hidden; }
+.k-why__bar i { display: block; height: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+.k-why .k-hscroll__btn { flex: none; }
+.k-why .k-hscroll__btn svg { width: 14px; height: 14px; }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion='full']) .k-why__img img { transition: none; transform: none; } html:not([data-motion='full']) .k-why__slide { transform: none; } }
+html[data-motion='reduced'] .k-why__img img { transition: none; transform: none; }
+html[data-motion='reduced'] .k-why__slide { transform: none; }

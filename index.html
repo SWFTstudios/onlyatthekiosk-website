@@ -99,8 +99,12 @@
           <a class="k-bar k-mt-m" href="atlas.html">View more in the Atlas<span class="k-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
         </div>
         <div class="k-wl__stage" data-wl-stage>
-          <canvas class="k-wl__globe" role="img" aria-label="Spinning wireframe globe with featured stories pinned at their coordinates. Drag to spin."></canvas>
-          <div class="k-wl__nodes" data-wl-nodes></div>
+          <!-- the globe itself floats: before it settles here it slides out from
+               under the departures board and swells behind the latest stories -->
+          <div class="k-wl__float" data-wl-float>
+            <canvas class="k-wl__globe" role="img" aria-label="Spinning wireframe globe with featured stories pinned at their coordinates. Drag to spin."></canvas>
+            <div class="k-wl__nodes" data-wl-nodes></div>
+          </div>
         </div>
       </div>
     </section>
@@ -114,8 +118,7 @@
     </div>
 
     <!-- MAIN CONCOURSE: departures from every desk + terminal directory; the
-         logo globe slides out from under the board as it scrolls up
-         (js/kiosk-logo-globe.js) -->
+         Atlas globe first slides out from under the board (the slot below it) -->
     <section class="k-section k-section--tight k-concourse-home" aria-labelledby="concourse-title">
       <div class="k-wrap k-concourse-home__inner">
         <div class="k-concourse-home__sign">
@@ -126,7 +129,7 @@
         </div>
         <div class="k-concourse-home__board">
           <div data-mount="term-page-board"></div>
-          <div class="k-vglobe" data-vglobe aria-hidden="true"><canvas></canvas></div>
+          <div class="k-vglobe" data-roam-slot aria-hidden="true"></div>
         </div>
       </div>
     </section>
@@ -173,15 +176,20 @@
     </section>
 
     <!-- 02 / MANIFESTO ------------------------------------------------ -->
-    <section class="k-section k-section--tight" aria-label="About KIOSK" data-home="about">
+    <section class="k-section k-why" aria-labelledby="why-title" data-home="about">
       <div class="k-wrap">
-        <p class="k-eyebrow">02 / Why the kiosk</p>
-        <p class="k-quote k-mt-m" data-reveal>
-          “Pick it up at the kiosk, get lost in a world
-          <span class="k-quote__inline" data-mount="quote-inline" aria-hidden="true"></span>
-          you never knew existed — then go and find it.”
-          <span class="k-quote__aside">For anyone, any age, anywhere: cars, motorcycles, skate, travel and the people doing cool things across the globe. Different cultures, same feeling.</span>
-        </p>
+        <div class="k-why__head">
+          <p class="k-eyebrow">02 / Why the kiosk</p>
+          <h2 class="k-sr" id="why-title">Why the kiosk</h2>
+        </div>
+        <!-- quotes on one side, a lifestyle photo filling the other; it turns
+             on its own, with arrows and a pause button (js/kiosk-glass.js) -->
+        <div class="k-why__slider" data-mount="why-slider">
+          <figure class="k-why__slide is-on">
+            <blockquote class="k-why__quote"><p>“Pick it up at the kiosk, get lost in a world you never knew existed — then go and find it.”</p></blockquote>
+            <figcaption class="k-why__who"><b>The KIOSK</b><span>For anyone, any age, anywhere</span></figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 
