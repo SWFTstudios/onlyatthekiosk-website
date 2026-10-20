@@ -32,6 +32,13 @@
  * Full walkthrough: docs/CONTENT_GUIDE.md
  */
 window.KIOSK_CONTENT = {
+  /* Why the kiosk (home): readers in their own words. Each one becomes a
+   * slide (quote on one side, a lifestyle photo on the other) ahead of the
+   * KIOSK's own lines. Only real quotes, with the reader's OK to print them:
+   *   { quote: '…', name: 'Ama', place: 'Accra', role: 'Reader since Issue 01', image: 'images/…jpg', story: 'slug' }
+   * image (or the story's photo) is optional; without one a story photo is used. */
+  voices: [],
+
   issue: {
     number: '01',
     title: 'Hudson Line',

@@ -2220,7 +2220,7 @@
    * Opened from the gear in the header, "Settings" in the menu or #settings.
    * -------------------------------------------------------------------- */
   const HOME_SECTIONS = [
-    ['garage', 'Latest stories'], ['departments', 'The Departments'], ['globe', 'The globe'], ['about', 'About'],
+    ['garage', 'Latest stories'], ['globe', 'The Atlas'], ['departments', 'The Departments'], ['about', 'Why the kiosk'],
     ['make', 'What we make'], ['films', 'Films'], ['mosaic', 'The Mosaic'], ['radio', 'Radio'], ['shop', 'Supply & co.'], ['dispatch', 'The Dispatch'],
   ];
   const ACCENTS = [['signal', 'Signal', '#ff5b23'], ['cobalt', 'Cobalt', '#2f5bff'], ['acid', 'Acid', '#b6f500'], ['rose', 'Rose', '#ff3d8b'], ['gold', 'Gold', '#e2a72e'], ['mono', 'Mono', 'currentColor']];
@@ -2485,7 +2485,7 @@
 
   /* Sections rise into view as you scroll */
   function markRise(root = document) {
-    $$('main > section:not(.k-cover):not(.k-gh), main > .k-section, main > .k-wrap > section', root).forEach((s) => {
+    $$('main > section:not(.k-cover):not(.k-gh):not(.k-wl), main > .k-section:not(.k-wl), main > .k-wrap > section', root).forEach((s) => {
       if (!s.hasAttribute('data-reveal')) s.setAttribute('data-reveal', 'rise');
     });
   }
@@ -2977,8 +2977,9 @@
     const geos = posts.map(geoOf);
 
     const first = geos[0];
+    let res = 1;
     const globe = createGlobe($('canvas', stage), {
-      interactive: true, max: 3, homeBias: 0.6, scale: 0.36, speed: 0.00012,
+      interactive: true, max: 3, homeBias: 0.6, scale: 0.36, speed: 0.00012, res: () => res,
       yaw: -first.lon * Math.PI / 180, pitch: Math.max(0.2, first.lat * Math.PI / 180 * 0.8),
       onFrame: ({ project, R }) => {
         nodes.forEach((n, i) => {
@@ -2998,9 +2999,217 @@
       },
     });
     signal.addEventListener('abort', () => globe.stop());
+    roamGlobe(sec, (r) => { res = r; });
     sec.addEventListener('pointerover', (e) => { const it = e.target.closest('[data-wl-item]'); if (it) { const g = geos[Number(it.dataset.wlItem)]; globe.face(g.lat, g.lon); } }, { signal });
     sec.addEventListener('focusin', (e) => { const it = e.target.closest('[data-wl-item], [data-wl-node]'); if (it) { const g = geos[Number(it.dataset.wlItem || it.dataset.wlNode)]; globe.face(g.lat, g.lon); } }, { signal });
 
+  }
+
+  /* The Atlas globe roams. Before it settles in the Atlas it slides out from
+   * under the departures board, swells into a big faint globe behind the
+   * latest stories, then shrinks into its place here, where the story
+   * thumbnails come up round it. One globe moved FLIP-style: the canvas stays
+   * in the Atlas, and a transform on its float carries it to wherever the
+   * scroll says it should be (scrubbed between the three spots, eased).
+   * Reduced motion or Depth: Flat: it just stays in the Atlas. */
+  function roamGlobe(sec, setRes) {
+    const stage = $('[data-wl-stage]', sec);
+    const float = $('[data-wl-float]', sec);
+    const nodesEl = $('[data-wl-nodes]', sec);
+    const slot = $('[data-roam-slot]');
+    const board = $('[data-mount="term-page-board"]');
+    const stories = $('[data-home="garage"]');
+    if (!stage || !float || REDUCED || prefs.depth === 'off') { if (slot) slot.hidden = true; return; }
+    const signal = pageAbort.signal;
+    const lerp = (a, b, k) => a + (b - a) * k;
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const shown = (el) => el && !el.hidden && el.offsetParent !== null;
+    let ticking = false; let lastRes = 1;
+    const update = () => {
+      ticking = false;
+      const vh = window.innerHeight; const vw = document.documentElement.clientWidth; const y = window.scrollY;
+      const N = stage.getBoundingClientRect();
+      if (!N.width) return;
+      const ncx = N.left + N.width / 2; const ncy = N.top + N.height / 2;
+      // the spots, each with the scroll position where it's "in focus"
+      const home = { at: y + ncy - vh / 2, cx: ncx, cy: ncy, w: N.width, o: 1, dock: 1 };
+      const spots = [];
+      if (shown(slot) && board) {
+        const sr = slot.getBoundingClientRect(); const b = board.getBoundingClientRect();
+        // tucked under the board while its bottom edge is low on the screen, out by the time it's risen past the middle
+        const e = clamp01((vh * 0.95 - b.bottom) / (vh * 0.5));
+        spots.push({ at: y + b.bottom - vh * 0.45, cx: sr.left + sr.width / 2, cy: sr.top + sr.height / 2 - (1 - e) * 0.62 * sr.height, w: sr.width * (0.8 + 0.2 * e), o: 0.15 + 0.85 * e, dock: 0 });
+      }
+      if (shown(stories)) {
+        const r = stories.getBoundingClientRect();
+        spots.push({ at: y + r.top + r.height / 2 - vh / 2, cx: vw / 2, cy: r.top + r.height / 2, w: Math.min(vw * 0.96, Math.max(r.height * 1.25, N.width * 1.3)), o: 0.14, dock: 0 });
+      }
+      // only the spots above the Atlas lead into it
+      const path = spots.filter((p) => p.at < home.at).sort((a, b) => a.at - b.at).concat(home);
+      let T = path[path.length - 1];
+      if (y <= path[0].at) T = path[0];
+      else if (y < T.at) {
+        let i = 0; while (y >= path[i + 1].at) i += 1;
+        const a = path[i]; const b = path[i + 1]; const k = ease((y - a.at) / Math.max(1, b.at - a.at));
+        T = { cx: lerp(a.cx, b.cx, k), cy: lerp(a.cy, b.cy, k), w: lerp(a.w, b.w, k), o: lerp(a.o, b.o, k), dock: lerp(a.dock, b.dock, k) };
+      }
+      const sc = T.w / N.width;
+      const docked = T.dock > 0.999;
+      float.style.transform = docked ? '' : `translate3d(${(T.cx - ncx).toFixed(1)}px, ${(T.cy - ncy).toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
+      float.style.opacity = T.o.toFixed(3);
+      float.style.pointerEvents = docked ? '' : 'none';
+      // the thumbnails come up as it lands
+      const nk = clamp01((T.dock - 0.55) / 0.45);
+      nodesEl.style.opacity = nk.toFixed(3);
+      nodesEl.style.visibility = nk < 0.02 ? 'hidden' : '';
+      sec.classList.toggle('is-docked', docked);
+      // draw finer while it's shown bigger than its canvas
+      const r2 = sc > 1.15 ? 2 : 1;
+      if (r2 !== lastRes) { lastRes = r2; setRes(r2); }
+    };
+    const kick = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', kick, { passive: true, signal });
+    window.addEventListener('resize', kick, { passive: true, signal });
+    // the rails and photos above it settle their heights after load
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(kick); ro.observe(document.body); signal.addEventListener('abort', () => ro.disconnect()); }
+    signal.addEventListener('abort', () => { float.style.transform = ''; float.style.opacity = ''; nodesEl.style.opacity = ''; nodesEl.style.visibility = ''; });
+    update();
+  }
+
+  /* The dark stretch of the home page: as the departments come up the
+   * screen the whole page fades to black, and stays black through Why the
+   * kiosk, fading back as the next section comes up. --zone (0 → 1 on
+   * <html>) drives the page's colours (css: "home: the dark zone"). */
+  function bindZone() {
+    const d = document.documentElement;
+    const secs = ['departments', 'about'].map((k) => $(`[data-home="${k}"]`)).filter((s) => s && !s.hidden);
+    if (!secs.length) return;
+    const signal = pageAbort.signal;
+    const c01 = (v) => Math.max(0, Math.min(1, v));
+    let shown = -1; let ticking = false;
+    const update = () => {
+      ticking = false;
+      const vh = window.innerHeight;
+      // each dark section: in as its top rises from 90% to 40% of the screen, out as its bottom does
+      // (summed, so back-to-back sections hand over without a dip)
+      let z = 0;
+      secs.forEach((s) => { const r = s.getBoundingClientRect(); z += c01((vh * 0.9 - r.top) / (vh * 0.5)) * (1 - c01((vh * 0.9 - r.bottom) / (vh * 0.5))); });
+      z = c01(z);
+      if (Math.abs(z - shown) > 0.003 || ((z === 0 || z === 1) && z !== shown)) { shown = z; d.style.setProperty('--zone', z.toFixed(3)); }
+    };
+    const kick = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', kick, { passive: true, signal });
+    window.addEventListener('resize', kick, { passive: true, signal });
+    signal.addEventListener('abort', () => d.style.removeProperty('--zone'));
+    update();
+  }
+
+  /* ---------------------------------------------------- why the kiosk
+   * Home: a two-sided slider, a quote on one half and a lifestyle photo
+   * filling the other (stacked on phones). Readers' own words lead
+   * (C.voices), then the KIOSK's: the manifesto line and the Words to wear.
+   * It moves on every 7 s (not with reduced motion: play to start it), and
+   * holds while hovered, focused, off screen or paused; the arrows (or a
+   * swipe) step by hand. */
+  const WHY_MS = 7000;
+  function mountWhy() {
+    const root = mount('why-slider');
+    if (!root || root.dataset.on) return;
+    root.dataset.on = '1';
+    const signal = pageAbort.signal;
+    // lifestyle photos: the colourways on location, then the shoots
+    const pics = [];
+    (C.products || []).forEach((p) => (p.colorways || []).forEach((w) => (w.lifestyle || []).forEach((src) => pics.push(src))));
+    features.forEach((f) => (f.gallery || []).slice(0, 2).forEach((g) => pics.push(typeof g === 'string' ? g : g.src)));
+    if (!pics.length && features[0] && features[0].image) pics.push(features[0].image);
+    const slides = (C.voices || []).filter((v) => v && v.quote)
+      .map((v) => ({ quote: v.quote, name: v.name || 'A reader', meta: [v.place, v.role].filter(Boolean).join(' · '), img: v.image || (featureBySlug(v.story) || {}).image }))
+      .concat({ quote: 'Pick it up at the kiosk, get lost in a world you never knew existed — then go and find it.', name: 'The KIOSK', meta: 'For anyone, any age, anywhere' })
+      .concat((C.products || []).filter((p) => p.quote && p.category === 'quotes').slice(0, 4)
+        .map((p) => ({ quote: p.quote, name: 'Words to wear', meta: `On the ${p.title}`, href: `vault.html?c=quotes#${p.id}` })));
+    // step through the photos so neighbouring slides never look alike
+    slides.forEach((sl, i) => { if (!sl.img && pics.length) sl.img = pics[(i * 5) % pics.length]; });
+    const n = slides.length;
+    root.setAttribute('role', 'region');
+    root.setAttribute('aria-roledescription', 'carousel');
+    root.setAttribute('aria-label', 'Why the kiosk');
+    root.innerHTML = `
+      <div class="k-why__grid">
+        <div class="k-why__media" aria-hidden="true">${slides.map((sl, i) => `<span class="k-why__img${i ? '' : ' is-on'}" data-why-img="${i}">${sl.img ? `<img src="${esc(sl.img)}" alt="" loading="${i ? 'lazy' : 'eager'}" decoding="async">` : ''}</span>`).join('')}</div>
+        <div class="k-why__side">
+          <div class="k-why__slides" data-why-slides aria-live="off">${slides.map((sl, i) => `
+            <figure class="k-why__slide${i ? '' : ' is-on'}" data-why-slide="${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${n}"${i ? ' aria-hidden="true"' : ''}>
+              <blockquote class="k-why__quote"><p>“${esc(sl.quote)}”</p></blockquote>
+              <figcaption class="k-why__who"><b>${esc(sl.name)}</b>${sl.meta ? `<span>${sl.href ? `<a href="${esc(sl.href)}"${i ? ' tabindex="-1"' : ''}>${esc(sl.meta)}</a>` : esc(sl.meta)}</span>` : ''}</figcaption>
+            </figure>`).join('')}</div>
+          ${n > 1 ? `<div class="k-why__ui">
+            <span class="k-why__count" aria-hidden="true"><b data-why-n>01</b> / ${pad(n)}</span>
+            <span class="k-why__bar" aria-hidden="true"><i data-why-bar></i></span>
+            <button class="k-hscroll__btn" type="button" data-why-prev aria-label="Previous quote">${ARROW_L}</button>
+            <button class="k-hscroll__btn" type="button" data-why-play aria-label="Pause the slides">${icon.pause}</button>
+            <button class="k-hscroll__btn" type="button" data-why-next aria-label="Next quote">${ARROW_R}</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+    if (n < 2) return;
+    const slidesEl = $('[data-why-slides]', root);
+    const bar = $('[data-why-bar]', root);
+    const playBtn = $('[data-why-play]', root);
+    let cur = 0; let elapsed = 0; let last = 0; let raf = 0;
+    let paused = REDUCED; let hold = false; let seen = false;
+    const go = (i, byHand) => {
+      cur = (i + n) % n; elapsed = 0;
+      $$('[data-why-slide]', root).forEach((el, k) => {
+        const on = k === cur;
+        el.classList.toggle('is-on', on);
+        if (on) el.removeAttribute('aria-hidden'); else el.setAttribute('aria-hidden', 'true');
+        $$('a', el).forEach((a) => { if (on) a.removeAttribute('tabindex'); else a.setAttribute('tabindex', '-1'); });
+      });
+      $$('[data-why-img]', root).forEach((el, k) => el.classList.toggle('is-on', k === cur));
+      $('[data-why-n]', root).textContent = pad(cur + 1);
+      // announce a slide someone asked for, not the ones that turn on their own
+      slidesEl.setAttribute('aria-live', byHand ? 'polite' : 'off');
+      bar.style.transform = 'scaleX(0)';
+      wake();
+    };
+    const running = () => !paused && !hold && seen && !document.hidden;
+    const tick = (now) => {
+      raf = 0;
+      const dt = last ? now - last : 0; last = now;
+      if (!running()) { last = 0; return; }
+      elapsed += dt;
+      bar.style.transform = `scaleX(${Math.min(1, elapsed / WHY_MS).toFixed(4)})`;
+      if (elapsed >= WHY_MS) go(cur + 1, false);
+      else raf = requestAnimationFrame(tick);
+    };
+    const wake = () => { if (running() && !raf) { last = 0; raf = requestAnimationFrame(tick); } };
+    const setPaused = (v) => {
+      paused = v;
+      playBtn.innerHTML = v ? icon.play : icon.pause;
+      playBtn.setAttribute('aria-label', v ? 'Play the slides' : 'Pause the slides');
+      root.classList.toggle('is-paused', v);
+      wake();
+    };
+    setPaused(paused);
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-why-prev]')) go(cur - 1, true);
+      else if (e.target.closest('[data-why-next]')) go(cur + 1, true);
+      else if (e.target.closest('[data-why-play]')) setPaused(!paused);
+    }, { signal });
+    // hold while someone's reading or tabbing through it
+    root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hold = true; } }, { signal });
+    root.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { hold = false; wake(); } }, { signal });
+    root.addEventListener('focusin', () => { hold = true; }, { signal });
+    root.addEventListener('focusout', (e) => { if (!root.contains(e.relatedTarget)) { hold = false; wake(); } }, { signal });
+    // swipe the photo or the quote on touch screens
+    let sx = null;
+    root.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true, signal });
+    root.addEventListener('touchend', (e) => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 48) go(cur + (dx < 0 ? 1 : -1), true); }, { passive: true, signal });
+    document.addEventListener('visibilitychange', wake, { signal });
+    const io = new IntersectionObserver(([en]) => { seen = en.isIntersecting; wake(); }, { threshold: 0.35 });
+    io.observe(root);
+    signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); });
   }
 
   function pageHome() {
@@ -3009,8 +3218,9 @@
     if (!lead) return;
 
     mountGlobeHero();
-    mountLogoGlobe();
     mountWorldLibrary();
+    mountWhy();
+    bindZone();
     fill('hero-dek', esc(issue.dek || ''));
     fill('hero-stats', `
       <div><dt>Now showing</dt><dd>${esc(lead.title)} · ${esc([lead.make, lead.code].filter(Boolean).join(' '))}</dd></div>
@@ -3049,10 +3259,6 @@
         });
       }
     }
-
-    // Manifesto inline image uses a second feature
-    const second = features.find((f) => f.slug !== lead.slug) || lead;
-    fill('quote-inline', featureMedia(second, { meta: '', mark: '' }));
 
     // Films
     const films = features.filter((f) => (f.media || []).includes('film'));
@@ -5288,7 +5494,8 @@
     function draw(now) {
       const w = canvas.clientWidth; const h = canvas.clientHeight;
       if (!w || !h) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // (opts.res: an extra factor while the canvas is shown scaled up)
+      const dpr = Math.min((window.devicePixelRatio || 1) * (opts.res ? opts.res() : 1), 3);
       if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -5532,23 +5739,6 @@
         signal.addEventListener('abort', () => hero.stop());
       })
       .catch((err) => { sec.classList.add('is-flat'); console.warn('[KIOSK] globe hero unavailable', err); });
-  }
-
-  /* ----------------------------------------------------- the logo globe
-   * Home, under the departures board: the KIOSK mark's globe in ink, sliding
-   * out from beneath the board as it scrolls up (js/kiosk-logo-globe.js). */
-  function mountLogoGlobe() {
-    const el = $('[data-vglobe]');
-    if (!el || el.dataset.on) return;
-    el.dataset.on = '1';
-    const signal = pageAbort.signal;
-    (window.KioskLogoGlobe ? Promise.resolve() : loadScript('js/kiosk-logo-globe.js'))
-      .then(() => {
-        if (signal.aborted) return;
-        const g = window.KioskLogoGlobe.mount(el, { anchor: $('[data-mount="term-page-board"]') || el, reduced: REDUCED });
-        signal.addEventListener('abort', () => g.stop());
-      })
-      .catch((err) => { el.hidden = true; console.warn('[KIOSK] logo globe unavailable', err); });
   }
 
   /* ------------------------------------------------------- live presence
