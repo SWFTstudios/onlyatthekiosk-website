@@ -614,7 +614,7 @@ html[data-motion='reduced'] .k-ed-hero__cue i::after { animation: none; }
 .k-atlas-archive { padding-bottom: 0; }
 .k-atlas-archive .k-lede .k-ed-link { margin: 14px 18px 0 0; }
 
-/* -------------------------------------------- a volume: the field journal */
+/* ------------------------------------------ a volume: the monthly archive */
 
 .k-jr-cover { padding-top: calc(var(--nav-h) + clamp(48px, 8vw, 120px)); }
 .k-jr-kicker { font-size: calc(13px * var(--type, 1)); font-weight: 500; letter-spacing: 0.08em; }

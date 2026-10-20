@@ -4602,7 +4602,7 @@
       if (k === 'tag') { if (st.tags.has(v)) st.tags.delete(v); else st.tags.add(v); } else st[k] = v;
       paint();
     }, { signal });
-    if (fill('atlas-library', libraryHtml(journalVolumes(), { title: 'Monthly archive' }))) bindLibrary();
+    if (fill('atlas-library', libraryHtml(journalVolumes(), { title: 'Monthly volumes' }))) bindLibrary();
   }
 
 
@@ -5606,7 +5606,7 @@
   }
 
   /* ======================================================== the journal
-   * One volume a month, laid out like a ranger's field journal: a cover,
+   * One volume a month for the KIOSK Archive, laid out like a monthly field report: a cover,
    * the month in numbers, a section per story with its log, then everything
    * else that happened. A month gets a volume when something in the content
    * file is dated in it (a story published or shot, a timeline milestone, a
@@ -5694,14 +5694,14 @@
 
   /* ------------------------------------------------- the archive (shelf) */
 
-  function libraryHtml(vols, { search = true, years = true, title = 'The archive' } = {}) {
+  function libraryHtml(vols, { search = true, years = true, title = 'Every volume' } = {}) {
     const ys = Array.from(new Set(vols.map((v) => v.year)));
     return `
       <section class="k-lib3d" data-lib3d aria-label="${esc(title)}">
         <svg class="k-lib3d__room" data-lib3d-room aria-hidden="true"></svg>
         <div class="k-wrap k-lib3d__inner">
           <div class="k-lib3d__head" data-lib3d-head>
-            <p><b>KIOSK Field Journal</b> — ${esc(title)}</p>
+            <p><b>KIOSK Archive</b> — ${esc(title)}</p>
             <div class="k-lib3d__tools">
               ${years && ys.length > 1 ? `<div class="k-lib3d__years" role="group" aria-label="Year">${['all'].concat(ys).map((y, i) => `<button type="button" data-lib3d-year="${y}" aria-pressed="${!i}">${y === 'all' ? 'All' : y}</button>`).join('')}</div>` : ''}
               <button class="k-lib3d__tool" type="button" data-lib3d-previews aria-pressed="true" aria-label="Cover previews" title="Cover previews">${icon.camera}</button>
@@ -5801,7 +5801,7 @@
     const first = vols[vols.length - 1];
     fill('archive', `
       <header class="k-wrap k-arc-hero">
-        <p class="k-ed-label">The KIOSK field journal${first ? ` · since ${esc(first.name)}` : ''}</p>
+        <p class="k-ed-label">The KIOSK Archive${first ? ` · since ${esc(first.name)}` : ''}</p>
         <h1 class="k-ed-giant" data-ed="mask" data-fit>The Journal</h1>
         <p class="k-lede">One volume every month: what we shot, what we published, where we went and what dropped in the shop. Filed below, newest first.</p>
       </header>
@@ -5828,7 +5828,7 @@
     const r = v.report || {};
     document.title = `Volume ${pad(v.no)} · ${v.name} · The Journal · KIOSK`;
     const desc = $('meta[name="description"]');
-    if (desc) desc.setAttribute('content', `The KIOSK field journal for ${v.name}: ${v.lead}.`);
+    if (desc) desc.setAttribute('content', `The KIOSK Archive for ${v.name}: ${v.lead}.`);
 
     const frames = v.stories.reduce((n, f) => n + (f.gallery || []).length, 0);
     const clips = v.stories.reduce((n, f) => n + ((f.bts || {}).clips || []).length + ((f.bts || {}).driveClips || []).length, 0);
@@ -5870,7 +5870,7 @@
         <header class="k-jr-cover">
           <div class="k-wrap">
             <p class="k-jr-kicker">${esc(v.name.toUpperCase())} · VOLUME ${pad(v.no)}</p>
-            <h1 class="k-jr-title" id="jr-title" data-ed="mask"><span>Field</span><span>Journal</span></h1>
+            <h1 class="k-jr-title" id="jr-title" data-ed="mask"><span>Monthly</span><span>Archive</span></h1>
           </div>
           <figure class="k-jr-lead">
             <div class="k-jr-lead__media" data-ed="img">${v.cover ? media({ image: v.cover.src, focus: v.cover.focus, alt: v.cover.caption, eager: true, cls: 'k-media--clean' }) : `<div class="k-media"><div class="plate plate--graphite"><span class="plate__mark">${pad(v.no)}</span></div></div>`}</div>
