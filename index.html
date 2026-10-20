@@ -62,50 +62,29 @@
     <!-- GLOBE HERO: the opening flight lands on the visitor's town, then the
          planet settles under the headline with them pinned (sonar), everyone
          else on the site right now pinned too (/api/live) and flights
-         streaking between them (js/kiosk-globe-hero.js) -->
+         streaking between them. The stage stays pinned while you scroll: the
+         headline lifts away, the whole planet rises into view and turns with
+         the page (scroll back and it turns back). Drag it to spin it.
+         (js/kiosk-globe-hero.js) -->
     <section class="k-gh" data-globe-hero aria-labelledby="gh-title">
-      <div class="k-gh__stage" aria-hidden="true">
-        <div class="k-gh__space"></div>
-        <canvas class="k-gh__earth" data-gh-earth></canvas>
-        <canvas class="k-gh__fx" data-gh-fx></canvas>
-        <div class="k-gh__fade"></div>
-      </div>
-      <p class="k-gh__route" data-gh-route aria-hidden="true">KSK 001</p>
-      <div class="k-wrap k-gh__copy">
-        <p class="k-gh__live" data-gh-live><span class="k-gh__dot" aria-hidden="true"></span><span data-gh-count>Travelers from everywhere</span></p>
-        <h1 class="k-gh__title" id="gh-title">Where the world’s travelers <em class="k-serif">meet.</em></h1>
-        <p class="k-gh__dek">A global culture magazine and store. Films, stories and fresh threads from the road, and a community of travelers from every corner of the map.</p>
-        <div class="k-gh__cta">
-          <a class="k-btn k-btn--solid k-gh__btn" href="atlas.html">Start exploring</a>
-          <a class="k-btn k-gh__btn k-gh__btn--ghost" href="vault.html">Shop the kiosk</a>
+      <div class="k-gh__pin" data-gh-pin>
+        <div class="k-gh__stage" data-gh-stage aria-hidden="true">
+          <div class="k-gh__space"></div>
+          <canvas class="k-gh__earth" data-gh-earth></canvas>
+          <canvas class="k-gh__fx" data-gh-fx></canvas>
+          <div class="k-gh__fade"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- COVER: under the globe, a floating carousel of jumping-off points:
-         films, stories, the shop, the radio, the Garage, the Atlas -->
-    <section class="k-cover k-orbit" aria-labelledby="orbit-title">
-      <div class="k-cover__media k-orbit__scene" aria-hidden="true">
-        <div class="k-orbit__sky"></div>
-        <div class="k-orbit__stars"></div>
-      </div>
-      <div class="k-cover__inner k-orbit__inner">
-        <div class="k-cover__top">
-          <p class="k-eyebrow" data-mount="hero-issue"><b>Issue 01</b></p>
-          <p class="k-eyebrow k-cover__edition"><span class="k-term__t k-term__t--sm">T0</span> Main concourse · <span data-clock>--:--</span> <span data-clock-zone></span></p>
+        <p class="k-gh__route" data-gh-route aria-hidden="true">KSK 001</p>
+        <div class="k-wrap k-gh__copy">
+          <p class="k-gh__live" data-gh-live><span class="k-gh__dot" aria-hidden="true"></span><span data-gh-count>Travelers from everywhere</span></p>
+          <h1 class="k-gh__title" id="gh-title">Where the world’s travelers <em class="k-serif">meet.</em></h1>
+          <p class="k-gh__dek">A global culture magazine and store. Films, stories and fresh threads from the road, and a community of travelers from every corner of the map.</p>
+          <div class="k-gh__cta">
+            <a class="k-btn k-btn--solid k-gh__btn" href="atlas.html">Start exploring</a>
+            <a class="k-btn k-gh__btn k-gh__btn--ghost" href="vault.html">Shop the kiosk</a>
+          </div>
         </div>
-        <div class="k-orbit__head">
-          <h2 class="k-orbit__title" id="orbit-title">Where to <em class="k-serif">next?</em></h2>
-          <p class="k-orbit__dek">A global travel magazine for the curious: cars, motorcycles, culture and fashion in films, stories and pieces from the road. Swipe the carousel and pick a departure.</p>
-        </div>
-        <div class="k-orbit__carousel" data-mount="orbit-carousel"></div>
-        <ol class="k-cover__index" aria-label="In this issue">
-          <li><a href="atlas.html?desk=automotive"><span>01</span>Automotive</a></li>
-          <li><a href="atlas.html"><span>02</span>Travel</a></li>
-          <li><a href="radio.html"><span>03</span>Music</a></li>
-          <li><a href="vault.html"><span>04</span>Fashion</a></li>
-          <li><a href="the-garage.html"><span>05</span>The Garage</a></li>
-        </ol>
+        <p class="k-gh__hint" aria-hidden="true"><span class="k-gh__hint-now" data-gh-now>Travelers on the map right now</span><span class="k-gh__hint-how">Drag or scroll to spin the globe</span></p>
       </div>
     </section>
 
