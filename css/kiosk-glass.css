@@ -3712,13 +3712,30 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-concourse-home__inner { display: grid; gap: clamp(20px, 3vw, 40px); align-items: start; }
 /* side by side only where the board gets ~830px for its bigger type; stacked below that */
 @media (min-width: 1200px) { .k-concourse-home__inner { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); } }
-/* The slot under the board where the Atlas globe first slides out
- * (js/kiosk-glass.js, roamGlobe); the globe itself lives in the Atlas */
-.k-concourse-home__board { display: grid; min-width: 0; }
-.k-concourse-home__board > [data-mount='term-page-board'] { position: relative; z-index: 2; min-width: 0; }
-.k-vglobe { justify-self: center; width: min(100%, 520px); aspect-ratio: 1; margin-top: clamp(8px, 2vw, 24px); pointer-events: none; }
+/* The slot under the board where the Atlas globe slides out as the board
+ * scrolls (js/kiosk-glass.js, roamGlobe); the globe itself lives in the
+ * Atlas. The departures card sticks under the nav while the globe emerges
+ * from beneath it, then the card lets go and scrolls away with the page.
+ * The extra run at the bottom of the column is the sticky scroll: how
+ * long the card stays pinned while the globe comes out. */
+/* block, not grid: a sticky child of a grid only sticks inside its own
+ * row, which is exactly as tall as the card — it would never pin. The
+ * min-height is the sticky run (bottom padding would not extend it:
+ * sticky travel stops at the parent's content box). */
+.k-concourse-home__board { display: block; min-width: 0; min-height: 168vh; }
+.k-concourse-home__board > [data-mount='term-page-board'] { position: sticky; top: calc(var(--nav-h, 76px) + 10px); z-index: 2; min-width: 0; }
+/* tucked up under the card at rest, so the emerging globe reads as
+ * sliding out from underneath it */
+.k-vglobe { width: min(100%, 520px); aspect-ratio: 1; margin: -72px auto 0; pointer-events: none; }
 .k-vglobe[hidden] { display: none; }
-@media (max-width: 640px) { .k-vglobe { width: min(100%, 380px); } }
+@media (max-width: 640px) {
+  /* the card is taller than a phone screen, so pinning it would trap its
+   * own bottom rows; on phones it scrolls normally and the globe still
+   * slides out from under it into the slot */
+  .k-concourse-home__board { min-height: 0; }
+  .k-concourse-home__board > [data-mount='term-page-board'] { position: relative; top: auto; }
+  .k-vglobe { width: min(100%, 380px); margin-top: -48px; }
+}
 .k-dir { display: grid; gap: 8px; }
 .k-dir__sign { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: var(--board); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.06); transition: transform .25s var(--ease), background .25s; }
 .k-dir__sign:hover, .k-dir__sign:focus-visible { transform: translateX(4px); background: color-mix(in srgb, var(--board) 88%, var(--signal)); outline: none; }
@@ -3815,7 +3832,9 @@ a.k-board__row { display: grid; text-decoration: none; }
 @media (max-width: 999px) { .k-wl__stage { order: -1; max-width: 560px; } }
 .k-wl__stage { position: relative; aspect-ratio: 1; width: 100%; max-width: 760px; justify-self: center; color: var(--ink); }
 .k-wl__float { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform, opacity; }
-.k-wl__globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; color: var(--ink); }
+/* the sphere itself is drawn dark (Lost & Found night globe), so it
+ * carries a soft space shadow against the light Atlas backdrop */
+.k-wl__globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; color: var(--ink); filter: drop-shadow(0 34px 55px rgba(4, 7, 18, 0.45)); }
 .k-wl__globe.is-dragging { cursor: grabbing; }
 .k-wl__nodes { position: absolute; inset: 0; pointer-events: none; }
 .k-wl-node { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: auto; color: inherit; text-decoration: none; will-change: transform, opacity; transition: opacity .3s; }
@@ -3831,6 +3850,10 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-wl-node:focus-visible { outline: none; }
 .k-wl-node:focus-visible .k-wl-node__thumb { box-shadow: 0 0 0 2px var(--signal); }
 .k-wl-node__label { display: block; text-align: center; }
+/* labels land on the dark night sphere now: give them a small dark chip
+ * so they read over the disc and over the light backdrop alike */
+.k-wl__stage .k-wl-node__label { width: fit-content; max-width: 100%; margin-inline: auto; padding: 5px 9px 6px; border-radius: 8px; background: rgba(6, 7, 10, 0.62); color: #f2f4fa; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.k-wl__stage .k-wl-node__label small { color: rgba(242, 244, 250, 0.72); }
 .k-wl-node__label b { display: block; font-size: calc(12.5px * var(--type, 1)); font-weight: 500; line-height: 1.2; }
 .k-wl-node__label small { display: block; font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .06em; color: var(--ink-3); margin-top: 2px; }
 /* The hero slideshow, flipped into the first pin */
