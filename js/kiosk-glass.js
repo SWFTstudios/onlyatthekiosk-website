@@ -557,6 +557,8 @@
     $('.k-lightbox__inner', el).innerHTML = html;
     el.setAttribute('aria-label', label || 'Dialog');
     el.setAttribute('aria-hidden', 'false');
+    // Opened from a product page: sit in front of it, not behind
+    el.classList.toggle('is-over', !!$('.k-pdp.is-open'));
     el.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     const focusable = $('[data-autofocus]', el) || $('[data-close]', el);
@@ -2774,7 +2776,15 @@
                 ? `<div class="k-pdp__pricebar"><b>${esc(price(p))}</b>
                      <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to bag</button>
                      <button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>Buy now <span class="k-arrow">${icon.arrow}</span></button></div>`
-                : `<button class="k-btn k-btn--solid k-pdp__buy" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve · get the coordinates' : 'Notify me when it drops'}</button>`}
+                : `<form class="k-pdp__notify" data-dispatch data-pdp-notify novalidate data-interest="${esc(p.id)}" data-title="${esc(p.title)}">
+                     <p class="k-pdp__notify-lead">${p.pickup ? 'Reserve it: we’ll email the coordinates when you’re cleared to collect.' : 'Coming soon. Leave your email and we’ll tell you the moment it drops.'}</p>
+                     <div class="k-pdp__notify-row">
+                       <label class="k-sr" for="k-pdp-notify-${esc(p.id)}">Email</label>
+                       <input id="k-pdp-notify-${esc(p.id)}" type="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required>
+                       <button class="k-btn k-btn--solid" type="submit">${p.pickup ? 'Reserve' : 'Notify me'}</button>
+                     </div>
+                   </form>
+                   <p class="k-form-msg k-pdp__notify-msg" aria-live="polite"></p>`}
               ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
             </div>
             <div class="k-pdp__sticky" aria-hidden="false">
@@ -2783,7 +2793,7 @@
                 <button type="button" class="k-pdp__wish" data-wish-product="${esc(p.id)}" aria-label="Save">${icon.heart}</button>
                 ${canBuy(p, cw)
                   ? `<button class="k-btn" type="button" data-pdp-cart>Add to bag</button>`
-                  : `<button class="k-btn" type="button" data-notify="${esc(p.id)}" data-notify-title="${esc(p.title)}">${p.pickup ? 'Reserve' : 'Notify'}</button>`}
+                  : `<button class="k-btn" type="button" data-pdp-notify-focus>${p.pickup ? 'Reserve' : 'Notify me'}</button>`}
               </div>
             </div>
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
@@ -2950,6 +2960,11 @@
       if (head) tapped = head.parentElement;
       if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
       if (e.target.closest('[data-pdp-full]')) { setPDPFull(!pdpState.full); return; }
+      if (e.target.closest('[data-pdp-notify-focus]')) {
+        const f = $('[data-pdp-notify]', root);
+        if (f) { f.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); setTimeout(() => $('input', f).focus({ preventScroll: true }), REDUCED ? 0 : 350); }
+        return;
+      }
       const im = e.target.closest('[data-pdp-img]');
       if (im) { carGo(Number(im.dataset.pdpImg)); return; }
       const step = e.target.closest('[data-car-step]');
