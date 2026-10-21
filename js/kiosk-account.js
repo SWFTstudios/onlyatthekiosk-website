@@ -22,6 +22,8 @@
     cart: null,
     orders: [],
     profile: null,
+    commerce: null,   // 'stripe' | 'shopify' | null — which checkout runs (/api/me)
+    shipCountry: '',  // ship-to picked in the bag (Stripe checkout)
     loading: true,
   };
   let justSignedIn = false;
@@ -144,6 +146,7 @@
       state.cart = data.cart || null;
       state.orders = data.orders || [];
       state.profile = data.profile || null;
+      state.commerce = data.commerce || null;
       state.loading = false;
       if (state.cart && state.cart.id) setCartId(state.cart.id);
       else if (!state.user) {
@@ -155,8 +158,8 @@
           } catch (e) { /* guest cart may have expired */ }
         }
       }
-      // Show cart chrome when accounts are on, or when a guest already has a cart id.
-      showAccountButtons(state.enabled, !!(state.cart && state.cart.id) || !!cartId());
+      // Show cart chrome when accounts or checkout are on, or when a guest already has a cart id.
+      showAccountButtons(state.enabled, !!state.commerce || !!(state.cart && state.cart.id) || !!cartId());
       updateCartBadge(state.cart);
       if (state.user) { await mergeLocalWishlist(); await syncTaste(); }
       renderAccountPage();
@@ -164,6 +167,7 @@
       return state;
     } catch (err) {
       state.enabled = false;
+      state.commerce = null;
       state.loading = false;
       showAccountButtons(false, !!cartId());
       renderAccountPage();
@@ -471,13 +475,70 @@
                   </div>
                 </li>`).join('')}
             </ul>
-            <div class="k-cart__foot">
+            ${cart.provider === 'stripe' ? stripeFootHtml(cart) : `<div class="k-cart__foot">
               <p class="k-cart__total"><span>Total</span><b>${esc(money(cart.cost))}</b></p>
               <p class="k-cart__ship">Shipping calculated at checkout · Secure Shopify checkout</p>
               <a class="k-btn k-btn--solid" href="${esc(cart.checkoutUrl || '#')}">Checkout</a>
-            </div>`}
+            </div>`}`}
         </div>
       </div>`;
+  }
+
+  /* Stripe checkout: pick where it ships, see the USPS rate, pay on Stripe.
+   * Rates come with the cart (shipping.byZone), so changing the country is instant. */
+  const countryName = (() => {
+    let dn = null;
+    try { dn = new Intl.DisplayNames([document.documentElement.lang || 'en'], { type: 'region' }); } catch (e) { /* old browser */ }
+    return (c) => (dn ? dn.of(c) : c);
+  })();
+
+  function shipQuote(cart, country) {
+    const sh = cart.shipping || {};
+    const zone = (sh.zoneOf || {})[country] || 'INTL';
+    const cents = (sh.byZone || {})[zone];
+    return cents == null ? sh.amount : cents;
+  }
+
+  function stripeFootHtml(cart) {
+    const sh = cart.shipping || {};
+    const country = state.shipCountry && (sh.countries || []).includes(state.shipCountry) ? state.shipCountry : sh.country;
+    const ship = shipQuote(cart, country);
+    const sub = Math.round(Number((cart.cost || {}).amount || 0) * 100);
+    const cur = (cart.cost || {}).currencyCode || 'USD';
+    const list = (sh.countries || []).slice().sort((a, b) => (a === 'US' ? -1 : b === 'US' ? 1 : countryName(a).localeCompare(countryName(b))));
+    const intl = country !== 'US' && country !== 'PR';
+    return `<div class="k-cart__foot" data-cart-foot>
+              <label class="k-cart__shipto"><span>Ship to</span>
+                <select data-ship-country aria-label="Ship to">${list.map((c) => `<option value="${esc(c)}"${c === country ? ' selected' : ''}>${esc(countryName(c))}</option>`).join('')}</select>
+              </label>
+              <p class="k-cart__total"><span>Subtotal</span><b>${esc(money(cart.cost))}</b></p>
+              <p class="k-cart__total"><span>USPS shipping</span><b data-ship-amount>${esc(money({ amount: ship / 100, currencyCode: cur }))}</b></p>
+              <p class="k-cart__total"><span>Total</span><b data-ship-total>${esc(money({ amount: (sub + ship) / 100, currencyCode: cur }))}</b></p>
+              <p class="k-cart__ship" data-ship-note>Ships from Jersey City, NJ${intl ? ' · import duties and taxes, if any, are paid on delivery' : ''} · Secure checkout by Stripe</p>
+              <button class="k-btn k-btn--solid" type="button" data-checkout>Checkout</button>
+              <p class="k-form-msg" data-checkout-msg aria-live="polite"></p>
+            </div>`;
+  }
+
+  async function startCheckout(country) {
+    const cart = state.cart;
+    const sh = (cart && cart.shipping) || {};
+    const to = country || state.shipCountry || sh.country || 'US';
+    const btn = cartEl && $('[data-checkout]', cartEl);
+    const msg = cartEl && $('[data-checkout-msg]', cartEl);
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
+    try {
+      const data = await api('/api/checkout', { method: 'POST', body: JSON.stringify({ cartId: (cart && cart.id) || cartId(), country: to }) });
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'begin_checkout', { currency: 'USD', value: Number((cart && cart.cost && cart.cost.amount) || 0), items: ((cart && cart.lines) || []).map((l) => ({ item_id: l.productId || l.handle, item_name: l.title, item_variant: l.variantTitle, price: Number((l.price || {}).amount || 0), quantity: l.quantity })) });
+      }
+      location.href = data.url;
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Checkout'; }
+      if (msg) { msg.textContent = err.message || 'Checkout couldn’t open.'; msg.classList.add('is-error'); }
+      else toast(err.message || 'Checkout couldn’t open.');
+      if (err.status === 409) refreshMe();
+    }
   }
 
   function openCartDrawer() {
@@ -490,6 +551,7 @@
       cartEl.setAttribute('aria-labelledby', 'k-cart-title');
       document.body.append(cartEl);
       cartEl.addEventListener('click', onCartClick);
+      cartEl.addEventListener('change', onCartChange);
     }
     cartEl.innerHTML = cartDrawerHtml(state.cart);
     cartReturn = document.activeElement;
@@ -504,8 +566,19 @@
     if (cartReturn && cartReturn.focus) cartReturn.focus();
   }
 
+  function onCartChange(e) {
+    const sel = e.target.closest('[data-ship-country]');
+    if (!sel || !state.cart) return;
+    state.shipCountry = sel.value;
+    const foot = $('[data-cart-foot]', cartEl);
+    if (foot) foot.outerHTML = stripeFootHtml(state.cart);
+    const again = $('[data-ship-country]', cartEl);
+    if (again) again.focus();
+  }
+
   async function onCartClick(e) {
     if (e.target.closest('[data-cart-close]')) { closeCartDrawer(); return; }
+    if (e.target.closest('[data-checkout]')) { startCheckout(); return; }
     const line = e.target.closest('[data-line]');
     if (!line) return;
     const lineId = line.getAttribute('data-line');
@@ -542,6 +615,8 @@
   /* ---------------------------------------------------------- add to cart */
 
   async function resolveVariant(product, cw, size) {
+    // Stripe checkout: the bag names the piece itself; the server checks it against the catalog
+    if (state.commerce === 'stripe') return `kiosk:${product.id}:${Number(cw) || 0}:${encodeURIComponent(size || '')}`;
     const handle = K().handleOf ? K().handleOf(product, cw) : null;
     if (!handle) throw new Error('This piece isn’t linked to Shopify yet.');
     const q = 'query($h:String!){product(handle:$h){variants(first:50){nodes{id availableForSale selectedOptions{name value}}}}}';
@@ -560,7 +635,7 @@
     return v.id;
   }
 
-  async function addToCart({ productId, cw = 0, size }) {
+  async function addToCart({ productId, cw = 0, size, quiet = false }) {
     const product = K().productById ? K().productById(productId) : null;
     if (!product) { toast('Product not found.'); return; }
     if ((product.sizes || []).length > 1 && !size) { toast('Pick a size first.'); return; }
@@ -575,13 +650,27 @@
         variantId,
         quantity: 1,
       });
-      say('Added to cart.');
-      toast('Added to cart');
-      openCartDrawer();
+      say(quiet ? '' : 'Added to cart.');
+      if (!quiet) { toast('Added to cart'); openCartDrawer(); }
       return cart;
     } catch (err) {
       say(err.message || 'Could not add to cart.', true);
       toast(err.message || 'Could not add to cart.');
+    }
+  }
+
+  /** "Buy now" with the Stripe checkout: into the bag, then straight to pay. */
+  async function buyNow(detail) {
+    const cart = await addToCart({ ...detail, quiet: true });
+    if (!cart) return;
+    const msg = $('[data-pdp-msg]');
+    if (msg) msg.textContent = 'Opening checkout…';
+    try {
+      const data = await api('/api/checkout', { method: 'POST', body: JSON.stringify({ cartId: cart.id, country: state.shipCountry || (cart.shipping || {}).country }) });
+      location.href = data.url;
+    } catch (err) {
+      if (msg) { msg.textContent = err.message || 'Checkout couldn’t open.'; msg.classList.add('is-error'); }
+      openCartDrawer();
     }
   }
 
@@ -746,7 +835,14 @@
 
   function boot() {
     bind();
-    refreshMe();
+    refreshMe().then(() => {
+      // Back from Stripe without paying: the bag is still there
+      if (new URLSearchParams(location.search).get('checkout') === 'cancelled') {
+        history.replaceState(history.state, '', location.pathname + location.search.replace(/[?&]checkout=cancelled/, '').replace(/^&/, '?') + location.hash);
+        toast('Checkout cancelled. Your bag is saved.');
+        if (state.cart && state.cart.totalQuantity) openCartDrawer();
+      }
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
@@ -756,6 +852,7 @@
     refresh: refreshMe,
     openAccount: openAccountSheet,
     openCart: openCartDrawer,
+    buyNow,
     openOnboarding,
     saveTaste,
     getState: () => state,
