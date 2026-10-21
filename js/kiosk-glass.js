@@ -6681,6 +6681,7 @@
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
   const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
   const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
+  const INFO_PAGES = ['about', 'contact', 'faq', 'shipping-returns', 'members', 'terms-conditions', 'privacy-cookies', 'do-not-sell'];
   const termStrip = (t, label) => `<p class="k-term__strip"><span class="k-term__t">${esc(t.t)}</span><span>${esc(label || t.name)}</span><span class="k-term__clock"><span data-clock>--:--:--</span> <small data-clock-zone></small></span></p>`;
   const PLANE = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 16.5l19-6.5-1.2-2.6-6.6 1.8L8.3 3.5 6.6 4.2l3 6.1-4.4 1.3-2.2-2-1.4.5 1.4 3.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
   const LANDING = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9.5l17.6 6.2.6-2.8-6.4-2.6-1.4-7-1.8-.4.6 6.7-4.3-1.7-1.3-2.7-1.5-.3.2 3.7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 20.5h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
@@ -6719,6 +6720,9 @@
       });
       const acct = $('.k-acct-page');
       if (acct && !$('.k-term__strip', acct)) acct.insertAdjacentHTML('afterbegin', termStrip({ t: 'PC' }, 'Passport control · your account'));
+    } else if (INFO_PAGES.includes(PAGE)) {
+      // About, contact, FAQ, shipping and the legal pages: the information desk
+      $$('.k-page-head .k-wrap').forEach((wrap) => { if (!$('.k-term__strip', wrap)) wrap.insertAdjacentHTML('afterbegin', termStrip({ t: 'i' }, 'Information desk')); });
     }
     const mountB = mount('term-page-board');
     if (mountB && !mountB.dataset.done) {

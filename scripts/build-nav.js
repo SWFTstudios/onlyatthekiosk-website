@@ -12,62 +12,8 @@ const PARTIAL_PATH = path.join(ROOT, 'partials', 'underlay-nav.html');
 const CONFIG_PATH = path.join(ROOT, 'partials', 'nav-config.json');
 
 const PAGES = [
-  // index.html, films.html, atlas.html, story.html, radio.html and vault.html use the
-  // KIOSK Glass chrome rendered by js/kiosk-glass.js — not this partial.
-  {
-    file: 'about.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'media.html',
-    base: '',
-    mainClass: 'is-interior',
-    wrapStart: '<div class="old-main"',
-  },
-  {
-    file: 'contact.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'faq.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'shipping-returns.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'members.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'terms-conditions.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'privacy-cookies.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
-  {
-    file: 'do-not-sell.html',
-    base: '',
-    mainClass: 'is-interior',
-    transformMain: true,
-  },
+  // Every public page uses the KIOSK Glass chrome rendered by js/kiosk-glass.js.
+  // Only the internal style guide still gets the old underlay menu.
   {
     file: 'kiosk-styleguide.html',
     base: '',
