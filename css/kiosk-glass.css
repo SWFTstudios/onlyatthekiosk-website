@@ -3541,6 +3541,21 @@ html[data-theme='dark'] .k-signin__msg { color: #ff7a5c; }
 
 .k-pdp__cta { display: flex; flex-wrap: wrap; gap: 8px; }
 .k-pdp__cta .k-btn { min-height: 44px; }
+/* Not on sale yet: the drop alert lives in the product page itself */
+.k-pdp__notify { flex: 1 1 100%; display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line-2); border-radius: 18px; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.k-pdp__notify-lead { margin: 0; font-size: calc(14px * var(--type, 1)); line-height: 1.45; color: var(--ink-2); }
+.k-pdp__notify-row { display: flex; gap: 8px; }
+.k-pdp__notify-row input {
+  flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 0 16px;
+  border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 16px;   /* 16px stops iOS zooming in */
+}
+.k-pdp__notify-row input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 12%, transparent); }
+.k-pdp__notify-row .k-btn { flex: none; min-height: 48px; }
+.k-pdp__notify-msg { flex: 1 1 100%; margin: 0; }
+.k-pdp__notify-msg:empty { display: none; }
+/* A pop-up opened from a product page sits in front of it */
+.k-lightbox.is-over { z-index: 190; }
 .k-pdp__cart { flex: 1 1 auto; }
 
 .k-acct-page { padding: calc(var(--nav-h) + 32px) 0 calc(var(--tabbar-h) + 48px); }
@@ -4458,6 +4473,9 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
 @media (max-width: 820px) {
   .k-pdp__sticky { display: block; }
   .k-pdp__cta { display: none; }
+  /* …but a drop alert stays in the page: the sticky Notify button jumps to it */
+  .k-pdp__cta:has(.k-pdp__notify) { display: flex; }
+  .k-pdp__cta:has(.k-pdp__notify) > .k-btn { display: none; }
 }
 .k-pdp__collect { display: grid; gap: 10px; margin: 18px 0; padding: 16px; border-radius: var(--r-md); border: 1px dashed var(--line-2); }
 .k-pdp__collect ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
