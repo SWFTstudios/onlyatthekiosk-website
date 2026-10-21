@@ -43,7 +43,22 @@
     </header>
 
     <section class="k-section" style="padding-top:0" aria-label="Now playing">
-      <div class="k-wrap" data-mount="radio"></div>
+      <div class="k-wrap">
+        <div class="k-cockpit" data-cockpit>
+          <div class="k-cockpit__layer k-cockpit__ship" aria-hidden="true"></div>
+          <div class="k-cockpit__layer k-cockpit__crew" aria-hidden="true"></div>
+          <div class="k-cockpit__vignette" aria-hidden="true"></div>
+          <div class="k-cockpit__stage" data-mount="radio"></div>
+          <div class="k-cockpit__controls">
+            <button class="k-cabin-switch" type="button" role="switch" aria-checked="false" data-cabin-toggle>
+              <span class="k-cabin-switch__track"><span class="k-cabin-switch__handle">CABIN SHAKE</span></span>
+              <span class="k-cabin-switch__label" data-cabin-label>Off · cabin steady</span>
+            </button>
+            <a class="k-btn" href="tv.html">KIOSK TV<span class="k-arrow">→</span></a>
+          </div>
+        </div>
+        <div class="k-mt-l" data-mount="spotify-connect"></div>
+      </div>
     </section>
 
     <section class="k-section k-section--tight" aria-labelledby="tl-title">

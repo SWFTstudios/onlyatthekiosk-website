@@ -215,7 +215,7 @@
         <label class="k-field"><span>Email</span>
           <input type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" value="${esc(signin.email)}" aria-describedby="k-signin-msg" required>
         </label>
-        <label class="k-field"><span>First name <small>optional, for new members</small></span>
+        <label class="k-field"><span>First name <small>optional, for new Voyagers</small></span>
           <input name="firstName" autocomplete="given-name" maxlength="60" value="${esc(signin.firstName || ((localTaste() || {}).name) || '')}">
         </label>
         <button class="k-btn k-btn--solid k-acct__cta" type="submit"${signin.busy ? ' disabled' : ''}>${signin.busy ? 'Sending…' : 'Email me a code'}</button>
@@ -280,7 +280,7 @@
     await refreshMe();
     if (accountEl && accountEl.classList.contains('is-open')) accountEl.innerHTML = accountSheetHtml();
     const u = data.user || {};
-    toast(data.isNew ? `Welcome aboard${u.firstName ? `, ${u.firstName}` : ''}. You’re member ${u.memberNo || ''}.` : `Welcome back${u.firstName ? `, ${u.firstName}` : ''}.`);
+    toast(data.isNew ? `Welcome aboard${u.firstName ? `, ${u.firstName}` : ''}. You’re Voyager ${u.memberNo || ''}.` : `Welcome back${u.firstName ? `, ${u.firstName}` : ''}.`);
   }
 
   async function signOut() {
@@ -322,12 +322,12 @@
   function memberCard(u) {
     const t = localTaste();
     const saves = u ? (state.wishlist || []).length : localSaves();
-    const name = u ? (u.firstName || (u.email || '').split('@')[0] || 'Member') : ((t && t.name) || 'Guest');
+    const name = u ? (u.firstName || (u.email || '').split('@')[0] || 'Voyager') : ((t && t.name) || 'Guest');
     return `
-      <div class="k-member" aria-label="${u ? 'Your member pass' : 'Guest pass'}">
+      <div class="k-member" aria-label="${u ? 'Your Voyager pass' : 'Guest pass'}">
         <div class="k-member__top">
           <span class="k-member__brand">KIOSK</span>
-          <span class="k-member__kind">${u ? `Member ${esc(u.memberNo || '')}` : 'Guest pass'}</span>
+          <span class="k-member__kind">${u ? `Voyager ${esc(u.memberNo || '')}` : 'Guest pass'}</span>
         </div>
         <p class="k-member__name">${esc(name)}</p>
         ${u && u.email ? `<p class="k-member__email">${esc(u.email)}</p>` : ''}
@@ -355,7 +355,7 @@
       const cta = state.enabled
         ? `<div data-signin-box>${signinHtml()}</div>`
         : `<div class="k-acct__soon">
-             <p><b>Member sign-in opens soon.</b> Until then your saves and check-in are kept on this device.</p>
+             <p><b>Voyager sign-in opens soon.</b> Until then your saves and check-in are kept on this device.</p>
              <button type="button" class="k-btn k-btn--solid k-acct__cta" data-notify="dispatch" data-notify-title="The Dispatch">Tell me when it opens</button>
            </div>`;
       return `${head}
