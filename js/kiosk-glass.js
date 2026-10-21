@@ -217,6 +217,7 @@
     { id: 'journal', label: 'Atlas', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
+    { id: 'tv', label: 'KIOSK TV', href: 'tv.html' },
     { id: 'garage', label: 'Garage', href: 'the-garage.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
@@ -239,6 +240,7 @@
     journal: { note: 'Every story', icon: 'journal' },
     films: { note: 'Screening room', icon: 'films' },
     radio: { note: 'Phonk & mixes', icon: 'radio' },
+    tv: { note: 'Music videos', icon: 'films' },
     garage: { note: 'The Street File', icon: 'garage' },
     vault: { note: 'Supply', icon: 'shop' },
   };
@@ -907,6 +909,107 @@
     },
   };
 
+  /* ------------------------------------------------------ Spotify connect
+   * One OAuth connect per Voyager (Worker: /api/spotify/*), then a single
+   * persistent Web Playback SDK device — "KIOSK Radio" — plays whole
+   * playlists in-page. No per-song sign-in. Premium only (Spotify's rule);
+   * everyone else keeps the embed above. Access tokens are fetched fresh
+   * from /api/spotify/token (refresh stays server-side).
+   * -------------------------------------------------------------------- */
+  const spotifySdk = {
+    status: null,          // { configured, voyager, connected, premium }
+    statusLoading: null,
+    sdk: null,
+    deviceId: '',
+    deviceReady: null,
+    active: false,         // the SDK device is the thing making sound
+
+    async loadStatus(force) {
+      if (this.status && !force) return this.status;
+      if (this.statusLoading) return this.statusLoading;
+      this.statusLoading = fetch('/api/spotify/status')
+        .then((r) => (r.ok ? r.json() : { configured: false }))
+        .catch(() => ({ configured: false }))
+        .then((d) => { this.status = d; this.statusLoading = null; return d; });
+      return this.statusLoading;
+    },
+
+    loadSdk() {
+      if (this.sdk) return this.sdk;
+      this.sdk = new Promise((resolve) => {
+        if (window.Spotify && window.Spotify.Player) { resolve(true); return; }
+        const prev = window.onSpotifyWebPlaybackSDKReady;
+        window.onSpotifyWebPlaybackSDKReady = () => { if (prev) prev(); resolve(true); };
+        const s = document.createElement('script');
+        s.src = 'https://sdk.scdn.co/spotify-player.js';
+        s.async = true;
+        s.onerror = () => resolve(false);
+        document.head.append(s);
+        setTimeout(() => resolve(!!(window.Spotify && window.Spotify.Player)), 8000);
+      });
+      return this.sdk;
+    },
+
+    async token() {
+      const r = await fetch('/api/spotify/token');
+      if (!r.ok) throw new Error('spotify-token');
+      const d = await r.json();
+      return d.accessToken;
+    },
+
+    /** Create (once) and connect the KIOSK Radio device. */
+    async ensureDevice() {
+      if (this.deviceReady) return this.deviceReady;
+      this.deviceReady = (async () => {
+        if (!await this.loadSdk()) return false;
+        const P = new window.Spotify.Player({
+          name: 'KIOSK Radio',
+          volume: 0.85,
+          getOAuthToken: (cb) => { this.token().then(cb).catch(() => {}); },
+        });
+        this.player = P;
+        P.addListener('ready', ({ device_id }) => { this.deviceId = device_id; });
+        P.addListener('not_ready', () => { this.deviceId = ''; });
+        P.addListener('player_state_changed', (st) => player.onSpotifySdk(st));
+        P.addListener('account_error', () => { this.active = false; });
+        P.addListener('authentication_error', () => { this.status = null; this.active = false; });
+        const ok = await P.connect();
+        for (let i = 0; i < 40 && !this.deviceId; i += 1) await new Promise((r) => setTimeout(r, 150));
+        return !!(ok && this.deviceId);
+      })().catch(() => false);
+      return this.deviceReady;
+    },
+
+    async api(path, opts = {}) {
+      const token = await this.token();
+      const r = await fetch(`https://api.spotify.com/v1${path}`, {
+        ...opts,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (!r.ok && r.status !== 204) throw new Error(`spotify-api-${r.status}`);
+      return r.status === 204 ? null : r.json().catch(() => null);
+    },
+
+    /**
+     * Play a mix on the SDK device. With a track pick, queue the wheel from
+     * that song onward so Spotify itself advances — like a radio.
+     * Returns false when the embed fallback should run instead.
+     */
+    async play(mix, trackUri, queueUris) {
+      const st = await this.loadStatus();
+      if (!st.connected || !st.premium) return false;
+      if (!await this.ensureDevice()) return false;
+      try {
+        const body = trackUri
+          ? { uris: (queueUris && queueUris.length ? queueUris : [trackUri]) }
+          : { context_uri: `spotify:playlist:${mix.spotify}` };
+        await this.api(`/me/player/play?device_id=${encodeURIComponent(this.deviceId)}`, { method: 'PUT', body: JSON.stringify(body) });
+        this.active = true;
+        return true;
+      } catch { return false; }
+    },
+  };
+
   /* SoundCloud: the Widget API plays a track, playlist or likes page in an
    * iframe and reports play / pause / progress, which drive the waveform. */
   const soundcloud = {
@@ -1048,7 +1151,7 @@
           <div class="k-dock__embed" data-embed="soundcloud" hidden></div>
           <div class="k-dock__embed" data-embed="apple" hidden></div>
           <p class="k-dock__note k-small" data-embed="apple" hidden>Press play in the Apple Music player. Sign in to Apple Music in this browser for full tracks; otherwise it plays previews. It keeps playing while you browse.</p>
-          <p class="k-dock__note k-small" data-embed="spotify">Log in to Spotify in this browser for full tracks. Otherwise Spotify plays 30-second previews.</p>
+          <p class="k-dock__note k-small" data-embed="spotify">Previews here. Voyagers with Spotify Premium: connect Spotify once on the Radio page and the whole playlist plays in full, right here.</p>
         </div>
         <div class="k-dock__bar">
           <button class="k-dock__btn" type="button" data-dock-toggle aria-label="Play">${icon.play}</button>
@@ -1068,11 +1171,18 @@
       $('[data-dock-close]', this.el).addEventListener('click', () => this.close());
       const bar = $('.k-dock__progress', this.el);
       bar.addEventListener('click', (e) => {
-        if (!this.audio || !this.audio.duration) return;
         const r = bar.getBoundingClientRect();
-        this.audio.currentTime = ((e.clientX - r.left) / r.width) * this.audio.duration;
+        const frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        if (spotifySdk.active && spotifySdk.player && this.sdkDuration) { spotifySdk.player.seek(Math.round(frac * this.sdkDuration)).catch(() => {}); return; }
+        if (!this.audio || !this.audio.duration) return;
+        this.audio.currentTime = frac * this.audio.duration;
       });
       bar.addEventListener('keydown', (e) => {
+        if (spotifySdk.active && spotifySdk.player && this.sdkDuration) {
+          if (e.key === 'ArrowRight') spotifySdk.player.seek(Math.min(this.sdkDuration, (this.sdkPosition || 0) + 10_000)).catch(() => {});
+          if (e.key === 'ArrowLeft') spotifySdk.player.seek(Math.max(0, (this.sdkPosition || 0) - 10_000)).catch(() => {});
+          return;
+        }
         if (!this.audio || !this.audio.duration) return;
         if (e.key === 'ArrowRight') this.audio.currentTime = Math.min(this.audio.duration, this.audio.currentTime + 10);
         if (e.key === 'ArrowLeft') this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
@@ -1154,11 +1264,23 @@
         this.expand(true);
       } else {
         this.source = 'spotify';
-        this.showEmbed('spotify');
         $('.k-dock__progress', this.el).hidden = true;
-        this.el.classList.add('has-embed');
         this.buffering = true;
         this.sync();
+        // Connected Voyager + Premium: the persistent SDK device plays the
+        // whole playlist (or the wheel queue) with no per-song sign-in.
+        const queue = this.track ? (radioTracks.list[slug] || []).slice(opts.index).map((s) => s.uri).filter(Boolean) : null;
+        if (await spotifySdk.play(mix, this.track ? song.uri : null, queue)) {
+          $$('[data-embed]', this.el).forEach((n) => { n.hidden = true; });
+          this.el.classList.remove('has-embed');
+          this.expand(false);
+          this.buffering = false;
+          this.sync();
+          this.syncMediaSession();
+          return;
+        }
+        this.showEmbed('spotify');
+        this.el.classList.add('has-embed');
         const slot = $('[data-spotify-slot]', this.el) || $('.k-dock__embed iframe', this.el);
         // Open the tracklist so the Spotify play button is right there if the
         // browser blocks autoplay; it folds away once music starts.
@@ -1187,6 +1309,7 @@
 
     /** Next song on the wheel (wraps round to the first). */
     next() {
+      if (spotifySdk.active && spotifySdk.player) { spotifySdk.player.nextTrack().catch(() => {}); return; }
       const t = this.track;
       const list = t && radioTracks.list[t.slug];
       if (!list || !list.length) return;
@@ -1257,9 +1380,63 @@
       this.sync();
     },
 
+    /** Web Playback SDK state: keep dock, wheel, waveform and cabin in step. */
+    onSpotifySdk(state) {
+      if (this.source !== 'spotify' || !spotifySdk.active) return;
+      if (!state) { this.playing = false; this.sync(); return; }
+      const was = this.playing;
+      this.playing = !state.paused;
+      this.buffering = false;
+      this.sdkPosition = state.position || 0;
+      this.sdkDuration = state.duration || 0;
+      if (this.el && this.sdkDuration) {
+        const bar = $('.k-dock__progress', this.el);
+        if (bar) { bar.hidden = false; $('i', bar).style.width = `${(this.sdkPosition / this.sdkDuration) * 100}%`; bar.setAttribute('aria-valuenow', String(Math.round((this.sdkPosition / this.sdkDuration) * 100))); }
+      }
+      wave.clock = { position: state.position || 0, at: performance.now() };
+      const track = state.track_window && state.track_window.current_track;
+      if (track) {
+        this.nowPlaying(track.name || '', (track.artists || []).map((a) => a.name).join(', '));
+        const list = this.mix ? (radioTracks.list[this.mix.slug] || []) : [];
+        const idx = list.findIndex((s) => s.uri === track.uri);
+        if (idx >= 0 && this.mix) this.track = { slug: this.mix.slug, index: idx };
+        if ('mediaSession' in navigator) {
+          const art = ((track.album && track.album.images) || []).map((i) => ({ src: i.url, sizes: `${i.width}x${i.height}` }));
+          try { navigator.mediaSession.metadata = new MediaMetadata({ title: track.name || '', artist: (track.artists || []).map((a) => a.name).join(', '), album: (track.album && track.album.name) || '', artwork: art }); } catch { /* artwork sizes optional */ }
+        }
+      }
+      const fmt = (ms) => `${Math.floor(ms / 60000)}:${pad(Math.floor((ms / 1000) % 60))}`;
+      if (this.el) $('.k-dock__time', this.el).textContent = state.duration ? `${fmt(state.position || 0)} / ${fmt(state.duration)}` : '';
+      if (this.playing !== was) this.syncMediaSession();
+      this.sync();
+    },
+
+    /** Lock-screen / headphone controls follow the dock. */
+    syncMediaSession() {
+      if (!('mediaSession' in navigator)) return;
+      try {
+        navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused';
+        navigator.mediaSession.setActionHandler('play', () => this.toggle());
+        navigator.mediaSession.setActionHandler('pause', () => this.toggle());
+        navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+        navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
+      } catch { /* older browsers */ }
+    },
+
+    /** Previous song: SDK device if it is playing, else the wheel. */
+    prev() {
+      if (spotifySdk.active && spotifySdk.player) { spotifySdk.player.previousTrack().catch(() => {}); return; }
+      const t = this.track;
+      const list = t && radioTracks.list[t.slug];
+      if (!list || !list.length) return;
+      this.play(t.slug, { index: (t.index - 1 + list.length) % list.length });
+    },
+
     toggle() {
       if (this.source === 'audio' && this.audio) {
         if (this.audio.paused) { if (wave.ctx) wave.ctx.resume(); this.audio.play().catch(() => {}); } else this.audio.pause();
+      } else if (this.source === 'spotify' && spotifySdk.active && spotifySdk.player) {
+        spotifySdk.player.togglePlay().catch(() => {});
       } else if (this.source === 'spotify' && spotify.ctrl) {
         spotify.ctrl.togglePlay();
       } else if (this.source === 'soundcloud' && soundcloud.widget) {
@@ -1277,6 +1454,7 @@
 
     pause() {
       if (this.audio && !this.audio.paused) this.audio.pause();
+      if (spotifySdk.active && spotifySdk.player && this.source === 'spotify' && this.playing) spotifySdk.player.pause().catch(() => {});
       if (spotify.ctrl && this.source === 'spotify' && this.playing) spotify.ctrl.pause();
       if (soundcloud.widget && this.source === 'soundcloud' && this.playing) soundcloud.widget.pause();
       if (this.source === 'apple') { this.stopApple(); this.sync(); }
@@ -1284,6 +1462,7 @@
 
     pauseAll() {
       if (this.audio) this.audio.pause();
+      if (spotifySdk.player && spotifySdk.active) spotifySdk.player.pause().catch(() => {});
       if (spotify.ctrl) spotify.ctrl.pause();
       if (soundcloud.widget) soundcloud.widget.pause();
       this.stopApple();
@@ -1329,7 +1508,7 @@
    * Anything else (legacy pages, other sites, new tabs) navigates normally.
    * -------------------------------------------------------------------- */
 
-  const SOFT_PAGES = new Set(['', 'index', 'films', 'flights', 'atlas', 'archive', 'gallery', 'story', 'radio', 'vault', 'lost-and-found', 'store']);
+  const SOFT_PAGES = new Set(['', 'index', 'films', 'flights', 'atlas', 'archive', 'gallery', 'story', 'radio', 'tv', 'vault', 'lost-and-found', 'store']);
   let pageAbort = new AbortController();
   // The page's identity ignores ?p / ?cw / ?handle: those only open the product panel
   const pageKey = () => { const q = new URLSearchParams(location.search); ['p', 'cw', 'handle'].forEach((k) => q.delete(k)); const qs = q.toString(); return location.pathname + (qs ? `?${qs}` : ''); };
@@ -3904,9 +4083,235 @@
     if (el) el.classList.add('k-hide');
   }
 
+  /* ------------------------------------------- cabin shake cockpit
+   * The media page's spaceship + crew cutouts, rebuilt for the radio:
+   * when CABIN SHAKE is on and music is playing, the cockpit rides the
+   * waveform level (the 140 BPM synth for Spotify, the real signal for
+   * MP3s); it settles the moment the music pauses. Off by default,
+   * remembered per device, and always off for reduced motion.
+   * ------------------------------------------------------------------ */
+  function mountCabinShake() {
+    const root = $('[data-cockpit]');
+    if (!root || root.dataset.cabinDone) return;
+    root.dataset.cabinDone = '1';
+    const btn = $('[data-cabin-toggle]', root);
+    const label = $('[data-cabin-label]', root);
+    const ship = $('.k-cockpit__ship', root);
+    const crew = $('.k-cockpit__crew', root);
+    let on = false;
+    try { on = localStorage.getItem('kiosk:cabin-shake') === '1'; } catch { on = false; }
+    if (REDUCED) on = false;
+    let raf = 0;
+    const apply = () => {
+      if (btn) { btn.setAttribute('aria-checked', String(on)); btn.classList.toggle('is-on', on); }
+      if (label) label.textContent = on ? 'On · riding the music' : 'Off · cabin steady';
+      root.classList.toggle('cabin-on', on);
+      try { localStorage.setItem('kiosk:cabin-shake', on ? '1' : '0'); } catch { /* private mode */ }
+      if (on && !raf) raf = requestAnimationFrame(tick);
+      if (!on) { if (ship) ship.style.transform = ''; if (crew) crew.style.transform = ''; }
+    };
+    const tick = (now) => {
+      raf = 0;
+      if (!on || !root.isConnected) return;
+      const level = player.playing ? Math.min(1, wave.level || 0) : 0;
+      const beat = Math.sin(now / (60000 / 140 / 2)) * level;
+      const y = (-14 * level - 6 * Math.max(0, beat)).toFixed(1);
+      const x = (Math.sin(now / 900) * 3 * level).toFixed(1);
+      if (ship) ship.style.transform = `translate(${x}px, ${y}px)`;
+      if (crew) crew.style.transform = `translate(${(-x * 0.6).toFixed(1)}px, ${(y * 0.55).toFixed(1)}px)`;
+      root.style.setProperty('--cabin-glow', (0.25 + level * 0.55).toFixed(2));
+      raf = requestAnimationFrame(tick);
+    };
+    if (btn) btn.addEventListener('click', () => { on = !on; if (REDUCED && on) { toast('Cabin shake is off while reduced motion is on.'); on = false; } apply(); });
+    apply();
+  }
+
+  /* ------------------------------------------- Spotify connect panel
+   * States: unconfigured / guest (become a Voyager) / Voyager not connected
+   * / Free (connected, previews) / Premium (full in-page playback).
+   * ------------------------------------------------------------------ */
+  async function mountSpotifyPanel() {
+    const el = mount('spotify-connect');
+    if (!el || el.dataset.done) return;
+    el.dataset.done = '1';
+    const flag = new URLSearchParams(location.search).get('spotify');
+    if (flag === 'connected') toast('Spotify connected. Press play — the whole playlist plays here.');
+    if (flag === 'declined') toast('Spotify connection was cancelled.');
+    if (flag === 'failed') toast('Spotify connection didn’t finish. Try again.');
+    if (flag === 'sign-in-first') toast('Become a Voyager first, then connect Spotify.');
+    const st = await spotifySdk.loadStatus(true);
+    if (!el.isConnected) return;
+    let body = '';
+    if (!st.configured) {
+      body = `<p class="k-body">Full-track Spotify in the cabin is being fitted. Until then, every playlist below plays previews here — or in full in your Spotify app.</p>`;
+    } else if (!st.voyager) {
+      body = `<p class="k-body">Become a Voyager (free, one email code) and connect Spotify once. Your playlists then play in full without signing in for every song.</p>
+        <div class="k-row-flex"><a class="k-btn k-btn--solid" href="account.html">Become a Voyager</a><a class="k-btn" href="tv.html">Watch KIOSK TV</a></div>`;
+    } else if (!st.connected) {
+      body = `<p class="k-body">One connect, then press play. Spotify Premium plays full tracks right here; Free still browses your library and hears previews.</p>
+        <div class="k-row-flex"><a class="k-btn k-btn--solid" href="/api/spotify/login?returnTo=${encodeURIComponent('/radio.html')}">Connect Spotify</a></div>`;
+    } else if (!st.premium) {
+      body = `<p class="k-body">Connected${st.displayName ? ` as <b>${esc(st.displayName)}</b>` : ''} (Spotify Free). Your channels are below — previews play here, full tracks open in Spotify. In-page full playback needs Spotify Premium (Spotify’s rule, not ours).</p>
+        <div class="k-row-flex"><button class="k-btn" type="button" data-spotify-disconnect>Disconnect Spotify</button></div>
+        <div data-spotify-channels></div>`;
+    } else {
+      body = `<p class="k-body"><span class="k-live" aria-hidden="true"></span> Connected${st.displayName ? ` as <b>${esc(st.displayName)}</b>` : ''} · Spotify Premium. Press play on any playlist — it plays in full on the KIOSK Radio device and follows you around the site.</p>
+        <div class="k-row-flex"><button class="k-btn" type="button" data-spotify-disconnect>Disconnect Spotify</button>
+        <label class="k-small">Volume <input type="range" min="0" max="100" value="85" data-spotify-volume aria-label="Spotify volume"></label></div>
+        <div data-spotify-channels></div>`;
+    }
+    el.innerHTML = `<div class="k-glass k-spotify-panel" data-reveal>
+      <p class="k-eyebrow"><span class="k-live" aria-hidden="true"></span><b>Your Spotify</b> · In-flight entertainment</p>
+      <h2 class="k-h2">Connect once. <em class="k-serif">Fly all the way.</em></h2>${body}</div>`;
+    reveal(el);
+    const dc = $('[data-spotify-disconnect]', el);
+    if (dc) dc.addEventListener('click', async () => {
+      await fetch('/api/spotify/disconnect', { method: 'POST' }).catch(() => {});
+      spotifySdk.status = null; delete el.dataset.done; el.innerHTML = ''; mountSpotifyPanel();
+      toast('Spotify disconnected.');
+    });
+    const vol = $('[data-spotify-volume]', el);
+    if (vol) vol.addEventListener('input', () => { if (spotifySdk.player) spotifySdk.player.setVolume(vol.value / 100).catch(() => {}); });
+    const channels = $('[data-spotify-channels]', el);
+    if (channels && st.connected) loadSpotifyChannels(channels);
+  }
+
+  /** The Voyager's own top / recent / liked songs as playable channels. */
+  async function loadSpotifyChannels(el) {
+    el.innerHTML = '<p class="k-small">Loading your channels…</p>';
+    try {
+      const kinds = [['top', 'Your top tracks'], ['recent', 'Recently played'], ['liked', 'Liked songs']];
+      const lists = await Promise.all(kinds.map(async ([kind, label]) => {
+        const r = await fetch(`/api/spotify/library?kind=${kind}`);
+        const d = r.ok ? await r.json() : { tracks: [] };
+        return { kind, label, tracks: d.tracks || [] };
+      }));
+      el.innerHTML = lists.filter((l) => l.tracks.length).map((l) => `
+        <div class="k-spotify-channel"><p class="k-eyebrow">${esc(l.label)}</p>
+        <ol class="k-rows">${l.tracks.slice(0, 8).map((t) => `<li class="k-row" style="grid-template-columns:44px 1fr auto">
+          <span class="k-row__num">${t.cover ? `<img src="${esc(t.cover)}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover">` : ''}</span>
+          <span style="font-size:15px">${esc(t.title)}<small style="display:block;opacity:.65">${esc(t.artist)}</small></span>
+          <a class="k-btn" href="https://open.spotify.com/track/${esc(t.id)}" target="_blank" rel="noopener">Open</a></li>`).join('')}</ol></div>`).join('') || '<p class="k-small">No songs yet — play something in Spotify and it will show up here.</p>';
+    } catch { el.innerHTML = '<p class="k-small">Your channels couldn’t load right now.</p>'; }
+  }
+
+  /* ------------------------------------------------------------ KIOSK TV
+   * Curated official videos (C.tvVideos) for everyone; a Voyager's own
+   * Spotify library resolved to videos by /api/tv/feed. A card shows its
+   * YouTube thumbnail until tapped, then swaps in the player with sound.
+   * Scrolling a playing card mostly out of view stops it.
+   * -------------------------------------------------------------------- */
+  function tvCard(v, personal) {
+    const thumb = v.youtube ? `https://i.ytimg.com/vi/${esc(v.youtube)}/hqdefault.jpg` : (v.cover || '');
+    return `<article class="k-tv-card" data-tv-card data-youtube="${esc(v.youtube || '')}" data-track="${esc(v.id || v.spotify || '')}">
+      <div class="k-tv-card__frame">
+        ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}
+        ${v.youtube ? `<button class="k-btn k-btn--solid" type="button" data-tv-play style="position:absolute;inset:auto 12px 12px auto;z-index:2">Play video</button>` : `<span class="k-btn" style="position:absolute;inset:auto 12px 12px auto">Audio only</span>`}
+      </div>
+      <div class="k-tv-card__body">
+        <b data-no-i18n>${esc(v.title || '')}</b>
+        <span data-no-i18n>${esc(v.artist || '')}${v.note ? ` · ${esc(v.note)}` : ''}${personal && v.youtube && !v.verified ? ' · matched video — check it’s the right one' : ''}</span>
+        <div class="k-row-flex">
+          ${v.id || v.spotify ? `<a class="k-btn" href="https://open.spotify.com/track/${esc(v.id || v.spotify)}" target="_blank" rel="noopener">Open in Spotify</a>` : ''}
+          ${personal && v.youtube ? `<button class="k-btn" type="button" data-tv-reject>Not this video</button>` : ''}
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function bindTvFeed(root) {
+    if (!root || root.dataset.tvDone) return;
+    root.dataset.tvDone = '1';
+    root.addEventListener('click', async (e) => {
+      const reject = e.target.closest('[data-tv-reject]');
+      if (reject) {
+        const card = reject.closest('[data-tv-card]');
+        await fetch('/api/tv/not-this-video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ spotifyTrackId: card.dataset.track }) }).catch(() => {});
+        card.remove();
+        toast('Got it — that match won’t come back.');
+        return;
+      }
+      const btn = e.target.closest('[data-tv-play]');
+      if (!btn) return;
+      const card = btn.closest('[data-tv-card]');
+      const frame = $('.k-tv-card__frame', card);
+      const id = card.dataset.youtube;
+      if (!id || !frame) return;
+      $$('[data-tv-card] iframe', root).forEach((f) => { const c = f.closest('[data-tv-card]'); if (c && c !== card) { f.remove(); const b = $('[data-tv-play]', c); if (b) b.hidden = false; } });
+      btn.hidden = true;
+      const img = $('img', frame);
+      if (img) img.hidden = true;
+      const f = document.createElement('iframe');
+      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+      f.title = 'Music video';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      frame.append(f);
+    });
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (en.intersectionRatio >= 0.25) return;
+          const f = $('iframe', en.target);
+          if (f) { f.remove(); const b = $('[data-tv-play]', en.target); if (b) b.hidden = false; const img = $('.k-tv-card__frame img', en.target); if (img) img.hidden = false; }
+        });
+      }, { threshold: [0, 0.25] });
+      $$('[data-tv-card]', root).forEach((c) => io.observe(c));
+    }
+  }
+
+  function pageTv() {
+    const curated = fill('tv-curated', (C.tvVideos || []).filter((v) => v.youtube).length
+      ? `<div class="k-tv-feed k-tv-scroll">${(C.tvVideos || []).filter((v) => v.youtube).map((v) => tvCard(v, false)).join('')}</div>`
+      : `<div class="k-glass" style="padding:22px"><p class="k-eyebrow">First broadcast soon</p><p class="k-body" style="margin-top:8px">The first official videos are being matched to the radio playlists. Add them in <b>js/kiosk-content.js</b> (<i>tvVideos</i>) — see the Content Guide. Meanwhile the songs play on <a href="radio.html" style="text-decoration:underline;text-underline-offset:3px">KIOSK Radio</a>.</p></div>`);
+    bindTvFeed(curated);
+    mountTvPersonal();
+  }
+
+  /** A Voyager's own library as videos; everyone else gets the invite. */
+  async function mountTvPersonal() {
+    const el = mount('tv-personal');
+    if (!el || el.dataset.done) return;
+    el.dataset.done = '1';
+    const curatedMap = {};
+    (C.tvVideos || []).forEach((v) => { if (v.spotify && v.youtube) curatedMap[v.spotify] = v.youtube; });
+    let d = null;
+    try {
+      const r = await fetch('/api/tv/feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ curated: curatedMap }) });
+      d = r.ok ? await r.json() : null;
+    } catch { d = null; }
+    if (!el.isConnected) return;
+    if (!d || !d.enabled) {
+      const reason = d && d.reason;
+      el.innerHTML = `<div class="k-glass" style="padding:22px"><p class="k-body">${reason === 'unconfigured'
+        ? 'Personal TV switches on once Spotify is connected to the site. The curated channel above is on air for everyone.'
+        : 'Become a Voyager and connect Spotify once — your top songs, likes and recent plays become a video channel of your own.'}</p>
+        <div class="k-row-flex" style="margin-top:12px"><a class="k-btn k-btn--solid" href="${reason === 'not-connected' ? '/api/spotify/login?returnTo=%2Ftv.html' : 'account.html'}">${reason === 'not-connected' ? 'Connect Spotify' : 'Become a Voyager'}</a><a class="k-btn" href="radio.html">KIOSK Radio</a></div></div>`;
+      return;
+    }
+    const withVideo = d.videos.filter((v) => v.youtube);
+    el.innerHTML = (withVideo.length
+      ? `<div class="k-row-flex" role="group" aria-label="Your Spotify source">${[['top', 'Top tracks'], ['recent', 'Recently played'], ['liked', 'Liked songs']].map(([k, l]) => `<button class="k-btn${(d.source || 'top') === k ? ' k-btn--solid' : ''}" type="button" data-tv-source="${k}">${l}</button>`).join('')}</div>
+         <div class="k-tv-feed k-tv-scroll" style="margin-top:14px">${withVideo.map((v) => tvCard(v, true)).join('')}</div>
+         <p class="k-small" style="margin-top:10px">Matched from YouTube — a live or cover version can slip in. “Not this video” removes that match for you for good.</p>`
+      : '<p class="k-body">No videos matched your Spotify songs yet. The curated channel above is on air.</p>');
+    bindTvFeed(el);
+    $$('[data-tv-source]', el).forEach((b) => b.addEventListener('click', async () => {
+      const r = await fetch(`/api/tv/feed?source=${encodeURIComponent(b.dataset.tvSource)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ curated: curatedMap }) }).catch(() => null);
+      const dd = r && r.ok ? await r.json() : null;
+      if (!dd || !dd.enabled) return;
+      const list = dd.videos.filter((v) => v.youtube);
+      const feed = $('.k-tv-feed', el);
+      if (feed) { feed.innerHTML = list.map((v) => tvCard(v, true)).join(''); delete feed.dataset.tvDone; }
+      $$('[data-tv-source]', el).forEach((x) => x.classList.toggle('k-btn--solid', x === b));
+    }));
+  }
+
   /* ------------------------------------------------------------ radio */
 
   function pageRadio() {
+    mountSpotifyPanel();
+    mountCabinShake();
     const deck = mount('radio');
     mountWheel(deck, (player.mix && player.mix.slug) || ((C.mixes || [])[0] && C.mixes[0].slug), true);
     if (deck) {
@@ -6673,11 +7078,12 @@
     { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
     { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
+    { id: 'tv', t: 'T4V', name: 'KIOSK TV', href: 'tv.html', note: 'Music videos, curated and yours' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
     { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
     { id: 'garage', t: 'T7', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
   ];
-  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault' };
+  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault', tv: 'radio' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
   const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
   const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
@@ -6756,7 +7162,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, archive: pageArchive, gallery: pageGallery, store: pageStore, hunt: pageHunt, account: () => {}, partner: () => {} };
+  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, tv: pageTv, vault: pageVault, journal: pageJournal, archive: pageArchive, gallery: pageGallery, store: pageStore, hunt: pageHunt, account: () => {}, partner: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();

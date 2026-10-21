@@ -200,6 +200,20 @@ To add a playlist, copy its share link (`open.spotify.com/playlist/<ID>`) and ad
 
 For a self-hosted DJ mix, set `audio` to an MP3 URL (320 kbps). It then plays in the KIOSK player instead of the Spotify embed, and `length`, `bpm` and `tracks` show on the deck.
 
+**Voyagers + Spotify (full tracks):** a Voyager can connect their own Spotify once on the Radio page (Worker secrets `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`, redirect `https://onlyatthekiosk.com/api/spotify/callback`, D1 migration `0008_spotify.sql`). With Spotify Premium the whole playlist then plays in-page on the persistent "KIOSK Radio" device — no per-song sign-in; Free and guests keep previews/the embed. Your own Spotify account can curate the playlists, but it cannot stream full songs to other people: Spotify licenses playback per listener.
+
+**CABIN SHAKE:** the Radio page cockpit (spaceship + crew cutouts from the media page) has a CABIN SHAKE switch. On, it rides the music while it plays; it is off by default, remembered per device, and stays off with reduced motion.
+
+### KIOSK TV: music videos
+
+`tv.html` is a scroll of official music videos. Spotify has no video feed for websites, so videos are YouTube, hand-matched once in `tvVideos` in `js/kiosk-content.js`:
+
+```js
+{ spotify: '<track ID from open.spotify.com/track/...>', youtube: '<video ID from youtube.com/watch?v=...>', title: 'Song title', artist: 'Artist', note: '' }
+```
+
+Only list songs whose official video you have actually found — a wrong ID plays the wrong video on the site. Voyagers who connect Spotify get a personal channel: their top/recent/liked tracks are matched to videos (curated entries first, then a shared cache, then YouTube search when `YOUTUBE_API_KEY` is set as a Worker secret) and can reject a bad match with "Not this video".
+
 > Large media: Cloudflare Pages rejects any single file over 25 MB. Host long mixes and films on R2, Bunny or YouTube/Vimeo, and use those URLs in `audio`, `video` or `embed`.
 
 ---

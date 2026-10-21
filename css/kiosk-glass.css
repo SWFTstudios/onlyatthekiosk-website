@@ -4844,3 +4844,42 @@ html[data-motion='reduced'] .k-why__slide { transform: none; }
 .k-doc__faq summary i::after { transform: rotate(90deg); }
 .k-doc__faq details[open] summary i::after { transform: rotate(0deg); }
 .k-doc__faq p { margin: 0 0 18px; max-width: 62ch; }
+
+/* ------------------------------------------------- radio: cabin cockpit
+ * Spaceship + crew cutouts (from the media page) framing the song wheel.
+ * JS (mountCabinShake) rides --cabin-glow and the layer transforms with
+ * the waveform; transforms/opacity only, and nothing moves when paused
+ * or under reduced motion. */
+.k-cockpit { position: relative; border-radius: var(--r-xl); overflow: hidden; background: #060607; color: #f2f0eb; --cabin-glow: .25; }
+.k-cockpit__layer { position: absolute; inset: 0; background-position: 50%; background-repeat: no-repeat; background-size: cover; pointer-events: none; will-change: transform; }
+.k-cockpit__ship { z-index: 3; background-image: url('../images/spaceship-only-landscape.webp'); opacity: calc(.55 + var(--cabin-glow) * .45); }
+.k-cockpit__crew { z-index: 3; background-image: url('../images/rick-and-morty-landscape.webp'); }
+.k-cockpit__vignette { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(circle, rgba(0,0,0,0) 38%, rgba(0,0,0,.88) 100%); }
+.k-cockpit__stage { position: relative; z-index: 2; }
+.k-cockpit__controls { position: relative; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 24px); }
+.k-cabin-switch { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.22); border-radius: 999px; background: rgba(10,10,12,.55); color: #f2f0eb; cursor: pointer; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.k-cabin-switch__track { display: block; width: 148px; height: 30px; border-radius: 999px; background: rgba(255,255,255,.16); padding: 3px; }
+.k-cabin-switch__handle { display: grid; place-items: center; width: 72px; height: 100%; border-radius: 999px; background: #f2f0eb; color: #111; font-family: var(--f-mono); font-size: 9px; letter-spacing: .08em; transition: transform .3s var(--ease), background .3s var(--ease); }
+.k-cabin-switch.is-on .k-cabin-switch__handle { transform: translateX(70px); background: var(--signal); color: #111; }
+.k-cabin-switch__label { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+@media (max-width: 991px) { .k-cockpit__ship { background-image: url('../images/spaceship-only-tablet.webp'); } .k-cockpit__crew { background-image: url('../images/rick-and-morty-tablet.webp'); } }
+@media (max-width: 479px) { .k-cockpit__ship { background-image: url('../images/spaceship-only-portrait.webp'); } .k-cockpit__crew { background-image: url('../images/rick-and-morty-portrait.webp'); } .k-cabin-switch__track { width: 128px; } .k-cabin-switch.is-on .k-cabin-switch__handle { transform: translateX(50px); } }
+@media (prefers-reduced-motion: reduce) { .k-cockpit__layer { will-change: auto; } }
+
+/* ------------------------------------------------------- Spotify panel */
+.k-spotify-panel { padding: clamp(18px, 3vw, 28px); display: grid; gap: 12px; }
+.k-spotify-panel .k-row-flex { align-items: center; }
+.k-spotify-channel { margin-top: 10px; }
+.k-spotify-channel .k-row small { font-size: 12px; }
+
+/* ------------------------------------------------------------- KIOSK TV
+ * A scroll-snap feed of music videos. Only the video in view plays. */
+.k-tv-feed { display: grid; gap: 18px; }
+.k-tv-card { scroll-snap-align: start; overflow: hidden; border-radius: var(--r-xl); background: #0b0b0c; color: #f2f0eb; }
+.k-tv-card__frame { position: relative; aspect-ratio: 16 / 9; background: #000; }
+.k-tv-card__frame iframe, .k-tv-card__frame img { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+.k-tv-card__body { display: grid; gap: 6px; padding: 14px 16px 16px; }
+.k-tv-card__body b { font-size: calc(17px * var(--type, 1)); }
+.k-tv-card__body span { opacity: .7; font-size: calc(13px * var(--type, 1)); }
+.k-tv-scroll { scroll-snap-type: y proximity; }
+@media (max-width: 767px) { .k-tv-card__frame { aspect-ratio: 4 / 3; } }

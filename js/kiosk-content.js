@@ -1139,6 +1139,21 @@ window.KIOSK_CONTENT = {
   ],
 
   /* ----------------------------------------------------------
+   * KIOSK TV — music videos for the songs on the radio.
+   * Spotify has no music-video feed for websites, so each entry is
+   * hand-matched once to its official YouTube video:
+   *   spotify: the track ID (open.spotify.com/track/<ID>) — also the
+   *            key that gives Voyagers this verified video instantly
+   *   youtube: the video ID (youtube.com/watch?v=<ID>)
+   *   title / artist: shown on the card
+   * Add a line per video; the TV page and the Voyager matcher pick
+   * it up on their own. See docs/CONTENT_GUIDE.md.
+   * -------------------------------------------------------- */
+  tvVideos: [
+    // { spotify: '', youtube: '', title: '', artist: '', note: '' },
+  ],
+
+  /* ----------------------------------------------------------
    * SHOP — KIOSK Supply (skateshop) + digital goods
    *
    * Every product renders a vector mockup from `mockup` until you
