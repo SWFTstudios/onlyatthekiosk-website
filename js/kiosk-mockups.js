@@ -117,6 +117,25 @@
       <rect x="-50" y="-25" width="100" height="50" fill="${ink}" mask="url(#${id})"/>`;
     },
 
+    // The retro orbit mark: a tall italic K with IOSK tucked beside it, an
+    // orbit swoosh round the K to a star, cracked like an old print. A
+    // colourway's mockup.stripes adds racing stripes under it (the Retro Tee)
+    retro: (ink, bg, id, spec = {}) => {
+      const m = `rt${(uid += 1)}`;
+      const bands = [ink].concat(spec.stripes || []);
+      const stripes = spec.stripes ? bands.map((col, i) => { const y = 11 + i * 5.6; return `<path d="M${-6 - i * 4},${y} L50,${y} L50,${y + 4.4} L${-7 - i * 4},${y + 4.4} Z" fill="${col}"/>`; }).join('') : '';
+      return `<filter id="${m}f" filterUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><feTurbulence type="fractalNoise" baseFrequency=".35 .9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -40 30"/></filter>
+      <mask id="${m}" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><rect x="-60" y="-45" width="120" height="85" fill="#fff" filter="url(#${m}f)"/></mask>
+      <g mask="url(#${m})">
+        ${stripes}
+        <path d="M-18,25 Q-54,24 -42,2 Q-28,-22 18,-25 Q42,-26 47,-15 Q40,-21 18,-20.5 Q-22,-18 -36,3 Q-44,19 -18,25 Z" fill="${ink}"/>
+        <path d="M44,-19 Q53,-6 41,9 Q45,-5 40,-16 Z" fill="${ink}"/>
+        ${star(17, -29, 8.5, ink)}
+        <text x="-25" y="22" text-anchor="middle" font-family="${SANS}" font-weight="700" font-style="italic" font-size="56" fill="${ink}">K</text>
+        <text x="18" y="5" text-anchor="middle" font-family="${SANS}" font-weight="700" font-style="italic" font-size="23" letter-spacing="-.3" fill="${ink}">IOSK</text>
+      </g>`;
+    },
+
     checker: (ink, bg) => {
       let squares = '';
       for (let r = 0; r < 3; r += 1) for (let c = 0; c < 10; c += 1) if ((r + c) % 2 === 0) squares += `<rect x="${-50 + c * 10}" y="${-26 + r * 10}" width="10" height="10" fill="${ink}"/>`;
@@ -502,7 +521,13 @@
   };
 
   function render(spec, colorway, opts) {
-    if (opts && opts.sketch) return sketch(spec, colorway, opts);
+    // a colourway can change the artwork, e.g. { mockup: { chest: false, stripes } }
+    if (colorway && colorway.mockup) spec = { ...spec, ...colorway.mockup };
+    if (opts && opts.sketch) {
+      // the flats are one ink: stripes become ink-coloured line art
+      if (spec.stripes) spec = { ...spec, stripes: spec.stripes.map(() => INK) };
+      return sketch(spec, colorway, opts);
+    }
     const id = `m${(uid += 1)}`;
     const c = { garment: '#141414', ink: '#f2f0eb', ...(colorway || {}) };
     const draw = garments[spec.type] || garments.tee;
