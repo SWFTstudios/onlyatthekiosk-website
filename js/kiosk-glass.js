@@ -236,24 +236,37 @@
     close: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
     more: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
   };
-  const MENU_EXTRA = {
-    journal: { note: 'Every story', icon: 'journal' },
-    films: { note: 'Screening room', icon: 'films' },
-    radio: { note: 'Phonk & mixes', icon: 'radio' },
-    tv: { note: 'Music videos', icon: 'films' },
-    garage: { note: 'The Street File', icon: 'garage' },
-    vault: { note: 'Supply', icon: 'shop' },
-  };
-  const MENU = [
-    { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' },
-    ...NAV.map((n) => ({ ...n, ...(MENU_EXTRA[n.id] || {}) })),
-    { id: 'archive', label: 'The Journal', href: 'archive.html', note: 'Monthly archive', icon: 'journal' },
-    { id: 'gallery', label: 'Gallery', href: 'gallery.html', note: 'Every frame', icon: 'films' },
-    { id: 'hunt', label: 'Lost &amp; Found', href: 'lost-and-found.html', note: 'Rare finds', icon: 'pin' },
-    { id: 'store', label: 'Stores', href: 'store.html', note: 'Partner stores', icon: 'store' },
-    { id: 'flights', label: 'Flights', href: 'flights.html', note: 'Live flight deck', icon: 'flights' },
-    { id: 'partner', label: 'Partner Hub', href: 'partner.html', note: 'Stores, brands & sponsors', icon: 'store' },
+  // The menu is six doors by intent, not a flat page list: each door is a
+  // verb with a tagline, and every page lives under exactly one door.
+  const MENU_HOME = { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' };
+  const MENU_GROUPS = [
+    { door: 'READ', tag: 'Stories from the road', links: [
+      { id: 'journal', label: 'Atlas', href: 'atlas.html', note: 'Every story', icon: 'journal' },
+      { id: 'archive', label: 'The Journal', href: 'archive.html', note: 'Monthly volumes', icon: 'journal' },
+    ] },
+    { door: 'WATCH', tag: 'Films & moving pictures', links: [
+      { id: 'films', label: 'Films', href: 'films.html', note: 'Screening room', icon: 'films' },
+      { id: 'tv', label: 'KIOSK TV', href: 'tv.html', note: 'Music videos', icon: 'films' },
+      { id: 'gallery', label: 'Gallery', href: 'gallery.html', note: 'Every frame', icon: 'films' },
+    ] },
+    { door: 'LISTEN', tag: 'Phonk for the drive', links: [
+      { id: 'radio', label: 'Radio', href: 'radio.html', note: 'Radio, song wheel & Your Spotify', icon: 'radio' },
+    ] },
+    { door: 'SHOP', tag: 'Only at the counter', links: [
+      { id: 'vault', label: 'Shop', href: 'vault.html', note: 'Supply', icon: 'shop' },
+      { id: 'hunt', label: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds', icon: 'pin' },
+      { id: 'store', label: 'Stores', href: 'store.html', note: 'Partner stores', icon: 'store' },
+    ] },
+    { door: 'JOIN', tag: 'Become a Voyager', links: [
+      { id: 'members', label: 'Voyagers', href: 'members.html', note: 'Members & check-in', icon: 'pin' },
+      { id: 'partner', label: 'Partner Hub', href: 'partner.html', note: 'Sell & stock at the KIOSK', icon: 'store' },
+    ] },
+    { door: 'EXPLORE', tag: 'Maps, machines & live sky', links: [
+      { id: 'garage', label: 'The Garage', href: 'the-garage.html', note: 'The Street File', icon: 'garage' },
+      { id: 'flights', label: 'Flights', href: 'flights.html', note: 'Live flight deck', icon: 'flights' },
+    ] },
   ];
+  const MENU_TOTAL = 1 + MENU_GROUPS.reduce((n, g) => n + g.links.length, 0);
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
     { id: 'journal', label: 'Atlas', href: 'atlas.html', icon: TAB_ICONS.journal },
@@ -325,6 +338,19 @@
   function renderChrome() {
     const cur = currentNav();
     const links = NAV.map((n) => `<a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}>${n.label}</a>`).join('');
+    // Menu sheet: Home as a lead row, then the six doors. One running
+    // index across every link keeps the open stagger in reading order.
+    let menuI = 0;
+    const menuLi = (n) => {
+      const i = menuI; menuI += 1;
+      return `<li style="--i:${i}"><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}><i class="k-sheet__ico">${TAB_ICONS[n.icon] || ''}</i><b>${n.label}</b><small>${esc(n.note || '')}</small><span>${pad(i)}</span></a></li>`;
+    };
+    const menuHome = menuLi(MENU_HOME);
+    const menuGroups = MENU_GROUPS.map((g) => `
+      <section class="k-sheet__group" aria-label="${g.door} — ${esc(g.tag)}">
+        <h3 class="k-sheet__door"><b>${g.door}</b><span>${esc(g.tag)}</span></h3>
+        <ul class="k-sheet__links">${g.links.map(menuLi).join('')}</ul>
+      </section>`).join('');
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
@@ -356,10 +382,9 @@
         <p class="k-eyebrow">Only at the KIOSK · Issue ${esc((C.issue || {}).number || '01')}</p>
         <p class="k-sheet__clock" aria-hidden="true"><span data-clock>--:--:--</span> <small data-clock-zone></small></p>
       </div>
-      <ul class="k-sheet__links">
-        ${MENU.map((n, i) => `<li style="--i:${i}"><a href="${n.href}"${n.id === cur ? ' aria-current="page"' : ''}><i class="k-sheet__ico">${TAB_ICONS[n.icon] || ''}</i><b>${n.label}</b><small>${esc(n.note || '')}</small><span>${pad(i)}</span></a></li>`).join('')}
-      </ul>
-      <div class="k-sheet__foot" style="--i:${MENU.length}">
+      <ul class="k-sheet__links k-sheet__links--home">${menuHome}</ul>
+      <div class="k-sheet__groups">${menuGroups}</div>
+      <div class="k-sheet__foot" style="--i:${MENU_TOTAL}">
         <div class="k-sheet__quick">
           <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings<small>Look &amp; feel</small></span></button>
           <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme<small data-theme-sub>Auto</small></span></button>
@@ -6153,10 +6178,11 @@
   function createGlobe(canvas, opts = {}) {
     const ctx = canvas.getContext('2d');
     const places = (opts.places || GLOBE_PLACES).map((p) => ({ ...p, v: toVec(p.la, p.lo) }));
-    // Lost & Found look (opts.lf): a dark sphere with dotted land, faint
-    // graticule, atmosphere rim and signal-coloured flights/beacons, like
-    // the MapLibre night globe in js/kiosk-hunt.js (#06070a ocean, land
-    // dots #c9cdd8, sky horizon #151a2b).
+    // Lost & Found land (opts.lf): the Hunt globe's dotted continents
+    // (landVecs from KIOSK_WORLD, as in js/kiosk-hunt.js), but on a
+    // transparent sphere — no ocean disc, so the page background shows
+    // through and the dots, drawn in theme ink, match it day or night.
+    // Signal orange is kept for flights and active places.
     const landVecs = [];
     if (opts.lf && opts.land) {
       for (let i = 0; i + 1 < opts.land.length; i += 2) landVecs.push(toVec(opts.land[i], opts.land[i + 1]));
@@ -6196,28 +6222,9 @@
       const ink = getComputedStyle(canvas).color;
       const R = Math.min(w, h) * scale; const cx = w / 2; const cy = h / 2;
       const P = (v, lift = 1) => { const r = rot(v); return [cx + r[0] * R * lift, cy - r[1] * R * lift, r[2]]; };
-      if (opts.lf) {
-        // Night ocean disc, lit from the upper left like the Hunt globe.
-        const disc = ctx.createRadialGradient(cx - R * 0.38, cy - R * 0.42, R * 0.1, cx, cy, R * 1.06);
-        disc.addColorStop(0, '#1a2238');
-        disc.addColorStop(0.55, '#0a0d15');
-        disc.addColorStop(1, '#06070a');
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, 0, Math.PI * 2);
-        ctx.fillStyle = disc;
-        ctx.fill();
-        // Atmosphere rim.
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, R + 1, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(120,150,255,0.5)';
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = 'rgba(90,120,220,0.55)';
-        ctx.shadowBlur = 22;
-        ctx.stroke();
-        ctx.restore();
-      }
-      ctx.strokeStyle = opts.lf ? 'rgba(232,236,245,0.9)' : ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
+      // opts.lf paints nothing under the land: the sphere is transparent
+      // and the page background is the ocean.
+      ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
 
       // Wireframe: back half faint, front half crisp
       // (runs of segments that share an alpha, rounded to 1/16, go down as one
@@ -6250,9 +6257,10 @@
       ctx.globalAlpha = opts.lf ? 0.25 : 0.7; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
 
-      // Dotted land, the Lost & Found dot-matrix (landVecs from KIOSK_WORLD).
+      // Dotted land, the Lost & Found dot-matrix (landVecs from
+      // KIOSK_WORLD), in theme ink so the continents match the page.
       if (landVecs.length) {
-        ctx.fillStyle = '#c9cdd8';
+        ctx.fillStyle = ink;
         const dr = Math.max(0.7, R / 190);
         landVecs.forEach((v) => {
           const r = rot(v);
@@ -6271,7 +6279,7 @@
         const [x, y, z] = P(p.v);
         if (z < 0) return;
         const on = active.has(p) || p === home;
-        if (opts.lf) ctx.fillStyle = on ? signalCol : '#c9cdd8';
+        if (opts.lf) ctx.fillStyle = on ? signalCol : ink;
         ctx.globalAlpha = (on ? 1 : 0.45) * Math.min(1, z * 2.5);
         const s = on ? 5 : 3;
         ctx.fillRect(x - s / 2, y - s / 2, s, s);
