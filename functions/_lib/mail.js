@@ -17,7 +17,7 @@ function layout(title, bodyHtml) {
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light dark"><title>${esc(title)}</title></head>
 <body style="margin:0;padding:32px 16px;background:#f4f2ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111214">
 <div style="max-width:440px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px 28px">
-<p style="margin:0 0 24px;font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em">KIOSK</p>
+<p style="margin:0 0 24px;font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em"><img src="https://onlyatthekiosk.com/images/brand/kiosk-k-star-black-1024.png" width="40" height="25" alt="" style="display:block;width:40px;height:25px;margin:0 0 12px;border:0">KIOSK</p>
 ${bodyHtml}
 <p style="margin:32px 0 0;font-size:12px;line-height:1.5;color:#77757a">Only at the KIOSK · <a href="https://onlyatthekiosk.com" style="color:#77757a">onlyatthekiosk.com</a></p>
 </div></body></html>`;
@@ -155,7 +155,7 @@ export async function sendOrderConfirmation(env, { order, items, origin = 'https
   const addr = shipTo(order);
   const link = `${origin}/order.html?session_id=${encodeURIComponent(order.stripe_session_id)}`;
   const intl = order.country && order.country !== 'US' && order.country !== 'PR';
-  const dutyNote = intl ? 'Your parcel ships from Jersey City, NJ by USPS. Import duties or taxes in your country, if any, are paid on delivery.' : 'Your parcel ships from Jersey City, NJ by USPS.';
+  const dutyNote = intl ? 'Your parcel ships by USPS with tracking. Import duties or taxes in your country, if any, are paid on delivery.' : 'Your parcel ships by USPS with tracking.';
   return env.EMAIL.send({
     from: sender(env),
     to: order.email,
@@ -199,10 +199,10 @@ export async function sendShippedNotice(env, { order, items, origin = 'https://o
     to: order.email,
     replyTo: teamAddress(env),
     subject: `Order ${order.number} is on its way`,
-    text: `Order ${order.number} left Jersey City${order.carrier ? ` with ${order.carrier}` : ''}.\n\n${items.map(itemLine).join('\n')}\n\n${order.tracking ? `Tracking: ${order.tracking}\n${url}\n\n` : ''}${link}`,
+    text: `Order ${order.number} is on its way${order.carrier ? ` with ${order.carrier}` : ''}.\n\n${items.map(itemLine).join('\n')}\n\n${order.tracking ? `Tracking: ${order.tracking}\n${url}\n\n` : ''}${link}`,
     html: layout(`Order ${order.number} shipped`, `
 <h1 style="margin:0 0 12px;font-size:24px;font-weight:500;letter-spacing:-.02em">It’s on its way.</h1>
-<p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">Order ${esc(order.number)} left Jersey City${order.carrier ? ` with ${esc(order.carrier)}` : ''}.</p>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">Order ${esc(order.number)} is on its way${order.carrier ? ` with ${esc(order.carrier)}` : ''}.</p>
 <p style="margin:0 0 20px;font-size:14px;line-height:1.6">${items.map((it) => esc(itemLine(it))).join('<br>')}</p>
 ${order.tracking ? `<p style="margin:0 0 20px;font-size:14px">Tracking number <b style="font-family:ui-monospace,Menlo,monospace">${esc(order.tracking)}</b></p>
 <p style="margin:0"><a href="${esc(url)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">Track the parcel</a></p>` : `<p style="margin:0"><a href="${esc(link)}" style="color:#111214">View your order</a></p>`}`),

@@ -161,7 +161,7 @@ const cs = {
   id: 'cs_test_paid', mode: 'payment', payment_status: 'paid', currency: 'usd', payment_intent: 'pi_1',
   amount_subtotal: 16997, amount_total: 18097, total_details: { amount_shipping: 1100, amount_tax: 0, amount_discount: 0 },
   customer_details: { email: 'Buyer@Example.com', name: 'Ada Buyer', phone: '+12015550123', address: { country: 'US' } },
-  collected_information: { shipping_details: { name: 'Ada Buyer', address: { line1: '1 Grove St', city: 'Jersey City', state: 'NJ', postal_code: '07302', country: 'US' } } },
+  collected_information: { shipping_details: { name: 'Ada Buyer', address: { line1: '1 Main St', city: 'Springfield', state: 'IL', postal_code: '62701', country: 'US' } } },
   metadata: { cart_id: stored.id },
 };
 const first = await createOrderFromSession(env, cs);
@@ -177,7 +177,7 @@ assert((await DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n === 1, '
 inv = await DB.prepare("SELECT on_hand FROM inventory WHERE sku = '001-black-tshirt-m'").first();
 assert(inv.on_hand === 1, 'stock is not taken twice');
 const pub = publicOrder(first.order, await orderItems(env, first.order.id));
-assert(pub.shipTo.city === 'Jersey City' && pub.items.length === 2 && !('notes' in pub) && !('id' in pub), 'public order hides internals');
+assert(pub.shipTo.city === 'Springfield' && pub.items.length === 2 && !('notes' in pub) && !('id' in pub), 'public order hides internals');
 
 const held2 = await reserve(env, [{ ...lines[0], quantity: 1 }]);
 await DB.prepare('INSERT INTO checkouts (session_id, cart_id, country, lines, subtotal, shipping) VALUES (?, ?, ?, ?, ?, ?)')

@@ -95,7 +95,7 @@ export function describeVariant(id) {
 }
 
 /* ------------------------------------------------------------- shipping
- * Everything ships from Jersey City, NJ by USPS. Customers pay a flat rate:
+ * Everything ships by USPS. Customers pay a flat rate:
  * the heaviest piece in the order sets the base, and each extra piece adds a
  * little. Edit the numbers here; docs/COMMERCE.md shows the costs behind them.
  *

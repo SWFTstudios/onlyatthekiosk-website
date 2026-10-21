@@ -504,7 +504,7 @@ body.k::after {
 .k-nav__inner > .k-logo { grid-column: 2; justify-self: center; }
 .k-nav__inner > .k-nav__actions { grid-column: 3; justify-self: end; }
 .k-nav .k-logo__mark { width: auto; height: auto; border-radius: 0; background: none; color: var(--ink); transition: opacity .2s; will-change: opacity, transform; }
-.k-nav .k-logo__mark .k-symbol { width: 54px; }
+.k-nav .k-logo__mark .k-symbol { width: 48px; }   /* the K star is taller than the old symbol; keeps the pill's height */
 .k-symbol { display: block; fill: currentColor; }
 
 .k-nav__links {
@@ -4816,3 +4816,31 @@ html.is-zone-dark body[data-page='home'] main > .k-gh ~ * {
 @media (prefers-reduced-motion: reduce) { html:not([data-motion='full']) .k-why__img img { transition: none; transform: none; } html:not([data-motion='full']) .k-why__slide { transform: none; } }
 html[data-motion='reduced'] .k-why__img img { transition: none; transform: none; }
 html[data-motion='reduced'] .k-why__slide { transform: none; }
+
+/* ------------------------------------------------- information desk pages
+   about, contact, faq, shipping-returns, members, terms, privacy, do-not-sell */
+.k-doc { max-width: 720px; display: grid; gap: 16px; font-size: calc(17px * var(--type, 1)); line-height: 1.6; color: var(--ink-2); }
+.k-doc h2 { margin: 24px 0 0; font-size: calc(clamp(22px, 2.2vw, 28px) * var(--type, 1)); font-weight: 450; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); }
+.k-doc h2:first-child { margin-top: 0; }
+.k-doc p, .k-doc ul { margin: 0; }
+.k-doc ul { padding-left: 1.2em; display: grid; gap: 6px; }
+.k-doc strong { color: var(--ink); font-weight: 500; }
+.k-doc a:not(.k-btn) { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.k-doc a:not(.k-btn):hover { text-decoration-thickness: 2px; }
+.k-doc__cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.k-page-head .k-lede a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.k-doc__list { display: grid; margin: 0; border-top: 1px solid var(--line); }
+.k-doc__list > div { display: grid; gap: 4px 24px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 640px) { .k-doc__list > div { grid-template-columns: 180px 1fr; } }
+.k-doc__list dt { font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+.k-doc__list dd { margin: 0; color: var(--ink); }
+.k-doc__faq { display: grid; border-top: 1px solid var(--line); }
+.k-doc__faq details { border-bottom: 1px solid var(--line); }
+.k-doc__faq summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 56px; padding: 14px 0; color: var(--ink); font-size: calc(18px * var(--type, 1)); font-weight: 450; cursor: pointer; list-style: none; }
+.k-doc__faq summary::-webkit-details-marker { display: none; }
+.k-doc__faq summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
+.k-doc__faq summary i { position: relative; flex: none; width: 12px; height: 12px; }
+.k-doc__faq summary i::before, .k-doc__faq summary i::after { content: ''; position: absolute; left: 0; top: 5.25px; width: 12px; height: 1.5px; border-radius: 1px; background: currentColor; transition: transform 0.3s var(--ease); }
+.k-doc__faq summary i::after { transform: rotate(90deg); }
+.k-doc__faq details[open] summary i::after { transform: rotate(0deg); }
+.k-doc__faq p { margin: 0 0 18px; max-width: 62ch; }
