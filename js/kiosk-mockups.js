@@ -45,6 +45,31 @@
   /* ------------------------------------------------------------- prints
    * Each print is drawn on a 100-unit-wide canvas centred on (0,0) and
    * scaled into place by the garment.                                    */
+  const K_LOGO = '/images/brand/kiosk-k-logo.png';
+  const K_RATIO = 1.451;
+  /** The retro K mark: the logo, optional IOSK and stripes, under one crackle mask. */
+  function retroMark(ink, spec, alone) {
+    const m = `rt${(uid += 1)}`;
+    const kw = alone ? 88 : 50; const kh = kw / K_RATIO;
+    const kx = alone ? -44 : -53; const ky = alone ? -34 : -25;
+    const img = (extra = '') => `<image href="${K_LOGO}" x="${kx}" y="${ky}" width="${kw}" height="${kh.toFixed(2)}"${extra}/>`;
+    const bands = (spec.stripes || []).map((col, i) => {
+      const y = alone ? 4 + i * 6.4 : 9 + i * 4.4; const hgt = alone ? 5 : 3.3;
+      const x0 = alone ? -38 : -12;
+      return `<rect x="${x0}" y="${y}" width="${50 - x0}" height="${hgt}" fill="${col}"/>`;
+    }).join('');
+    return `<filter id="${m}f" filterUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><feTurbulence type="fractalNoise" baseFrequency=".35 .9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -40 30"/></filter>
+      <mask id="${m}" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><rect x="-60" y="-45" width="120" height="85" fill="#fff" filter="url(#${m}f)"/></mask>
+      <mask id="${m}k" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85">${img()}</mask>
+      ${bands ? `<filter id="${m}d"><feMorphology in="SourceAlpha" operator="dilate" radius="${alone ? 1.4 : 0.9}"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"/></filter>
+      <mask id="${m}s" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><rect x="-60" y="-45" width="120" height="85" fill="#fff"/>${img(` filter="url(#${m}d)"`)}</mask>` : ''}
+      <g mask="url(#${m})">
+        ${bands ? `<g mask="url(#${m}s)">${bands}</g>` : ''}
+        <rect x="-60" y="-45" width="120" height="85" fill="${ink}" mask="url(#${m}k)"/>
+        ${alone ? '' : `<text x="-9" y="5.5" font-family="${SANS}" font-weight="700" font-style="italic" font-size="21" letter-spacing="-.2" fill="${ink}">IOSK</text>`}
+      </g>`;
+  }
+
   const PRINTS = {
     wordmark: (ink) => `
       <text x="0" y="-14" text-anchor="middle" font-family="${SANS}" font-size="6.2" letter-spacing="2.6" fill="${ink}" opacity=".8">ONLY AT THE</text>
@@ -117,24 +142,13 @@
       <rect x="-50" y="-25" width="100" height="50" fill="${ink}" mask="url(#${id})"/>`;
     },
 
-    // The retro orbit mark: a tall italic K with IOSK tucked beside it, an
-    // orbit swoosh round the K to a star, cracked like an old print. A
-    // colourway's mockup.stripes (one colour per band, top down) adds racing
-    // stripes under it (the Liftoff Retro Tee)
-    retro: (ink, bg, id, spec = {}) => {
-      const m = `rt${(uid += 1)}`;
-      const stripes = spec.stripes ? spec.stripes.map((col, i) => { const y = 11 + i * 5.6; return `<path d="M${-6 - i * 4},${y} L50,${y} L50,${y + 4.4} L${-7 - i * 4},${y + 4.4} Z" fill="${col}"/>`; }).join('') : '';
-      return `<filter id="${m}f" filterUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><feTurbulence type="fractalNoise" baseFrequency=".35 .9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -40 30"/></filter>
-      <mask id="${m}" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><rect x="-60" y="-45" width="120" height="85" fill="#fff" filter="url(#${m}f)"/></mask>
-      <g mask="url(#${m})">
-        ${stripes}
-        <path d="M-18,25 Q-54,24 -42,2 Q-28,-22 18,-25 Q42,-26 47,-15 Q40,-21 18,-20.5 Q-22,-18 -36,3 Q-44,19 -18,25 Z" fill="${ink}"/>
-        <path d="M44,-19 Q53,-6 41,9 Q45,-5 40,-16 Z" fill="${ink}"/>
-        ${star(17, -29, 8.5, ink)}
-        <text x="-25" y="22" text-anchor="middle" font-family="${SANS}" font-weight="700" font-style="italic" font-size="56" fill="${ink}">K</text>
-        <text x="18" y="5" text-anchor="middle" font-family="${SANS}" font-weight="700" font-style="italic" font-size="23" letter-spacing="-.3" fill="${ink}">IOSK</text>
-      </g>`;
-    },
+    // The retro orbit K (images/brand/kiosk-k-logo.png, masked so it takes
+    // any ink) printed cracked like an old tee: with IOSK beside it on the
+    // front ('retro') or on its own across the back ('retroK'). A colourway's
+    // mockup.stripes (one colour per band, top down) adds racing stripes,
+    // cut away round the K (the Liftoff Retro Tee)
+    retro: (ink, bg, id, spec = {}) => retroMark(ink, spec, false),
+    retroK: (ink, bg, id, spec = {}) => retroMark(ink, spec, true),
 
     checker: (ink, bg) => {
       let squares = '';
@@ -195,6 +209,14 @@
   /** A ringer's contrast neck rib (colourway `rib`), front and back. */
   const ringFront = (c) => (c.rib ? `<path d="M150,56.5 Q200,107 250,56.5 L241,58 Q200,95 159,58 Z" fill="${c.rib}"/>` : '');
   const ringBack = (c) => (c.rib ? `<path d="M156,57 Q200,73 244,57" stroke="${c.rib}" stroke-width="7" fill="none" stroke-linecap="round"/>` : '');
+  /** Woven K label inside the back neck, seen through the opening on the front (spec.tag).
+   *  Colourway `tag` sets the label colour (else rib, else ink); the K is woven in cream. */
+  const neckTag = (c, spec) => {
+    if (!spec.tag) return '';
+    const m = `tg${(uid += 1)}`;
+    return `<mask id="${m}" maskUnits="userSpaceOnUse" x="190" y="65" width="20" height="13"><image href="${K_LOGO}" x="194.3" y="67.6" width="11.4" height="7.86"/></mask>
+        <rect x="191.5" y="66.5" width="17" height="10" rx="1" fill="${c.tag || c.rib || c.ink}"/><rect x="191.5" y="66.5" width="17" height="10" fill="#f1ede4" mask="url(#${m})"/>`;
+  };
 
   /* --------------------------------------------------------- shared defs */
   function defs(id, g) {
@@ -256,6 +278,7 @@
         ${chestMark(c, 250, 130, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
+        ${neckTag(c, spec)}
         ${ringFront(c)}
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
         <path d="M152,57 Q200,104 248,57" stroke="${s}" stroke-width="1" fill="none" opacity=".6"/>
@@ -269,6 +292,7 @@
         ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 120, id, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
+        ${neckTag(c, spec)}
         ${ringFront(c)}
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
         <path d="M152,57 Q200,104 248,57" stroke="${s}" stroke-width="1" fill="none" opacity=".6"/>
@@ -640,6 +664,7 @@
       } else {
         out.push(`<path d="M${pt(a)} Q100,${N[1] + 4} ${pt(mir(a))}" ${SEAM}/>`);
         out.push(`<path d="M${pt(a)} Q100,${fx(N[1] + neckD * 0.62)} ${pt(mir(a))}" ${SEAM}/>`);
+        if (spec.tag) out.push(`<rect x="95" y="${N[1] + 5.5}" width="10" height="6.5" rx=".6" ${OUT}/><mask id="sktag${uid}" maskUnits="userSpaceOnUse" x="94" y="${N[1] + 4}" width="12" height="9"><image href="${K_LOGO}" x="96.6" y="${N[1] + 6.4}" width="6.8" height="4.7"/></mask><rect x="94" y="${N[1] + 4}" width="12" height="9" fill="${INK}" mask="url(#sktag${uid})"/>`);
         out.push(`<path d="M${pt([N[0] - 2, N[1] + 1.5])} Q100,${fx(N[1] + neckD * 1.1 + 6)} ${pt([202 - N[0], N[1] + 1.5])}" ${STITCH}/>`);
       }
     }
@@ -707,6 +732,7 @@
     const details = DETAILS[spec.type].slice();
     if (spec.quote && !spec.backPrint) details[1] = ['back', quoteCentre(spec), spec.quoteFinish === 'stitch' ? 'Embroidered quote' : 'Hand-lettered quote', 1.35];
     if (spec.type === 'hoodie' && spec.drawcord === false) details[1] = ['front', [100, 52], 'Clean hood · no drawcord'];
+    if (spec.tag && details[0][2] === '1x1 rib neck') details[0] = ['front', [90, details[0][1][1] + 2], '1x1 rib neck · woven K label'];
     return details;
   }
   /** The schematic views a product gets, in carousel order. */

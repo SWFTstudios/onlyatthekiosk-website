@@ -2689,15 +2689,44 @@
       ['Is it good for travel?', ['tee', 'longsleeve', 'crew', 'hoodie'].includes(g.type) ? 'Yes. Soft, breathable cotton that packs flat and recovers its shape after a long day in a seat.' : 'Yes. Built to be packed, carried and worn on the road.'],
       [wayStatus(p, cw) === 'available' ? 'How long does shipping take?' : 'When does it drop?', wayStatus(p, cw) === 'available' ? 'See <a href="shipping-returns.html">Shipping &amp; returns</a> for times and costs.' : 'Tap “Notify me” and the Dispatch tells you the moment it lands. Shipping times are on <a href="shipping-returns.html">Shipping &amp; returns</a>.'],
     ].filter(Boolean);
-    const sec = (id, title, body) => `<details class="k-guide__sec" data-acc="${id}"><summary><span>${title}</span><i aria-hidden="true">+</i></summary><div class="k-guide__body">${body}</div></details>`;
+    // One section open at a time (native exclusive <details name>), each
+    // with an icon, a one-line preview and a chevron
+    const GI = {
+      size: '<path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>',
+      fabric: '<path d="M8 4l-4 3 2 4 2-1v10h8V10l2 1 2-4-4-3c-.5 1.6-2 2.5-4 2.5S8.5 5.6 8 4z"/>',
+      care: '<path d="M3 7h18l-2 12H5z"/><path d="M6 11c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 3 0"/>',
+      palette: '<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="16" cy="10" r="1.3"/><path d="M12 21c-1.5 0-2-1-2-2s1-2 2-3"/>',
+      pairs: '<path d="M8 3h8l1 5-2 1v12H9V9L7 8z"/><path d="M12 3v3"/>',
+      faq: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7"/><path d="M12 17h.01"/>',
+    };
+    const gi = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${GI[k]}</svg>`;
+    // Laundry symbols for the care lines, matched on their wording
+    const careIcon = (line) => {
+      const t = line.toLowerCase();
+      const no = '<path d="M4 4l16 16M20 4L4 20"/>';
+      const svg = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
+      if (/dry clean/.test(t)) return svg(`<circle cx="12" cy="12" r="7"/>${/not|never/.test(t) ? no : ''}`);
+      if (/iron/.test(t)) return svg(`<path d="M3 17h17l-1.5-6a3 3 0 0 0-3-2.5H8"/><path d="M8 8.5L6 5h9"/>${/never|not|no /.test(t) ? no : '<circle cx="11" cy="14" r=".8"/>'}`);
+      if (/bleach/.test(t)) return svg(`<path d="M12 4l9 15H3z"/>${no}`);
+      if (/dry/.test(t)) return svg(`<rect x="4" y="4" width="16" height="16" rx="2"/>${/tumble/.test(t) ? '<circle cx="12" cy="12" r="5"/>' : '<path d="M12 7v10"/>'}`);
+      return svg('<path d="M3 7h18l-2 12H5z"/><path d="M6 11c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 3 0"/>');
+    };
+    const sec = (id, title, peek, body) => `<details class="k-guide__sec" name="k-pdp-guide" data-acc="${id}">
+      <summary><span class="k-guide__ico">${gi(id)}</span><span class="k-guide__head"><b>${title}</b>${peek ? `<small>${peek}</small>` : ''}</span><i class="k-guide__chev" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"/></svg></i></summary>
+      <div class="k-guide__body">${body}</div>
+    </details>`;
+    const dots = (hexes) => `<span class="k-guide__dots">${hexes.map((h) => `<span style="--sw:${esc(h)}"></span>`).join('')}</span>`;
+    const short = (t, n = 46) => { const x = String(t || '').split(/[,:;.(]/)[0].trim(); return esc(x.length > n ? `${x.slice(0, n - 1)}…` : x); };
+    const sizeSpan = sizes.length ? `${sizes[0]}–${sizes[sizes.length - 1]}` : (p.sizes || []).join(' · ');
+    const others = (p.colorways || []).filter((x) => x !== w);
     return `<div class="k-guide">
-      ${sec('size', g.chart ? 'Size chart &amp; fit' : 'Size &amp; fit', `<p>${esc(g.fit)}</p>${modelLine(p) ? `<p><b>${esc(modelLine(p))}</b></p>` : ''}${chart}`)}
-      ${sec('fabric', 'Materials', `<ul class="k-guide__list">${g.fabric.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
-      ${sec('care', 'Care', `<ul class="k-guide__list">${g.care.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
-      ${sec('palette', 'Colour palette', `<ul class="k-guide__sws">${sw(w.garment, w.name || 'Garment', `Garment · ${String(w.garment || '').toUpperCase()}`)}${w.ink ? sw(w.ink, p.quote ? 'Lettering' : 'Print', String(w.ink).toUpperCase()) : ''}</ul>
-        ${(p.colorways || []).length > 1 ? `<p class="k-guide__note">Also in ${(p.colorways || []).filter((x) => x !== w).map((x) => esc(x.name)).join(', ')}.</p>` : ''}`)}
-      ${sec('pairs', 'Pairs well with', `<ul class="k-guide__sws">${pair.list.map((c) => sw(c.hex, c.name)).join('')}</ul><p class="k-guide__note">${esc(pair.look)}</p>`)}
-      ${sec('faq', 'Questions', `<dl class="k-guide__faq">${faq.map(([q, a]) => `<div><dt>${esc(q)}</dt><dd>${/</.test(a) ? a : esc(a)}</dd></div>`).join('')}</dl>`)}
+      ${sec('size', g.chart ? 'Size chart &amp; fit' : 'Size &amp; fit', `${short(g.fit, 30)}${sizeSpan ? ` · ${esc(sizeSpan)}` : ''}`, `<p class="k-guide__lede">${esc(g.fit)}</p>${modelLine(p) ? `<p><b>${esc(modelLine(p))}</b></p>` : ''}${chart}`)}
+      ${sec('fabric', 'Materials', short(g.fabric[0]), `<ul class="k-guide__spec">${g.fabric.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
+      ${sec('care', 'Care', `${g.care.length} steps · ${short(g.care[0], 30)}`, `<ul class="k-guide__care">${g.care.map((x) => `<li>${careIcon(x)}<span>${esc(x)}</span></li>`).join('')}</ul>`)}
+      ${sec('palette', 'Colour palette', `${dots([w.garment, w.ink].filter(Boolean))}${esc(w.name || 'Garment')}`, `<ul class="k-guide__sws">${sw(w.garment, w.name || 'Garment', `Garment · ${String(w.garment || '').toUpperCase()}`)}${w.ink ? sw(w.ink, p.quote ? 'Lettering' : 'Print', String(w.ink).toUpperCase()) : ''}</ul>
+        ${others.length ? `<div class="k-guide__also"><span class="k-guide__note">Also in</span><span class="k-guide__chips">${others.map((x) => `<button type="button" class="k-guide__chip" data-pdp-cw="${(p.colorways || []).indexOf(x)}"><span style="--sw:${esc(x.garment || '#777')}"></span>${esc(x.name)}</button>`).join('')}</span></div>` : ''}`)}
+      ${sec('pairs', 'Pairs well with', `${dots(pair.list.map((c) => c.hex))}${esc(pair.list.slice(0, 2).map((c) => c.name).join(', '))}`, `<ul class="k-guide__sws">${pair.list.map((c) => sw(c.hex, c.name)).join('')}</ul><p class="k-guide__note">${esc(pair.look)}</p>`)}
+      ${sec('faq', 'Questions', `${faq.length} answers · fit, sizing, shrink and drops`, `<div class="k-guide__faq">${faq.map(([q, a]) => `<details><summary>${esc(q)}<i aria-hidden="true"></i></summary><p>${/</.test(a) ? a : esc(a)}</p></details>`).join('')}</div>`)}
     </div>`;
   }
   const sketchOf = (p, cw, view) => window.KioskMockup.render(p.mockup || { type: 'tee' }, wayOf(p, cw), { sketch: true, view, code: flightOf(p), title: p.title, category: categoryLabel(p.category), detail: p.detail, sizes: p.sizes, colorways: p.colorways });
@@ -2902,7 +2931,22 @@
     if (pdpState.full) setPDPFull(false); else closePDP();
   });
   function bindPDP(root) {
+    // Opening a guide section closes the open one above it and the page
+    // jumps up, so bring the header the reader tapped back into view
+    let tapped = null;
+    root.addEventListener('toggle', (e) => {
+      const d = e.target;
+      if (d !== tapped || !d.open) return;
+      tapped = null;
+      requestAnimationFrame(() => {
+        const bar = $('.k-pdp__bar', root);
+        const top = bar ? bar.getBoundingClientRect().bottom : 0;
+        if (d.getBoundingClientRect().top < top + 8) d.scrollIntoView({ block: 'start', behavior: REDUCED ? 'auto' : 'smooth' });
+      });
+    }, true);
     root.addEventListener('click', (e) => {
+      const head = e.target.closest('.k-guide__sec > summary');
+      if (head) tapped = head.parentElement;
       if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
       if (e.target.closest('[data-pdp-full]')) { setPDPFull(!pdpState.full); return; }
       const im = e.target.closest('[data-pdp-img]');

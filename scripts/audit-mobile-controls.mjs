@@ -63,9 +63,12 @@ function auditInPage({ scope, fixedScope }) {
   const opacity = (el) => { let o = 1; for (let n = el; n && n !== document; n = n.parentElement) o *= Number(getComputedStyle(n).opacity); return o; };
   const visible = (el) => {
     if (el.closest('[hidden], [aria-hidden="true"], [inert]')) return false;
-    // inside a closed <details> (other than its summary) it isn't rendered at all
-    const shut = el.closest('details:not([open])');
-    if (shut && !el.closest('summary')) return false;
+    // inside a closed <details> (other than its own summary) it isn't rendered
+    // at all, nested ones included
+    for (let d = el.closest('details:not([open])'); d; d = d.parentElement && d.parentElement.closest('details:not([open])')) {
+      const sum = d.querySelector(':scope > summary');
+      if (!sum || !sum.contains(el)) return false;
+    }
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden' || cs.display === 'none') return false;
     const r = el.getBoundingClientRect();
