@@ -2008,7 +2008,12 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Which form this was, so the confirmation email and Airtable say so
-        body: JSON.stringify({ email, interest: form.dataset.interest || 'dispatch', title: form.dataset.title || '', source: location.pathname }),
+        body: JSON.stringify({
+          email, interest: form.dataset.interest || 'dispatch', title: form.dataset.title || '', source: location.pathname,
+          // Drop alerts: a size and / or colour, or '' for any
+          size: ($('[data-notify-size][aria-pressed="true"]', form) || { dataset: {} }).dataset.notifySize || '',
+          colour: ($('[data-notify-colour][aria-pressed="true"]', form) || { dataset: {} }).dataset.notifyColour || '',
+        }),
       });
       let data = {};
       try { data = await res.json(); } catch (e) { /* empty body */ }
@@ -2627,7 +2632,8 @@
 
   /* -- Product panel: a frosted panel that expands into a full product page */
   let pdpEl = null;
-  const pdpState = { id: '', cw: 0, size: '', img: 0, full: false };
+  // nSize / nColour: the drop-alert choice ('any' | 'this'; null = default), nEmail: what's typed in it
+  const pdpState = { id: '', cw: 0, size: '', img: 0, full: false, nSize: null, nColour: null, nEmail: '' };
   function pdpImages(p, cw) {
     const w = wayOf(p, cw);
     const out = [];
@@ -2776,15 +2782,7 @@
                 ? `<div class="k-pdp__pricebar"><b>${esc(price(p))}</b>
                      <button class="k-btn k-pdp__cart" type="button" data-pdp-cart>Add to bag</button>
                      <button class="k-btn k-btn--solid k-pdp__buy" type="button" data-pdp-buy>Buy now <span class="k-arrow">${icon.arrow}</span></button></div>`
-                : `<form class="k-pdp__notify" data-dispatch data-pdp-notify novalidate data-interest="${esc(p.id)}" data-title="${esc(p.title)}">
-                     <p class="k-pdp__notify-lead">${p.pickup ? 'Reserve it: we’ll email the coordinates when you’re cleared to collect.' : 'Coming soon. Leave your email and we’ll tell you the moment it drops.'}</p>
-                     <div class="k-pdp__notify-row">
-                       <label class="k-sr" for="k-pdp-notify-${esc(p.id)}">Email</label>
-                       <input id="k-pdp-notify-${esc(p.id)}" type="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required>
-                       <button class="k-btn k-btn--solid" type="submit">${p.pickup ? 'Reserve' : 'Notify me'}</button>
-                     </div>
-                   </form>
-                   <p class="k-form-msg k-pdp__notify-msg" aria-live="polite"></p>`}
+                : notifyHtml(p, cw, sizes, ways)}
               ${pdpState.full ? '' : `<button class="k-btn" type="button" data-pdp-full>Learn more <span class="k-arrow">${icon.expand}</span></button>`}
             </div>
             <div class="k-pdp__sticky" aria-hidden="false">
@@ -2858,6 +2856,42 @@
       if (e.key === 'ArrowLeft') { e.preventDefault(); carGo(pdpState.img - 1); }
     });
   }
+  /**
+   * Drop alert for a piece that isn't on sale: any size (default) or the size
+   * picked above, any colour or the one shown. A voyager's check-in size is
+   * picked for them; their email is filled in.
+   */
+  function notifyHtml(p, cw, sizes, ways) {
+    const way = (ways[cw] || {}).name || '';
+    const t = memberTaste();
+    const size = sizes.length > 1 ? pdpState.size : '';
+    const sizeThis = size && (pdpState.nSize ? pdpState.nSize === 'this' : !!(t && mySizeOn(p, t) === size));
+    const colourThis = ways.length > 1 && pdpState.nColour === 'this';
+    const chip = (kind, value, label, on, extra = '') => `<button type="button" class="k-chip" data-notify-${kind}="${esc(value)}" aria-pressed="${on}"${extra}>${label}</button>`;
+    return `
+      <form class="k-pdp__notify" data-dispatch data-pdp-notify novalidate data-interest="${esc(p.id)}" data-title="${esc(p.title)}">
+        <p class="k-pdp__notify-lead">${p.pickup ? 'Reserve it: we’ll email the coordinates when you’re cleared to collect.' : 'Coming soon. Tell me when it’s in stock:'}</p>
+        ${sizes.length > 1 ? `<div class="k-pdp__notify-opts" role="group" aria-label="Size">
+          ${chip('size', '', 'Any size', !sizeThis)}
+          ${size ? chip('size', size, `${esc(size)}${t && mySizeOn(p, t) === size ? ' <small>your size</small>' : ''}`, sizeThis) : '<span class="k-pdp__notify-hint">Pick a size above for just yours</span>'}
+        </div>` : ''}
+        ${ways.length > 1 ? `<div class="k-pdp__notify-opts" role="group" aria-label="Colour">
+          ${chip('colour', '', 'Any colour', !colourThis)}
+          ${chip('colour', way, `<i style="--sw:${esc((ways[cw] || {}).garment || '#888')}"></i>${esc(way)}`, colourThis)}
+        </div>` : ''}
+        <div class="k-pdp__notify-row">
+          <label class="k-sr" for="k-pdp-notify-${esc(p.id)}">Email</label>
+          <input id="k-pdp-notify-${esc(p.id)}" type="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" value="${esc(pdpState.nEmail || memberEmail())}" required>
+          <button class="k-btn k-btn--solid" type="submit">${p.pickup ? 'Reserve' : 'Notify me'}</button>
+        </div>
+      </form>
+      <p class="k-form-msg k-pdp__notify-msg" aria-live="polite"></p>`;
+  }
+
+  // Sign-in state arrives after a product page can already be open (vault.html?p=…):
+  // redraw it so a voyager's size and email land in the drop alert
+  document.addEventListener('kiosk:account', () => { if (pdpEl && pdpEl.classList.contains('is-open')) renderPDP(); });
+
   function renderPDP() {
     const p = productById(pdpState.id);
     if (!pdpEl || !p) return;
@@ -2868,6 +2902,8 @@
     const keep = act && ['data-pdp-cw', 'data-pdp-size', 'data-pdp-img', 'data-pdp-full', 'data-pdp-buy', 'data-pdp-cart'].find((a) => act.hasAttribute(a));
     const keepSel = keep ? `[${keep}${act.getAttribute(keep) ? `="${act.getAttribute(keep)}"` : ''}]` : '';
     const opened = $$('[data-acc][open]', pdpEl).map((d) => d.dataset.acc);
+    const typed = $('[data-pdp-notify] input[type="email"]', pdpEl);
+    if (typed && typed.value) pdpState.nEmail = typed.value;
     pdpEl.innerHTML = pdpHtml(p);
     opened.forEach((a) => { const d = $(`[data-acc="${a}"]`, pdpEl); if (d) d.open = true; });
     bindCarousel();
@@ -2896,6 +2932,7 @@
     const wasOpen = pdpEl.classList.contains('is-open');
     const mine = ((taste() || {}).sizes || {}).top;   // the size from check-in, when this piece comes in it
     const fits = mine && (p.sizes || []).find((z) => z.toLowerCase() === mine);
+    if (pdpState.id !== id) Object.assign(pdpState, { nSize: null, nColour: null, nEmail: '' });
     Object.assign(pdpState, { id, cw: Math.min(cw, Math.max(0, (p.colorways || []).length - 1)), size: (p.sizes || []).length === 1 ? p.sizes[0] : (fits || ''), img: 0, full });
     if (!wasOpen) pdpEl.__return = document.activeElement;
     renderPDP();
@@ -2960,6 +2997,13 @@
       if (head) tapped = head.parentElement;
       if (e.target.closest('[data-pdp-close]')) { closePDP(); return; }
       if (e.target.closest('[data-pdp-full]')) { setPDPFull(!pdpState.full); return; }
+      const nc = e.target.closest('[data-notify-size], [data-notify-colour]');
+      if (nc) {
+        const kind = nc.hasAttribute('data-notify-size') ? 'size' : 'colour';
+        $$(`[data-notify-${kind}]`, nc.parentElement).forEach((b) => b.setAttribute('aria-pressed', String(b === nc)));
+        pdpState[kind === 'size' ? 'nSize' : 'nColour'] = nc.getAttribute(`data-notify-${kind}`) ? 'this' : 'any';
+        return;
+      }
       if (e.target.closest('[data-pdp-notify-focus]')) {
         const f = $('[data-pdp-notify]', root);
         if (f) { f.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); setTimeout(() => $('input', f).focus({ preventScroll: true }), REDUCED ? 0 : 350); }
@@ -4652,6 +4696,48 @@
 
   /* Check-in answers (js/kiosk-onboard.js) and how they pick posts */
   const taste = () => { const t = store.get('kiosk:taste', null); return t && t.completedAt ? t : null; };
+
+  /* Voyagers (signed-in members) get their check-in applied by default:
+   * their size on drop alerts, and the shop filtered and sorted for them. */
+  const isMember = () => { const a = window.KIOSK_ACCOUNT; const st = a && a.getState ? a.getState() : null; return !!(st && st.user); };
+  const memberTaste = () => (isMember() ? taste() : null);
+  const memberEmail = () => { const a = window.KIOSK_ACCOUNT; const st = a && a.getState ? a.getState() : null; return (st && st.user && st.user.email) || ''; };
+  const LETTER = { xxs: 0, xs: 1, s: 2, m: 3, l: 4, xl: 5, xxl: 6, '2xl': 6, xxxl: 7, '3xl': 7, '4xl': 8 };
+  const letterOf = (z) => LETTER[String(z).trim().toLowerCase()];
+  /** Does a piece come in their check-in size? Pieces without clothing sizes (bags, decks, one size) always fit. */
+  function fitsMe(p, t) {
+    const sizes = p.sizes || [];
+    const top = t && t.sizes && t.sizes.top;
+    const waist = t && t.sizes && t.sizes.bottom;
+    const letters = sizes.filter((z) => letterOf(z) != null);
+    const waists = sizes.filter((z) => /^\d{2}$/.test(String(z).trim()));
+    if (letters.length && top) return letters.some((z) => letterOf(z) === letterOf(top));
+    if (waists.length && waist) return waists.some((z) => String(z).trim() === String(waist).replace(/\D/g, ''));
+    return true;
+  }
+  /** The size on a piece that matches their check-in, or ''. */
+  const mySizeOn = (p, t) => (t && t.sizes && t.sizes.top ? (p.sizes || []).find((z) => letterOf(z) != null && letterOf(z) === letterOf(t.sizes.top)) || '' : '');
+  /** A colourway's family, in check-in terms: black, bone, grey, navy, olive, brown, red or pop. */
+  function colourFamily(w) {
+    const n = String((w && w.name) || '').toLowerCase();
+    const byName = [
+      ['black', /black|obsidian|onyx|ink|midnight(?! blue)/], ['bone', /white|bone|oat|sand|cream|ivory|ecru|natural|parchment/],
+      ['grey', /grey|gray|charcoal|slate|heather|chrome|gunmetal|asphalt|steel|concrete|silver|ash/], ['navy', /navy|indigo|denim/],
+      ['olive', /olive|matcha|moss|sage|army|forest|green|khaki/], ['brown', /brown|espresso|oak|taupe|mocha|coffee|chocolate|tan|camel|rust/],
+      ['red', /red|crimson|burgundy|maroon|wine|cherry/],
+    ].find(([, re]) => re.test(n));
+    if (byName) return byName[0];
+    const hex = String((w && w.garment) || '').replace('#', '');
+    if (/^[0-9a-f]{6}$/i.test(hex)) {
+      const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+      const max = Math.max(r, g, b); const min = Math.min(r, g, b);
+      if (max < 60) return 'black';
+      if (max - min < 24) return max > 200 ? 'bone' : 'grey';
+    }
+    return 'pop';
+  }
+  /** How well a piece suits their colours: 1 when a colourway is in a family they wear. */
+  const colourScore = (p, t) => ((t && (t.colors || []).length && (p.colorways || []).some((w) => t.colors.includes(colourFamily(w)))) ? 1 : 0);
   const INTEREST_MATCH = {
     cars: { desks: ['automotive'], words: /\b(car|cars|meet|stance|drift|jdm|rollers|build|garage|infiniti|bmw|honda civic|night drive)\b/i },
     motorcycles: { words: /\b(motorcycle|moto|bike|superbike|rider|riders|r1m?|r3|cbr|yamaha|ducati|powersports)\b/i },
@@ -5140,6 +5226,13 @@
     let sort = params.get('sort') || 'featured';
     let page = 1;
     const PAGE = 12;
+    /* For you: a voyager's check-in size filters the shop and their colours
+     * sort first, unless the link already sets filters or they chose
+     * "Show everything" (remembered on this device). */
+    const FORME_OFF = 'kiosk:shop-forme-off';
+    const linkFilters = ['size', 'colour', 'store', 'avail', 'max'].some((k) => params.has(k));
+    let forMe = false;
+    const wantForMe = () => !!memberTaste() && !linkFilters && !store.get(FORME_OFF, false);
     const filters = {
       size: new Set((params.get('size') || '').split(',').filter(Boolean)),
       colour: new Set((params.get('colour') || '').split(',').filter(Boolean)),
@@ -5214,7 +5307,7 @@
       </fieldset>` : ''}`;
     if (filterBody) filterBody.innerHTML = filterHtml();
 
-    const activeFilterCount = () => filters.size.size + filters.colour.size + filters.store.size + filters.avail.size + (filters.max != null && filters.max < priceMax ? 1 : 0);
+    const activeFilterCount = () => filters.size.size + filters.colour.size + filters.store.size + filters.avail.size + (filters.max != null && filters.max < priceMax ? 1 : 0) + (forMe && !filters.size.size ? 1 : 0);
     const syncFilterBadge = () => {
       const n = activeFilterCount();
       const wrap = $('.k-cmd__filter'); if (wrap) wrap.dataset.count = String(n);
@@ -5226,6 +5319,8 @@
     const availOk = (p, a) => (a === 'pickup' ? !!p.pickup : a === 'digital' ? isDigitalP(p) : a === 'ships' ? !p.pickup && !isDigitalP(p) : true);
     const matches = (p) => {
       if (cat !== 'all' && p.category !== cat) return false;
+      // Their size, unless they've picked sizes in the filter themselves
+      if (forMe && !filters.size.size && !fitsMe(p, memberTaste())) return false;
       if (filters.size.size && !(p.sizes || []).some((z) => filters.size.has(z))) return false;
       if (filters.colour.size && !(p.colorways || []).some((w) => filters.colour.has(w.name))) return false;
       if (filters.store.size && !filters.store.has(p.store || 'kiosk')) return false;
@@ -5239,6 +5334,10 @@
       if (sort === 'price-asc') l.sort((a, b) => (a.price ?? 1e9) - (b.price ?? 1e9));
       if (sort === 'price-desc') l.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
       if (sort === 'featured') l.sort((a, b) => (lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0));
+      if (sort === 'foryou') {
+        const t = memberTaste();
+        l.sort((a, b) => (colourScore(b, t) - colourScore(a, t)) || ((lifeOf(b, 0).length > 0) - (lifeOf(a, 0).length > 0)));
+      }
       return l;
     };
     const grid = mount('vault-grid');
@@ -5249,7 +5348,43 @@
     let view = params.get('view') || store.get(SHOP_VIEW_KEY, 'carousel');
     if (view !== 'list' && view !== 'carousel') view = 'carousel';
     if (!carouselRoot) view = 'list';
+    /** The "For you" bar above the pieces, and the For you sort option (voyagers only). */
+    const paintForMe = () => {
+      const t = memberTaste();
+      if (sortSel) {
+        let opt = $('option[value="foryou"]', sortSel);
+        if (t && !opt) { opt = document.createElement('option'); opt.value = 'foryou'; opt.textContent = 'For you'; sortSel.prepend(opt); }
+        if (!t && opt) opt.remove();
+        if (!t && sort === 'foryou') sort = 'featured';
+        sortSel.value = sort;
+      }
+      const bar = mount('vault-forme');
+      if (!bar) return;
+      bar.hidden = !t;
+      if (!t) return;
+      const size = t.sizes && t.sizes.top ? t.sizes.top.toUpperCase() : '';
+      const what = [size && `size ${size}`, (t.colors || []).length && 'your colours first'].filter(Boolean).join(' · ') || 'your check-in';
+      bar.innerHTML = forMe
+        ? `<span class="k-forme__on"><i aria-hidden="true">${icon.user}</i><span><b>For you</b> · ${esc(what)}</span></span><button type="button" class="k-forme__btn" data-forme="off">Show everything</button>`
+        : `<span>Showing everything.</span><button type="button" class="k-forme__btn k-forme__btn--on" data-forme="on">Fit to my size${size ? ` · ${esc(size)}` : ''}</button>`;
+    };
+    const setForMe = (on, remember) => {
+      forMe = on;
+      if (remember) store.set(FORME_OFF, !on);
+      if (on && sort === 'featured') sort = 'foryou';
+      if (!on && sort === 'foryou') sort = 'featured';
+      page = 1;
+    };
+    if (wantForMe()) setForMe(true, false);
+    // Account and check-in load after the page: apply For you once they do
+    const onAccount = () => {
+      if (!forMe && wantForMe()) { setForMe(true, false); render(); } else if (forMe && !memberTaste()) { setForMe(false, false); render(); } else paintForMe();
+    };
+    document.addEventListener('kiosk:account', onAccount, { signal });
+    document.addEventListener('kiosk:taste', onAccount, { signal });
+
     const render = () => {
+      paintForMe();
       const list = order(all.filter(matches));
       const shown = list.slice(0, page * PAGE);
       const asCarousel = view === 'carousel';
@@ -5269,7 +5404,7 @@
       if (grid) reveal(grid);
       const qs = new URLSearchParams(location.search);
       if (cat === 'all') qs.delete('c'); else qs.set('c', cat);
-      if (sort === 'featured') qs.delete('sort'); else qs.set('sort', sort);
+      if (sort === 'featured' || sort === 'foryou') qs.delete('sort'); else qs.set('sort', sort);
       qs.delete('view');
       [['size', filters.size], ['colour', filters.colour], ['store', filters.store], ['avail', filters.avail]].forEach(([k, set]) => {
         if (!set.size) qs.delete(k); else qs.set(k, [...set].join(','));
@@ -5289,6 +5424,8 @@
     };
 
     document.addEventListener('click', (e) => {
+      const fm = e.target.closest('[data-forme]');
+      if (fm) { setForMe(fm.dataset.forme === 'on', true); render(); return; }
       const vb = e.target.closest('[data-shop-view]');
       if (vb) {
         if (vb.dataset.shopView === view) return;

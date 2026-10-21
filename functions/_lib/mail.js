@@ -78,11 +78,14 @@ const SUBSCRIBE_COPY = {
   },
 };
 
-export async function sendSubscribeConfirm(env, { to, interest, title }) {
+export async function sendSubscribeConfirm(env, { to, interest, title, size = '', colour = '' }) {
+  const choice = [size, colour].filter(Boolean).join(' · ');
   const copy = SUBSCRIBE_COPY[interest] || {
-    subject: `We’ll tell you when ${title || 'it'} drops`,
+    subject: `We’ll tell you when ${title || 'it'} drops${choice ? ` in ${choice}` : ''}`,
     title: `${esc(title || 'This drop')} isn’t out yet.`,
-    body: 'You’ll get one email the moment it lands. Nothing else.',
+    body: choice
+      ? `You’ll get one email the moment it’s in stock in ${esc(choice)}. Nothing else.`
+      : 'You’ll get one email the moment it lands, in any size or colour. Nothing else.',
     cta: ['Browse the Supply terminal', 'https://onlyatthekiosk.com/vault.html'],
   };
   const plain = (s) => String(s).replace(/&amp;/g, '&').replace(/<[^>]+>/g, '');

@@ -47,6 +47,13 @@ Each signup:
 
 Every list for a release: `SELECT email FROM subscribers WHERE interest = 'dispatch'` (or a product / film id) in the D1 console.
 
+**Drop alerts by size and colour.** On a product page that isn't on sale, the alert offers *Any size* (the default) or the size picked above, and *Any colour* or the colourway shown. Each combination is its own row: `interest` is the product id with the choice appended (`tee-004-orbit`, `tee-004-orbit@xl`, `tee-004-orbit@xl/yellow-cab`), and `size` / `colour` hold the choice (`0006_subscriber_variants.sql`). When a size comes in, everyone who wants that piece in that size (or any size) is:
+`SELECT email FROM subscribers WHERE interest LIKE 'tee-004-orbit%' AND size IN ('', 'XL')`.
+
+**Voyagers (signed-in members).** Their check-in is applied by default:
+- the drop alert picks their check-in size and fills in their email;
+- the shop opens **For you**: filtered to pieces that come in their size (pieces without clothing sizes always show) and sorted with their colours first. A bar above the pieces says so. **Show everything** turns it off, and the choice is remembered on the device (`kiosk:shop-forme-off`); **Fit to my size** turns it back on. A link that sets filters, or sizes picked in the filter, take over.
+
 ## How sign-in works
 
 1. `POST /api/auth/code { email }` stores a hashed code in `login_codes` (one per email, 10 minutes) and emails it. It always answers the same way, so it never reveals who has an account. It is limited to 3 codes per email and 8 per IP every 10 minutes.

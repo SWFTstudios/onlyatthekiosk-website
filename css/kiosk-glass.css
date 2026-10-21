@@ -3554,6 +3554,22 @@ html[data-theme='dark'] .k-signin__msg { color: #ff7a5c; }
 .k-pdp__notify-row .k-btn { flex: none; min-height: 48px; }
 .k-pdp__notify-msg { flex: 1 1 100%; margin: 0; }
 .k-pdp__notify-msg:empty { display: none; }
+/* Drop-alert choices: any size / theirs, any colour / this one */
+.k-pdp__notify-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.k-pdp__notify-opts .k-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; }
+.k-pdp__notify-opts .k-chip small { font-size: 11px; opacity: 0.7; }
+.k-pdp__notify-opts .k-chip i { width: 14px; height: 14px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
+.k-pdp__notify-hint { font-size: 12.5px; color: var(--ink-3); }
+
+/* Shop: "For you" bar for voyagers (their size, their colours first) */
+.k-forme { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 0 0 14px; padding: 8px 8px 8px 14px; border: 1px solid var(--line-2); border-radius: 999px; background: color-mix(in srgb, var(--ink) 4%, transparent); font-size: calc(13.5px * var(--type, 1)); color: var(--ink-2); }
+.k-forme[hidden] { display: none; }
+.k-forme__on { display: inline-flex; align-items: center; gap: 8px; }
+.k-forme__on i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); }
+.k-forme__on i svg { width: 13px; height: 13px; }
+.k-forme b { color: var(--ink); font-weight: 500; }
+.k-forme__btn { min-height: 36px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.k-forme__btn--on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 /* A pop-up opened from a product page sits in front of it */
 .k-lightbox.is-over { z-index: 190; }
 .k-pdp__cart { flex: 1 1 auto; }
