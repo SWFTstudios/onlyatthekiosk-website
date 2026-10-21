@@ -90,6 +90,25 @@
       <text x="0" y="10" text-anchor="middle" font-family="${SANS}" font-weight="600" font-size="20" letter-spacing="2" fill="${ink}">CLUB</text>
       <text x="0" y="22" text-anchor="middle" font-family="${SANS}" font-size="5.6" letter-spacing="2" fill="${ink}" opacity=".8">BROOKLYN · SUNDAYS ONLY</text>`,
 
+    // The KIOSK globe mark: gridded globe, orbit ring and star, the
+    // wordmark in a box across the equator (the Globe Hoodie)
+    globe: (ink, bg) => {
+      const sw = 'stroke-width="1.6"';
+      let grid = '';
+      [-0.75, -0.4, 0, 0.4, 0.75].forEach((k) => { const y = 30 * k; const hw = 30 * Math.sqrt(1 - k * k); grid += `<path d="M${-hw},${y} L${hw},${y}" stroke="${ink}" ${sw} fill="none"/>`; });
+      [0.32, 0.68].forEach((k) => { grid += `<ellipse cx="0" cy="0" rx="${(30 * k).toFixed(1)}" ry="30" fill="none" stroke="${ink}" ${sw}/>`; });
+      return `
+      <path d="M-46,10 Q0,-14 46,-4" fill="none" stroke="${ink}" stroke-width="5" opacity=".9"/>
+      <circle cx="0" cy="0" r="30" fill="${bg}" stroke="${ink}" stroke-width="2.6"/>
+      ${grid}
+      <path d="M0,-30 L0,30" stroke="${ink}" ${sw}/>
+      <path d="M-14,-18 q6,-6 12,-2 q4,6 -2,10 q-8,2 -10,-8 Z M6,-12 q10,-4 14,4 q-2,8 -10,6 q-6,-4 -4,-10 Z M-6,8 q6,-2 8,6 q-2,10 -6,12 q-4,-8 -2,-18 Z" fill="${ink}" opacity=".85"/>
+      <rect x="-44" y="-8" width="88" height="16" rx="2" fill="${bg}" stroke="${ink}" stroke-width="1.8"/>
+      ${wordmark(0, 5.6, 14.5, 1.2, `font-family="${SANS}" font-weight="700" fill="${ink}"`)}
+      <path d="M-46,14 Q0,36 50,-2" fill="none" stroke="${ink}" stroke-width="3.2"/>
+      ${star(42, -26, 6, ink)}`;
+    },
+
     checker: (ink, bg) => {
       let squares = '';
       for (let r = 0; r < 3; r += 1) for (let c = 0; c < 10; c += 1) if ((r + c) % 2 === 0) squares += `<rect x="${-50 + c * 10}" y="${-26 + r * 10}" width="10" height="10" fill="${ink}"/>`;
@@ -141,7 +160,10 @@
   };
 
   /** Small K mark on the left chest (wearer's left = viewer's right). */
-  const chestMark = (c, x, y) => `<g transform="translate(${x} ${y}) scale(.3)">${PRINTS.kmark(c.ink, c.garment)}</g>`;
+  const chestMark = (c, x, y, spec) => {
+    const name = (spec && spec.chestPrint) || 'kmark';
+    return `<g transform="translate(${x} ${y}) scale(${name === 'kmark' ? 0.3 : 0.24})">${(PRINTS[name] || PRINTS.kmark)(c.ink, c.garment)}</g>`;
+  };
 
   /* --------------------------------------------------------- shared defs */
   function defs(id, g) {
@@ -199,7 +221,7 @@
         return `${shadow(id, 200, 452, 140, 14)}
         <path d="${TEE}" fill="${c.garment}"/>
         <path d="M128,210 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
-        ${chestMark(c, 250, 130)}
+        ${chestMark(c, 250, 130, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
@@ -271,7 +293,7 @@
         <path d="${hood}" fill="${c.garment}"/>${shade(id, hood)}
         <path d="${HOOD_BODY}" fill="${c.garment}"/>
         <path d="M130,230 Q144,320 128,404" stroke="${fold(c.garment)}" stroke-width="18" fill="none"/>
-        ${spec.chest ? chestMark(c, 248, 170) : print(spec.print, c.ink, c.garment, 200, 236, spec.printW || 108, id, spec)}
+        ${spec.chest ? chestMark(c, 248, 170, spec) : print(spec.print, c.ink, c.garment, 200, 236, spec.printW || 108, id, spec)}
         <path d="M128,326 L272,326 L294,404 L106,404 Z" fill="rgba(0,0,0,.05)"/>
         ${shade(id, HOOD_BODY)}
         <path d="M128,326 L272,326 M128,326 Q112,360 106,404 M272,326 Q288,360 294,404" stroke="${s}" stroke-width="1.4" fill="none"/>
@@ -279,8 +301,8 @@
         <path d="M28,398 L70,405 L68,428 L26,420 Z M372,398 L330,405 L332,428 L374,420 Z" fill="rgba(0,0,0,.08)"/>
         <path d="${opening}" fill="rgba(0,0,0,.42)"/>
         <path d="${opening}" stroke="${s}" stroke-width="3" fill="none"/>
-        <path d="M188,100 L184,176 M212,100 L216,178" stroke="${string}" stroke-width="3" stroke-linecap="round"/>
-        <rect x="181" y="174" width="6" height="12" rx="2" fill="${string}"/><rect x="213" y="176" width="6" height="12" rx="2" fill="${string}"/>
+        ${spec.drawcord === false ? '' : `<path d="M188,100 L184,176 M212,100 L216,178" stroke="${string}" stroke-width="3" stroke-linecap="round"/>
+        <rect x="181" y="174" width="6" height="12" rx="2" fill="${string}"/><rect x="213" y="176" width="6" height="12" rx="2" fill="${string}"/>`}
         <path d="M94,82 Q108,130 92,206 M306,82 Q292,130 308,206" stroke="${s}" stroke-width="1.2" fill="none"/>`;
     },
 
@@ -609,8 +631,10 @@
         out.push(`<path d="M${pt(N)} C58,0 142,0 ${pt(mir(N))} Q118,${N[1] + 26} 100,${N[1] + 34} Q82,${N[1] + 26} ${pt(N)} Z" ${OUT}/>`);
         out.push(`<path d="M78,${N[1] + 2} C80,10 120,10 122,${N[1] + 2} Q112,${N[1] + 20} 100,${N[1] + 26} Q88,${N[1] + 20} 78,${N[1] + 2} Z" fill="${PAPER}" stroke="${INK}" stroke-width="1"/>`);
         out.push(`<path d="M74,${N[1]} C76,6 124,6 126,${N[1]}" ${STITCH}/>`);
-        out.push(`<path d="M90,${N[1] + 19} L88,${N[1] + 76} M110,${N[1] + 19} L112,${N[1] + 76}" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/>`);
-        out.push(`<circle cx="90" cy="${N[1] + 19}" r="1.7" ${OUT}/><circle cx="110" cy="${N[1] + 19}" r="1.7" ${OUT}/><rect x="86.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/><rect x="110.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/>`);
+        if (spec.drawcord !== false) {
+          out.push(`<path d="M90,${N[1] + 19} L88,${N[1] + 76} M110,${N[1] + 19} L112,${N[1] + 76}" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/>`);
+          out.push(`<circle cx="90" cy="${N[1] + 19}" r="1.7" ${OUT}/><circle cx="110" cy="${N[1] + 19}" r="1.7" ${OUT}/><rect x="86.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/><rect x="110.2" y="${N[1] + 75}" width="3.6" height="8" rx="1" ${OUT}/>`);
+        }
         const top = hemY - 76; const bot = hemY - 15;
         out.push(`<path d="M70,${top} L130,${top} L150,${bot} L50,${bot} Z" ${OUT}/><path d="M72,${top + 3} L128,${top + 3} M70.6,${top + 3} L54,${bot} M129.4,${top + 3} L146,${bot}" ${STITCH}/>`);
       }
@@ -621,7 +645,8 @@
       if (spec.backPrint) out.push(p(spec.backPrint, 100, N[1] + 70, 74));
       else if (spec.quote) out.push(quoteLettering(spec, 110, N[1] + (b.hood ? 30 : 38), INK, PAPER));
     } else if (spec.chest) {
-      out.push(`<g transform="translate(126 ${N[1] + 34}) scale(.2)">${PRINTS.kmark(INK, PAPER)}</g>`);
+      const cp = spec.chestPrint || 'kmark';
+      out.push(`<g transform="translate(126 ${N[1] + 34}) scale(${cp === 'kmark' ? 0.2 : 0.17})">${(PRINTS[cp] || PRINTS.kmark)(INK, PAPER)}</g>`);
     } else if (spec.print) {
       out.push(p(spec.print, 100, N[1] + (b.hood ? 58 : 66), b.hood ? 64 : 70));
     }
@@ -641,6 +666,7 @@
   function detailsFor(spec) {
     const details = DETAILS[spec.type].slice();
     if (spec.quote && !spec.backPrint) details[1] = ['back', quoteCentre(spec), spec.quoteFinish === 'stitch' ? 'Embroidered quote' : 'Hand-lettered quote', 1.35];
+    if (spec.type === 'hoodie' && spec.drawcord === false) details[1] = ['front', [100, 52], 'Clean hood · no drawcord'];
     return details;
   }
   /** The schematic views a product gets, in carousel order. */

@@ -146,6 +146,9 @@ for (const [w, h] of VIEWPORTS) {
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' }).catch(() => {});
+    // Phones scroll natively (no Lenis), so html's scroll-behavior: smooth would animate
+    // every scroll the audit makes and it would measure before the page arrives
+    await page.addStyleTag({ content: 'html, html * { scroll-behavior: auto !important; }' }).catch(() => {});
     await page.waitForTimeout(1500);
     const main = await page.evaluate(auditInPage, { scope: '' });
     const chrome = await page.evaluate(auditInPage, { scope: '.k-nav', fixedScope: '#none' });

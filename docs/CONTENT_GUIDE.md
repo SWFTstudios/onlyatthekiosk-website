@@ -292,6 +292,11 @@ The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an ai
 - **In the product panel:** both photos lead the gallery, followed by the 3D renders.
 - **Without photos:** a product falls back to its 3D render or a **vector mockup**.
 - **Current set:** the 36 lookbook photos are in `images/product-lifestyle/`; see `docs/APPAREL_LIFESTYLE_LOOKBOOK.md`.
+- **More than two photos:** list as many as you have, in gallery order, and describe each for screen readers with `lifestyleAlt` (same order), e.g. `lifestyleAlt: ['front, on concrete steps', 'back print, walking away']`. The KIOSK Globe Hoodie #004 has four per colourway (`004-<colour>-street|back|chest|duo-01.webp`).
+- **Size guide past XXL:** a product's own `guide` overrides the garment guide (`fit`, `fabric`, `care`, `chart` in inches, `shrink`), and `guide.fitsChest` sets the "Fits chest" column for its own sizes (the Globe Hoodie runs XS–4XL).
+- **Fit model:** `model: { name: 'Preston', height: '6\'1"', size: 'L' }` shows "Preston is 6'1" and wears an L" under the sizes and in the size guide. It stays hidden until both height and size are filled in, so only real numbers ever show.
+- **Globe print:** `mockup: { type: 'hoodie', chest: true, chestPrint: 'globe', backPrint: 'globe', drawcord: false }` draws the KIOSK globe mark small on the chest and large on the back of the vector mockups and the tech sketch, with a clean hood.
+- **Tech pack:** the Globe Hoodie's full manufacturing spec (fabric, construction, print placement, colourways, points of measure XS–4XL, QC) is the "KIOSK Globe Hoodie — Tech Pack" doc.
 
 ```js
 {
