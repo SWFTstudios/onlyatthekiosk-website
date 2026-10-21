@@ -11,6 +11,7 @@
 import { json, error, handleOptions, withCors, rateLimit } from '../../_lib/http.js';
 import { requireSession } from '../../_lib/session.js';
 import { cleanPartner, readPartner } from '../../_lib/partner.js';
+import { sendTeamNotice } from '../../_lib/mail.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -33,6 +34,7 @@ export async function onRequest(context) {
       if (p.error) return withCors(error(p.error, 422), request);
 
       const taken = await env.DB.prepare('SELECT user_id FROM partners WHERE handle = ? AND user_id != ?').bind(p.handle, session.userId).first();
+      const existed = await env.DB.prepare('SELECT 1 FROM partners WHERE user_id = ?').bind(session.userId).first();
       if (taken) return withCors(error(`The handle “${p.handle}” is taken. Try another.`, 409, { field: 'handle' }), request);
 
       await env.DB.prepare(
@@ -43,6 +45,11 @@ export async function onRequest(context) {
            website = excluded.website, instagram = excluded.instagram, logo = excluded.logo, cover = excluded.cover,
            settings = excluded.settings, updated_at = datetime('now')`
       ).bind(session.userId, p.handle, p.kind, p.name, p.tagline, p.bio, p.city, p.country, p.website, p.instagram, p.logo, p.cover, JSON.stringify(p.settings)).run();
+      // A new profile waits for KIOSK to set it live: tell the team
+      if (!existed && env.EMAIL) {
+        context.waitUntil(sendTeamNotice(env, { interest: 'partner', email: session.email, title: `New Partner Hub profile: ${p.name} (@${p.handle}, ${p.kind}) · pending review`, source: '/partner' })
+          .catch((err) => console.error('partner notice', err && err.message)));
+      }
       return reply(await readPartner(env, session.userId));
     }
 

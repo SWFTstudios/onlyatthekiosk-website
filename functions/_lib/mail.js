@@ -49,3 +49,70 @@ export async function sendWelcome(env, { to, firstName, memberNo }) {
 <p style="margin:0"><a href="https://onlyatthekiosk.com/account.html" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">Open your account</a></p>`),
   });
 }
+
+/* ------------------------------------------------- email form follow-ups
+ * /api/subscribe sends one of these to whoever signed up, and tells the team
+ * about stockist and partner requests. Team mail goes to MAIL_TEAM (default
+ * hello@onlyatthekiosk.com); that address must receive mail (Email Routing). */
+
+export const teamAddress = (env) => (env && env.MAIL_TEAM) || 'hello@onlyatthekiosk.com';
+
+const SUBSCRIBE_COPY = {
+  dispatch: {
+    subject: 'You’re on the Dispatch',
+    title: 'You’re on the Dispatch.',
+    body: 'New films, new playlists, Supply drops and Lost &amp; Found coordinates. One email per release, nothing in between.',
+    cta: ['Open the kiosk', 'https://onlyatthekiosk.com/'],
+  },
+  stockist: {
+    subject: 'Selling at the KIOSK: we got your note',
+    title: 'Thanks for reaching out.',
+    body: 'We’ll send the stockist pack to this address: how listing works, what the kiosk takes from each sale, and how you keep selling through your own store. A real person reads every request.',
+    cta: ['See the stores at the kiosk', 'https://onlyatthekiosk.com/store.html'],
+  },
+  partner: {
+    subject: 'Partnering with the KIOSK: we got your note',
+    title: 'Thanks for reaching out.',
+    body: 'The desk will set up your Partner Hub account and write back to this address with next steps for your page, your pieces or backing a film.',
+    cta: ['Visit the kiosk', 'https://onlyatthekiosk.com/'],
+  },
+};
+
+export async function sendSubscribeConfirm(env, { to, interest, title }) {
+  const copy = SUBSCRIBE_COPY[interest] || {
+    subject: `We’ll tell you when ${title || 'it'} drops`,
+    title: `${esc(title || 'This drop')} isn’t out yet.`,
+    body: 'You’ll get one email the moment it lands. Nothing else.',
+    cta: ['Browse the Supply terminal', 'https://onlyatthekiosk.com/vault.html'],
+  };
+  const plain = (s) => String(s).replace(/&amp;/g, '&').replace(/<[^>]+>/g, '');
+  return env.EMAIL.send({
+    from: sender(env),
+    to,
+    replyTo: teamAddress(env),
+    subject: plain(copy.subject),
+    text: `${plain(copy.title)}\n\n${plain(copy.body)}\n\n${copy.cta[1]}\n\nYou got this because ${to} was entered on onlyatthekiosk.com. Not you? Reply and we’ll take it off the list.`,
+    html: layout(plain(copy.subject), `
+<h1 style="margin:0 0 12px;font-size:24px;font-weight:500;letter-spacing:-.02em">${copy.title}</h1>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">${copy.body}</p>
+<p style="margin:0 0 20px"><a href="${copy.cta[1]}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">${copy.cta[0]}</a></p>
+<p style="margin:0;font-size:13px;line-height:1.5;color:#77757a">You got this because ${esc(to)} was entered on onlyatthekiosk.com. Not you? Reply and we’ll take it off the list.</p>`),
+  });
+}
+
+export async function sendTeamNotice(env, { interest, email, title, source }) {
+  const what = interest === 'stockist' ? 'Stockist request' : interest === 'partner' ? 'Partner request' : `Interest: ${title || interest}`;
+  return env.EMAIL.send({
+    from: sender(env),
+    to: teamAddress(env),
+    replyTo: email,
+    subject: `${what} · ${email}`,
+    text: `${what}\n\nEmail: ${email}\nForm: ${title || interest}\nPage: ${source || '—'}\n\nReply to this email to answer them directly.`,
+    html: layout(what, `
+<h1 style="margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-.02em">${esc(what)}</h1>
+<p style="margin:0 0 6px;font-size:15px"><b>Email:</b> <a href="mailto:${esc(email)}" style="color:#111214">${esc(email)}</a></p>
+<p style="margin:0 0 6px;font-size:15px"><b>Form:</b> ${esc(title || interest)}</p>
+<p style="margin:0 0 20px;font-size:15px"><b>Page:</b> ${esc(source || '—')}</p>
+<p style="margin:0;font-size:13px;color:#77757a">Reply to this email to answer them directly.</p>`),
+  });
+}

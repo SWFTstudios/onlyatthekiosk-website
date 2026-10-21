@@ -18,10 +18,11 @@ Accounts switch on when both bindings exist (`accountsReady` in `functions/_lib/
 2. Cloudflare dashboard → **Compute → Email Service → Email Sending → Onboard Domain** → pick `onlyatthekiosk.com`. Cloudflare adds the SPF, DKIM, DMARC and bounce records itself; they usually take 5 to 15 minutes.
 3. The sender is `members@onlyatthekiosk.com`. To use another address on the domain, add a **variable** `MAIL_FROM` on the Worker (Settings → Variables and Secrets).
 4. Optional: add a **secret** `AUTH_SECRET` (any long random string). Sign-in codes are then hashed with it. Codes issued before you add it stop working, so add it before launch.
+5. Team emails (stockist and partner requests, new Partner Hub profiles) go to `hello@onlyatthekiosk.com`. That address must actually receive mail. Set it up under **Email Service → Email Routing** (forward `hello@` to your inbox), or set a **variable** `MAIL_TEAM` to an inbox you already read.
 
 ### 2. Database
 
-Already done: `kiosk-accounts` (`539499f7-d26e-4e19-b5e8-6c514397672b`) is bound in `wrangler.jsonc`. `0001` to `0004` are applied to it (`0002_profiles.sql` on 2026-10-17; `0003_partners.sql`, the Partner Hub, and `0004_presence.sql`, the live count and globe pins, on 2026-10-20). When a new migration is added:
+Already done: `kiosk-accounts` (`539499f7-d26e-4e19-b5e8-6c514397672b`) is bound in `wrangler.jsonc`. `0001` to `0005` are applied to it (`0002_profiles.sql` on 2026-10-17; `0003_partners.sql`, the Partner Hub, and `0004_presence.sql`, the live count and globe pins, on 2026-10-20; `0005_subscribers.sql`, every email form signup, on 2026-10-21). When a new migration is added:
 
 ```bash
 npx wrangler d1 migrations apply kiosk-accounts --remote
@@ -30,6 +31,21 @@ npx wrangler d1 migrations apply kiosk-accounts --remote
 ### 3. Deploy
 
 Merging to `main` deploys through Workers Builds (`npm run build:worker`, then `wrangler deploy`). After that, `/api/me` returns `{ "enabled": true }` and the account sheet shows the sign-in form.
+
+## Email forms
+
+Every email form on the site posts to `POST /api/subscribe { email, interest, title, source }`. The forms are: Join the Dispatch (home, menu), Notify me on drops and films, Sell at the KIOSK (`stockist`), Partner (`partner`), and the newsletter forms on About, Contact, FAQ, Members and the policy pages (`js/newsletter-forms.js`).
+
+Each signup:
+
+1. is kept in D1 `subscribers` (one row per email and interest, so a repeat doesn't send a second email);
+2. is copied to Airtable **Incoming Interest**, with **Source** set to the form and page (for example `Stockist · /store.html`), when `AIRTABLE_ACCESS_TOKEN` and `AIRTABLE_BASE_ID` are set;
+3. gets a confirmation email: a Dispatch welcome, a stockist or partner reply, or "we'll tell you when it drops". Replies go to the team address;
+4. for stockist and partner requests, also emails the team (`MAIL_TEAM`), with Reply-To set to the person.
+
+`GET /api/subscribe` reports which stores and email are connected. New members are also copied to Airtable **Members** on their first sign-in (`users.airtable_record_id` keeps the link).
+
+Every list for a release: `SELECT email FROM subscribers WHERE interest = 'dispatch'` (or a product / film id) in the D1 console.
 
 ## How sign-in works
 
