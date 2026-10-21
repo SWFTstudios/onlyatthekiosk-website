@@ -2514,11 +2514,21 @@ html[data-motion='reduced'] .k-nav__live-dot::after, html[data-motion='reduced']
 .k-sheet__top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--line-2); }
 .k-sheet__clock { font-family: var(--f-mono); font-size: calc(clamp(22px, 4vw, 40px) * var(--type, 1)); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
 .k-sheet__clock small { font-size: calc(11px * var(--type, 1)); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
-.k-sheet__links { max-width: var(--max); width: 100%; margin: 0 auto; }
-.k-sheet__links a { font-size: calc(clamp(36px, 7.4vw, 104px) * var(--type, 1)); letter-spacing: -0.045em; padding: 10px 0; }
+.k-sheet__links { width: 100%; margin: 0; }
+.k-sheet__links a { font-size: calc(clamp(26px, 2.6vw, 38px) * var(--type, 1)); letter-spacing: -0.03em; padding: 8px 0; }
 .k-sheet__links a:hover { font-family: var(--f-serif); font-style: italic; letter-spacing: -0.02em; }
 .k-sheet__links a[aria-current='page'] { font-family: var(--f-serif); font-style: italic; }
-@media (min-width: 1000px) { .k-sheet__links { columns: 2; column-gap: 48px; } .k-sheet__links li { break-inside: avoid; } }
+/* The six doors: verb headers with serif taglines over grouped links.
+ * Home rides above them as a lead row in the same link style. */
+.k-sheet { overflow-y: auto; }
+.k-sheet__links--home, .k-sheet__groups { max-width: var(--max); width: 100%; margin: 0 auto; }
+.k-sheet__groups { display: grid; gap: 36px 48px; margin-top: 28px; }
+.k-sheet__group { break-inside: avoid; min-width: 0; }
+.k-sheet__door { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--line-2); font-weight: 500; }
+.k-sheet__door b { font-family: var(--f-mono); font-size: calc(12px * var(--type, 1)); font-weight: 600; letter-spacing: 0.18em; }
+.k-sheet__door span { font-family: var(--f-serif); font-style: italic; font-size: calc(17px * var(--type, 1)); color: var(--ink-3); }
+@media (min-width: 900px) { .k-sheet__groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1400px) { .k-sheet__groups { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ------------------------------------------------ cover: full-screen video */
 .k-cover {
@@ -3798,6 +3808,17 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-lib__label { min-width: 74px; font-family: var(--f-mono); font-size: calc(10.5px * var(--type, 1)); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
 .k-lib__count { margin: 16px 0 14px; font-family: var(--f-mono); letter-spacing: .06em; }
 .k-lib__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: clamp(18px, 2.4vw, 28px); }
+/* The Journal lead story: one big editorial block above the stream */
+.k-jlead { display: grid; gap: clamp(18px, 3vw, 40px); align-items: center; margin: clamp(20px, 3vw, 36px) 0 clamp(26px, 3.5vw, 44px); }
+@media (min-width: 900px) { .k-jlead { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+.k-jlead__media { position: relative; display: block; aspect-ratio: 16 / 10; border-radius: var(--r-lg); overflow: hidden; background: var(--bg-3); }
+.k-jlead__media .k-media { position: absolute; inset: 0; height: 100%; border-radius: 0; }
+.k-jlead__title { font-family: var(--f-serif); font-weight: 400; font-size: calc(clamp(30px, 4.2vw, 54px) * var(--type, 1)); line-height: 1.04; letter-spacing: -0.01em; margin: 10px 0 12px; }
+.k-jlead__title a { color: inherit; text-decoration: none; }
+.k-jlead__title a:hover { font-style: italic; }
+.k-jlead__dek { font-size: calc(clamp(15px, 1.6vw, 19px) * var(--type, 1)); line-height: 1.55; color: var(--ink-2); margin: 0 0 16px; max-width: 52ch; }
+.k-jlead .k-lib-card__meta { margin-bottom: 16px; }
+.k-jlead[hidden], [data-journal-lead][hidden] { display: none; }
 .k-lib-card { display: flex; flex-direction: column; border-radius: var(--r-lg); overflow: hidden; background: var(--bg-2); border: 1px solid var(--line); }
 .k-lib-card__media { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; }
 .k-lib-card__media .k-media { position: absolute; inset: 0; height: 100%; border-radius: 0; }
@@ -3832,9 +3853,9 @@ a.k-board__row { display: grid; text-decoration: none; }
 @media (max-width: 999px) { .k-wl__stage { order: -1; max-width: 560px; } }
 .k-wl__stage { position: relative; aspect-ratio: 1; width: 100%; max-width: 760px; justify-self: center; color: var(--ink); }
 .k-wl__float { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform, opacity; }
-/* the sphere itself is drawn dark (Lost & Found night globe), so it
- * carries a soft space shadow against the light Atlas backdrop */
-.k-wl__globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; color: var(--ink); filter: drop-shadow(0 34px 55px rgba(4, 7, 18, 0.45)); }
+/* the sphere is transparent (dotted land only), so no disc shadow:
+ * a drop-shadow filter would shadow every dot into a smudge */
+.k-wl__globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; color: var(--ink); }
 .k-wl__globe.is-dragging { cursor: grabbing; }
 .k-wl__nodes { position: absolute; inset: 0; pointer-events: none; }
 .k-wl-node { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: auto; color: inherit; text-decoration: none; will-change: transform, opacity; transition: opacity .3s; }
@@ -3850,8 +3871,8 @@ a.k-board__row { display: grid; text-decoration: none; }
 .k-wl-node:focus-visible { outline: none; }
 .k-wl-node:focus-visible .k-wl-node__thumb { box-shadow: 0 0 0 2px var(--signal); }
 .k-wl-node__label { display: block; text-align: center; }
-/* labels land on the dark night sphere now: give them a small dark chip
- * so they read over the disc and over the light backdrop alike */
+/* labels can land on dense dot fields: give them a small dark chip
+ * so they read over the dotted land and the plain backdrop alike */
 .k-wl__stage .k-wl-node__label { width: fit-content; max-width: 100%; margin-inline: auto; padding: 5px 9px 6px; border-radius: 8px; background: rgba(6, 7, 10, 0.62); color: #f2f4fa; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .k-wl__stage .k-wl-node__label small { color: rgba(242, 244, 250, 0.72); }
 .k-wl-node__label b { display: block; font-size: calc(12.5px * var(--type, 1)); font-weight: 500; line-height: 1.2; }
@@ -4093,7 +4114,11 @@ body[data-page='flights'] .k-footer { display: none; }
  * tab bar folds away to a single close button while the menu is open. */
 @media (max-width: 760px) {
   .k-sheet { background: color-mix(in srgb, var(--bg) 94%, transparent); }
-  .k-sheet__links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; columns: auto; }
+  /* doors stack; each door's pages stay a two-column tile grid */
+  .k-sheet__groups { gap: 24px; margin-top: 22px; }
+  .k-sheet__door { padding-bottom: 6px; }
+  .k-sheet__door span { font-size: calc(15px * var(--type, 1)); }
+  .k-sheet__links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; columns: auto; }
   .k-sheet__links li:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .k-sheet__links a {
     display: grid; grid-template-columns: 34px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center;
