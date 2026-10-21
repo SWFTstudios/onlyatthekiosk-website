@@ -1566,6 +1566,44 @@ window.KIOSK_CONTENT = {
       status: 'soon', shopifyHandle: '003-black-tshirt', href: '', image: '',
       seasons: ['fall', 'spring'], vibes: ['travel', 'urban', 'clean'], colors: ['Carbon', 'Bridge Grey'],
     },
+    /* ---- Orbit Ringer Tee #004: the orbit wordmark (italic KIOSK, an arc to
+     * a four-point star, a swoosh underneath) small on the chest and big
+     * across the back, on a heavyweight boxy tee with a contrast ringer
+     * collar. Four colourways, shot in the garage and on the East River.
+     * Not in Shopify yet: add the products, then set status 'available' and
+     * each colourway's shopifyHandle. ---- */
+    {
+      id: 'tee-004-orbit', category: 'apparel', title: 'Orbit Ringer Tee #004', design: 'Orbit', price: 45, badge: 'New', added: '2026-10-21',
+      detail: '260 gsm heavyweight cotton · boxy fit, XS–3XL · contrast ringer collar · orbit wordmark on the chest and back',
+      description: 'The KIOSK orbit wordmark: italic letters, a thin arc to a four-point star and a swoosh sweeping underneath, like something leaving the atmosphere. Small on the left chest, big across the back, on a heavyweight boxy tee with a contrast 1x1 rib ringer collar in the print colour. Five colourways named for where they were shot and what they look like: Yellow Cab, East River, Ultraviolet, Matcha and Blackout, a washed charcoal with a tonal black print.',
+      mockup: { type: 'tee', chest: true, chestPrint: 'orbit', backPrint: 'orbit', backW: 150 },
+      colorways: [
+        { name: 'Yellow Cab', garment: '#f5d547', ink: '#c8211e', rib: '#c8211e', lifestyle: ['images/product-lifestyle/tees/004-yellowcab-street-01.webp', 'images/product-lifestyle/tees/004-yellowcab-garage-01.webp', 'images/product-lifestyle/tees/004-yellowcab-back-01.webp', 'images/product-lifestyle/tees/004-yellowcab-chest-01.webp'],
+          lifestyleAlt: ['front, leaning on a black door', 'full look by a motorcycle in the garage', 'red orbit wordmark across the back', 'close-up of the red ringer collar and chest mark'] },
+        { name: 'East River', garment: '#a9c8ec', ink: '#14275e', rib: '#1a2a5a', lifestyle: ['images/product-lifestyle/tees/004-eastriver-street-01.webp', 'images/product-lifestyle/tees/004-eastriver-bridge-01.webp', 'images/product-lifestyle/tees/004-eastriver-back-01.webp', 'images/product-lifestyle/tees/004-eastriver-chest-01.webp'],
+          lifestyleAlt: ['front, sitting by the Brooklyn Bridge', 'full look on the East River promenade', 'navy orbit wordmark across the back', 'close-up of the navy ringer collar and chest mark'] },
+        { name: 'Ultraviolet', garment: '#3d2560', ink: '#b48ff0', rib: '#b796ec', lifestyle: ['images/product-lifestyle/tees/004-ultraviolet-street-01.webp', 'images/product-lifestyle/tees/004-ultraviolet-garage-01.webp', 'images/product-lifestyle/tees/004-ultraviolet-back-01.webp', 'images/product-lifestyle/tees/004-ultraviolet-chest-01.webp'],
+          lifestyleAlt: ['front, sitting by the Brooklyn Bridge', 'full look by a motorcycle in the garage', 'lilac orbit wordmark across the back', 'close-up of the lilac ringer collar and chest mark'] },
+        { name: 'Matcha', garment: '#c4e3a8', ink: '#0f4d2b', rib: '#0f4d2b', lifestyle: ['images/product-lifestyle/tees/004-matcha-street-01.webp', 'images/product-lifestyle/tees/004-matcha-garage-01.webp', 'images/product-lifestyle/tees/004-matcha-back-01.webp', 'images/product-lifestyle/tees/004-matcha-chest-01.webp'],
+          lifestyleAlt: ['front, sitting by the Brooklyn Bridge', 'full look in front of a roller door', 'forest green orbit wordmark across the back', 'close-up of the green ringer collar and chest mark'] },
+        { name: 'Blackout', garment: '#3b3b3d', ink: '#19191a', rib: '#2f2f31', lifestyle: ['images/product-lifestyle/tees/004-blackout-street-01.webp', 'images/product-lifestyle/tees/004-blackout-garage-01.webp', 'images/product-lifestyle/tees/004-blackout-back-01.webp', 'images/product-lifestyle/tees/004-blackout-chest-01.webp'],
+          lifestyleAlt: ['front, sitting in front of a motorcycle', 'full look by a motorcycle in the garage', 'tonal black orbit wordmark across the back', 'close-up of the tonal chest mark on washed charcoal'] },
+      ],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+      guide: {
+        fit: 'Boxy and slightly oversized: dropped shoulder, wide body, hem on the hip and a sleeve that ends near the elbow. Take your usual size; size down one for a closer fit.',
+        fabric: ['100% combed cotton heavyweight jersey, 260 gsm', 'Garment-dyed and enzyme-washed for a soft, broken-in hand', 'Pre-shrunk: under 3% after washing', 'Contrast 1x1 rib ringer collar, 2.5 cm, dyed to the print colour', 'Twin-needle sleeve and bottom hems', 'Screen-printed orbit wordmark: small on the left chest, large across the back'],
+        care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Hang dry or tumble dry low', 'Warm iron inside out; never iron the print', 'Do not dry clean'],
+        chart: {
+          points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'],
+          rows: { XS: [21.5, 27, 8.5], S: [22.5, 28, 8.75], M: [23.5, 29, 9], L: [24.5, 30, 9.25], XL: [25.5, 31, 9.5], '2XL': [27, 32, 9.75], '3XL': [28.5, 33, 10] },
+        },
+        fitsChest: { XS: '32–34', S: '34–37', M: '37–40', L: '40–43', XL: '43–46', '2XL': '46–50', '3XL': '50–54' },
+        shrink: 'Pre-shrunk and garment-washed. Expect under 3% after washing; wash cold and hang dry to keep the exact fit.',
+      },
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['summer', 'spring'], vibes: ['urban', 'travel', 'dusk'], colors: ['Raw Denim', 'Carbon'],
+    },
     {
       id: 'hoodie-002-stamp', category: 'apparel', title: 'Travel Stamp Hoodie #002', design: 'Travel Stamp', price: 89.99, badge: 'Lookbook', added: '2026-10-14',
       detail: 'Brushed fleece · passport-stamp KIOSK mark, mid-chest',

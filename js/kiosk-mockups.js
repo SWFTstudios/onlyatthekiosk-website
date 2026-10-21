@@ -109,6 +109,14 @@
       ${star(42, -26, 6, ink)}`;
     },
 
+    // The orbit wordmark (images/brand/kiosk-orbit-logo.png): the real
+    // artwork used as a mask so it takes any ink colour (the Orbit Ringer Tee)
+    orbit: (ink) => {
+      const id = `orb${(uid += 1)}`;
+      return `<mask id="${id}" maskUnits="userSpaceOnUse" x="-50" y="-25" width="100" height="50"><image href="/images/brand/kiosk-orbit-logo.png" x="-50" y="-24.43" width="100" height="48.86"/></mask>
+      <rect x="-50" y="-25" width="100" height="50" fill="${ink}" mask="url(#${id})"/>`;
+    },
+
     checker: (ink, bg) => {
       let squares = '';
       for (let r = 0; r < 3; r += 1) for (let c = 0; c < 10; c += 1) if ((r + c) % 2 === 0) squares += `<rect x="${-50 + c * 10}" y="${-26 + r * 10}" width="10" height="10" fill="${ink}"/>`;
@@ -165,6 +173,10 @@
     return `<g transform="translate(${x} ${y}) scale(${name === 'kmark' ? 0.3 : 0.24})">${(PRINTS[name] || PRINTS.kmark)(c.ink, c.garment)}</g>`;
   };
 
+  /** A ringer's contrast neck rib (colourway `rib`), front and back. */
+  const ringFront = (c) => (c.rib ? `<path d="M150,56.5 Q200,107 250,56.5 L241,58 Q200,95 159,58 Z" fill="${c.rib}"/>` : '');
+  const ringBack = (c) => (c.rib ? `<path d="M156,57 Q200,73 244,57" stroke="${c.rib}" stroke-width="7" fill="none" stroke-linecap="round"/>` : '');
+
   /* --------------------------------------------------------- shared defs */
   function defs(id, g) {
     const dark = lum(g) < 0.35;
@@ -213,6 +225,7 @@
         <path d="M128,210 Q142,320 126,430" stroke="${fold(c.garment)}" stroke-width="16" fill="none"/>
         ${print(spec.backPrint || 'quote', c.ink, c.garment, 200, 200, spec.backW || 132, id, spec)}
         ${shade(id, TEE)}
+        ${ringBack(c)}
         <path d="M158,58 Q200,70 242,58" stroke="${s}" stroke-width="2.4" fill="none"/>
         <path d="M96,76 Q106,118 96,160 M304,76 Q294,118 304,160" stroke="${s}" stroke-width="1.2" fill="none"/>
         <path d="M33,139 L70,175 M367,139 L330,175 M94,424 Q200,436 306,424" stroke="${s}" stroke-width="1.2" fill="none"/>`;
@@ -224,6 +237,7 @@
         ${chestMark(c, 250, 130, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
+        ${ringFront(c)}
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
         <path d="M152,57 Q200,104 248,57" stroke="${s}" stroke-width="1" fill="none" opacity=".6"/>
         <path d="M96,76 Q106,118 96,160 M304,76 Q294,118 304,160" stroke="${s}" stroke-width="1.2" fill="none"/>
@@ -236,6 +250,7 @@
         ${print(spec.print, c.ink, c.garment, 200, 205, spec.printW || 120, id, spec)}
         ${shade(id, TEE)}
         <path d="M164,60 Q200,72 236,60 Q200,86 164,60 Z" fill="rgba(0,0,0,.28)"/>
+        ${ringFront(c)}
         <path d="M158,58 Q200,96 242,58" stroke="${s}" stroke-width="2" fill="none"/>
         <path d="M152,57 Q200,104 248,57" stroke="${s}" stroke-width="1" fill="none" opacity=".6"/>
         <path d="M96,76 Q106,118 96,160 M304,76 Q294,118 304,160" stroke="${s}" stroke-width="1.2" fill="none"/>
