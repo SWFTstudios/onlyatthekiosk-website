@@ -45,7 +45,7 @@ Locally: put the same values in `.dev.vars`, run `npx wrangler d1 migrations app
 
 ## Shipping
 
-Everything ships from **Jersey City, NJ** by USPS. Rates live in `SHIPPING` in `functions/_lib/commerce.js`; the heaviest piece sets the base and each extra piece adds a little:
+Everything ships by USPS with tracking. Rates live in `SHIPPING` in `functions/_lib/commerce.js`; the heaviest piece sets the base and each extra piece adds a little:
 
 | Zone | Service | Tees & small goods | With a hoodie / crew | Each extra piece |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ Shoppers pick their country in the bag (it defaults to where Cloudflare says the
 Postage you pay (Pirate Ship, commercial rates): roughly $5–6 for a US tee, $8–11 for a hoodie; $19–25 for an international tee, $24–44 for a hoodie. A 450 gsm hoodie packs over 2 lb, which is the expensive bracket abroad.
 
 **Taxes and duties**
-- New Jersey doesn't charge sales tax on most clothing. Stripe Tax (`STRIPE_TAX=on`) handles other US states once you register where you owe.
+- US sales tax: Stripe Tax (`STRIPE_TAX=on`) works out and collects it once you register in the states where you owe. Several states exempt most clothing.
 - International parcels ship duties-unpaid: the buyer may pay VAT/duty/fees on delivery (the bag, emails and the shipping page say so).
 - **UK is off by default.** HMRC requires overseas sellers to register for UK VAT and charge it at checkout on parcels up to £135. Register, then add `GB` to `SHIP_COUNTRIES` (and turn on Stripe Tax for UK VAT).
 - **EU:** since 1 July 2026 there's a €3 duty per item type on parcels under €150. Without IOSS the buyer pays VAT and fees on delivery; with an IOSS intermediary you can collect VAT at checkout instead.

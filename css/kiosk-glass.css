@@ -504,7 +504,7 @@ body.k::after {
 .k-nav__inner > .k-logo { grid-column: 2; justify-self: center; }
 .k-nav__inner > .k-nav__actions { grid-column: 3; justify-self: end; }
 .k-nav .k-logo__mark { width: auto; height: auto; border-radius: 0; background: none; color: var(--ink); transition: opacity .2s; will-change: opacity, transform; }
-.k-nav .k-logo__mark .k-symbol { width: 54px; }
+.k-nav .k-logo__mark .k-symbol { width: 48px; }   /* the K star is taller than the old symbol; keeps the pill's height */
 .k-symbol { display: block; fill: currentColor; }
 
 .k-nav__links {

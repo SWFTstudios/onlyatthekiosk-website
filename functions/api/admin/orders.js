@@ -2,7 +2,7 @@
  * /api/admin/orders — the back office's order list (ADMIN_EMAILS only).
  *
  * GET  ?status=open|unfulfilled|packed|shipped|delivered|cancelled|all&q=
- *      open = unfulfilled + packed (what still has to leave Jersey City)
+ *      open = unfulfilled + packed (what still has to ship)
  * POST { id, action: 'status', status }                 packed, delivered, cancelled…
  *      { id, action: 'ship', carrier, tracking, notify } shipped + email to the buyer
  *      { id, action: 'note', notes }

@@ -514,7 +514,7 @@
               <p class="k-cart__total"><span>Subtotal</span><b>${esc(money(cart.cost))}</b></p>
               <p class="k-cart__total"><span>USPS shipping</span><b data-ship-amount>${esc(money({ amount: ship / 100, currencyCode: cur }))}</b></p>
               <p class="k-cart__total"><span>Total</span><b data-ship-total>${esc(money({ amount: (sub + ship) / 100, currencyCode: cur }))}</b></p>
-              <p class="k-cart__ship" data-ship-note>Ships from Jersey City, NJ${intl ? ' · import duties and taxes, if any, are paid on delivery' : ''} · Secure checkout by Stripe</p>
+              <p class="k-cart__ship" data-ship-note>Tracked USPS shipping${intl ? ' · import duties and taxes, if any, are paid on delivery' : ''} · Secure checkout by Stripe</p>
               <button class="k-btn k-btn--solid" type="button" data-checkout>Checkout</button>
               <p class="k-form-msg" data-checkout-msg aria-live="polite"></p>
             </div>`;

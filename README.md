@@ -19,7 +19,7 @@ All content lives in `js/kiosk-content.js`. Rendering is in `js/kiosk-glass.js` 
 
 ## 🛒 Checkout and back office
 
-Until the Shopify store is live, the shop sells through **Stripe Checkout**, with orders and stock in D1, order emails, an Airtable copy and a back office at `/admin.html` (shipping from Jersey City, NJ by USPS). Setup, shipping rates and the move to Shopify: **[docs/COMMERCE.md](docs/COMMERCE.md)**.
+Until the Shopify store is live, the shop sells through **Stripe Checkout**, with orders and stock in D1, order emails, an Airtable copy and a back office at `/admin.html` (USPS shipping). Setup, shipping rates and the move to Shopify: **[docs/COMMERCE.md](docs/COMMERCE.md)**.
 
 ## 🏗️ Architecture
 

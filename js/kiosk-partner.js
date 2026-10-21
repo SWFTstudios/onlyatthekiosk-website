@@ -225,13 +225,12 @@
 
   function mediaKit() {
     const files = [
-      ['images/brand/kiosk-symbol.svg', 'KIOSK symbol', 'SVG · any size'],
-      ['images/brand/kiosk-symbol-black-1024.png', 'Symbol, black', 'PNG · 1024 px'],
-      ['images/brand/kiosk-symbol-white-1024.png', 'Symbol, white', 'PNG · 1024 px'],
-      ['images/brand/kiosk-lockup-reference.png', 'Lockup reference', 'PNG'],
+      ['images/brand/kiosk-k-star.svg', 'K star logo', 'SVG · any size'],
+      ['images/brand/kiosk-k-star-black-1024.png', 'K star, black', 'PNG · 1024 px'],
+      ['images/brand/kiosk-k-star-white-1024.png', 'K star, white', 'PNG · 1024 px'],
     ];
     return `
-      <p class="k-lede">Use these on your shop, posts and packaging when you sell or sponsor at the kiosk. Keep clear space around the symbol, and don’t recolour or stretch it.</p>
+      <p class="k-lede">Use these on your shop, posts and packaging when you sell or sponsor at the kiosk. Keep clear space around the K star, and don’t recolour or stretch it.</p>
       <ul class="k-ph-files">${files.map(([href, name, meta]) => `
         <li><a href="${href}" download>
           <span class="k-ph-files__thumb${/white/.test(href) ? ' k-dark' : ''}"><img src="${href}" alt="" loading="lazy"></span>

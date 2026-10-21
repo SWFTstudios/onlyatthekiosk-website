@@ -405,7 +405,8 @@ On phones the tab bar floats at the bottom with icons only (Home, Atlas, Films, 
 
 ## Brand marks
 
-- **Symbol** (`images/brand/kiosk-symbol.svg`): a backwards K and a forward K joined at the stem, which forms the I; inside the I an O, inside the O an S. It uses `currentColor`, so it takes the text colour where it's placed. PNGs: `kiosk-symbol-white-1024.png`, `kiosk-symbol-black-1024.png`. The original artwork is kept as `kiosk-symbol-reference.png` and `kiosk-lockup-reference.png`.
-- **Favicon and app icons** are generated from the symbol: `images/favicon.svg`, `favicon.ico`, `favicon-32.png`, `favicon-48.png`, `images/app/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`.
+- **K star** (`images/brand/kiosk-k-star.svg`): the KIOSK logo, a backwards K and a K back to back with a four-point star where they meet. It's the header logo, the footer logo, the favicon, the app icon, the share image and the email header. The SVG uses `currentColor` (it takes the text colour where it's placed; its path has `id="k-star"` for `<use>`). PNGs: `kiosk-k-star-white-1024.png`, `kiosk-k-star-black-1024.png`. The original artwork is `kiosk-k-star-reference.png`. Always call it the K star.
+- **Favicon, app icons and share image** are drawn from the K star: `images/favicon.svg`, `favicon.ico` (16/32/48), `favicon-32.png`, `favicon-48.png`, `webclip.png`, `images/app/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, and `images/og-kiosk.png` (1200×630, the `og:image`). Pages link them with `?v=kstar` so browsers drop the old icon; change that tag if you redraw them.
+- **Retired:** the earlier symbol (`kiosk-symbol*.svg/png`, `kiosk-lockup-reference.png`) and the box logos (`KiosKBoxLogo.png`, `KiosK-BOX-Logo-NO-BG.jpg`, `Wht-Logo*.png`) are kept for reference but no longer used on the site. Garment artwork (the K mark and retro K prints in `js/kiosk-mockups.js`) is product design, not the logo, and is unchanged.
 - **Wordmark**: ꓘIOSK, with the first K facing backwards (`.k-rk`).
 

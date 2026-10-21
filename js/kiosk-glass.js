@@ -208,8 +208,8 @@
     ...extra,
   });
 
-  /** The KIOSK symbol (images/brand/kiosk-symbol.svg): ꓘ and K joined at the stem, which is the I; an O inside it, an S inside that. */
-  const KIOSK_SYMBOL = '<svg class="k-symbol" viewBox="100 318 822 424" aria-hidden="true" focusable="false"><defs><mask id="kiosk-symbol-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="#fff"/><rect x="479" y="364" width="65" height="328" rx="10" fill="#000"/><rect x="493" y="392" width="36" height="282" rx="6" fill="#fff"/><path d="M521,423 H508 Q503,423 503,428 V505 Q503,512 510,512 H514 Q520,512 520,519 V645 Q520,652 513,652 H501" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></mask></defs><g fill="currentColor" mask="url(#kiosk-symbol-cut)"><rect x="454" y="323" width="114" height="413"/><path d="M769,323 H907 L726,506 Q717,515 725,524 L917,736 H766 L594,546 Q580,550 568,560 V496 Q579,502 586,506 Z"/><path d="M253,323 H115 L296,506 Q305,515 297,524 L105,736 H256 L428,546 Q442,550 454,560 V496 Q443,502 436,506 Z"/></g></svg>';
+  /** The K star (images/brand/kiosk-k-star.svg): the KIOSK logo — a backwards K and a K back to back, a four-point star where they meet. */
+  const KIOSK_SYMBOL = '<svg class="k-symbol" viewBox="0 0 1152 726" aria-hidden="true" focusable="false"><path fill-rule="evenodd" d="M0 725.1C0 724.3 48.2 677.3 103.5 624C112.8 615 141.2 587.6 166.5 563.1C191.8 538.6 230 501.6 251.5 481C272.9 460.4 298.4 435.9 308 426.5C329.9 405.4 347.1 388.8 362.4 374.1L374.3 362.7L365.4 354.1C337.4 327 240.5 232.7 204.5 197.5C156.4 150.5 53.4 50.4 10.7 9C6.5 4.9 3 1.2 3 0.8C3 0.4 62.6 0 135.4 0L267.8 -0L271 3.7C273.9 7 282.8 16.4 323.6 59C335.1 71 383.5 122 431.9 173C452.5 194.7 475.3 218.5 482.5 225.8C495 238.4 495.8 239 499.6 239C504.1 239 507.1 236.7 508.9 231.7C509.7 229.8 509.8 194.1 509.3 114.4L508.7 -0.1L540.8 0.2C558.4 0.4 573.1 0.8 573.5 1.2C574.8 2.5 570.2 84.3 563.9 171.5C556.7 271.3 551.8 294.3 532.6 318.6C525.2 328 514.5 335.5 502 340.1C497.7 341.6 477.9 347.2 457.9 352.5C437.9 357.8 420.8 362.3 420 362.6C419.1 363 421.3 364 425 365C433.3 367.3 466.5 376.1 483.6 380.5C508.1 386.9 517.3 391.3 527.5 401.5C549.4 423.4 555.8 447.9 563 537.5C564.1 551.2 565.2 563.9 565.5 565.5C566.5 571.5 570.7 630.7 572 656C572.6 667.3 573.3 679 573.6 682.1L574.2 687.7L560.9 688.3C553.5 688.7 538.5 689 527.5 689.1L507.5 689.2L507 581.2C506.7 521.8 506.2 472.9 505.9 472.6C505.3 472 492.5 483.7 472 503.4C465.6 509.5 437.3 536.8 409 564C380.7 591.2 350.1 620.7 341 629.5C331.9 638.3 305.8 663.6 283 685.6L241.5 725.6L120.7 725.8C54.3 725.9 0 725.6 0 725.1ZM787.5 611.4C724.8 548.4 669.7 493.1 665 488.6C660.4 484.2 654.6 478.6 652.1 476.2C649.7 473.9 647.6 472 647.4 472C647.2 472 647 520.8 647 580.5L647 689L614.5 689C586.3 689 581.9 688.8 581.4 687.5C580.4 684.9 585.3 604.6 589 564C597.6 469.1 600.4 450.3 609.4 429.1C616 413.6 626.8 400.4 639.5 392.5C648.5 386.8 659 383.5 702.2 372.4C721.4 367.5 737 363.2 737 362.9C737 362.6 729.7 360.5 720.8 358.2C677 346.9 658.5 341.9 652.3 339.4C627.2 329.3 612.5 311.3 604.6 280.6C599.5 261.3 596.6 233.7 592 161C590.8 143.1 589.5 122 589 114C586.5 75.9 583.1 1.5 583.8 0.8C584.3 0.3 598.8 0.1 616.1 0.2L647.5 0.5L647.5 21.5C647.5 33.1 647.1 85 646.7 137C645.9 230.5 645.9 231.5 647.9 234.7C650.1 238.1 653.5 239.6 657.3 238.6C659.7 238 665.6 232 759.5 134C824.2 66.7 886.8 1.9 888.4 0.8C890 -0.3 1152 -0.2 1152 0.9C1152 1.4 1149.6 4 1146.6 6.7C1140.2 12.4 1066.7 83.1 1059.5 90.5C1054.4 95.7 979.9 167.4 912.5 232C892.1 251.5 869 273.8 861 281.5C831.2 310.4 783.4 355.9 780.8 357.9L778.1 360.1L794.8 376.3C826.9 407.5 847.1 427.1 921 499.5C1040.5 616.6 1089.5 664.6 1121.3 695.4C1137.6 711.3 1151 724.6 1151 724.9C1151 725.2 1094.8 725.6 1026.2 725.8L901.4 726.1L787.5 611.4Z"/></svg>';
 
   /* ----------------------------------------------------------- chrome */
 
@@ -326,7 +326,7 @@
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
-    // Glass header: local clock and who's here now · the KIOSK symbol (centre) · day/night · radio · menu. Everything else lives in the menu.
+    // Glass header: local clock and who's here now · the K star (centre) · day/night · radio · menu. Everything else lives in the menu.
     nav.innerHTML = `
       <div class="k-nav__inner">
         <div class="k-nav__left">
@@ -2815,7 +2815,7 @@
                 ${p.quote ? `<div><dt>On the back</dt><dd class="k-serif">“${esc(p.quote)}”</dd></div>` : ''}
                 ${ways.length ? `<div><dt>Colourways</dt><dd>${ways.map((w) => esc(w.name) + (w.status === 'soon' ? ' (soon)' : '')).join(' · ')}</dd></div>` : ''}
                 ${sizes.length ? `<div><dt>Sizes</dt><dd>${sizes.map(esc).join(' · ')}</dd></div>` : ''}
-                <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from Jersey City, NJ by USPS'}</dd></div>
+                <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from the KIOSK store'}</dd></div>
                 ${p.pickup ? `<div><dt>Lost &amp; Found</dt><dd>${esc(p.pickup.coords || 'Exact coordinates drop in the Dispatch')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
                 <div><dt>Flight</dt><dd>${esc(flightOf(p))} · Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</dd></div>
               </dl>
@@ -5644,7 +5644,7 @@
     if (!root) return;
     const signal = pageAbort.signal;
     const items = (C.products || []).filter((p) => p.pickup);
-    const thumb = (p) => lifeOf(p, 0)[0] || wayOf(p, 0).image || p.image || 'images/KiosKBoxLogo.png';
+    const thumb = (p) => lifeOf(p, 0)[0] || wayOf(p, 0).image || p.image || 'images/og-kiosk.png';
     const status = (t) => { const el = mount('hunt-status'); if (el) el.textContent = t; };
     status(`${items.length} ${items.length === 1 ? 'drop' : 'drops'} · ${(C.stores || []).length} ${(C.stores || []).length === 1 ? 'store' : 'stores'} · drag to turn the globe, zoom in to a drop zone`);
     document.documentElement.classList.add('is-hunt');

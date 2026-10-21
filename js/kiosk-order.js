@@ -14,9 +14,9 @@
     try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: String(cur || 'usd').toUpperCase() }).format((cents || 0) / 100); } catch (e) { return `$${((cents || 0) / 100).toFixed(2)}`; }
   };
   const STATUS = {
-    unfulfilled: ['Paid', 'We’re packing it. You’ll get the tracking number by email when it leaves Jersey City.'],
+    unfulfilled: ['Paid', 'We’re packing it. You’ll get the tracking number by email when it ships.'],
     packed: ['Packed', 'It’s boxed and going to the post office.'],
-    shipped: ['On its way', 'It left Jersey City with USPS.'],
+    shipped: ['On its way', 'It’s on its way with USPS.'],
     delivered: ['Delivered', 'It arrived. Enjoy it.'],
     cancelled: ['Cancelled', 'This order was cancelled. Any payment is refunded to your card.'],
   };
