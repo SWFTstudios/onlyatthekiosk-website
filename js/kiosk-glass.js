@@ -2815,7 +2815,7 @@
                 ${p.quote ? `<div><dt>On the back</dt><dd class="k-serif">“${esc(p.quote)}”</dd></div>` : ''}
                 ${ways.length ? `<div><dt>Colourways</dt><dd>${ways.map((w) => esc(w.name) + (w.status === 'soon' ? ' (soon)' : '')).join(' · ')}</dd></div>` : ''}
                 ${sizes.length ? `<div><dt>Sizes</dt><dd>${sizes.map(esc).join(' · ')}</dd></div>` : ''}
-                <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from the KIOSK store'}</dd></div>
+                <div><dt>Delivery</dt><dd>${p.pickup ? `Pickup only · ${esc(p.pickup.place)}` : isDigitalP(p) ? 'Digital download' : st && st.id !== 'kiosk' ? `Ships from ${esc(st.name)}` : 'Ships from Jersey City, NJ by USPS'}</dd></div>
                 ${p.pickup ? `<div><dt>Lost &amp; Found</dt><dd>${esc(p.pickup.coords || 'Exact coordinates drop in the Dispatch')} · ${esc(p.pickup.window || '')}. ${esc(p.pickup.note || '')}</dd></div>` : ''}
                 <div><dt>Flight</dt><dd>${esc(flightOf(p))} · Gate ${esc(gateOf(p.category))} · ${esc(categoryLabel(p.category))}</dd></div>
               </dl>
@@ -3057,6 +3057,9 @@
     const msg = pdpEl && $('[data-pdp-msg]', pdpEl);
     const say = (t, err) => { if (msg) { msg.textContent = t; msg.classList.toggle('is-error', !!err); } };
     if ((p.sizes || []).length > 1 && !size) { say('Pick a size first.', true); return; }
+    // Stripe checkout (no Shopify store yet): kiosk-account.js puts it in the bag and opens Stripe
+    const acct = window.KIOSK_ACCOUNT;
+    if (acct && acct.buyNow && acct.getState().commerce === 'stripe') { acct.buyNow({ productId: p.id, cw, size }); return; }
     const handle = handleOf(p, cw);
     if (!handle) { if (p.href) location.href = p.href; return; }
     const btn = pdpEl && $('[data-pdp-buy]', pdpEl);

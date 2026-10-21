@@ -4,6 +4,8 @@
  * in Email Service; set MAIL_FROM to change it.
  */
 
+import { formatAddress, itemLine, cents, trackingUrl } from './orders.js';
+
 const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function sender(env) {
@@ -117,5 +119,92 @@ export async function sendTeamNotice(env, { interest, email, title, source }) {
 <p style="margin:0 0 6px;font-size:15px"><b>Form:</b> ${esc(title || interest)}</p>
 <p style="margin:0 0 20px;font-size:15px"><b>Page:</b> ${esc(source || '—')}</p>
 <p style="margin:0;font-size:13px;color:#77757a">Reply to this email to answer them directly.</p>`),
+  });
+}
+
+/* ------------------------------------------------------------------ orders
+ * Sent by the Stripe webhook (paid) and /api/admin/orders (shipped). The team
+ * copy goes to MAIL_TEAM with the address laid out for packing. */
+
+function orderTable(order, items) {
+  const row = (label, value, strong) => `<tr><td style="padding:4px 0;font-size:14px;color:#4a484d">${label}</td><td style="padding:4px 0;font-size:14px;text-align:right${strong ? ';font-weight:600;color:#111214' : ''}">${value}</td></tr>`;
+  return `<table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 20px">
+${items.map((it) => row(esc(itemLine(it)), esc(cents(it.unit_amount * it.quantity, order.currency)))).join('')}
+<tr><td colspan="2" style="border-top:1px solid #e6e3dd;padding-top:6px"></td></tr>
+${row('Subtotal', esc(cents(order.subtotal, order.currency)))}
+${order.discount ? row('Discount', `−${esc(cents(order.discount, order.currency))}`) : ''}
+${row('Shipping', esc(cents(order.shipping, order.currency)))}
+${order.tax ? row('Tax', esc(cents(order.tax, order.currency))) : ''}
+${row('Total', esc(cents(order.total, order.currency)), true)}
+</table>`;
+}
+
+const orderText = (order, items) => [
+  ...items.map((it) => `${itemLine(it)}  ${cents(it.unit_amount * it.quantity, order.currency)}`),
+  '',
+  `Subtotal ${cents(order.subtotal, order.currency)}`,
+  order.discount ? `Discount −${cents(order.discount, order.currency)}` : '',
+  `Shipping ${cents(order.shipping, order.currency)}`,
+  order.tax ? `Tax ${cents(order.tax, order.currency)}` : '',
+  `Total ${cents(order.total, order.currency)}`,
+].filter((l) => l !== '').join('\n');
+
+const shipTo = (order) => { try { return formatAddress(JSON.parse(order.ship_to)); } catch (e) { return []; } };
+
+export async function sendOrderConfirmation(env, { order, items, origin = 'https://onlyatthekiosk.com' }) {
+  const addr = shipTo(order);
+  const link = `${origin}/order.html?session_id=${encodeURIComponent(order.stripe_session_id)}`;
+  const intl = order.country && order.country !== 'US' && order.country !== 'PR';
+  const dutyNote = intl ? 'Your parcel ships from Jersey City, NJ by USPS. Import duties or taxes in your country, if any, are paid on delivery.' : 'Your parcel ships from Jersey City, NJ by USPS.';
+  return env.EMAIL.send({
+    from: sender(env),
+    to: order.email,
+    replyTo: teamAddress(env),
+    subject: `Order ${order.number} is in`,
+    text: `Thanks${order.name ? `, ${order.name.split(' ')[0]}` : ''}. Order ${order.number} is paid and we’re packing it.\n\n${orderText(order, items)}\n\nShipping to:\n${addr.join('\n')}\n\n${dutyNote} You’ll get the tracking number when it leaves.\n\n${link}`,
+    html: layout(`Order ${order.number}`, `
+<h1 style="margin:0 0 12px;font-size:24px;font-weight:500;letter-spacing:-.02em">Order ${esc(order.number)} is in.</h1>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">Thanks${order.name ? `, ${esc(order.name.split(' ')[0])}` : ''}. It’s paid and we’re packing it. You’ll get the tracking number when it leaves.</p>
+${orderTable(order, items)}
+<p style="margin:0 0 6px;font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.15em;color:#77757a">SHIPPING TO</p>
+<p style="margin:0 0 20px;font-size:14px;line-height:1.5">${addr.map(esc).join('<br>')}</p>
+<p style="margin:0 0 20px;font-size:13px;line-height:1.5;color:#77757a">${esc(dutyNote)}</p>
+<p style="margin:0"><a href="${esc(link)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">View your order</a></p>`),
+  });
+}
+
+export async function sendOrderTeamNotice(env, { order, items, origin = 'https://onlyatthekiosk.com' }) {
+  const addr = shipTo(order);
+  return env.EMAIL.send({
+    from: sender(env),
+    to: teamAddress(env),
+    replyTo: order.email,
+    subject: `New order ${order.number} · ${cents(order.total, order.currency)} · ${order.country || '—'}`,
+    text: `New order ${order.number}\n\n${orderText(order, items)}\n\nShip to:\n${addr.join('\n')}\nPhone: ${order.phone || '—'}\nEmail: ${order.email}\n\nPack it and mark it shipped: ${origin}/admin.html`,
+    html: layout(`New order ${order.number}`, `
+<h1 style="margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-.02em">New order ${esc(order.number)}</h1>
+${orderTable(order, items)}
+<p style="margin:0 0 6px;font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.15em;color:#77757a">SHIP TO</p>
+<p style="margin:0 0 12px;font-size:15px;line-height:1.5">${addr.map(esc).join('<br>')}</p>
+<p style="margin:0 0 20px;font-size:14px">Phone: ${esc(order.phone || '—')} · <a href="mailto:${esc(order.email)}" style="color:#111214">${esc(order.email)}</a></p>
+<p style="margin:0"><a href="${esc(origin)}/admin.html" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">Open the back office</a></p>`),
+  });
+}
+
+export async function sendShippedNotice(env, { order, items, origin = 'https://onlyatthekiosk.com' }) {
+  const url = trackingUrl(order.carrier, order.tracking);
+  const link = `${origin}/order.html?session_id=${encodeURIComponent(order.stripe_session_id)}`;
+  return env.EMAIL.send({
+    from: sender(env),
+    to: order.email,
+    replyTo: teamAddress(env),
+    subject: `Order ${order.number} is on its way`,
+    text: `Order ${order.number} left Jersey City${order.carrier ? ` with ${order.carrier}` : ''}.\n\n${items.map(itemLine).join('\n')}\n\n${order.tracking ? `Tracking: ${order.tracking}\n${url}\n\n` : ''}${link}`,
+    html: layout(`Order ${order.number} shipped`, `
+<h1 style="margin:0 0 12px;font-size:24px;font-weight:500;letter-spacing:-.02em">It’s on its way.</h1>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">Order ${esc(order.number)} left Jersey City${order.carrier ? ` with ${esc(order.carrier)}` : ''}.</p>
+<p style="margin:0 0 20px;font-size:14px;line-height:1.6">${items.map((it) => esc(itemLine(it))).join('<br>')}</p>
+${order.tracking ? `<p style="margin:0 0 20px;font-size:14px">Tracking number <b style="font-family:ui-monospace,Menlo,monospace">${esc(order.tracking)}</b></p>
+<p style="margin:0"><a href="${esc(url)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">Track the parcel</a></p>` : `<p style="margin:0"><a href="${esc(link)}" style="color:#111214">View your order</a></p>`}`),
   });
 }

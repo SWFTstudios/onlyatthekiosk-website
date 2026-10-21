@@ -2,6 +2,9 @@
 // Build: npm run build:worker    Deploy: npx wrangler deploy
 // Secrets used by /api (Airtable, Shopify, …) are set on the Worker in the
 // Cloudflare dashboard (Settings → Variables and Secrets), not in this file.
+// Checkout (docs/COMMERCE.md): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+// ADMIN_EMAILS (back office), optional SHIP_COUNTRIES, STRIPE_TAX=on,
+// COMMERCE_PROVIDER. Orders and stock live in D1 (migrations/0007_commerce.sql).
 {
   "name": "onlyatthekiosk-website",
   "main": "./dist/_worker.js/index.js",

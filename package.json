@@ -14,6 +14,8 @@
     "test:accounts-ui": "node scripts/test-accounts-ui.mjs",
     "test:partner": "node scripts/test-partner-unit.mjs",
     "test:live": "node scripts/test-live-unit.mjs",
+    "test:commerce": "node scripts/test-commerce-unit.mjs",
+    "sync:airtable-catalog": "node scripts/sync-airtable-catalog.js",
     "audit:mobile-controls": "node scripts/audit-mobile-controls.mjs",
     "build:worker": "bash scripts/build-worker.sh",
     "deploy:worker": "bash scripts/build-worker.sh && npx --yes wrangler@4 deploy"

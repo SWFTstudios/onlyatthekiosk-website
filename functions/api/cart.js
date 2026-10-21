@@ -1,10 +1,16 @@
 /**
  * /api/cart
- * GET  ?cartId=  — fetch cart (guest cartId or signed-in user's stored cart)
+ * GET  ?cartId=&country=  — fetch cart (guest cartId or signed-in user's stored cart)
  * POST { action: 'create'|'add'|'update'|'remove'|'attach', ... }
  *
- * Signed-in users: cart id is stored in D1 and linked via buyer identity.
- * Guests: pass cartId from localStorage; no D1 write.
+ * Two backends, picked by functions/_lib/commerce.js (commerceProvider):
+ *   shopify — Shopify Storefront carts (variantId is a Shopify variant gid)
+ *   stripe  — KIOSK bags in D1, paid through Stripe Checkout (/api/checkout);
+ *             variantId is kiosk:<product>:<colourway>:<size>
+ * Both answer with the same cart shape, so the cart drawer doesn't care.
+ *
+ * Signed-in users: cart id is stored in D1 (carts) and linked to the member.
+ * Guests: pass cartId from localStorage; no member link.
  */
 
 import {
@@ -12,6 +18,7 @@ import {
   error,
   handleOptions,
   withCors,
+  siteOrigin,
 } from '../_lib/http.js';
 import { accountsReady, getSession } from '../_lib/session.js';
 import {
@@ -22,6 +29,8 @@ import {
   removeLines,
   attachBuyer,
 } from '../_lib/storefront-cart.js';
+import { commerceProvider, renderCart, shipCountries, pickCountry } from '../_lib/commerce.js';
+import * as bag from '../_lib/kiosk-cart.js';
 
 async function loadUserCartId(env, userId) {
   const row = await env.DB.prepare(
@@ -43,7 +52,9 @@ export async function onRequest(context) {
 
   if (request.method === 'OPTIONS') return handleOptions(request);
 
-  if (!env.SHOPIFY_STOREFRONT_TOKEN) {
+  const provider = commerceProvider(env);
+  if (provider === 'stripe') return stripeCart(context);
+  if (provider !== 'shopify') {
     return withCors(error('Checkout is not configured.', 503), request);
   }
 
@@ -154,5 +165,82 @@ export async function onRequest(context) {
   } catch (err) {
     console.error('api/cart', err && err.message);
     return withCors(error(err.message || 'Cart request failed.', 500), request);
+  }
+}
+
+/* ------------------------------------------------------------- Stripe bags */
+
+async function stripeCart(context) {
+  const { request, env } = context;
+  if (!env.DB) return withCors(error('Checkout is not configured.', 503), request);
+  const origin = siteOrigin(request, env);
+  const countries = shipCountries(env);
+
+  try {
+    const session = accountsReady(env) ? await getSession(env, request) : null;
+    const url = new URL(request.url);
+    const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
+    const country = pickCountry(request, body.country || url.searchParams.get('country'));
+    const reply = (cart) => withCors(json({ cart: cart ? renderCart(cart, { origin, country, countries }) : null }), request);
+
+    // A member's bag comes from their account; a guest's from the id they hold.
+    // A bag linked to a member is never handed to someone else.
+    let cart = null;
+    if (session) {
+      cart = await bag.loadCart(env, await loadUserCartId(env, session.userId));
+      if (cart && cart.userId && cart.userId !== session.userId) cart = null;
+    }
+    const askedId = body.cartId || url.searchParams.get('cartId');
+    const guest = askedId && (!cart || askedId !== cart.id) ? await bag.loadCart(env, askedId) : null;
+    const guestOk = guest && (!guest.userId || (session && guest.userId === session.userId));
+    if (!cart && guestOk) cart = guest;
+
+    if (request.method === 'GET') return reply(cart);
+    if (request.method !== 'POST') return withCors(error('Method not allowed', 405), request);
+
+    const action = body.action;
+    const fresh = () => bag.emptyCart(session ? session.userId : null);
+    const persist = async (c) => {
+      if (session) c.userId = session.userId;
+      await bag.saveCart(env, c);
+      if (session) await saveUserCartId(env, session.userId, c.id);
+      return reply(c);
+    };
+
+    if (action === 'create') {
+      const c = fresh();
+      for (const l of (Array.isArray(body.lines) ? body.lines : []).slice(0, 20)) {
+        bag.addLine(c, l.variantId || l.merchandiseId, l.quantity);
+      }
+      return persist(c);
+    }
+    if (action === 'add') {
+      if (!body.variantId) return withCors(error('variantId is required.'), request);
+      return persist(bag.addLine(cart || fresh(), body.variantId, body.quantity));
+    }
+    if (action === 'update') {
+      if (!cart || !body.lineId) return withCors(error('cartId and lineId are required.'), request);
+      return persist(bag.updateLine(cart, body.lineId, body.quantity));
+    }
+    if (action === 'remove') {
+      const lineIds = body.lineIds || (body.lineId ? [body.lineId] : []);
+      if (!cart || !lineIds.length) return withCors(error('cartId and lineId(s) are required.'), request);
+      return persist(bag.removeLines(cart, lineIds));
+    }
+    if (action === 'attach') {
+      // Fold the guest bag into the member's bag after signing in.
+      if (!session) return withCors(error('Sign in required.', 401), request);
+      if (!guestOk) return reply(cart);
+      if (cart && cart.id !== guest.id) {
+        bag.mergeInto(cart, guest);
+        await env.DB.prepare('DELETE FROM kiosk_carts WHERE id = ?').bind(guest.id).run();
+        return persist(cart);
+      }
+      return persist(guest);
+    }
+    return withCors(error('Unknown action.'), request);
+  } catch (err) {
+    console.error('api/cart stripe', err && err.message);
+    return withCors(error(err.status === 400 ? err.message : 'Cart request failed.', err.status || 500), request);
   }
 }
