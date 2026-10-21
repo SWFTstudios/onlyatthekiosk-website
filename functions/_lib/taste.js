@@ -23,13 +23,17 @@ const pick = (list, allowed, max = allowed.length) => (Array.isArray(list)
   ? Array.from(new Set(list.filter((x) => typeof x === 'string' && allowed.includes(x)))).slice(0, max)
   : []);
 const one = (v, allowed) => (typeof v === 'string' && allowed.includes(v) ? v : '');
-const coord = (v, lim) => (Number.isFinite(Number(v)) && Math.abs(Number(v)) <= lim ? Math.round(Number(v) * 100) / 100 : null);
+// null and '' are "no coordinate", not 0 (Number(null) is 0)
+const coord = (v, lim) => (v != null && v !== '' && Number.isFinite(Number(v)) && Math.abs(Number(v)) <= lim ? Math.round(Number(v) * 100) / 100 : null);
 
 /** Returns a clean taste object (never throws). */
 export function cleanTaste(raw) {
   const t = raw && typeof raw === 'object' ? raw : {};
   const home = t.home && typeof t.home === 'object' ? t.home : {};
-  const lat = coord(home.lat, 90); const lon = coord(home.lon, 180);
+  let lat = coord(home.lat, 90); let lon = coord(home.lon, 180);
+  // 0,0 is the ocean off West Africa, not anyone's town: it's what a city with no
+  // coordinates used to be saved as, so read it as unknown
+  if (lat === 0 && lon === 0) { lat = null; lon = null; }
   const sizes = t.sizes && typeof t.sizes === 'object' ? t.sizes : {};
   const done = typeof t.completedAt === 'string' && !Number.isNaN(Date.parse(t.completedAt)) ? new Date(t.completedAt).toISOString() : '';
   return {

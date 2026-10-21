@@ -5808,7 +5808,11 @@
   }
   function visitorHome(signal) {
     const t = taste();
-    if (t && t.home && t.home.lat != null && t.home.lon != null) return Promise.resolve({ lat: t.home.lat, lon: t.home.lon, city: t.home.city });   // the home city from check-in
+    // the home city from check-in, when it came with real coordinates (a city typed
+    // in that isn't on the list has none, and older saves turned that into 0,0)
+    const h = t && t.home;
+    const hl = h && h.lat != null && h.lat !== '' ? Number(h.lat) : NaN; const hn = h && h.lon != null && h.lon !== '' ? Number(h.lon) : NaN;
+    if (Number.isFinite(hl) && Number.isFinite(hn) && !(hl === 0 && hn === 0)) return Promise.resolve({ lat: hl, lon: hn, city: h.city });
     const fallback = homeFromZone() || { lat: 40.71, lon: -74.0, city: 'New York', approx: true };
     const ask = fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
       .then((r) => (r.ok ? r.json() : null))
