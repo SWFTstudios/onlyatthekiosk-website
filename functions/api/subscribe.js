@@ -1,5 +1,5 @@
 /**
- * POST /api/subscribe { email, interest?, title?, source? } — every email form
+ * POST /api/subscribe { email, interest?, title?, source?, size?, colour? } — every email form
  *
  * Used by Join the Dispatch, Notify me (drops), Sell at the KIOSK (stockist),
  * Partner, and the newsletter forms on the info pages.
@@ -7,6 +7,7 @@
  *   interest  'dispatch' (default) | 'stockist' | 'partner' | a product/film id
  *   title     what the form was about, as shown on the site
  *   source    the page path it was sent from
+ *   size, colour  drop alerts only: just this size / colour ('' = any)
  *
  * Each signup is kept in D1 (`subscribers`, one row per email + interest) and
  * copied to Airtable "Incoming Interest" (Source = form · page). The person
@@ -40,6 +41,11 @@ export async function onRequest(context) {
   const interest = (safeText(body.interest, 60).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'dispatch');
   const title = safeText(body.title, 120) || null;
   const source = safeText(body.source, 200) || null;
+  const size = safeText(body.size, 12);
+  const colour = safeText(body.colour, 40);
+  const slug = (v) => v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // One row per piece + choice: tee-004-orbit, tee-004-orbit@xl, tee-004-orbit@xl/yellow-cab
+  const key = size || colour ? `${interest}@${[slug(size) || 'any', slug(colour)].filter(Boolean).join('/')}` : interest;
 
   if (!rateLimit(`sub:ip:${clientIp(request)}`, { limit: 10, windowMs: 10 * 60_000 })
     || !rateLimit(`sub:email:${email}`, { limit: 4, windowMs: 60 * 60_000 })) {
@@ -52,13 +58,13 @@ export async function onRequest(context) {
   if (env.DB) {
     try {
       const r = await env.DB.prepare(
-        'INSERT OR IGNORE INTO subscribers (email, interest, title, source) VALUES (?, ?, ?, ?)'
-      ).bind(email, interest, title, source).run();
+        'INSERT OR IGNORE INTO subscribers (email, interest, title, source, size, colour) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(email, key, title, source, size, colour).run();
       isNew = !!(r.meta && r.meta.changes);
       d1ok = true;
     } catch (err) { console.error('subscribe d1', err && err.message); }
   }
-  const airtable = isNew ? saveToAirtable(env, { email, interest, title, source }) : Promise.resolve(false);
+  const airtable = isNew ? saveToAirtable(env, { email, interest, title: [title, size, colour].filter(Boolean).join(' · ') || null, source }) : Promise.resolve(false);
   const airtableOk = await airtable;
   if (!d1ok && !airtableOk) {
     return withCors(error('We couldn’t save your email just now. Please try again.', 502), request);
@@ -66,8 +72,8 @@ export async function onRequest(context) {
 
   // 2. Tell them (and the team for stockist / partner), once per email + interest
   if (isNew && env.EMAIL) {
-    const mail = [sendSubscribeConfirm(env, { to: email, interest, title })
-      .then(() => env.DB && env.DB.prepare("UPDATE subscribers SET confirmed_at = datetime('now') WHERE email = ? AND interest = ?").bind(email, interest).run())];
+    const mail = [sendSubscribeConfirm(env, { to: email, interest, title, size, colour })
+      .then(() => env.DB && env.DB.prepare("UPDATE subscribers SET confirmed_at = datetime('now') WHERE email = ? AND interest = ?").bind(email, key).run())];
     if (interest === 'stockist' || interest === 'partner') mail.push(sendTeamNotice(env, { interest, email, title, source }));
     context.waitUntil(Promise.allSettled(mail).then((rs) => rs.forEach((r) => {
       if (r.status === 'rejected') console.error('subscribe email', r.reason && (r.reason.code || ''), r.reason && r.reason.message);
@@ -78,7 +84,7 @@ export async function onRequest(context) {
     ? (isNew ? 'You’re on the Dispatch. Check your inbox.' : 'You’re already on the Dispatch.')
     : interest === 'stockist' || interest === 'partner'
       ? 'Thanks. We’ll be in touch at that address.'
-      : (isNew ? 'Done. We’ll email you the moment it drops.' : 'You’re already on the list for this one.');
+      : (isNew ? `Done. We’ll email you the moment it’s in${size || colour ? ` ${[size, colour].filter(Boolean).join(', ')}` : ''}.` : 'You’re already on the list for this one.');
   return withCors(json({ success: true, isNew, message }), request);
 }
 
