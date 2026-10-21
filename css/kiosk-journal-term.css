@@ -1,0 +1,187 @@
+/* =====================================================================
+ * The Journal — retro sci-fi terminal theme (archive.html only)
+ *
+ * The monthly magazine archive rendered as if you were inside the
+ * backend of a sci-fi magazine: amber phosphor on deep space black,
+ * scanlines, mono type, directory-listing tables and code-comment
+ * headings. Everything is scoped to body.k-journal-term, mostly by
+ * re-pointing the theme variables, so no other page changes. Amber is
+ * the only colour and the page is dark in both day and night themes.
+ * ===================================================================== */
+
+body.k-journal-term {
+  --crt: #ffb347;
+  --crt-ink: rgba(255, 179, 71, 0.92);
+  --crt-dim: rgba(255, 179, 71, 0.62);
+  --crt-faint: rgba(255, 179, 71, 0.42);
+  --bg: #07060a;
+  --bg-2: #0c0a10;
+  --bg-3: #14101c;
+  --ink: var(--crt-ink);
+  --ink-2: rgba(255, 179, 71, 0.78);
+  --ink-3: var(--crt-dim);
+  --line: rgba(255, 179, 71, 0.14);
+  --line-2: rgba(255, 179, 71, 0.30);
+  --sheet: rgba(7, 6, 10, 0.94);
+  --nav-bg: rgba(7, 6, 10, 0.78);
+  --glass: rgba(255, 179, 71, 0.06);
+  --glass-2: rgba(255, 179, 71, 0.10);
+  --glass-3: rgba(255, 179, 71, 0.16);
+  --glass-dark: rgba(7, 6, 10, 0.6);
+  --glass-hover: rgba(255, 179, 71, 0.14);
+  --tile: #0c0a10;
+  --tile-hover: #14101c;
+  --bone: #ffb347;
+  --bone-ink: #07060a;
+  background-color: #07060a;
+  /* starfield: three depths of static stars over the void */
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255, 220, 170, 0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 8%, rgba(255, 220, 170, 0.55) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 34%, rgba(255, 220, 170, 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 64%, rgba(255, 220, 170, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 86%, rgba(255, 220, 170, 0.65) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 6% 78%, rgba(255, 220, 170, 0.45) 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 68%, rgba(255, 220, 170, 0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 44% 38%, rgba(255, 220, 170, 0.4) 50%, transparent 51%);
+  color: var(--crt-ink);
+}
+
+body.k-journal-term ::selection { background: var(--crt); color: #07060a; }
+
+/* CRT screen: scanlines and a vignette over everything, always */
+body.k-journal-term::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.22) 2px 4px);
+  mix-blend-mode: multiply;
+}
+body.k-journal-term::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+body.k-journal-term main { font-family: var(--f-mono); }
+
+/* ---------------------------------------------------------- boot lines */
+.k-jt-boot, .k-jt-eof, .k-jt-path {
+  font-family: var(--f-mono);
+  font-size: calc(11.5px * var(--type, 1));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--crt-dim);
+}
+.k-jt-boot {
+  display: block;
+  margin: 0 0 26px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-2);
+  background: rgba(255, 179, 71, 0.05);
+  text-shadow: 0 0 8px rgba(255, 179, 71, 0.35);
+}
+.k-jt-eof { margin-top: 40px; }
+.k-jt-path { margin: 0 0 14px; }
+
+/* --------------------------------------------------------------- titles */
+body.k-journal-term .k-ed-giant,
+body.k-journal-term .k-jr-title {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--crt);
+  text-shadow: 0 0 6px rgba(255, 179, 71, 0.55), 0 0 28px rgba(255, 179, 71, 0.30), 0 0 90px rgba(255, 179, 71, 0.18);
+}
+/* the [data-fit] script measures in the serif it was built for; in mono
+ * its size overflows, so the masthead takes a vw size of its own
+ * (11 glyphs ≈ 6.6em: at 12.5vw the line lands inside the column) */
+body.k-journal-term .k-ed-giant { font-size: calc(clamp(38px, 12.5vw, 190px) * var(--type, 1)) !important; }
+/* the fitted masthead plus its cursor can overhang a few px: clip it */
+html:has(body.k-journal-term), body.k-journal-term { overflow-x: clip; }
+/* blinking block cursor after the masthead */
+body.k-journal-term .k-ed-giant::after {
+  content: '█';
+  margin-left: 0.08em;
+  font-size: 0.52em;
+  vertical-align: baseline;
+  animation: k-jt-blink 1.1s steps(1) infinite;
+}
+@keyframes k-jt-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+body.k-journal-term .k-ed-label,
+body.k-journal-term .k-jr-kicker {
+  font-family: var(--f-mono);
+  color: var(--crt-dim);
+  text-shadow: 0 0 8px rgba(255, 179, 71, 0.3);
+}
+body.k-journal-term .k-lede,
+body.k-journal-term .k-ed-standfirst,
+body.k-journal-term .k-jr-note { color: var(--ink-2); }
+body.k-journal-term .k-jr-note { font-family: var(--f-mono); font-style: normal; }
+
+/* links read as terminal commands */
+body.k-journal-term .k-ed-link { color: var(--crt); text-shadow: 0 0 8px rgba(255, 179, 71, 0.3); }
+body.k-journal-term .k-ed-link:hover { background: var(--crt); color: #07060a; text-shadow: none; }
+
+/* ------------------------------------------------------- shelf listing */
+/* the wireframe room, cols and rows already draw in currentColor, which
+ * is amber here; what follows makes the table read as a file listing */
+body.k-journal-term .k-lib3d__head { background: rgba(255, 179, 71, 0.04); box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.05), 0 0 34px rgba(255, 179, 71, 0.06); }
+body.k-journal-term .k-lib3d__table { background: transparent; }
+body.k-journal-term .k-lib3d__cols {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: calc(12px * var(--type, 1));
+  color: var(--crt-faint);
+}
+body.k-journal-term .k-lib3d__rows > li { background: rgba(7, 6, 10, 0.88); }
+body.k-journal-term .k-lib3d__row { letter-spacing: 0.03em; font-variant-numeric: tabular-nums; text-shadow: 0 0 7px rgba(255, 179, 71, 0.25); }
+body.k-journal-term .k-lib3d__row > span:nth-child(2)::before { content: 'VOL.'; color: var(--crt-faint); }
+body.k-journal-term .k-lib3d__years button { text-transform: uppercase; letter-spacing: 0.08em; }
+body.k-journal-term .k-lib3d__years button::before { content: '[ '; color: var(--crt-faint); }
+body.k-journal-term .k-lib3d__years button::after { content: ' ]'; color: var(--crt-faint); }
+body.k-journal-term .k-lib3d__years button[aria-pressed='true']::before,
+body.k-journal-term .k-lib3d__years button[aria-pressed='true']::after { color: rgba(7, 6, 10, 0.6); }
+body.k-journal-term .k-lib3d__search input::placeholder { color: var(--crt-faint); text-transform: uppercase; letter-spacing: 0.1em; }
+body.k-journal-term .k-lib3d__peek { border-color: var(--crt); box-shadow: 0 0 34px rgba(255, 179, 71, 0.25); }
+
+/* ---------------------------------------------- volume: source-code view */
+body.k-journal-term .k-jr-h { border-bottom-color: var(--line-2); color: var(--crt); text-shadow: 0 0 8px rgba(255, 179, 71, 0.3); }
+body.k-journal-term .k-jr-h::before { content: '// '; color: var(--crt-faint); }
+body.k-journal-term .k-jr-h em { color: var(--crt-dim); }
+body.k-journal-term .k-jr-facts dt::after,
+body.k-journal-term .k-jr-seen dt::after { content: ':'; }
+body.k-journal-term .k-jr-table th { color: var(--crt-faint); }
+body.k-journal-term .k-jr-grid td { font-family: var(--f-mono); color: var(--crt); text-shadow: 0 0 10px rgba(255, 179, 71, 0.35); }
+body.k-journal-term .k-arc-cover__cap b { font-family: var(--f-mono); color: var(--crt); }
+
+/* photographs arrive de-saturated amber and snap to colour under the hand */
+body.k-journal-term .k-media img {
+  filter: grayscale(0.45) sepia(0.55) hue-rotate(-14deg) saturate(2.1) contrast(1.03);
+  transition: filter 0.6s var(--ease);
+}
+body.k-journal-term a:hover .k-media img,
+body.k-journal-term .k-jr-thumb:hover .k-media img { filter: none; }
+
+/* chrome on this page comes through the same tube */
+body.k-journal-term .k-nav { color: var(--crt-ink); }
+body.k-journal-term .k-logo, body.k-journal-term .k-nav__links a { color: var(--crt-ink); }
+
+/* phones: lighter scanlines, same tube */
+@media (max-width: 760px) {
+  body.k-journal-term::before { background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 3px, rgba(0, 0, 0, 0.14) 3px 5px); }
+  .k-jt-boot { font-size: calc(10.5px * var(--type, 1)); line-height: 1.7; }
+}
+
+/* still tube: no blink, no cursor under reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body.k-journal-term .k-ed-giant::after { animation: none; opacity: 0; }
+}
+html[data-motion='off'] body.k-journal-term .k-ed-giant::after,
+html[data-motion='reduce'] body.k-journal-term .k-ed-giant::after { animation: none; opacity: 0; }
