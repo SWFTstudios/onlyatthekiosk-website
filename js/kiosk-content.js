@@ -1594,6 +1594,42 @@ window.KIOSK_CONTENT = {
       status: 'soon', shopifyHandle: '003-black-hoodie', href: '', image: '',
       seasons: ['fall', 'winter'], vibes: ['clean', 'warm', 'travel'], colors: ['Carbon'],
     },
+    /* ---- KIOSK Globe Hoodie #004: the globe mark small on the chest and big
+     * across the back, a heavy oversized fit graded XS–4XL. The full tech
+     * pack (fabric, construction, print placement, points of measure) lives
+     * in the "KIOSK Globe Hoodie — Tech Pack" doc; the size chart below is
+     * its finished measurements in inches. Not in Shopify yet: add the three
+     * products, then set status 'available' and each shopifyHandle. ---- */
+    {
+      id: 'globe-hoodie', category: 'apparel', title: 'KIOSK Globe Hoodie #004', design: 'Globe', price: 98, badge: 'New', added: '2026-10-21',
+      detail: '450 gsm heavyweight fleece · oversized boxy fit, XS–4XL · globe mark on the left chest and across the back',
+      description: 'The KIOSK globe, small over the heart and big across the back: the grid, the continents, the orbit ring and the star, with the wordmark across the equator. Cut oversized and boxy from a 450 gsm brushed-back fleece, with a dropped shoulder, a clean double-layer hood (no drawcord) and firm 8 cm rib cuffs and hem, so it hangs the same way on every size from XS to 4XL. Black with a worn-in chrome print, white with black line art, or espresso with cream.',
+      mockup: { type: 'hoodie', chest: true, chestPrint: 'globe', backPrint: 'globe', backW: 150, drawcord: false },
+      colorways: [
+        { name: 'Black / Chrome', garment: '#1b1b1c', ink: '#c9cacc', lifestyle: ['images/product-lifestyle/hoodies/004-black-street-01.webp', 'images/product-lifestyle/hoodies/004-black-back-01.webp', 'images/product-lifestyle/hoodies/004-black-chest-01.webp', 'images/product-lifestyle/hoodies/004-black-duo-01.webp'],
+          lifestyleAlt: ['front, worn with black cargos on concrete steps', 'back print, walking away under the overpass', 'close-up of the chrome globe on the left chest', 'front and back, two wearers'] },
+        { name: 'White', garment: '#f4f3ef', ink: '#141414', lifestyle: ['images/product-lifestyle/hoodies/004-white-street-01.webp', 'images/product-lifestyle/hoodies/004-white-back-01.webp', 'images/product-lifestyle/hoodies/004-white-chest-01.webp', 'images/product-lifestyle/hoodies/004-white-duo-01.webp'],
+          lifestyleAlt: ['front, worn with black cargos on concrete steps', 'back print in black line art, walking away', 'close-up of the globe on the left chest', 'front and back, two wearers'] },
+        { name: 'Espresso', garment: '#4a2e22', ink: '#e9dcc2', lifestyle: ['images/product-lifestyle/hoodies/004-espresso-street-01.webp', 'images/product-lifestyle/hoodies/004-espresso-back-01.webp', 'images/product-lifestyle/hoodies/004-espresso-chest-01.webp', 'images/product-lifestyle/hoodies/004-espresso-duo-01.webp'],
+          lifestyleAlt: ['front, worn with black cargos on concrete steps', 'close-up of the cream globe across the back', 'front, hands in the pocket', 'front and back, two wearers'] },
+      ],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+      // Fit model: fill in Preston's real height and the size he wears in the shoot; the line shows once both are set
+      model: { name: 'Preston', height: '', size: '' },
+      guide: {
+        fit: 'Oversized and boxy: dropped shoulder, wide body, hem on the hip and a relaxed sleeve gathered at the cuff. Take your usual size for the oversized fit, or size down one for a closer fit. The bigger sizes grow wider, not longer, so the shape stays the same from XS to 4XL.',
+        fabric: ['Heavyweight brushed-back fleece, 450 gsm, 100% combed ring-spun cotton', 'Garment-dyed and enzyme-washed (white is piece-dyed) for a soft, lived-in hand', 'Pre-shrunk: under 3% after washing', 'Double-layer three-panel hood that stands up, no drawcord', '8 cm 1x1 rib cuffs and hem with 5% elastane for recovery', 'Screen-printed globe: chrome on black, black line art on white, cream on espresso'],
+        care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Tumble dry low or hang to dry', 'Cool iron inside out; never iron the print', 'Do not dry clean'],
+        chart: {
+          points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'],
+          rows: { XS: [24.4, 26.8, 22], S: [25.6, 27.6, 22.4], M: [26.8, 28.3, 22.8], L: [28, 29.1, 23.2], XL: [29.1, 29.9, 23.6], '2XL': [30.7, 30.7, 24], '3XL': [32.3, 31.5, 24.4], '4XL': [33.9, 32.3, 24.8] },
+        },
+        fitsChest: { XS: '32–34', S: '34–37', M: '37–40', L: '40–43', XL: '43–46', '2XL': '46–50', '3XL': '50–54', '4XL': '54–58' },
+        shrink: 'Pre-shrunk and garment-washed. Expect under 3% in length after washing; wash cold and hang dry to keep the exact fit.',
+      },
+      status: 'soon', shopifyHandle: '', href: '', image: '',
+      seasons: ['fall', 'winter'], vibes: ['urban', 'travel', 'night', 'clean'], colors: ['Obsidian'],
+    },
 
     /* ---- Headwear ---- */
     {

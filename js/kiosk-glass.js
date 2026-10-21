@@ -2632,7 +2632,7 @@
     if (!lifeOf(p, cw).length && !isDigitalP(p) && window.KioskMockup) {
       return window.KioskMockup.sketchViews(p.mockup || { type: 'tee' }).map((view) => ({ view, alt: `${p.title}, ${window.KioskMockup.viewNames[view] || view}` }));
     }
-    lifeOf(p, cw).forEach((src, i) => out.push({ src, alt: `${p.title}, ${w.name || ''}, ${i ? 'in the terminal' : 'on the street'}` }));
+    lifeOf(p, cw).forEach((src, i) => out.push({ src, alt: `${p.title}, ${w.name || ''}, ${(w.lifestyleAlt || [])[i] || (i ? 'in the terminal' : 'on the street')}` }));
     if (w.image) out.push({ src: w.image, alt: `${p.title}, ${w.name || ''}${w.imageFront ? ', back' : ''}`, flat: true });
     if (w.imageFront) out.push({ src: w.imageFront, alt: `${p.title}, ${w.name || ''}, front`, flat: true });
     if (!out.length && p.image) out.push({ src: p.image, alt: p.title, flat: true });
@@ -2661,6 +2661,8 @@
     const list = order.map((n) => pal.find((c) => c.name === n)).filter((c) => c && !near(c.hex, hex)).slice(0, 4);
     return { list, look };
   }
+  /** The fit-model line ("<name> is <height> and wears an L"), only once the model's real numbers are in. */
+  const modelLine = (p) => (p.model && p.model.height && p.model.size ? `${p.model.name || 'Our model'} is ${p.model.height} and wears ${/^[AEFHILMNORSX]/.test(p.model.size) ? 'an' : 'a'} ${p.model.size}.` : '');
   function guideHtml(p, cw) {
     const g = guideOf(p);
     if (!g) return '';
@@ -2668,11 +2670,12 @@
     const unit = pdpState.unit || 'in';
     const num = (v) => (unit === 'cm' ? Math.round(v * 2.54 * 2) / 2 : v);
     const sizes = (p.sizes || []).filter((z) => g.chart && g.chart.rows[z]);
+    const fits = g.fitsChest || FITS_CHEST;   // a product graded past XXL brings its own
     const chart = g.chart && sizes.length ? `
       <div class="k-guide__units" role="group" aria-label="Units">${['in', 'cm'].map((u) => `<button type="button" data-pdp-unit="${u}" aria-pressed="${unit === u}">${u}</button>`).join('')}</div>
       <div class="k-guide__table-wrap"><table class="k-guide__table">
         <thead><tr><th scope="col">Size</th>${g.chart.points.map((pt, i) => `<th scope="col"><b>${'ABC'[i]}</b> ${esc(pt)}</th>`).join('')}<th scope="col">Fits chest</th></tr></thead>
-        <tbody>${sizes.map((z) => `<tr${z === pdpState.size ? ' class="is-on"' : ''}><th scope="row">${esc(z)}</th>${g.chart.rows[z].map((v) => `<td>${num(v)}</td>`).join('')}<td>${FITS_CHEST[z] ? (unit === 'cm' ? FITS_CHEST[z].split('–').map((v) => Math.round(v * 2.54)).join('–') : FITS_CHEST[z]) : '—'}</td></tr>`).join('')}</tbody>
+        <tbody>${sizes.map((z) => `<tr${z === pdpState.size ? ' class="is-on"' : ''}><th scope="row">${esc(z)}</th>${g.chart.rows[z].map((v) => `<td>${num(v)}</td>`).join('')}<td>${fits[z] ? (unit === 'cm' ? fits[z].split('–').map((v) => Math.round(v * 2.54)).join('–') : fits[z]) : '—'}</td></tr>`).join('')}</tbody>
       </table></div>
       <p class="k-guide__note">Measured flat, garment laid on a table, in ${unit === 'cm' ? 'centimetres' : 'inches'}. A, B and C match the tech sketch. Tolerance ±0.5 in / 1 cm.</p>` : '';
     const pair = pairsFor(w.garment || '#777');
@@ -2688,7 +2691,7 @@
     ].filter(Boolean);
     const sec = (id, title, body) => `<details class="k-guide__sec" data-acc="${id}"><summary><span>${title}</span><i aria-hidden="true">+</i></summary><div class="k-guide__body">${body}</div></details>`;
     return `<div class="k-guide">
-      ${sec('size', g.chart ? 'Size chart &amp; fit' : 'Size &amp; fit', `<p>${esc(g.fit)}</p>${chart}`)}
+      ${sec('size', g.chart ? 'Size chart &amp; fit' : 'Size &amp; fit', `<p>${esc(g.fit)}</p>${modelLine(p) ? `<p><b>${esc(modelLine(p))}</b></p>` : ''}${chart}`)}
       ${sec('fabric', 'Materials', `<ul class="k-guide__list">${g.fabric.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
       ${sec('care', 'Care', `<ul class="k-guide__list">${g.care.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`)}
       ${sec('palette', 'Colour palette', `<ul class="k-guide__sws">${sw(w.garment, w.name || 'Garment', `Garment · ${String(w.garment || '').toUpperCase()}`)}${w.ink ? sw(w.ink, p.quote ? 'Lettering' : 'Print', String(w.ink).toUpperCase()) : ''}</ul>
@@ -2754,6 +2757,7 @@
               </div>
             </div>
             <p class="k-form-msg" data-pdp-msg aria-live="polite"></p>
+            ${modelLine(p) ? `<p class="k-pdp__model">${esc(modelLine(p))}</p>` : ''}
             ${p.detail ? `<p class="k-pdp__detail">${esc(p.detail)}</p>` : ''}
             ${p.pickup ? `<div class="k-pdp__collect">
               <p class="k-qv__label"><span>How collection works</span></p>

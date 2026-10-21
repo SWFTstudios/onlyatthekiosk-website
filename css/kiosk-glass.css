@@ -3240,6 +3240,7 @@ html[data-theme='dark'] .k-mockup--sketch { --sk-ink: #ecebe6; --sk-paper: #1314
 .k-pdp__buy { flex: 1 1 220px; justify-content: center; }
 .k-pdp__buy:disabled { opacity: 0.6; }
 .k-pdp__detail { margin: 0; font-size: calc(14px * var(--type, 1)); color: var(--ink-2); }
+.k-pdp__model { margin: 0; font-size: calc(13px * var(--type, 1)); color: var(--ink); }
 .k-pdp__more { display: grid; gap: 18px; padding-top: 10px; border-top: 1px solid var(--line); }
 .k-pdp__more[hidden] { display: none; }
 .k-pdp__desc { margin: 0; font-size: calc(17px * var(--type, 1)); line-height: 1.55; color: var(--ink); max-width: 60ch; }
