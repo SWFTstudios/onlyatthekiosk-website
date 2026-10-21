@@ -3316,8 +3316,18 @@
 
     const first = geos[0];
     let res = 1;
-    const globe = createGlobe($('canvas', stage), {
+    // The Lost & Found globe's dotted land (KIOSK_WORLD) feeds this globe;
+    // if the data cannot load, the wireframe sphere still stands.
+    let globe = { stop() {}, face() {}, hold() {} };
+    const landReady = window.KIOSK_WORLD && window.KIOSK_WORLD.points
+      ? Promise.resolve()
+      : loadScript('js/kiosk-world.js').catch(() => {});
+    landReady.then(() => {
+      if (signal.aborted || !stage.isConnected) return;
+      globe = createGlobe($('canvas', stage), {
       interactive: true, max: 3, homeBias: 0.6, scale: 0.36, speed: 0.00012, res: () => res,
+      lf: true,
+      land: window.KIOSK_WORLD && window.KIOSK_WORLD.points ? window.KIOSK_WORLD.points() : null,
       yaw: -first.lon * Math.PI / 180, pitch: Math.max(0.2, first.lat * Math.PI / 180 * 0.8),
       onFrame: ({ project, R }) => {
         nodes.forEach((n, i) => {
@@ -3335,6 +3345,7 @@
           n.style.zIndex = String(Math.round(z * 100) + 100);
         });
       },
+      });
     });
     signal.addEventListener('abort', () => globe.stop());
     roamGlobe(sec, (r) => { res = r; });
@@ -3343,13 +3354,13 @@
 
   }
 
-  /* The Atlas globe roams. Before it settles in the Atlas it slides out from
-   * under the departures board, swells into a big faint globe behind the
-   * latest stories, then shrinks into its place here, where the story
-   * thumbnails come up round it. One globe moved FLIP-style: the canvas stays
-   * in the Atlas, and a transform on its float carries it to wherever the
-   * scroll says it should be (scrubbed between the three spots, eased).
-   * Reduced motion or Depth: Flat: it just stays in the Atlas. */
+  /* The Atlas globe roams. It settles in the Atlas, then follows the scroll
+   * down: it slides out from under the sticky departures board in the Main
+   * Concourse and swells into a big faint globe behind the latest stories.
+   * Scrolling back up runs the film in reverse. One globe moved FLIP-style:
+   * the canvas stays in the Atlas, and a transform on its float carries it
+   * to wherever the scroll says it should be (scrubbed between the spots,
+   * eased). Reduced motion or Depth: Flat: it just stays in the Atlas. */
   function roamGlobe(sec, setRes) {
     const stage = $('[data-wl-stage]', sec);
     const float = $('[data-wl-float]', sec);
@@ -3392,14 +3403,21 @@
         const R = G.stories;
         spots.push({ at: R.y + R.h / 2 - vh / 2, cx: vw / 2, cy: R.y + R.h / 2, w: Math.min(vw * 0.96, Math.max(R.h * 1.25, N.w * 1.3)), o: 0.14, dock: 0 });
       }
-      // only the spots above the Atlas lead into it
-      const path = spots.filter((pt) => pt.at < home.at).sort((m, n) => m.at - n.at).concat(home);
-      let T = home;
+      // the full route, top of page to bottom: Atlas home, the slot under
+      // the sticky departures board, then the stories backdrop. Whichever
+      // way the visitor scrolls, the globe scrubs along the same path.
+      const path = [home].concat(spots).sort((m, n) => m.at - n.at);
+      let T = path[path.length - 1];
       if (y <= path[0].at) T = path[0];
-      else if (y < home.at) {
+      else if (y < path[path.length - 1].at) {
         let i = 0; while (y >= path[i + 1].at) i += 1;
-        const m = path[i]; const n = path[i + 1]; const k = ease((y - m.at) / Math.max(1, n.at - m.at));
-        T = { cx: lerp(m.cx, n.cx, k), cy: lerp(m.cy, n.cy, k), w: lerp(m.w, n.w, k), o: lerp(m.o, n.o, k), dock: lerp(m.dock, n.dock, k) };
+        const m = path[i]; const n = path[i + 1];
+        const raw = clamp01((y - m.at) / Math.max(1, n.at - m.at));
+        const k = ease(raw);
+        // cy runs linear, not eased: the spots are about a screen apart, so
+        // an eased cy lags the scroll and the globe would drift up behind
+        // the sticky board instead of sliding out from under it
+        T = { cx: lerp(m.cx, n.cx, k), cy: lerp(m.cy, n.cy, raw), w: lerp(m.w, n.w, k), o: lerp(m.o, n.o, k), dock: lerp(m.dock, n.dock, k) };
       }
       const sc = T.w / N.w;
       const docked = T.dock > 0.999;
@@ -6135,6 +6153,15 @@
   function createGlobe(canvas, opts = {}) {
     const ctx = canvas.getContext('2d');
     const places = (opts.places || GLOBE_PLACES).map((p) => ({ ...p, v: toVec(p.la, p.lo) }));
+    // Lost & Found look (opts.lf): a dark sphere with dotted land, faint
+    // graticule, atmosphere rim and signal-coloured flights/beacons, like
+    // the MapLibre night globe in js/kiosk-hunt.js (#06070a ocean, land
+    // dots #c9cdd8, sky horizon #151a2b).
+    const landVecs = [];
+    if (opts.lf && opts.land) {
+      for (let i = 0; i + 1 < opts.land.length; i += 2) landVecs.push(toVec(opts.land[i], opts.land[i + 1]));
+    }
+    const signalCol = (getComputedStyle(document.documentElement).getPropertyValue('--signal') || '#ff5b23').trim();
     const home = places.find((p) => p.home) || places[0];
     const st = { yaw: opts.yaw != null ? opts.yaw : 0.9, /* New York (74° W) starts just left of centre */ pitch: opts.pitch != null ? opts.pitch : 0.38, spin: 0, drag: null, flights: [], spawnAt: 0, last: 0, raf: 0, visible: true, stopped: false };
     const scale = opts.scale || 0.42;
@@ -6169,7 +6196,28 @@
       const ink = getComputedStyle(canvas).color;
       const R = Math.min(w, h) * scale; const cx = w / 2; const cy = h / 2;
       const P = (v, lift = 1) => { const r = rot(v); return [cx + r[0] * R * lift, cy - r[1] * R * lift, r[2]]; };
-      ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
+      if (opts.lf) {
+        // Night ocean disc, lit from the upper left like the Hunt globe.
+        const disc = ctx.createRadialGradient(cx - R * 0.38, cy - R * 0.42, R * 0.1, cx, cy, R * 1.06);
+        disc.addColorStop(0, '#1a2238');
+        disc.addColorStop(0.55, '#0a0d15');
+        disc.addColorStop(1, '#06070a');
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.fillStyle = disc;
+        ctx.fill();
+        // Atmosphere rim.
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R + 1, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(120,150,255,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(90,120,220,0.55)';
+        ctx.shadowBlur = 22;
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.strokeStyle = opts.lf ? 'rgba(232,236,245,0.9)' : ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
 
       // Wireframe: back half faint, front half crisp
       // (runs of segments that share an alpha, rounded to 1/16, go down as one
@@ -6199,8 +6247,21 @@
         for (let la = -90; la <= 90; la += 5) pts.push(P(toVec(la, lo)));
         line(pts, lo === 0 ? 0.5 : 0.28, 0.05, 0.8);
       }
-      ctx.globalAlpha = 0.7; ctx.lineWidth = 1.2;
+      ctx.globalAlpha = opts.lf ? 0.25 : 0.7; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      // Dotted land, the Lost & Found dot-matrix (landVecs from KIOSK_WORLD).
+      if (landVecs.length) {
+        ctx.fillStyle = '#c9cdd8';
+        const dr = Math.max(0.7, R / 190);
+        landVecs.forEach((v) => {
+          const r = rot(v);
+          if (r[2] <= 0.03) return;
+          ctx.globalAlpha = 0.30 + 0.60 * r[2];
+          ctx.beginPath(); ctx.arc(cx + r[0] * R, cy - r[1] * R, dr, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+      }
 
       // Places
       const active = new Set();
@@ -6210,13 +6271,15 @@
         const [x, y, z] = P(p.v);
         if (z < 0) return;
         const on = active.has(p) || p === home;
+        if (opts.lf) ctx.fillStyle = on ? signalCol : '#c9cdd8';
         ctx.globalAlpha = (on ? 1 : 0.45) * Math.min(1, z * 2.5);
         const s = on ? 5 : 3;
         ctx.fillRect(x - s / 2, y - s / 2, s, s);
         if (on && z > 0.12) ctx.fillText(p.n.toUpperCase(), x + 8, y + 3.5);
       });
 
-      // Flights
+      // Flights (signal-coloured on the Lost & Found globe)
+      if (opts.lf) { ctx.strokeStyle = signalCol; ctx.fillStyle = signalCol; }
       st.flights = st.flights.filter((f) => now - f.t0 < f.dur * 1.45);
       st.flights.forEach((f) => {
         const u = (now - f.t0) / f.dur;
