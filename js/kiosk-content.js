@@ -1606,19 +1606,23 @@ window.KIOSK_CONTENT = {
     },
     /* ---- Liftoff Retro Tee #005: the retro orbit mark (a tall K, IOSK
      * beside it, an orbit swoosh to a star) printed cracked, like a tee from
-     * a 70s launch. Original Cream wears it big on the front and back with
-     * racing stripes; the three ringer colourways carry it small on the chest
-     * and big across the back. Photos and flats from the Retro Tee lookbook.
+     * a 70s launch. Original Cream, Washed Navy and Washed Black wear it big
+     * on the front and back with racing stripes; the three ringer colourways
+     * carry it small on the chest and big across the back. Photos and flats from the Retro Tee lookbook.
      * Not in Shopify yet: add the products, then set status 'available' and
      * each colourway's shopifyHandle. ---- */
     {
       id: 'tee-005-liftoff', category: 'apparel', title: 'Liftoff Retro Tee #005', design: 'Liftoff', price: 45, badge: 'New', added: '2026-10-21',
       detail: '100% cotton, vintage washed · boxy fit, XS–3XL · cracked retro orbit print · made for the journey',
-      description: 'A tee that looks like it flew the 70s space programme and came home: a tall italic K with IOSK tucked beside it, an orbit swoosh swinging round to a four-point star, printed cracked and faded like it has been washed a hundred times. Original Cream wears it big on the front and back with red, orange and yellow racing stripes. Yellow + Red, Light Blue + Navy and Coal Grey + Black carry it small on the chest and big across the back, with a ringer collar and a woven K label at the neck.',
+      description: 'A tee that looks like it flew the 70s space programme and came home: a tall italic K with IOSK tucked beside it, an orbit swoosh swinging round to a four-point star, printed cracked and faded like it has been washed a hundred times. Original Cream, Washed Navy and Washed Black wear it big on the front and back with racing stripes: red, orange and yellow on cream, sky blue on navy, red on black. Yellow + Red, Light Blue + Navy and Coal Grey + Black carry it small on the chest and big across the back, with a ringer collar and a woven K label at the neck.',
       mockup: { type: 'tee', chest: true, chestPrint: 'retro', backPrint: 'retro', backW: 150 },
       colorways: [
-        { name: 'Original Cream', garment: '#ece3cf', ink: '#b8382a', mockup: { chest: false, print: 'retro', printW: 150, stripes: ['#de7530', '#e7b03c'] }, lifestyle: ['images/product-lifestyle/tees/005-cream-front-01.webp', 'images/product-lifestyle/tees/005-cream-back-01.webp'],
-          lifestyleAlt: ['front, big retro print with racing stripes against a roller door', 'retro K and racing stripes across the back'] },
+        { name: 'Original Cream', garment: '#ece3cf', ink: '#b8382a', mockup: { chest: false, print: 'retro', printW: 150, stripes: ['#b8382a', '#de7530', '#e7b03c'] }, lifestyle: ['images/product-lifestyle/tees/005-cream-front-01.webp', 'images/product-lifestyle/tees/005-cream-back-01.webp', 'images/product-lifestyle/tees/005-cream-print-01.webp', 'images/product-lifestyle/tees/005-cream-label-01.webp'],
+          lifestyleAlt: ['front, big retro print with racing stripes against a roller door', 'retro K and racing stripes across the back', 'close-up of the cracked red print and red, orange and yellow stripes', 'red woven K label at the back neck'] },
+        { name: 'Washed Navy', garment: '#3d5675', ink: '#ece8de', mockup: { chest: false, print: 'retro', printW: 150, stripes: ['#7fb3e0', '#4f8fcf', '#3a78bd'] }, lifestyle: ['images/product-lifestyle/tees/005-navy-front-01.webp', 'images/product-lifestyle/tees/005-navy-back-01.webp', 'images/product-lifestyle/tees/005-navy-print-01.webp', 'images/product-lifestyle/tees/005-navy-label-01.webp'],
+          lifestyleAlt: ['front, sitting by a motorcycle under the bridge', 'white retro K and blue racing stripes across the back', 'close-up of the cracked white print and blue stripes', 'navy woven K label at the back neck'] },
+        { name: 'Washed Black', garment: '#2e2e30', ink: '#e9e5dc', mockup: { chest: false, print: 'retro', printW: 150, stripes: ['#ece8de', '#c0392b', '#c0392b'] }, lifestyle: ['images/product-lifestyle/tees/005-black-front-01.webp', 'images/product-lifestyle/tees/005-black-back-01.webp', 'images/product-lifestyle/tees/005-black-print-01.webp', 'images/product-lifestyle/tees/005-black-label-01.webp'],
+          lifestyleAlt: ['front, in a dark parking garage', 'white retro K and red racing stripes across the back', 'close-up of the cracked white print and red stripes', 'black woven K label at the back neck'] },
         { name: 'Yellow + Red', garment: '#f3d35a', ink: '#cf2a20', rib: '#c8211e', lifestyle: ['images/product-lifestyle/tees/005-yellow-front-01.webp', 'images/product-lifestyle/tees/005-yellow-back-01.webp'],
           lifestyleAlt: ['front, red ringer collar and chest mark under a yellow awning', 'red retro orbit mark across the back'],
           image: 'images/product-lifestyle/tees/005-yellow-flat-back.webp', imageFront: 'images/product-lifestyle/tees/005-yellow-flat-front.webp' },
@@ -1632,7 +1636,7 @@ window.KIOSK_CONTENT = {
       sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
       guide: {
         fit: 'Boxy and slightly oversized: dropped shoulder, wide body, hem on the hip and a sleeve that ends near the elbow. Take your usual size; size down one for a closer fit.',
-        fabric: ['100% cotton heavyweight jersey', 'Vintage-washed for a soft, faded, broken-in hand', 'Pre-shrunk: under 3% after washing', '1x1 rib collar: contrast ringer on Yellow + Red and Light Blue + Navy, tonal on Coal Grey + Black and Original Cream', 'Woven K label at the back neck', 'Cracked-finish retro orbit print: small on the chest and large across the back (big on both sides on Original Cream)'],
+        fabric: ['100% cotton heavyweight jersey', 'Vintage-washed for a soft, faded, broken-in hand', 'Pre-shrunk: under 3% after washing', '1x1 rib collar: contrast ringer on Yellow + Red and Light Blue + Navy, tonal on Coal Grey + Black, Original Cream, Washed Navy and Washed Black', 'Woven K label at the back neck', 'Cracked-finish retro orbit print: small on the chest and large across the back, or big on both sides with racing stripes on Original Cream, Washed Navy and Washed Black'],
         care: ['Machine wash cold, inside out, with like colours', 'Mild detergent, no bleach or fabric softener', 'Hang dry or tumble dry low', 'Never iron the print; the cracks are meant to be there', 'Do not dry clean'],
         chart: {
           points: ['Chest (pit to pit)', 'Body length (HPS)', 'Sleeve length (shoulder seam)'],

@@ -119,11 +119,11 @@
 
     // The retro orbit mark: a tall italic K with IOSK tucked beside it, an
     // orbit swoosh round the K to a star, cracked like an old print. A
-    // colourway's mockup.stripes adds racing stripes under it (the Retro Tee)
+    // colourway's mockup.stripes (one colour per band, top down) adds racing
+    // stripes under it (the Liftoff Retro Tee)
     retro: (ink, bg, id, spec = {}) => {
       const m = `rt${(uid += 1)}`;
-      const bands = [ink].concat(spec.stripes || []);
-      const stripes = spec.stripes ? bands.map((col, i) => { const y = 11 + i * 5.6; return `<path d="M${-6 - i * 4},${y} L50,${y} L50,${y + 4.4} L${-7 - i * 4},${y + 4.4} Z" fill="${col}"/>`; }).join('') : '';
+      const stripes = spec.stripes ? spec.stripes.map((col, i) => { const y = 11 + i * 5.6; return `<path d="M${-6 - i * 4},${y} L50,${y} L50,${y + 4.4} L${-7 - i * 4},${y + 4.4} Z" fill="${col}"/>`; }).join('') : '';
       return `<filter id="${m}f" filterUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><feTurbulence type="fractalNoise" baseFrequency=".35 .9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -40 30"/></filter>
       <mask id="${m}" maskUnits="userSpaceOnUse" x="-60" y="-45" width="120" height="85"><rect x="-60" y="-45" width="120" height="85" fill="#fff" filter="url(#${m}f)"/></mask>
       <g mask="url(#${m})">
