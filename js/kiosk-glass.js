@@ -214,7 +214,7 @@
   /* ----------------------------------------------------------- chrome */
 
   const NAV = [
-    { id: 'journal', label: 'Atlas', href: 'atlas.html' },
+    { id: 'journal', label: 'The Journal', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
     { id: 'tv', label: 'KIOSK TV', href: 'tv.html' },
@@ -241,8 +241,8 @@
   const MENU_HOME = { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' };
   const MENU_GROUPS = [
     { door: 'READ', tag: 'Stories from the road', links: [
-      { id: 'journal', label: 'Atlas', href: 'atlas.html', note: 'Every story', icon: 'journal' },
-      { id: 'archive', label: 'The Journal', href: 'archive.html', note: 'Monthly volumes', icon: 'journal' },
+      { id: 'journal', label: 'The Journal', href: 'atlas.html', note: 'Mixed media, editorial', icon: 'journal' },
+      { id: 'archive', label: 'The Archive', href: 'archive.html', note: 'Monthly volumes', icon: 'journal' },
     ] },
     { door: 'WATCH', tag: 'Films & moving pictures', links: [
       { id: 'films', label: 'Films', href: 'films.html', note: 'Screening room', icon: 'films' },
@@ -269,7 +269,7 @@
   const MENU_TOTAL = 1 + MENU_GROUPS.reduce((n, g) => n + g.links.length, 0);
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
-    { id: 'journal', label: 'Atlas', href: 'atlas.html', icon: TAB_ICONS.journal },
+    { id: 'journal', label: 'Journal', href: 'atlas.html', icon: TAB_ICONS.journal },
     { id: 'films', label: 'Films', href: 'films.html', icon: TAB_ICONS.films },
     { id: 'radio', label: 'Radio', href: 'radio.html', icon: TAB_ICONS.radio },
     { id: 'vault', label: 'Shop', href: 'vault.html', icon: TAB_ICONS.shop },
@@ -462,7 +462,7 @@
             <p class="k-eyebrow">Only at the KIOSK</p>
             <p class="k-lede k-mt-s">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, plus pieces and rare finds you can only get at the kiosk.</p>
           </div>
-          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Atlas</a></li><li><a href="archive.html">The Journal</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
+          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Journal</a></li><li><a href="archive.html">The Archive</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
           <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li><li><a href="partner.html">Partner Hub</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
@@ -2432,7 +2432,7 @@
    * Opened from the gear in the header, "Settings" in the menu or #settings.
    * -------------------------------------------------------------------- */
   const HOME_SECTIONS = [
-    ['garage', 'Latest stories'], ['globe', 'The Atlas'], ['departments', 'The Departments'], ['about', 'Why the kiosk'],
+    ['garage', 'Latest stories'], ['globe', 'The Journal'], ['departments', 'The Departments'], ['about', 'Why the kiosk'],
     ['make', 'What we make'], ['films', 'Films'], ['mosaic', 'The Mosaic'], ['radio', 'Radio'], ['shop', 'Supply & co.'], ['dispatch', 'The Dispatch'],
   ];
   const ACCENTS = [['signal', 'Signal', '#ff5b23'], ['cobalt', 'Cobalt', '#2f5bff'], ['acid', 'Acid', '#b6f500'], ['rose', 'Rose', '#ff3d8b'], ['gold', 'Gold', '#e2a72e'], ['mono', 'Mono', 'currentColor']];
@@ -3624,7 +3624,7 @@
         <p class="k-feature-card__sub">${[formatLabel(lead), place(lead), lead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
         ${featureMedia(lead, { meta: '' })}
       </a>
-      <a class="k-bar" href="atlas.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
+      <a class="k-bar" href="atlas.html">Open the Journal<span class="k-arrow">${icon.arrow}</span></a>`);
     // Latest stories: the same rail (and card size) as the departments, with a type filter
     const railEl = mount('garage-rail');
     const renderRail = (type) => {
@@ -5242,7 +5242,7 @@
       { title: 'Stories', list: newest.filter((f) => postType(f) === 'article') },
       ...Object.keys(DESKS).map((d) => ({ title: `${DESKS[d]} desk`, list: newest.filter((f) => f.desk === d) })),
     ].filter((r) => r.list.length);
-    const nudge = t ? '' : `<div class="k-wrap"><div class="k-atlas-checkin"><p>Tell us what you’re into and the Atlas will pick for you.</p><button class="k-btn k-btn--sm k-btn--solid" type="button" data-onboard-open>Check in · 1 min</button></div></div>`;
+    const nudge = t ? '' : `<div class="k-wrap"><div class="k-atlas-checkin"><p>Tell us what you’re into and the Journal will pick for you.</p><button class="k-btn k-btn--sm k-btn--solid" type="button" data-onboard-open>Check in · 1 min</button></div></div>`;
     return nudge + rows.map((r) => `
       <div class="k-wrap k-frow k-arow${r.big ? ' k-arow--big' : ''}" data-reveal>
         <div class="k-frow__head"><h2 class="k-frow__title">${esc(r.title)}</h2><span class="k-frow__count">${r.list.length}</span></div>
@@ -5325,6 +5325,26 @@
       signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); globe.destroy(); });
     }).catch(() => hero.classList.add('is-nogl'));
   }
+  /** The Journal's lead story: one big editorial block above the stream. */
+  function journalLeadHtml(f) {
+    const type = postType(f);
+    const title = f.title || featureName(f);
+    const meta = type === 'video' ? (f.runtime || 'Film') : type === 'photo' ? `${(f.gallery || []).length || ''} photos`.trim() : `${readMinutes(f)} min read`;
+    return `<article class="k-jlead" data-reveal>
+      <a class="k-jlead__media" href="${storyHref(f)}" aria-label="${esc(title)}">
+        ${media({ image: f.image, tone: f.tone, mark: f.code, alt: title, focus: f.focus, vimeo: f.vimeo })}
+        <span class="k-lib-card__type k-lib-card__type--${type}">${type === 'video' ? '▶ ' : ''}${esc(POST_TYPES[type])}</span>
+      </a>
+      <div class="k-jlead__body">
+        <p class="k-eyebrow">The lead · ${esc(POST_TYPES[type])}${f.desk && DESKS[f.desk] ? ` · ${esc(DESKS[f.desk])} desk` : ''}</p>
+        <h3 class="k-jlead__title"><a href="${storyHref(f)}">${esc(title)}</a></h3>
+        ${f.tagline ? `<p class="k-jlead__dek">${esc(f.tagline)}</p>` : ''}
+        <p class="k-lib-card__meta"><span>${esc(shortDate(f.published))}${f.published ? ` ${esc(String(f.published).slice(0, 4))}` : ''}</span>${postPlace(f) ? `<span>${esc(postPlace(f))}</span>` : ''}<span>${esc(meta)}</span><span>By ${esc(f.author || 'KIOSK')}</span></p>
+        <a class="k-ed-link" href="${storyHref(f)}">${type === 'video' ? 'Watch the story' : type === 'photo' ? 'Open the photo story' : 'Read the story'}</a>
+      </div>
+    </article>`;
+  }
+
   function pageJournal() {
     const posts = features.slice();
     const params = new URLSearchParams(location.search);
@@ -5340,6 +5360,9 @@
     const locs = uniq(posts.map(postPlace));
     const desks = uniq(posts.map((f) => f.desk));
     fill('journal-count', `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`);
+    const leadEl = mount('journal-lead');
+    const leadPost = worldFeatured()[0] || byNewest(posts)[0];
+    if (leadEl && leadPost) { leadEl.innerHTML = journalLeadHtml(leadPost); hydrateCovers(leadEl); reveal(leadEl); }
 
     const chip = (key, val, label, on) => `<button type="button" class="k-chip" data-lib="${key}" data-val="${esc(val)}" aria-pressed="${on}">${esc(label)}</button>`;
     const controls = () => `
@@ -5365,6 +5388,7 @@
       const rowsEl = mount('atlas-rows'); const resEl = $('[data-atlas-results]');
       if (rowsEl) rowsEl.hidden = active;
       if (resEl) resEl.hidden = !active;
+      const leadWrap = $('[data-journal-lead]'); if (leadWrap) leadWrap.hidden = active;
       let list = posts.filter((f) => (!st.type || postType(f) === st.type) && (!st.desk || f.desk === st.desk)
         && (!st.author || (f.author || 'KIOSK') === st.author) && (!st.loc || postPlace(f) === st.loc)
         && [...st.tags].every((t) => (f.tags || []).includes(t))
@@ -5380,7 +5404,7 @@
       const n = mount('lib-count'); if (n) n.textContent = `${list.length} of ${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
       const grid = mount('journal');
       grid.innerHTML = list.length ? list.map((f) => libraryCard(f, st.q.trim())).join('')
-        : `<div class="k-empty" style="grid-column:1/-1"><p class="k-h3">Nothing in the Atlas matches that.</p><p class="k-small k-mt-s">Try another word or clear a filter.</p><button class="k-btn k-mt-m" type="button" data-lib-clear>Clear filters</button></div>`;
+        : `<div class="k-empty" style="grid-column:1/-1"><p class="k-h3">Nothing in the Journal matches that.</p><p class="k-small k-mt-s">Try another word or clear a filter.</p><button class="k-btn k-mt-m" type="button" data-lib-clear>Clear filters</button></div>`;
       reveal(grid); hydrateCovers(grid);
       const qs = new URLSearchParams();
       if (st.q) qs.set('q', st.q); if (st.sort !== 'new') qs.set('sort', st.sort); if (st.type) qs.set('type', st.type);
@@ -6774,7 +6798,7 @@
     fill('archive', `
       <header class="k-wrap k-arc-hero">
         <p class="k-ed-label">The KIOSK Archive${first ? ` · since ${esc(first.name)}` : ''}</p>
-        <h1 class="k-ed-giant" data-ed="mask" data-fit>The Journal</h1>
+        <h1 class="k-ed-giant" data-ed="mask" data-fit>The Archive</h1>
         <p class="k-lede">One volume every month: what we shot, what we published, where we went and what dropped in the shop. Filed below, newest first.</p>
       </header>
       ${latest && latest.cover ? `
@@ -6798,7 +6822,7 @@
     const newer = vols[i - 1];
     const older = vols[i + 1];
     const r = v.report || {};
-    document.title = `Volume ${pad(v.no)} · ${v.name} · The Journal · KIOSK`;
+    document.title = `Volume ${pad(v.no)} · ${v.name} · The Archive · KIOSK`;
     const desc = $('meta[name="description"]');
     if (desc) desc.setAttribute('content', `The KIOSK Archive for ${v.name}: ${v.lead}.`);
 
@@ -6975,7 +6999,7 @@
       <header class="k-wrap k-gal-hero">
         <p class="k-ed-label">Photographs · films · clips</p>
         <h1 class="k-ed-giant" data-ed="mask" data-fit>Gallery</h1>
-        <p class="k-lede">Every frame from every story and every volume of the Journal. Search it, sort it, or narrow it down by date, place, issue and story.</p>
+        <p class="k-lede">Every frame from every story and every volume of the Archive. Search it, sort it, or narrow it down by date, place, issue and story.</p>
       </header>
       <div class="k-wrap k-gal-bar">
         <label class="k-gal-search">${icon.search}<span class="k-sr">Search the gallery</span><input type="search" data-gal-q placeholder="Search places, machines, stories, months…" value="${esc(st.q)}" autocomplete="off" enterkeyhint="search"></label>
@@ -7147,7 +7171,7 @@
     { id: 'home', t: 'T0', name: 'Main concourse', href: 'index.html', note: 'Departures from every desk' },
     { id: 'vault', t: 'T1', name: 'Supply terminal', href: 'vault.html', note: 'Clothing, travel goods and rare finds' },
     { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
-    { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
+    { id: 'journal', t: 'T3', name: 'The Journal', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
     { id: 'tv', t: 'T4V', name: 'KIOSK TV', href: 'tv.html', note: 'Music videos, curated and yours' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },

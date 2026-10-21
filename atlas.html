@@ -2,8 +2,8 @@
 <html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
-  <title>The Atlas — Every KIOSK story, film and vlog</title>
-  <meta name="description" content="The KIOSK Atlas: every film, interview, vlog, photo diary and story from the road. Search, sort and filter by place, date, type, author and tag.">
+  <title>The Journal — Mixed-media stories, films & photo diaries · KIOSK</title>
+  <meta name="description" content="The KIOSK Journal: a mixed-media editorial from the road — films, interviews, vlogs, photo diaries and essays. Search, sort and filter by place, date, type, author and tag.">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="site.webmanifest">
@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
   <link rel="canonical" href="https://onlyatthekiosk.com/atlas.html">
-  <meta property="og:title" content="The Atlas · KIOSK">
+  <meta property="og:title" content="The Journal · KIOSK">
   <meta property="og:description" content="The story behind every KIOSK film and photo set.">
   <meta property="og:image" content="https://onlyatthekiosk.com/images/og-kiosk.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,14 +42,22 @@
       </div>
       <div class="k-atlas-hero__shade" aria-hidden="true"></div>
       <div class="k-wrap k-atlas-hero__inner">
-        <p class="k-term__strip"><span class="k-term__t">T3</span><span>The Atlas · <span data-mount="journal-count"></span></span></p>
-        <h1 class="k-atlas-hero__title" id="atlas-title">The <em class="k-serif">Atlas.</em></h1>
-        <p class="k-atlas-hero__lede">Every film, interview, vlog, photo diary and story from the road. Swipe the globe, pinch to zoom, open a pin, or search any word.</p>
-        <label class="k-term__field k-lib__search k-atlas-hero__search"><span class="k-sr">Search the Atlas</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input type="search" data-lib-q placeholder="Search titles, places, people, any word…" autocomplete="off" enterkeyhint="search"></label>
+        <p class="k-term__strip"><span class="k-term__t">T3</span><span>The Journal · <span data-mount="journal-count"></span></span></p>
+        <h1 class="k-atlas-hero__title" id="atlas-title">The <em class="k-serif">Journal.</em></h1>
+        <p class="k-atlas-hero__lede">A mixed-media editorial from the road: films, interviews, vlogs, photo diaries and essays, pinned where they happened. Spin the globe, open a pin, or search any word.</p>
+        <label class="k-term__field k-lib__search k-atlas-hero__search"><span class="k-sr">Search the Journal</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input type="search" data-lib-q placeholder="Search titles, places, people, any word…" autocomplete="off" enterkeyhint="search"></label>
       </div>
     </section>
-    <section class="k-section k-section--tight k-lib k-atlas-browse" aria-label="Browse the Atlas">
+    <section class="k-section k-section--tight k-lib k-atlas-browse" aria-label="Browse the Journal">
       <div class="k-wrap">
+        <div class="k-section-head">
+          <div>
+            <p class="k-eyebrow">Mixed media · The editorial stream</p>
+            <h2 class="k-h2 k-stagger"><span>The</span> <span><em class="k-serif">stream.</em></span></h2>
+          </div>
+          <p class="k-lede">Films next to photo diaries next to essays: everything we publish, newest first. Filter by type, desk, author, place or tag.</p>
+        </div>
+        <div data-mount="journal-lead" data-journal-lead></div>
         <div data-mount="lib-controls"></div>
       </div>
       <div class="k-atlas-rows" data-mount="atlas-rows"></div>
@@ -63,7 +71,7 @@
         <div class="k-section-head">
           <div>
             <p class="k-eyebrow">The archive / One volume a month</p>
-            <h2 class="k-h2 k-stagger" id="archive-title"><span>The</span><span><em class="k-serif">Journal.</em></span></h2>
+            <h2 class="k-h2 k-stagger" id="archive-title"><span>The</span><span><em class="k-serif">Archive.</em></span></h2>
           </div>
           <p class="k-lede">Every month filed in the KIOSK Archive: what we shot, published and dropped. <a class="k-ed-link" href="archive.html">Open the archive</a> <a class="k-ed-link" href="gallery.html">Every frame</a></p>
         </div>
