@@ -714,7 +714,7 @@
           : id === 'partner'
           ? `<p class="k-h3">Partner with <span class="k-serif">the KIOSK.</span></p><p class="k-body k-mt-s">Stores, brands and sponsors: get a page on the kiosk, list your pieces or back a film. Leave your email and the desk will set up your Partner Hub account.</p>`
           : `<p class="k-h3"><span class="k-serif">${esc(title || 'This drop')}</span> isn’t out yet.</p><p class="k-body k-mt-s">Leave your email and we’ll tell you the moment it drops. No spam, one email per release.</p>`}
-        <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}">
+        <form class="k-input k-mt-m" data-dispatch novalidate data-interest="${esc(id || '')}" data-title="${esc(title || '')}">
           <label class="k-sr" for="k-notify-email">Email</label>
           <input id="k-notify-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required data-autofocus>
           <div class="k-input__row"><span class="k-small" style="color:rgba(13,13,14,.5)">Dispatch · KIOSK</span><button class="k-input__send" type="submit" aria-label="Join">${icon.send}</button></div>
@@ -2005,7 +2005,8 @@
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        // Which form this was, so the confirmation email and Airtable say so
+        body: JSON.stringify({ email, interest: form.dataset.interest || 'dispatch', title: form.dataset.title || '', source: location.pathname }),
       });
       let data = {};
       try { data = await res.json(); } catch (e) { /* empty body */ }

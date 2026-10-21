@@ -1,220 +1,101 @@
-// Cloudflare Pages Function to handle email subscriptions via Airtable
+/**
+ * POST /api/subscribe { email, interest?, title?, source? } — every email form
+ *
+ * Used by Join the Dispatch, Notify me (drops), Sell at the KIOSK (stockist),
+ * Partner, and the newsletter forms on the info pages.
+ *
+ *   interest  'dispatch' (default) | 'stockist' | 'partner' | a product/film id
+ *   title     what the form was about, as shown on the site
+ *   source    the page path it was sent from
+ *
+ * Each signup is kept in D1 (`subscribers`, one row per email + interest) and
+ * copied to Airtable "Incoming Interest" (Source = form · page). The person
+ * gets a confirmation email; stockist and partner requests also email the
+ * team (MAIL_TEAM). Emails go through Cloudflare Email Service (EMAIL).
+ *
+ * The signup succeeds when at least one store (D1 or Airtable) took it; an
+ * email that fails to send is logged, not shown as an error.
+ *
+ *   GET → { status: 'ok', stores: { d1, airtable }, email }   (health check)
+ */
 
-// Handle all HTTP methods
+import { json, error, handleOptions, withCors, rateLimit, clientIp, safeText } from '../_lib/http.js';
+import { normalizeEmail } from '../_lib/session.js';
+import { sendSubscribeConfirm, sendTeamNotice } from '../_lib/mail.js';
+
+const AIRTABLE_TABLE = 'Incoming Interest';
+
 export async function onRequest(context) {
   const { request, env } = context;
-  
-  // CORS headers
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
+  if (request.method === 'OPTIONS') return handleOptions(request);
 
-  // Handle preflight requests
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  // Handle GET requests (health check)
   if (request.method === 'GET') {
-    return new Response(
-      JSON.stringify({ 
-        status: 'ok',
-        service: 'email-subscription',
-        method: request.method
-      }),
-      { 
-        status: 200,
-        headers: corsHeaders
-      }
-    );
+    return withCors(json({ status: 'ok', stores: { d1: !!env.DB, airtable: !!(env.AIRTABLE_ACCESS_TOKEN && env.AIRTABLE_BASE_ID) }, email: !!env.EMAIL }), request);
+  }
+  if (request.method !== 'POST') return withCors(error('Method not allowed', 405), request);
+
+  const body = await request.json().catch(() => ({}));
+  const email = normalizeEmail(body.email);
+  if (!email) return withCors(error('Please enter a valid email address.'), request);
+  const interest = (safeText(body.interest, 60).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'dispatch');
+  const title = safeText(body.title, 120) || null;
+  const source = safeText(body.source, 200) || null;
+
+  if (!rateLimit(`sub:ip:${clientIp(request)}`, { limit: 10, windowMs: 10 * 60_000 })
+    || !rateLimit(`sub:email:${email}`, { limit: 4, windowMs: 60 * 60_000 })) {
+    return withCors(error('Too many signups from here. Try again in a little while.', 429), request);
   }
 
-  // Handle POST requests
-  if (request.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { 
-        status: 405,
-        headers: corsHeaders
-      }
-    );
+  // 1. Keep it: D1 and Airtable, side by side
+  let isNew = true;
+  let d1ok = false;
+  if (env.DB) {
+    try {
+      const r = await env.DB.prepare(
+        'INSERT OR IGNORE INTO subscribers (email, interest, title, source) VALUES (?, ?, ?, ?)'
+      ).bind(email, interest, title, source).run();
+      isNew = !!(r.meta && r.meta.changes);
+      d1ok = true;
+    } catch (err) { console.error('subscribe d1', err && err.message); }
   }
-  
-  try {
-    // Get email from request body
-    const body = await request.json();
-    const { email } = body;
-
-    // Validate email
-    if (!email || typeof email !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'Email is required' }),
-        { 
-          status: 400,
-          headers: corsHeaders
-        }
-      );
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid email format' }),
-        { 
-          status: 400,
-          headers: corsHeaders
-        }
-      );
-    }
-
-    // Airtable configuration from environment variables
-    // In Cloudflare Pages Functions, env vars are available directly from the context
-    const AIRTABLE_ACCESS_TOKEN = env.AIRTABLE_ACCESS_TOKEN;
-    const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID;
-    const AIRTABLE_TABLE_NAME = 'Incoming Interest';
-    
-    // Validate environment variables
-    if (!AIRTABLE_ACCESS_TOKEN || !AIRTABLE_BASE_ID) {
-      console.error('Missing Airtable configuration', {
-        hasToken: !!AIRTABLE_ACCESS_TOKEN,
-        hasBaseId: !!AIRTABLE_BASE_ID,
-        availableEnvKeys: Object.keys(env || {})
-      });
-      return new Response(
-        JSON.stringify({ 
-          error: 'Server configuration error. Please contact support.'
-        }),
-        { 
-          status: 500,
-          headers: corsHeaders
-        }
-      );
-    }
-    
-    const AIRTABLE_API_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}`;
-
-    // Prepare data for Airtable
-    // Note: "Date Submitted" is auto-generated, so we don't set it manually
-    const airtableData = {
-      fields: {
-        'Email Address': email
-      }
-    };
-
-    // Make request to Airtable API
-    const airtableResponse = await fetch(AIRTABLE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${AIRTABLE_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(airtableData)
-    });
-
-    if (!airtableResponse.ok) {
-      const errorData = await airtableResponse.text();
-      const errorStatus = airtableResponse.status;
-      
-      // Log error for debugging
-      console.error('Airtable API error:', {
-        status: errorStatus,
-        statusText: airtableResponse.statusText,
-        error: errorData
-      });
-      
-      // Check for authentication errors (401, 403)
-      if (errorStatus === 401 || errorStatus === 403) {
-        let authError = 'Authentication required. Please check your Airtable token.';
-        try {
-          const parsedError = JSON.parse(errorData);
-          if (parsedError.error && parsedError.error.message) {
-            authError = parsedError.error.message;
-          }
-        } catch (e) {
-          // Use default message
-        }
-        return new Response(
-          JSON.stringify({ 
-            error: authError,
-            status: errorStatus,
-            type: 'authentication'
-          }),
-          { 
-            status: 401,
-            headers: corsHeaders
-          }
-        );
-      }
-      
-      // Check if it's a duplicate entry (422 status)
-      if (errorStatus === 422) {
-        return new Response(
-          JSON.stringify({ error: 'This email is already registered' }),
-          { 
-            status: 409,
-            headers: corsHeaders
-          }
-        );
-      }
-
-      // Return more specific error for debugging
-      let errorMessage = 'Failed to save email. Please try again.';
-      try {
-        const parsedError = JSON.parse(errorData);
-        if (parsedError.error) {
-          errorMessage = parsedError.error.message || parsedError.error.type || errorMessage;
-        }
-      } catch (e) {
-        // If we can't parse, use default message
-        errorMessage = errorData || errorMessage;
-      }
-
-      return new Response(
-        JSON.stringify({ 
-          error: errorMessage,
-          status: errorStatus
-        }),
-        { 
-          status: 500,
-          headers: corsHeaders
-        }
-      );
-    }
-
-    const result = await airtableResponse.json();
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Email saved successfully',
-        id: result.id 
-      }),
-      { 
-        status: 200,
-        headers: corsHeaders
-      }
-    );
-
-  } catch (error) {
-    console.error('Error processing subscription:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-    return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error. Please try again later.',
-        details: error.message
-      }),
-      { 
-        status: 500,
-        headers: corsHeaders
-      }
-    );
+  const airtable = isNew ? saveToAirtable(env, { email, interest, title, source }) : Promise.resolve(false);
+  const airtableOk = await airtable;
+  if (!d1ok && !airtableOk) {
+    return withCors(error('We couldn’t save your email just now. Please try again.', 502), request);
   }
+
+  // 2. Tell them (and the team for stockist / partner), once per email + interest
+  if (isNew && env.EMAIL) {
+    const mail = [sendSubscribeConfirm(env, { to: email, interest, title })
+      .then(() => env.DB && env.DB.prepare("UPDATE subscribers SET confirmed_at = datetime('now') WHERE email = ? AND interest = ?").bind(email, interest).run())];
+    if (interest === 'stockist' || interest === 'partner') mail.push(sendTeamNotice(env, { interest, email, title, source }));
+    context.waitUntil(Promise.allSettled(mail).then((rs) => rs.forEach((r) => {
+      if (r.status === 'rejected') console.error('subscribe email', r.reason && (r.reason.code || ''), r.reason && r.reason.message);
+    })));
+  }
+
+  const message = interest === 'dispatch'
+    ? (isNew ? 'You’re on the Dispatch. Check your inbox.' : 'You’re already on the Dispatch.')
+    : interest === 'stockist' || interest === 'partner'
+      ? 'Thanks. We’ll be in touch at that address.'
+      : (isNew ? 'Done. We’ll email you the moment it drops.' : 'You’re already on the list for this one.');
+  return withCors(json({ success: true, isNew, message }), request);
 }
 
+/** Copy a signup to Airtable "Incoming Interest". Resolves true when saved. */
+async function saveToAirtable(env, { email, interest, title, source }) {
+  if (!env.AIRTABLE_ACCESS_TOKEN || !env.AIRTABLE_BASE_ID) return false;
+  const form = interest === 'dispatch' ? 'Dispatch' : interest === 'stockist' ? 'Stockist' : interest === 'partner' ? 'Partner' : `Notify: ${title || interest}`;
+  try {
+    const res = await fetch(`https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.AIRTABLE_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { 'Email Address': email, Source: [form, source].filter(Boolean).join(' · ') }, typecast: true }),
+    });
+    if (!res.ok) console.error('subscribe airtable', res.status, (await res.text()).slice(0, 300));
+    return res.ok;
+  } catch (err) {
+    console.error('subscribe airtable', err && err.message);
+    return false;
+  }
+}

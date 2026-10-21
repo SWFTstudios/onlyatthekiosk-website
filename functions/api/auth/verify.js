@@ -50,6 +50,8 @@ export async function onRequest(context) {
     const user = await env.DB.prepare('SELECT email, first_name, member_number, welcome_sent_at FROM users WHERE id = ?').bind(id).first();
     const session = await createSession(env, id);
 
+    if (isNew) context.waitUntil(mirrorMember(env, id, user).catch((err) => console.error('airtable member', err && err.message)));
+
     if (!user.welcome_sent_at) {
       context.waitUntil(sendWelcome(env, { to: email, firstName: user.first_name, memberNo: memberNo(user.member_number) })
         .then(() => env.DB.prepare("UPDATE users SET welcome_sent_at = datetime('now') WHERE id = ?").bind(id).run())
@@ -65,4 +67,27 @@ export async function onRequest(context) {
     console.error('auth/verify', err && err.message);
     return withCors(error('We couldn’t sign you in just now. Try again.', 500), request);
   }
+}
+
+/** Copy a new member to Airtable "Members" (D1 stays the source of truth). */
+async function mirrorMember(env, id, user) {
+  if (!env.AIRTABLE_ACCESS_TOKEN || !env.AIRTABLE_BASE_ID) return;
+  const res = await fetch(`https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent('Members')}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.AIRTABLE_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      typecast: true,
+      fields: {
+        Email: user.email,
+        'First Name': user.first_name || '',
+        'Member No.': String(user.member_number).padStart(4, '0'),
+        'Member Since': new Date().toISOString().slice(0, 10),
+        'Marketing Opt-in': false,
+        Source: 'KIOSK sign-in',
+      },
+    }),
+  });
+  if (!res.ok) { console.error('airtable member', res.status, (await res.text()).slice(0, 300)); return; }
+  const rec = await res.json();
+  if (rec && rec.id) await env.DB.prepare('UPDATE users SET airtable_record_id = ? WHERE id = ?').bind(rec.id, id).run();
 }
