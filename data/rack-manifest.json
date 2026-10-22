@@ -1,0 +1,137 @@
+{
+  "canvas": {
+    "width": 1086,
+    "height": 1448
+  },
+  "note": "hookX/neckY/bottomY in % of the 1086x1448 canvas. Side views are derived profiles of the front; replace a -side.webp with a photographed/true side of the same name when one exists.",
+  "pieces": {
+    "ess-tee": {
+      "front": "images/shop/rack/ess-tee-0-front.webp",
+      "side": "images/shop/rack/ess-tee-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 82.5,
+      "source": "images/shop/3d/ess-tee-0.webp"
+    },
+    "ess-hoodie": {
+      "front": "images/shop/rack/ess-hoodie-0-front.webp",
+      "side": "images/shop/rack/ess-hoodie-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 92.7,
+      "source": "images/shop/3d/ess-hoodie-0.webp"
+    },
+    "hoodie-garage": {
+      "front": "images/shop/rack/hoodie-garage-0-front.webp",
+      "side": "images/shop/rack/hoodie-garage-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 92.7,
+      "source": "images/shop/3d/hoodie-garage-0.webp"
+    },
+    "tee-hudson": {
+      "front": "images/shop/rack/tee-hudson-0-front.webp",
+      "side": "images/shop/rack/tee-hudson-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 82.5,
+      "source": "images/shop/3d/tee-hudson-0.webp"
+    },
+    "tee-phonk": {
+      "front": "images/shop/rack/tee-phonk-0-front.webp",
+      "side": "images/shop/rack/tee-phonk-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 82.4,
+      "source": "images/shop/3d/tee-phonk-0.webp"
+    },
+    "tee-q-direction": {
+      "front": "images/shop/rack/tee-q-direction-0-front.webp",
+      "side": "images/shop/rack/tee-q-direction-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 82.4,
+      "source": "images/shop/3d/tee-q-direction-0-back.webp"
+    },
+    "hoodie-q-exist": {
+      "front": "images/shop/rack/hoodie-q-exist-0-front.webp",
+      "side": "images/shop/rack/hoodie-q-exist-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 93.5,
+      "source": "images/shop/3d/hoodie-q-exist-0-back.webp"
+    },
+    "ls-issue01": {
+      "front": "images/shop/rack/ls-issue01-0-front.webp",
+      "side": "images/shop/rack/ls-issue01-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 87.8,
+      "source": "mockup"
+    },
+    "crew-cafe": {
+      "front": "images/shop/rack/crew-cafe-0-front.webp",
+      "side": "images/shop/rack/crew-cafe-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 83.6,
+      "source": "mockup"
+    },
+    "tee-002-stack": {
+      "front": "images/shop/rack/tee-002-stack-0-front.webp",
+      "side": "images/shop/rack/tee-002-stack-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 80.8,
+      "source": "mockup"
+    },
+    "tee-003-terminal": {
+      "front": "images/shop/rack/tee-003-terminal-0-front.webp",
+      "side": "images/shop/rack/tee-003-terminal-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 81,
+      "source": "mockup"
+    },
+    "tee-004-orbit": {
+      "front": "images/shop/rack/tee-004-orbit-0-front.webp",
+      "side": "images/shop/rack/tee-004-orbit-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 81.1,
+      "source": "mockup"
+    },
+    "tee-005-liftoff": {
+      "front": "images/shop/rack/tee-005-liftoff-0-front.webp",
+      "side": "images/shop/rack/tee-005-liftoff-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 80.8,
+      "source": "mockup"
+    },
+    "hoodie-002-stamp": {
+      "front": "images/shop/rack/hoodie-002-stamp-0-front.webp",
+      "side": "images/shop/rack/hoodie-002-stamp-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 91.4,
+      "source": "mockup"
+    },
+    "hoodie-003-bar": {
+      "front": "images/shop/rack/hoodie-003-bar-0-front.webp",
+      "side": "images/shop/rack/hoodie-003-bar-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 91.4,
+      "source": "mockup"
+    },
+    "globe-hoodie": {
+      "front": "images/shop/rack/globe-hoodie-0-front.webp",
+      "side": "images/shop/rack/globe-hoodie-0-side.webp",
+      "hookX": 50,
+      "neckY": 18.1,
+      "bottomY": 91.4,
+      "source": "mockup"
+    }
+  }
+}

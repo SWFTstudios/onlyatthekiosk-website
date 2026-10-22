@@ -136,6 +136,28 @@
   const wayStatus = (p, cw) => wayOf(p, cw).status || p.status;
   const handleOf = (p, cw) => wayOf(p, cw).shopifyHandle || p.shopifyHandle || '';
   const lifeOf = (p, cw) => { const w = wayOf(p, cw); return (w.lifestyle && w.lifestyle.length ? w.lifestyle : p.lifestyle) || []; };
+  /* Clothing-rack cutouts for a colourway: transparent on-hanger front/side
+   * views plus where the hook meets the rail (hookX), where the crest/body
+   * split falls (neckY) and where the hem ends (bottomY), all in % of the
+   * image. Falls back to the colourway's flat render, so a piece can hang
+   * before its rack cutouts exist; null when there is nothing to hang. */
+  const rackOf = (p, cw = 0) => {
+    const w = wayOf(p, cw);
+    const r = w.rack || {};
+    const front = r.front || w.image || p.image || '';
+    if (!front && !(p.mockup || {}).type) return null;
+    return {
+      front,
+      side: r.side || front,
+      hookX: r.hookX != null ? r.hookX : 50,
+      neckY: r.neckY != null ? r.neckY : 12,
+      bottomY: r.bottomY != null ? r.bottomY : 92,
+      cutout: !!r.front,
+    };
+  };
+  const hangable = (p) => ['apparel', 'quotes'].includes(p.category)
+    && ['tee', 'hoodie', 'longsleeve', 'crew'].includes((p.mockup || {}).type || 'tee')
+    && !!rackOf(p, 0);
   const isDigitalP = (p) => ['mixes', 'films', 'luts'].includes(p.category);
   const canBuy = (p, cw) => wayStatus(p, cw) === 'available' && !!(handleOf(p, cw) || p.href);
   // Kept for older links: a direct link to the product page
@@ -5625,6 +5647,342 @@
     };
   }
 
+  /* ---------------------------------------------------- clothing rack
+   * vault.html's rack view: the hangable pieces (tees, hoodies, crews) on a
+   * clothing rail, after snugwrld.netlify.app. At rest each garment shows
+   * its narrow side view; the centred (or hovered) one springs round to its
+   * front, grows, sways on its hook and pushes its neighbours apart. The
+   * image is split at the neck: the crest (hook + hanger) rides in a layer
+   * above the rail and never swings, the body below it does. Drag or swipe
+   * to slide along the rail; tap the front piece to open it.
+   * -------------------------------------------------------------------- */
+  function rackRail(root) {
+    root.innerHTML = `
+      <div class="k-rack">
+        <div class="k-rack__scene">
+          <div class="k-rack__stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Clothing rack. Left and right arrows slide along the rail, Enter opens the piece in front." data-rk-stage>
+            <div class="k-rack__crests" data-rk-crests aria-hidden="true"></div>
+            <div class="k-rack__rail" aria-hidden="true"><span class="k-rack__plate k-rack__plate--l"></span><span class="k-rack__tube"></span><span class="k-rack__plate k-rack__plate--r"></span></div>
+          </div>
+          <p class="k-rack__empty" data-rk-empty hidden>Nothing on this rail. <button type="button" class="k-rack__tolink" data-shop-view="list">Try the list view</button></p>
+        </div>
+        <div class="k-wheel__now" data-rk-now>
+          <button class="k-wheel__step" type="button" data-rk-step="-1" aria-label="Previous piece">${icon.left}</button>
+          <div class="k-wheel__info" aria-live="polite" aria-atomic="true">
+            <span class="k-mono k-wheel__count" data-rk-count></span>
+            <b class="k-wheel__title" data-rk-title></b>
+            <span class="k-wheel__artist" data-rk-sub></span>
+          </div>
+          <button class="k-wheel__step" type="button" data-rk-step="1" aria-label="Next piece">${icon.right}</button>
+        </div>
+        <div class="k-wheel__controls" data-rk-controls>
+          <span class="k-shopwheel__fare" data-rk-fare></span>
+          <button class="k-btn k-btn--solid" type="button" data-pdp="" data-cw="0" data-rk-open>View piece<span class="k-arrow">${icon.right}</span></button>
+          <button type="button" class="k-tcard__wish k-shopwheel__wish" data-wish-product="" aria-pressed="false" data-rk-wish>${icon.heart}</button>
+        </div>
+      </div>`;
+    const stage = $('[data-rk-stage]', root);
+    const crestLayer = $('[data-rk-crests]', root);
+    const openBtn = $('[data-rk-open]', root);
+    const wish = $('[data-rk-wish]', root);
+    const SPAN = 5;
+    const clampI = (v) => Math.max(0, Math.min(items.length - 1, v));
+    let items = [];
+    let states = [];
+    let key = null;
+    let pos = 0;
+    let target = 0;
+    let vel = 0;
+    let hoverIdx = null;
+    let front = -1;
+    let activeShown = -1;
+    let raf = 0;
+    let lastTs = 0;
+    let drag = null;
+    let wheelSnap = 0;
+    let suppressClick = false;
+    let onScreen = true;
+    let itemW = 220;
+    let spacing = 150;
+
+    const makeItem = () => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'k-rack__item';
+      b.tabIndex = -1;
+      b.innerHTML = `
+        <span class="k-rack__shadow" aria-hidden="true"></span>
+        <span class="k-rack__body">
+          <img class="k-rack__img k-rack__img--side" alt="" decoding="async" draggable="false">
+          <img class="k-rack__img k-rack__img--front" alt="" decoding="async" draggable="false">
+          <span class="k-rack__flat" hidden></span>
+          <span class="k-rack__hook" aria-hidden="true"></span>
+        </span>
+        <span class="k-board__status k-rack__status"></span>`;
+      const crest = document.createElement('span');
+      crest.className = 'k-rack__crest';
+      crest.innerHTML = `
+        <img class="k-rack__img k-rack__img--side" alt="" decoding="async" draggable="false">
+        <img class="k-rack__img k-rack__img--front" alt="" decoding="async" draggable="false">`;
+      crestLayer.append(crest);
+      stage.append(b);
+      return { el: b, crest };
+    };
+    const pool = Array.from({ length: SPAN * 2 + 1 }, makeItem);
+
+    const paint = (slot, i) => {
+      const p = items[i];
+      const { el, crest } = slot;
+      if (!p) { el.hidden = true; crest.hidden = true; return; }
+      const r = rackOf(p, 0);
+      el.hidden = false;
+      el.dataset.i = String(i);
+      el.setAttribute('aria-label', p.title);
+      el.style.setProperty('--hook-x', `${r.hookX}%`);
+      el.style.setProperty('--neck-y', `${r.neckY}%`);
+      crest.style.setProperty('--hook-x', `${r.hookX}%`);
+      crest.style.setProperty('--neck-y', `${r.neckY}%`);
+      const flat = $('.k-rack__flat', el);
+      const useFlat = () => {
+        el.classList.add('is-flat');
+        crest.hidden = true;
+        flat.hidden = false;
+        flat.innerHTML = window.KioskMockup ? window.KioskMockup.render(p.mockup || { type: 'tee' }, wayOf(p, 0)) : '';
+        $$('.k-rack__img', el).forEach((im) => { im.hidden = true; });
+      };
+      if (!r.front) { useFlat(); } else {
+        el.classList.remove('is-flat');
+        flat.hidden = true;
+        crest.hidden = false;
+        const side = $('.k-rack__img--side', el);
+        const frontImg = $('.k-rack__img--front', el);
+        const cSide = $('.k-rack__img--side', crest);
+        const cFront = $('.k-rack__img--front', crest);
+        [side, cSide].forEach((im) => { im.hidden = false; if (im.dataset.src !== r.side) { im.dataset.src = r.side; im.src = r.side; } });
+        [frontImg, cFront].forEach((im) => { im.hidden = false; if (im.dataset.src !== r.front) { im.dataset.src = r.front; im.src = r.front; } });
+        frontImg.alt = `${p.title}${wayOf(p, 0).name ? `, ${wayOf(p, 0).name}` : ''}, front`;
+        frontImg.onerror = () => { if (el.dataset.i === String(i)) useFlat(); };
+      }
+      const st = statusOf(p, 0);
+      const chip = $('.k-rack__status', el);
+      chip.className = `k-board__status k-board__status--${st.key} k-rack__status`;
+      chip.textContent = st.label;
+    };
+
+    const describe = (i) => {
+      const p = items[i];
+      if (!p) return;
+      const st = statusOf(p, 0);
+      const store = storeOf(p);
+      $('[data-rk-count]', root).textContent = `${pad(i + 1)} / ${pad(items.length)} · Gate ${gateOf(p.category)} · ${categoryLabel(p.category)}`;
+      $('[data-rk-title]', root).textContent = p.title;
+      $('[data-rk-sub]', root).textContent = [p.design, store && store.id !== 'kiosk' ? `by ${store.name}` : '', st.label].filter(Boolean).join(' · ');
+      $('[data-rk-fare]', root).textContent = price(p);
+      openBtn.dataset.pdp = p.id;
+      openBtn.setAttribute('aria-label', `View ${p.title}`);
+      wish.dataset.wishProduct = p.id;
+      wish.setAttribute('aria-label', `Save ${p.title}`);
+      wish.setAttribute('aria-pressed', String(!!(window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.wishlisted && window.KIOSK_ACCOUNT.wishlisted('product', p.id))));
+    };
+
+    const activeIndex = () => (hoverIdx != null ? hoverIdx : clampI(Math.round(pos)));
+
+    let stageW = 0;
+    const measure = () => {
+      const sample = pool[0].el;
+      itemW = sample.offsetWidth || itemW;
+      spacing = Math.max(58, itemW * 0.68);
+      stageW = stage.clientWidth || stageW;
+    };
+
+    const render = () => {
+      const base = Math.round(pos);
+      const act = activeIndex();
+      const actTurn = (states[act] || {}).turn || 0;
+      pool.forEach((slot, s) => {
+        const i = base - SPAN + s;
+        if (!items.length || i < 0 || i >= items.length) { slot.el.hidden = true; slot.crest.hidden = true; return; }
+        if (slot.el.dataset.i !== String(i) || slot.el.hidden) paint(slot, i);
+        const st = states[i];
+        const off = i - pos;
+        let push = 0;
+        const d = i - (hoverIdx != null ? hoverIdx : pos);
+        const pushScale = stageW && stageW < 560 ? 0.35 : 1;   // narrow screens: neighbours stay in frame
+        if (Math.abs(d) >= 0.85) push = Math.sign(d) * 0.25 * Math.pow(0.55, Math.abs(d) - 1) * itemW * actTurn * pushScale;
+        const x = off * spacing + push;
+        const t = st.turn;
+        const scale = 0.92 + 0.16 * t - Math.min(0.1, Math.abs(off) * 0.016);
+        slot.el.style.transform = `translateX(${x.toFixed(1)}px) rotateZ(${st.sway.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+        slot.el.style.zIndex = String(10 - Math.min(9, Math.round(Math.abs(off))));
+        slot.el.style.setProperty('--turn', t.toFixed(3));
+        slot.el.classList.toggle('is-front', i === act);
+        slot.crest.style.transform = `translateX(${x.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+        slot.crest.style.zIndex = String(30 - Math.min(9, Math.round(Math.abs(off))));
+        slot.crest.style.setProperty('--turn', t.toFixed(3));
+      });
+      if (items.length && base !== front) { front = base; }
+      if (items.length && act !== activeShown) { activeShown = act; describe(act); }
+    };
+
+    const tick = (ts) => {
+      raf = 0;
+      if (!onScreen || root.hidden) { lastTs = 0; return; }
+      const dt = Math.min(0.032, lastTs ? (ts - lastTs) / 1000 : 0.016);
+      lastTs = ts;
+      let alive = false;
+      if (!drag) {
+        if (REDUCED) { pos = target; vel = 0; } else {
+          const acc = (target - pos) * 110 - vel * 18;
+          vel += acc * dt;
+          pos += vel * dt;
+          if (Math.abs(target - pos) < 0.001 && Math.abs(vel) < 0.001) { pos = target; vel = 0; } else alive = true;
+        }
+      } else alive = true;
+      const act = activeIndex();
+      states.forEach((st, i) => {
+        const want = i === act ? 1 : 0;
+        if (REDUCED) { st.turn = want; st.turnVel = 0; st.sway = 0; st.swayVel = 0; return; }
+        const acc = (want - st.turn) * 120 - st.turnVel * 14;
+        st.turnVel += acc * dt;
+        st.turn += st.turnVel * dt;
+        st.swayVel += st.turnVel * dt * 1.6;                 // the turn kicks the pendulum
+        const sAcc = (0 - st.sway) * 90 - st.swayVel * 5;
+        st.swayVel += sAcc * dt;
+        st.sway = Math.max(-7, Math.min(7, st.sway + st.swayVel * dt));
+        if (Math.abs(st.turn - want) > 0.001 || Math.abs(st.turnVel) > 0.001 || Math.abs(st.sway) > 0.01) alive = true;
+      });
+      render();
+      if (alive) raf = requestAnimationFrame(tick);
+      else lastTs = 0;
+    };
+    const run = () => { if (!raf) { lastTs = 0; raf = requestAnimationFrame(tick); } };
+
+    const goTo = (i) => { target = clampI(Math.round(i)); run(); };
+    const stepBy = (k) => goTo(target + k);
+
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || !items.length) return;
+      drag = { x: e.clientX, y: e.clientY, from: pos, last: e.clientX, t: performance.now(), v: 0, moved: false, id: e.pointerId };
+      vel = 0;
+      run();
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (drag && e.pointerId === drag.id) {
+        const dx = e.clientX - drag.x;
+        if (!drag.moved) {
+          if (Math.abs(dx) < 6) return;
+          if (Math.abs(e.clientY - drag.y) > Math.abs(dx)) { drag = null; target = clampI(Math.round(pos)); run(); return; }
+          drag.moved = true;
+          suppressClick = true;
+          try { stage.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+          stage.classList.add('is-dragging');
+        }
+        const raw = drag.from - dx / spacing;
+        pos = raw < 0 ? raw * 0.35 : raw > items.length - 1 ? (items.length - 1) + (raw - (items.length - 1)) * 0.35 : raw;
+        const now = performance.now();
+        drag.v = 0.6 * drag.v + 0.4 * ((-(e.clientX - drag.last) / spacing) * (16.7 / Math.max(1, now - drag.t)));
+        drag.last = e.clientX;
+        drag.t = now;
+        hoverIdx = null;
+        run();
+        return;
+      }
+      if (e.pointerType !== 'mouse' || !items.length) return;
+      const rect = stage.getBoundingClientRect();
+      const idx = clampI(Math.round(pos + (e.clientX - rect.left - rect.width / 2) / spacing));
+      const centreX = rect.left + rect.width / 2 + (idx - pos) * spacing;
+      const next = Math.abs(e.clientX - centreX) < itemW * 0.55 ? idx : null;
+      if (next !== hoverIdx) { hoverIdx = next; run(); }
+    });
+    const release = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = drag;
+      drag = null;
+      stage.classList.remove('is-dragging');
+      if (d.moved) {
+        const v = REDUCED || performance.now() - d.t > 90 ? 0 : d.v;
+        vel = v * 0.6;
+        target = clampI(Math.round(pos + v * 10));
+        setTimeout(() => { suppressClick = false; }, 50);
+      }
+      run();
+    };
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+    stage.addEventListener('pointerleave', () => { if (hoverIdx != null) { hoverIdx = null; run(); } });
+    stage.addEventListener('click', (e) => {
+      if (suppressClick) { e.preventDefault(); return; }
+      const item = e.target.closest('.k-rack__item');
+      if (!item || item.dataset.i == null) return;
+      const i = Number(item.dataset.i);
+      if (i === activeIndex()) openBtn.click();
+      else { hoverIdx = null; goTo(i); }
+    });
+    stage.addEventListener('wheel', (e) => {
+      if (!items.length || items.length < 2) return;
+      const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const r = stage.getBoundingClientRect();
+      if (!horiz && (r.top < 0 || r.bottom > window.innerHeight)) return;
+      e.preventDefault();
+      let d = horiz ? e.deltaX : e.deltaY;
+      if (e.deltaMode === 1) d *= 32; else if (e.deltaMode === 2) d *= window.innerHeight;
+      if (!horiz && Math.abs(d) >= 50) { stepBy(Math.sign(d)); return; }
+      vel = 0;
+      target = Math.max(0, Math.min(items.length - 1, target + d / (spacing * 1.2)));
+      pos = target;
+      clearTimeout(wheelSnap);
+      wheelSnap = setTimeout(() => { target = clampI(Math.round(target)); run(); }, 120);
+      run();
+    }, { passive: false });
+    stage.addEventListener('keydown', (e) => {
+      if (!items.length) return;
+      const k = { ArrowRight: 1, ArrowLeft: -1, PageDown: 5, PageUp: -5 }[e.key];
+      if (k) { e.preventDefault(); hoverIdx = null; stepBy(k); } else if (e.key === 'Home') { e.preventDefault(); goTo(0); } else if (e.key === 'End') { e.preventDefault(); goTo(items.length - 1); } else if ((e.key === 'Enter' || e.key === ' ') && e.target === stage) { e.preventDefault(); openBtn.click(); }
+    });
+    $$('[data-rk-step]', root).forEach((b) => b.addEventListener('click', () => { hoverIdx = null; stepBy(Number(b.dataset.rkStep)); }));
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => {
+        onScreen = es.some((x) => x.isIntersecting);
+        if (onScreen) run();
+      }, { threshold: 0.05 });
+      io.observe(stage);
+    }
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => { if (!stage.isConnected) { ro.disconnect(); return; } measure(); render(); });
+      ro.observe(stage);
+    }
+
+    return {
+      get front() { return front; },
+      /** Show these pieces (only the hangable ones ride the rail). */
+      show(list) {
+        const hang = list.filter(hangable);
+        const k = hang.map((p) => p.id).join(',');
+        if (k === key) return;
+        const keepP = items[front];
+        key = k;
+        items = hang;
+        states = items.map(() => ({ turn: 0, turnVel: 0, sway: 0, swayVel: 0 }));
+        const empty = !items.length;
+        $('[data-rk-empty]', root).hidden = !empty;
+        ['[data-rk-stage]', '[data-rk-now]', '[data-rk-controls]'].forEach((sel) => { $(sel, root).hidden = empty; });
+        pool.forEach((slot) => { delete slot.el.dataset.i; slot.el.hidden = true; slot.crest.hidden = true; });
+        front = -1;
+        activeShown = -1;
+        if (empty) return;
+        const keep = keepP ? items.findIndex((p) => p.id === keepP.id) : -1;
+        const start = keep > 0 ? keep : 0;
+        target = start;
+        pos = REDUCED ? start : Math.min(items.length - 1, start + 3);
+        vel = 0;
+        measure();
+        render();
+        run();
+      },
+    };
+  }
+
   /* ------------------------------------------------ shop hero carousel
    * The top of vault.html: promotions (C.promos) and one card per
    * collection on a 3D drum. Tapping the front card (or its button) runs
@@ -5817,12 +6175,15 @@
     };
     const grid = mount('vault-grid');
     const moreBtn = mount('vault-more');
-    // Carousel or list (the card grid); the choice is remembered on this device
+    // Carousel, rack or list (the card grid); the choice is remembered on this device
     const carouselRoot = mount('vault-carousel');
+    const rackRoot = mount('vault-rack');
     let carousel = null;
+    let rack = null;
     let view = params.get('view') || store.get(SHOP_VIEW_KEY, 'carousel');
-    if (view !== 'list' && view !== 'carousel') view = 'carousel';
-    if (!carouselRoot) view = 'list';
+    if (view !== 'list' && view !== 'carousel' && view !== 'rack') view = 'carousel';
+    if (!carouselRoot && view === 'carousel') view = 'list';
+    if (!rackRoot && view === 'rack') view = 'list';
     /** The "For you" bar above the pieces, and the For you sort option (voyagers only). */
     const paintForMe = () => {
       const t = memberTaste();
@@ -5863,15 +6224,21 @@
       const list = order(all.filter(matches));
       const shown = list.slice(0, page * PAGE);
       const asCarousel = view === 'carousel';
+      const asRack = view === 'rack';
       $$('[data-shop-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.shopView === view)));
       if (carouselRoot) carouselRoot.hidden = !asCarousel;
-      if (grid) grid.hidden = asCarousel;
+      if (rackRoot) rackRoot.hidden = !asRack;
+      if (grid) grid.hidden = asCarousel || asRack;
       if (asCarousel) {
         if (!carousel) carousel = shopCarousel(carouselRoot);
         carousel.show(list);
         if (grid) grid.innerHTML = '';
+      } else if (asRack) {
+        if (!rack) rack = rackRail(rackRoot);
+        rack.show(list);
+        if (grid) grid.innerHTML = '';
       } else if (grid) grid.innerHTML = shown.map((p) => termCard(p)).join('');
-      if (moreBtn) { moreBtn.hidden = asCarousel || shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
+      if (moreBtn) { moreBtn.hidden = asCarousel || asRack || shown.length >= list.length; moreBtn.textContent = `Show more · ${list.length - shown.length} left`; }
       const c = cats.find((x) => x.id === cat);
       const lab = mount('term-gate-label'); if (lab) lab.textContent = c ? `Gate ${gateOf(c.id)} · ${c.label}` : 'All gates';
       const n = mount('vault-count'); if (n) n.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;

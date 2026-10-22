@@ -1302,7 +1302,7 @@ window.KIOSK_CONTENT = {
       quote: 'Focus on direction, not speed.',
       mockup: { type: 'tee', chest: true, quote: 'Focus on direction, not speed.', quoteStyle: 'serif', quoteFont: 'quill' },
       colorways: [
-        { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214' },
+        { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', rack: { front: 'images/shop/rack/tee-q-direction-0-front.webp', side: 'images/shop/rack/tee-q-direction-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 82.4 } },
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb' },
       ],
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
@@ -1315,7 +1315,7 @@ window.KIOSK_CONTENT = {
       quote: 'Just make it exist first. You can make it good later.',
       mockup: { type: 'hoodie', chest: true, quote: 'Just make it exist first. You can make it good later.', quoteStyle: 'grotesk', quoteFont: 'hand', quoteFinish: 'stitch' },
       colorways: [
-        { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb' },
+        { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb', rack: { front: 'images/shop/rack/hoodie-q-exist-0-front.webp', side: 'images/shop/rack/hoodie-q-exist-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 93.5 } },
         { name: 'Bridge Grey', garment: '#a8aba8', ink: '#121214' },
       ],
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
@@ -1460,7 +1460,7 @@ window.KIOSK_CONTENT = {
       detail: 'Heavyweight cotton · boxy fit · screen print',
       mockup: { type: 'tee', print: 'hudson' },
       colorways: [
-        { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb' },
+        { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb', rack: { front: 'images/shop/rack/tee-hudson-0-front.webp', side: 'images/shop/rack/tee-hudson-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 82.5 } },
         { name: 'Hudson Blue', garment: '#3b6b92', ink: '#f2f0eb' },
         { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214' },
       ],
@@ -1473,7 +1473,7 @@ window.KIOSK_CONTENT = {
       detail: 'Midweight cotton · sleeve hit · screen print',
       mockup: { type: 'longsleeve', print: 'issue', sleevePrint: 'HUDSON LINE' },
       colorways: [
-        { name: 'Fork Gold', garment: '#9a782e', ink: '#121214' },
+        { name: 'Fork Gold', garment: '#9a782e', ink: '#121214', rack: { front: 'images/shop/rack/ls-issue01-0-front.webp', side: 'images/shop/rack/ls-issue01-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 87.8 } },
         { name: 'Carbon', garment: '#14181d', ink: '#9a782e' },
         { name: 'Bridge Steel', garment: '#5d6c79', ink: '#f2f0eb' },
       ],
@@ -1486,7 +1486,7 @@ window.KIOSK_CONTENT = {
       detail: 'Brushed fleece · kangaroo pocket · arch print',
       mockup: { type: 'hoodie', print: 'arch' },
       colorways: [
-        { name: 'Bridge Grey', garment: '#a8aba8', ink: '#121214' },
+        { name: 'Bridge Grey', garment: '#a8aba8', ink: '#121214', rack: { front: 'images/shop/rack/hoodie-garage-0-front.webp', side: 'images/shop/rack/hoodie-garage-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 92.7 } },
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb' },
         { name: 'Oak Brown', garment: '#6e5034', ink: '#ece9e1' },
       ],
@@ -1499,7 +1499,7 @@ window.KIOSK_CONTENT = {
       detail: 'Loopback fleece · rib trims',
       mockup: { type: 'crew', print: 'cafe' },
       colorways: [
-        { name: 'Tail Red', garment: '#6e1114', ink: '#e9dcc4' },
+        { name: 'Tail Red', garment: '#6e1114', ink: '#e9dcc4', rack: { front: 'images/shop/rack/crew-cafe-0-front.webp', side: 'images/shop/rack/crew-cafe-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 83.6 } },
         { name: 'Hudson Haze', garment: '#d1cec7', ink: '#6e1114' },
         { name: 'Gunmetal', garment: '#313235', ink: '#e9dcc4' },
       ],
@@ -1512,7 +1512,7 @@ window.KIOSK_CONTENT = {
       detail: 'Heavyweight cotton · regular fit',
       mockup: { type: 'tee', print: 'phonk' },
       colorways: [
-        { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214' },
+        { name: 'Hudson Haze', garment: '#e4e1da', ink: '#121214', rack: { front: 'images/shop/rack/tee-phonk-0-front.webp', side: 'images/shop/rack/tee-phonk-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 82.4 } },
         { name: 'Obsidian', garment: '#121214', ink: '#f2f0eb' },
         { name: 'Racing Blue', garment: '#364679', ink: '#f2f0eb' },
       ],
@@ -1529,7 +1529,7 @@ window.KIOSK_CONTENT = {
       description: 'The original KIOSK hoodie. The full double-K monogram and wordmark, printed big across the chest of a heavy brushed fleece, the same mark as the Box Mark tee scaled up for the hood. Shot on the street and in the terminal.',
       mockup: { type: 'hoodie', print: 'kmark', printW: 56 },
       colorways: [
-        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-hoodie', image: 'images/shop/3d/ess-hoodie-0.webp', lifestyle: ['images/product-lifestyle/hoodies/001-black-street-01.webp', 'images/product-lifestyle/hoodies/001-black-airport-01.webp'] },
+        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-hoodie', image: 'images/shop/3d/ess-hoodie-0.webp', rack: { front: 'images/shop/rack/ess-hoodie-0-front.webp', side: 'images/shop/rack/ess-hoodie-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 92.7 }, lifestyle: ['images/product-lifestyle/hoodies/001-black-street-01.webp', 'images/product-lifestyle/hoodies/001-black-airport-01.webp'] },
         { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-hoodie', image: 'images/shop/3d/ess-hoodie-1.webp' },
         { name: 'Oat', garment: '#c4b5a0', ink: '#141414', shopifyHandle: '001-oat-hoodie', status: 'soon', lifestyle: ['images/product-lifestyle/hoodies/001-oat-street-01.webp', 'images/product-lifestyle/hoodies/001-oat-airport-01.webp'] },
         { name: 'Charcoal', garment: '#2c2c2c', ink: '#ece9e1', shopifyHandle: '001-charcoal-hoodie', status: 'soon', lifestyle: ['images/product-lifestyle/hoodies/001-charcoal-street-01.webp', 'images/product-lifestyle/hoodies/001-charcoal-airport-01.webp'] },
@@ -1544,7 +1544,7 @@ window.KIOSK_CONTENT = {
       description: 'The original KIOSK tee. The double-K monogram over the wordmark, centred on the chest in a heavy, high-contrast print from the box-logo family. Shot on the street and in the terminal.',
       mockup: { type: 'tee', print: 'wordmark' },
       colorways: [
-        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-tshirt', image: 'images/shop/3d/ess-tee-0.webp', lifestyle: ['images/product-lifestyle/tees/001-black-street-01.webp', 'images/product-lifestyle/tees/001-black-airport-01.webp'] },
+        { name: 'Black', garment: '#0a0a0a', ink: '#f2f0eb', shopifyHandle: '001-black-tshirt', image: 'images/shop/3d/ess-tee-0.webp', rack: { front: 'images/shop/rack/ess-tee-0-front.webp', side: 'images/shop/rack/ess-tee-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 82.5 }, lifestyle: ['images/product-lifestyle/tees/001-black-street-01.webp', 'images/product-lifestyle/tees/001-black-airport-01.webp'] },
         { name: 'White', garment: '#f1efe9', ink: '#141414', shopifyHandle: '001-white-tshirt', image: 'images/shop/3d/ess-tee-1.webp' },
         { name: 'Oat', garment: '#c4b5a0', ink: '#141414', shopifyHandle: '001-oat-tshirt', status: 'soon', lifestyle: ['images/product-lifestyle/tees/001-oat-street-01.webp', 'images/product-lifestyle/tees/001-oat-airport-01.webp'] },
         { name: 'Charcoal', garment: '#2c2c2c', ink: '#cfcdc8', shopifyHandle: '001-charcoal-tshirt', status: 'soon', lifestyle: ['images/product-lifestyle/tees/001-charcoal-street-01.webp', 'images/product-lifestyle/tees/001-charcoal-airport-01.webp'] },
@@ -1559,7 +1559,7 @@ window.KIOSK_CONTENT = {
       description: 'A small-to-medium stacked KIOSK wordmark set just off-centre on the chest. Quiet enough for the flight, loud enough for the street. Shot on the street and in the terminal.',
       mockup: { type: 'tee', print: 'wordmark' },
       colorways: [
-        { name: 'White', garment: '#f5f5f5', ink: '#141414', shopifyHandle: '002-white-tshirt', lifestyle: ['images/product-lifestyle/tees/002-white-street-01.webp', 'images/product-lifestyle/tees/002-white-airport-01.webp'] },
+        { name: 'White', garment: '#f5f5f5', ink: '#141414', shopifyHandle: '002-white-tshirt', rack: { front: 'images/shop/rack/tee-002-stack-0-front.webp', side: 'images/shop/rack/tee-002-stack-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 80.8 }, lifestyle: ['images/product-lifestyle/tees/002-white-street-01.webp', 'images/product-lifestyle/tees/002-white-airport-01.webp'] },
         { name: 'Stone', garment: '#9a9690', ink: '#141414', shopifyHandle: '002-stone-tshirt', lifestyle: ['images/product-lifestyle/tees/002-stone-street-01.webp', 'images/product-lifestyle/tees/002-stone-airport-01.webp'] },
         { name: 'Bone', garment: '#e8e0d4', ink: '#4b5a32', shopifyHandle: '002-bone-tshirt', lifestyle: ['images/product-lifestyle/tees/002-bone-street-01.webp', 'images/product-lifestyle/tees/002-bone-airport-01.webp'] },
       ],
@@ -1573,7 +1573,7 @@ window.KIOSK_CONTENT = {
       description: 'Ultra-minimal: thin horizontal rules and tiny “ONLY AT THE KIOSK” type on the left chest, set like a departures board. Made for the terminal. Shot on the street and in the terminal.',
       mockup: { type: 'tee', print: 'wordmark' },
       colorways: [
-        { name: 'Black', garment: '#0a0a0a', ink: '#9a9690', shopifyHandle: '003-black-tshirt', lifestyle: ['images/product-lifestyle/tees/003-black-street-01.webp', 'images/product-lifestyle/tees/003-black-airport-01.webp'] },
+        { name: 'Black', garment: '#0a0a0a', ink: '#9a9690', shopifyHandle: '003-black-tshirt', rack: { front: 'images/shop/rack/tee-003-terminal-0-front.webp', side: 'images/shop/rack/tee-003-terminal-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 81 }, lifestyle: ['images/product-lifestyle/tees/003-black-street-01.webp', 'images/product-lifestyle/tees/003-black-airport-01.webp'] },
         { name: 'Sand', garment: '#d2c4b0', ink: '#141414', shopifyHandle: '003-sand-tshirt', lifestyle: ['images/product-lifestyle/tees/003-sand-street-01.webp', 'images/product-lifestyle/tees/003-sand-airport-01.webp'] },
         { name: 'Slate', garment: '#4a5560', ink: '#7a2430', shopifyHandle: '003-slate-tshirt', lifestyle: ['images/product-lifestyle/tees/003-slate-street-01.webp', 'images/product-lifestyle/tees/003-slate-airport-01.webp'] },
       ],
@@ -1593,7 +1593,7 @@ window.KIOSK_CONTENT = {
       description: 'The KIOSK orbit wordmark: italic letters, a thin arc to a four-point star and a swoosh sweeping underneath, like something leaving the atmosphere. Small on the left chest, big across the back, on a heavyweight boxy tee with a contrast 1x1 rib ringer collar in the print colour. Five colourways named for where they were shot and what they look like: Yellow Cab, East River, Ultraviolet, Matcha and Blackout, a washed charcoal with a tonal black print.',
       mockup: { type: 'tee', chest: true, chestPrint: 'orbit', backPrint: 'orbit', backW: 150 },
       colorways: [
-        { name: 'Yellow Cab', garment: '#f5d547', ink: '#c8211e', rib: '#c8211e', lifestyle: ['images/product-lifestyle/tees/004-yellowcab-street-01.webp', 'images/product-lifestyle/tees/004-yellowcab-garage-01.webp', 'images/product-lifestyle/tees/004-yellowcab-back-01.webp', 'images/product-lifestyle/tees/004-yellowcab-chest-01.webp'],
+        { name: 'Yellow Cab', garment: '#f5d547', ink: '#c8211e', rib: '#c8211e', rack: { front: 'images/shop/rack/tee-004-orbit-0-front.webp', side: 'images/shop/rack/tee-004-orbit-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 81.1 }, lifestyle: ['images/product-lifestyle/tees/004-yellowcab-street-01.webp', 'images/product-lifestyle/tees/004-yellowcab-garage-01.webp', 'images/product-lifestyle/tees/004-yellowcab-back-01.webp', 'images/product-lifestyle/tees/004-yellowcab-chest-01.webp'],
           lifestyleAlt: ['front, leaning on a black door', 'full look by a motorcycle in the garage', 'red orbit wordmark across the back', 'close-up of the red ringer collar and chest mark'] },
         { name: 'East River', garment: '#a9c8ec', ink: '#14275e', rib: '#1a2a5a', lifestyle: ['images/product-lifestyle/tees/004-eastriver-street-01.webp', 'images/product-lifestyle/tees/004-eastriver-bridge-01.webp', 'images/product-lifestyle/tees/004-eastriver-back-01.webp', 'images/product-lifestyle/tees/004-eastriver-chest-01.webp'],
           lifestyleAlt: ['front, sitting by the Brooklyn Bridge', 'full look on the East River promenade', 'navy orbit wordmark across the back', 'close-up of the navy ringer collar and chest mark'] },
@@ -1632,7 +1632,7 @@ window.KIOSK_CONTENT = {
       description: 'A tee that looks like it flew the 70s space programme and came home: a tall italic K with IOSK tucked beside it, an orbit swoosh swinging round to a four-point star, printed cracked and faded like it has been washed a hundred times. Original Cream, Washed Navy and Washed Black wear it big on the front and back with racing stripes: red, orange and yellow on cream, sky blue on navy, red on black. Yellow + Red, Light Blue + Navy and Coal Grey + Black carry it small on the chest and big across the back, with a ringer collar and a woven K label at the neck.',
       mockup: { type: 'tee', chest: true, chestPrint: 'retro', backPrint: 'retro', backW: 150, tag: true },
       colorways: [
-        { name: 'Original Cream', garment: '#ece3cf', ink: '#b8382a', mockup: { chest: false, print: 'retro', backPrint: 'retroK', printW: 150, stripes: ['#b8382a', '#de7530', '#e7b03c'] }, lifestyle: ['images/product-lifestyle/tees/005-cream-front-01.webp', 'images/product-lifestyle/tees/005-cream-back-01.webp', 'images/product-lifestyle/tees/005-cream-print-01.webp', 'images/product-lifestyle/tees/005-cream-label-01.webp'],
+        { name: 'Original Cream', garment: '#ece3cf', ink: '#b8382a', mockup: { chest: false, print: 'retro', backPrint: 'retroK', printW: 150, stripes: ['#b8382a', '#de7530', '#e7b03c'] }, rack: { front: 'images/shop/rack/tee-005-liftoff-0-front.webp', side: 'images/shop/rack/tee-005-liftoff-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 80.8 }, lifestyle: ['images/product-lifestyle/tees/005-cream-front-01.webp', 'images/product-lifestyle/tees/005-cream-back-01.webp', 'images/product-lifestyle/tees/005-cream-print-01.webp', 'images/product-lifestyle/tees/005-cream-label-01.webp'],
           lifestyleAlt: ['front, big retro print with racing stripes against a roller door', 'retro K and racing stripes across the back', 'close-up of the cracked red print and red, orange and yellow stripes', 'red woven K label at the back neck'] },
         { name: 'Washed Navy', garment: '#3d5675', ink: '#ece8de', tag: '#1f3555', mockup: { chest: false, print: 'retro', backPrint: 'retroK', printW: 150, stripes: ['#7fb3e0', '#4f8fcf', '#3a78bd'] }, lifestyle: ['images/product-lifestyle/tees/005-navy-front-01.webp', 'images/product-lifestyle/tees/005-navy-back-01.webp', 'images/product-lifestyle/tees/005-navy-print-01.webp', 'images/product-lifestyle/tees/005-navy-label-01.webp'],
           lifestyleAlt: ['front, sitting by a motorcycle under the bridge', 'white retro K and blue racing stripes across the back', 'close-up of the cracked white print and blue stripes', 'navy woven K label at the back neck'] },
@@ -1669,7 +1669,7 @@ window.KIOSK_CONTENT = {
       description: 'A KIOSK mark set like a passport stamp in the middle of the chest: the airport hoodie, for long-haul seats and early gates. Shot on the street and in the terminal.',
       mockup: { type: 'hoodie', print: 'kmark', printW: 50 },
       colorways: [
-        { name: 'Heather', garment: '#8e8e8e', ink: '#141414', shopifyHandle: '002-heather-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-heather-street-01.webp', 'images/product-lifestyle/hoodies/002-heather-airport-01.webp'] },
+        { name: 'Heather', garment: '#8e8e8e', ink: '#141414', shopifyHandle: '002-heather-hoodie', rack: { front: 'images/shop/rack/hoodie-002-stamp-0-front.webp', side: 'images/shop/rack/hoodie-002-stamp-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 91.4 }, lifestyle: ['images/product-lifestyle/hoodies/002-heather-street-01.webp', 'images/product-lifestyle/hoodies/002-heather-airport-01.webp'] },
         { name: 'Sand', garment: '#d2c4b0', ink: '#141414', shopifyHandle: '002-sand-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-sand-street-01.webp', 'images/product-lifestyle/hoodies/002-sand-airport-01.webp'] },
         { name: 'Bone', garment: '#e8e0d4', ink: '#4b5a32', shopifyHandle: '002-bone-hoodie', lifestyle: ['images/product-lifestyle/hoodies/002-bone-street-01.webp', 'images/product-lifestyle/hoodies/002-bone-airport-01.webp'] },
       ],
@@ -1683,7 +1683,7 @@ window.KIOSK_CONTENT = {
       description: 'A single horizontal bar across the chest with a tiny KIOSK wordmark underneath. Quiet luxury for the lounge and the long way home. Shot on the street and in the terminal.',
       mockup: { type: 'hoodie', print: 'kmark', printW: 40 },
       colorways: [
-        { name: 'Black', garment: '#0a0a0a', ink: '#6b6b6b', shopifyHandle: '003-black-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-black-street-01.webp', 'images/product-lifestyle/hoodies/003-black-airport-01.webp'] },
+        { name: 'Black', garment: '#0a0a0a', ink: '#6b6b6b', shopifyHandle: '003-black-hoodie', rack: { front: 'images/shop/rack/hoodie-003-bar-0-front.webp', side: 'images/shop/rack/hoodie-003-bar-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 91.4 }, lifestyle: ['images/product-lifestyle/hoodies/003-black-street-01.webp', 'images/product-lifestyle/hoodies/003-black-airport-01.webp'] },
         { name: 'White', garment: '#f5f5f5', ink: '#141414', shopifyHandle: '003-white-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-white-street-01.webp', 'images/product-lifestyle/hoodies/003-white-airport-01.webp'] },
         { name: 'Taupe', garment: '#8b7e6e', ink: '#141414', shopifyHandle: '003-taupe-hoodie', lifestyle: ['images/product-lifestyle/hoodies/003-taupe-street-01.webp', 'images/product-lifestyle/hoodies/003-taupe-airport-01.webp'] },
       ],
@@ -1703,7 +1703,7 @@ window.KIOSK_CONTENT = {
       description: 'The KIOSK globe, small over the heart and big across the back: the grid, the continents, the orbit ring and the star, with the wordmark across the equator. Cut oversized and boxy from a 450 gsm brushed-back fleece, with a dropped shoulder, a clean double-layer hood (no drawcord) and firm 8 cm rib cuffs and hem, so it hangs the same way on every size from XS to 4XL. Black with a worn-in chrome print, white with black line art, or espresso with cream.',
       mockup: { type: 'hoodie', chest: true, chestPrint: 'globe', backPrint: 'globe', backW: 150, drawcord: false },
       colorways: [
-        { name: 'Black / Chrome', garment: '#1b1b1c', ink: '#c9cacc', lifestyle: ['images/product-lifestyle/hoodies/004-black-street-01.webp', 'images/product-lifestyle/hoodies/004-black-back-01.webp', 'images/product-lifestyle/hoodies/004-black-chest-01.webp', 'images/product-lifestyle/hoodies/004-black-duo-01.webp'],
+        { name: 'Black / Chrome', garment: '#1b1b1c', ink: '#c9cacc', rack: { front: 'images/shop/rack/globe-hoodie-0-front.webp', side: 'images/shop/rack/globe-hoodie-0-side.webp', hookX: 50, neckY: 18.1, bottomY: 91.4 }, lifestyle: ['images/product-lifestyle/hoodies/004-black-street-01.webp', 'images/product-lifestyle/hoodies/004-black-back-01.webp', 'images/product-lifestyle/hoodies/004-black-chest-01.webp', 'images/product-lifestyle/hoodies/004-black-duo-01.webp'],
           lifestyleAlt: ['front, worn with black cargos on concrete steps', 'back print, walking away under the overpass', 'close-up of the chrome globe on the left chest', 'front and back, two wearers'] },
         { name: 'White', garment: '#f4f3ef', ink: '#141414', lifestyle: ['images/product-lifestyle/hoodies/004-white-street-01.webp', 'images/product-lifestyle/hoodies/004-white-back-01.webp', 'images/product-lifestyle/hoodies/004-white-chest-01.webp', 'images/product-lifestyle/hoodies/004-white-duo-01.webp'],
           lifestyleAlt: ['front, worn with black cargos on concrete steps', 'back print in black line art, walking away', 'close-up of the globe on the left chest', 'front and back, two wearers'] },
