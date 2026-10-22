@@ -48,6 +48,7 @@
     precision highp float;
     uniform vec2 res; uniform vec3 cam; uniform vec3 fw; uniform vec3 rt; uniform vec3 upv;
     uniform float fov; uniform float px; uniform float py; uniform vec3 sun; uniform float relief; uniform float nightK; uniform float lowQ;
+    uniform vec3 accent; uniform float accentMix;
     uniform sampler2D dayT; uniform sampler2D nightT; uniform sampler2D reliefT; uniform sampler2D waterT;
     out vec4 o;
     const float PI = 3.14159265;
@@ -68,7 +69,9 @@
       float b = dot(cam, d); float c = dot(cam, cam) - 1.0; float h = b * b - c;
       vec3 col = vec3(0.0); float a = 1.0;
       vec3 sunN = normalize(sun);
-      vec3 rim = vec3(0.32, 0.58, 1.0);
+      vec3 rimBlue = vec3(0.32, 0.58, 1.0);
+      vec3 rim = mix(rimBlue, accent, accentMix);
+      vec3 nightFill = mix(vec3(0.32, 0.42, 0.66), accent * 0.85, accentMix);
       if (h > 0.0 && b < 0.0) {
         vec3 P = normalize(cam + d * (-b - sqrt(h)));
         float lat = asin(clamp(P.y, -1.0, 1.0)); float lon = atan(P.x, P.z);
@@ -87,20 +90,22 @@
           water = tex(waterT, uv).r;
         }
         vec3 day = pow(tex(dayT, uv).rgb, vec3(1.08));
+        // accent on: darken the day side toward silhouette so the accent rim reads
+        day = mix(day, day * 0.45, accentMix);
         float sunUp = dot(P, sunN);
         float lit = smoothstep(-0.10, 0.22, sunUp);
         float diff = clamp(dot(n, sunN) * 1.15 + 0.08, 0.0, 1.2);
         col = day * (0.06 + diff) * lit;
         // a little relief light on the night side too, so land still reads
         float lum = dot(day, vec3(0.3, 0.5, 0.2));
-        col += vec3(lum) * vec3(0.32, 0.42, 0.66) * (1.0 - lit) * (0.4 + 0.6 * clamp(dot(n, normalize(-cam)), 0.0, 1.0)) * 0.42;
+        col += vec3(lum) * nightFill * (1.0 - lit) * (0.4 + 0.6 * clamp(dot(n, normalize(-cam)), 0.0, 1.0)) * 0.42;
         // ocean glint
         vec3 rf = reflect(-sunN, P);
         col += vec3(1.0, 0.92, 0.78) * pow(max(dot(rf, -d), 0.0), 90.0) * 0.4 * water * lit;
         // city lights after dark
         float lights = pow(smoothstep(0.2, 0.62, tex(nightT, uv).r), 1.3);   // skip the faint land in the texture
         col += vec3(1.0, 0.8, 0.45) * lights * 2.6 * nightK * (1.0 - smoothstep(-0.12, 0.08, sunUp)) * (1.0 - water * 0.8);
-        // atmosphere: thin blue at the limb, lit by the sun
+        // atmosphere: thin rim at the limb, lit by the sun (blue → accent)
         float mu = clamp(dot(P, -d), 0.0, 1.0);
         float fr = pow(1.0 - mu, 3.0);
         col = mix(col, rim * (0.25 + 1.2 * smoothstep(-0.25, 0.5, sunUp)), fr * 0.75);
@@ -127,8 +132,8 @@
   function create(canvas, opts = {}) {
     const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: false });
     const view = Object.assign({ lat: 40, lon: -80, alt: 1.6, tilt: 0.55, px: 0.5, py: 0.5, fov: 0.55 }, opts.view || {});
-    const state = { relief: opts.relief == null ? 0.9 : opts.relief, sun: subsolar(), nightK: 1 };
-    const api = { view, state, gl: !!gl, onFrame: null, ready: null, invalidate, project, destroy, resize, camera };
+    const state = { relief: opts.relief == null ? 0.9 : opts.relief, sun: subsolar(), nightK: 1, accent: [0.18, 0.36, 1.0], accentMix: 0 };
+    const api = { view, state, gl: !!gl, onFrame: null, ready: null, invalidate, project, destroy, resize, camera, syncAccent };
     if (!gl) { canvas.classList.add('is-nogl'); api.ready = Promise.reject(new Error('no webgl2')); api.ready.catch(() => {}); return api; }
 
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
@@ -141,7 +146,24 @@
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    ['res', 'cam', 'fw', 'rt', 'upv', 'fov', 'px', 'py', 'sun', 'relief', 'nightK', 'lowQ', 'dayT', 'nightT', 'reliefT', 'waterT'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
+    ['res', 'cam', 'fw', 'rt', 'upv', 'fov', 'px', 'py', 'sun', 'relief', 'nightK', 'lowQ', 'accent', 'accentMix', 'dayT', 'nightT', 'reliefT', 'waterT'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
+
+    /** Read --signal from CSS when html[data-accent] is set; guests keep the blue globe. */
+    function syncAccent() {
+      const on = !!document.documentElement.dataset.accent;
+      state.accentMix = on ? 1 : 0;
+      if (on) {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue('--signal').trim() || '#ff5b23';
+        const c = document.createElement('canvas'); c.width = 1; c.height = 1;
+        const cx = c.getContext('2d'); cx.fillStyle = raw; cx.fillRect(0, 0, 1, 1);
+        const d = cx.getImageData(0, 0, 1, 1).data;
+        state.accent = [d[0] / 255, d[1] / 255, d[2] / 255];
+      }
+      invalidate();
+    }
+    syncAccent();
+    const onPrefs = () => syncAccent();
+    document.addEventListener('kiosk:prefs', onPrefs);
 
     // Placeholder pixels until the images arrive
     const textures = {};
@@ -231,6 +253,7 @@
       gl.uniform3fv(U.cam, C); gl.uniform3fv(U.fw, F); gl.uniform3fv(U.rt, R); gl.uniform3fv(U.upv, UP);
       gl.uniform1f(U.fov, view.fov); gl.uniform1f(U.px, view.px); gl.uniform1f(U.py, view.py);
       gl.uniform3fv(U.sun, s); gl.uniform1f(U.relief, state.relief); gl.uniform1f(U.nightK, state.nightK); gl.uniform1f(U.lowQ, small ? 1 : 0);
+      gl.uniform3fv(U.accent, state.accent); gl.uniform1f(U.accentMix, state.accentMix);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       if (api.onFrame) api.onFrame(api);
     }
@@ -278,6 +301,7 @@
     resize();
     function destroy() {
       alive = false; clearInterval(tick); window.removeEventListener('resize', resize);
+      document.removeEventListener('kiosk:prefs', onPrefs);
       if (raf) cancelAnimationFrame(raf);
       const lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
     }

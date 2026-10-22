@@ -4,6 +4,10 @@
 /journal  /atlas  301
 /hunt.html  /lost-and-found  301
 /hunt  /lost-and-found  301
+/tv.html  /radio.html  301
+/tv  /radio  301
+/flights.html  /atlas.html  301
+/flights  /atlas  301
 /products/:handle  /vault?handle=:handle  302
 /shop-tshirts-hoodies.html  /vault?c=apparel  301
 /shop-tshirts-hoodies  /vault?c=apparel  301

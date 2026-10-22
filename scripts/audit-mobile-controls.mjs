@@ -25,7 +25,7 @@ const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || `=${
 const BASE = arg('base-url', 'http://localhost:8099');
 const PAGES = arg('pages', [
   'index.html', 'atlas.html', 'archive.html', 'archive.html?v=2025-11', 'gallery.html', 'partner.html', 'films.html',
-  'radio.html', 'vault.html', 'store.html', 'flights.html', 'lost-and-found.html', 'account.html', 'story.html?s=andy-q50', 'the-garage.html',
+  'radio.html', 'vault.html', 'store.html', 'lost-and-found.html', 'account.html', 'story.html?s=andy-q50', 'the-garage.html',
 ].join(',')).split(',');
 const VIEWPORTS = [[320, 568], [360, 740], [390, 844], [430, 932]];
 const LIVE = process.argv.includes('--live');

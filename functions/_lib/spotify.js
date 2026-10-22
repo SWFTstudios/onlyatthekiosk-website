@@ -1,5 +1,5 @@
 /**
- * Spotify helpers for KIOSK Radio / KIOSK TV.
+ * Spotify helpers for KIOSK Radio.
  *
  * Flow: Authorization Code + PKCE. The Voyager's refresh token lives only
  * here (D1, AES-GCM encrypted with SPOTIFY_TOKEN_KEY / AUTH_SECRET); the

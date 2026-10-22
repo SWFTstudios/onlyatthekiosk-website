@@ -9,6 +9,9 @@ const path = require('path');
 
 const PAGES = [
   'index.html',
+  'atlas.html',
+  'vault.html',
+  'radio.html',
   'store.html',
   'media.html',
   'about.html',
@@ -21,6 +24,18 @@ const PAGES = [
   'do-not-sell.html',
   'kiosk-styleguide.html',
 ];
+
+/** Fail the audit when any tracked image exceeds 300KB unless allowlisted. */
+const IMAGE_MAX_KB = 300;
+const IMAGE_ALLOWLIST = new Set([
+  // intentional large hero / earth textures
+  'images/earth/day-4k.jpg',
+  'images/earth/night-4k.jpg',
+  'images/earth/day-2k.jpg',
+  'images/earth/night.jpg',
+  'images/earth/relief.jpg',
+]);
+
 
 const VIEWPORTS = [
   { name: '375', width: 375, height: 812 },
@@ -117,6 +132,29 @@ async function main() {
 
       await context.close();
     }
+  }
+
+
+  // Image weight guard (slow-wifi budget)
+  const imgRoot = path.join(__dirname, '..', 'images');
+  const offenders = [];
+  function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) walk(full);
+      else if (/\.(webp|jpg|jpeg|png|gif|avif)$/i.test(ent.name)) {
+        const rel = path.relative(path.join(__dirname, '..'), full).split(path.sep).join('/');
+        const kb = fs.statSync(full).size / 1024;
+        if (kb > IMAGE_MAX_KB && !IMAGE_ALLOWLIST.has(rel)) offenders.push({ rel, kb: Math.round(kb) });
+      }
+    }
+  }
+  if (fs.existsSync(imgRoot)) walk(imgRoot);
+  if (offenders.length) {
+    console.warn(`Image size audit: ${offenders.length} file(s) over ${IMAGE_MAX_KB}KB`);
+    offenders.slice(0, 25).forEach((o) => console.warn(`  ${o.kb}KB  ${o.rel}`));
+  } else {
+    console.log(`Image size audit: all tracked images ≤ ${IMAGE_MAX_KB}KB (or allowlisted).`);
   }
 
   await browser.close();

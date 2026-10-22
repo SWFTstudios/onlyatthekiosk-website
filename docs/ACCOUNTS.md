@@ -57,7 +57,7 @@ Every list for a release: `SELECT email FROM subscribers WHERE interest = 'dispa
 ## How sign-in works
 
 1. `POST /api/auth/code { email }` stores a hashed code in `login_codes` (one per email, 10 minutes) and emails it. It always answers the same way, so it never reveals who has an account. It is limited to 3 codes per email and 8 per IP every 10 minutes.
-2. `POST /api/auth/verify { email, code, firstName? }` allows 5 tries per code. On success it deletes the code, finds or creates the member, and sets the `kiosk_session` cookie (HttpOnly, Secure, SameSite=Lax, 30 days). It also sends the welcome email once.
+2. `POST /api/auth/verify { email, code, firstName? }` allows 5 tries per code. On success it deletes the code, finds or creates the member, and sets the `kiosk_session` cookie (HttpOnly, Secure, SameSite=Lax, 30 days). It also sends the welcome email once. If the Worker secret `WELCOME_DISCOUNT_CODE` is set (a shared code you create once in Shopify Admin for first-purchase discount), that code is included in the welcome email; when unset the email is unchanged.
 3. The site (`js/kiosk-account.js`) then carries over any guest bag and uploads the device's check-in. A new member gets Check-in opened for them, with the name they typed already filled in.
 
 On iPhone the code field uses `autocomplete="one-time-code"`, so iOS offers the code from Mail, and six digits sign in straight away.

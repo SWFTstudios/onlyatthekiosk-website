@@ -40,14 +40,25 @@ export async function sendLoginCode(env, { to, code }) {
 
 export async function sendWelcome(env, { to, firstName, memberNo }) {
   const hi = firstName ? `Welcome aboard, ${esc(firstName)}.` : 'Welcome aboard.';
+  // Shared first-purchase code from Shopify Admin, set as Worker secret WELCOME_DISCOUNT_CODE.
+  // When unset, the welcome email stays unchanged.
+  const code = String((env && env.WELCOME_DISCOUNT_CODE) || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+  const discountText = code
+    ? `\n\nYour first-purchase code: ${code}\nUse it at checkout on your first order.`
+    : '';
+  const discountHtml = code
+    ? `<p style="margin:20px 0 8px;font-size:15px;line-height:1.5;color:#4a484d">Your first-purchase code — use it at checkout on your first order:</p>
+<p style="margin:0 0 20px;padding:16px 0;border-radius:14px;background:#f4f2ee;text-align:center;font:600 22px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em">${esc(code)}</p>`
+    : '';
   return env.EMAIL.send({
     from: sender(env),
     to,
     subject: `Welcome to the KIOSK, member ${memberNo}`,
-    text: `${hi.replace(/&[^;]+;/g, '')}\n\nYou're KIOSK member ${memberNo}. Your saves, check-in and bag now follow you on every device.\n\nhttps://onlyatthekiosk.com/account.html`,
+    text: `${hi.replace(/&[^;]+;/g, '')}\n\nYou're KIOSK member ${memberNo}. Your saves, check-in and bag now follow you on every device.${discountText}\n\nhttps://onlyatthekiosk.com/account.html`,
     html: layout('Welcome to the KIOSK', `
 <h1 style="margin:0 0 12px;font-size:24px;font-weight:500;letter-spacing:-.02em">${hi}</h1>
 <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#4a484d">You're KIOSK member <b style="color:#111214">${esc(memberNo)}</b>. Your saves, check-in and bag now follow you on every device.</p>
+${discountHtml}
 <p style="margin:0"><a href="https://onlyatthekiosk.com/account.html" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#111214;color:#ffffff;text-decoration:none;font-size:14px">Open your account</a></p>`),
   });
 }

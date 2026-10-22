@@ -112,12 +112,27 @@
       const r = R(); const [cx, cy] = centre();
       const ink = getComputedStyle(canvas).color || '#fff';
 
-      // The sphere: a dark body with a lit rim
+      // The sphere: a dark body with a lit rim (blue by default; accent shade when chosen)
+      const accentOn = !!document.documentElement.dataset.accent;
+      let ar = 120; let ag = 170; let ab = 255;
+      if (accentOn) {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue('--signal').trim() || '#ff5b23';
+        const probe = document.createElement('canvas'); probe.width = 1; probe.height = 1;
+        const pc = probe.getContext('2d'); pc.fillStyle = raw; pc.fillRect(0, 0, 1, 1);
+        const px = pc.getImageData(0, 0, 1, 1).data;
+        ar = px[0]; ag = px[1]; ab = px[2];
+      }
       const body = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r);
-      body.addColorStop(0, 'rgba(40, 60, 96, 0.55)'); body.addColorStop(1, 'rgba(6, 10, 22, 0.85)');
+      if (accentOn) {
+        body.addColorStop(0, `rgba(${Math.round(ar * 0.22)}, ${Math.round(ag * 0.22)}, ${Math.round(ab * 0.22)}, 0.62)`);
+        body.addColorStop(1, 'rgba(4, 5, 8, 0.92)');
+      } else {
+        body.addColorStop(0, 'rgba(40, 60, 96, 0.55)'); body.addColorStop(1, 'rgba(6, 10, 22, 0.85)');
+      }
       ctx.fillStyle = body; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       const halo = ctx.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.12);
-      halo.addColorStop(0, 'rgba(120, 170, 255, 0.28)'); halo.addColorStop(1, 'rgba(120, 170, 255, 0)');
+      halo.addColorStop(0, `rgba(${ar}, ${ag}, ${ab}, ${accentOn ? 0.34 : 0.28})`);
+      halo.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 0)`);
       ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, r * 1.12, 0, Math.PI * 2); ctx.fill();
 
       ctx.strokeStyle = ink; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -277,13 +292,15 @@
     }, { passive: false });
     const onResize = () => invalidate();
     window.addEventListener('resize', onResize);
+    const onPrefs = () => invalidate();
+    document.addEventListener('kiosk:prefs', onPrefs);
     const io = new IntersectionObserver(([en]) => { seen = en.isIntersecting; if (seen) invalidate(); });
     io.observe(canvas);
 
     const origZoomTo = api.zoomTo;
     api.zoomTo = (z) => { origZoomTo(z); setTouch(); };
     api.ready = loadLand().then((rings) => { land = rings; invalidate(); });
-    api.destroy = () => { alive = false; io.disconnect(); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); };
+    api.destroy = () => { alive = false; io.disconnect(); window.removeEventListener('resize', onResize); document.removeEventListener('kiosk:prefs', onPrefs); if (raf) cancelAnimationFrame(raf); };
     invalidate();
     return api;
   }
