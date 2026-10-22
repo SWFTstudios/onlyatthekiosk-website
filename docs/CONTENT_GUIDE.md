@@ -351,6 +351,8 @@ The shop is `vault.html`, shown as **Shop** in the nav. It's laid out like an ai
 
 **Colourway status:** a colourway can override the product with `status: 'soon'` (for example a new colour that isn't in Shopify yet).
 
+**The clothing rack (shop's Rack view):** tees, hoodies, longsleeves and crews can hang on the rack slider. A colourway joins it with a `rack: { front, side, hookX, neckY, bottomY }` block: transparent front/side cutouts on the shared KIOSK hanger (1086×1448 template, measurements in % of the canvas, kept in `data/rack-manifest.json`). Build or rebuild the launch set with `node scripts/build-rack-assets.js` (sources: `images/shop/3d/` renders, else the vector mockups); replace any `-side.webp` with a true side view under the same name when one exists. Without a `rack` block a piece hangs as its flat render or vector mockup.
+
 **Linked handles:** the "Classic" #001 hoodie, tee, chain and bracelet are already linked to their existing Shopify handles.
 
 **Shareable links:**
