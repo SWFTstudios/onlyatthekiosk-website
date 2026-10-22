@@ -61,6 +61,7 @@
       if (prefs[k] && prefs[k] !== PREF_DEFAULTS[k]) d.setAttribute(`data-${k}`, prefs[k]);
       else d.removeAttribute(`data-${k}`);
     });
+    document.dispatchEvent(new CustomEvent('kiosk:prefs', { detail: { prefs: Object.assign({}, prefs) } }));
   }
 
   const icon = {
@@ -239,7 +240,6 @@
     { id: 'journal', label: 'Atlas', href: 'atlas.html' },
     { id: 'films', label: 'Films', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
-    { id: 'tv', label: 'KIOSK TV', href: 'tv.html' },
     { id: 'garage', label: 'Garage', href: 'the-garage.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
@@ -268,7 +268,6 @@
     ] },
     { door: 'WATCH', tag: 'Films & moving pictures', links: [
       { id: 'films', label: 'Films', href: 'films.html', note: 'Screening room', icon: 'films' },
-      { id: 'tv', label: 'KIOSK TV', href: 'tv.html', note: 'Music videos', icon: 'films' },
       { id: 'gallery', label: 'Gallery', href: 'gallery.html', note: 'Every frame', icon: 'films' },
     ] },
     { door: 'LISTEN', tag: 'Phonk for the drive', links: [
@@ -285,7 +284,6 @@
     ] },
     { door: 'EXPLORE', tag: 'Maps, machines & live sky', links: [
       { id: 'garage', label: 'The Garage', href: 'the-garage.html', note: 'The Street File', icon: 'garage' },
-      { id: 'flights', label: 'Flights', href: 'flights.html', note: 'Live flight deck', icon: 'flights' },
     ] },
   ];
   const MENU_TOTAL = 1 + MENU_GROUPS.reduce((n, g) => n + g.links.length, 0);
@@ -440,6 +438,15 @@
       </div>
       <button class="k-tabbar__item k-tabbar__more" type="button" data-tab-more aria-label="More" aria-expanded="false" aria-controls="k-sheet">${TAB_ICONS.more}</button>`;
 
+    // Far accent glow (CSS-gated on html[data-accent]); guests see nothing.
+    if (!$('.k-space')) {
+      const space = document.createElement('div');
+      space.className = 'k-space';
+      space.setAttribute('aria-hidden', 'true');
+      space.innerHTML = '<span class="k-space__stars"></span>';
+      document.body.prepend(space);
+      bindSpaceDrift(space);
+    }
     document.body.prepend(guides);
     document.body.prepend(sheet);
     document.body.prepend(nav);
@@ -2513,6 +2520,7 @@
             <div class="k-set__row"><span>Accent</span>
               <div class="k-set__swatches" role="radiogroup" aria-label="Accent">${ACCENTS.map(([v, l, c]) => `<button type="button" role="radio" data-pref="accent" data-value="${v}" aria-checked="${String(prefs.accent === v)}" aria-label="${l}" title="${l}" style="--sw:${c}"></button>`).join('')}</div>
             </div>
+            <p class="k-set__hint">Your accent tints the whole kiosk — even the globe.</p>
             <div class="k-set__row"><span>Text size</span>${seg('type', [['s', '<small>A</small>'], ['m', 'A'], ['l', '<big>A</big>'], ['xl', '<big><b>A</b></big>']], prefs.type, 'Text size')}</div>
             <div class="k-set__row"><span>Depth</span>${seg('depth', [['on', 'Depth'], ['off', 'Flat']], prefs.depth, 'Depth and parallax')}</div>
             <div class="k-set__row"><span>Corners</span>${seg('corners', [['round', 'Round'], ['square', 'Square']], prefs.corners, 'Corners')}</div>
@@ -2578,6 +2586,7 @@
     document.documentElement.classList.remove('is-settings-open');
     if (location.hash === '#settings') history.replaceState(history.state, '', location.pathname + location.search);
     if (settingsReturn && settingsReturn.focus) settingsReturn.focus({ preventScroll: true });
+    document.dispatchEvent(new CustomEvent('kiosk:settings-close'));
   }
   function refreshSettings() {
     if (!settingsEl) return;
@@ -2613,9 +2622,11 @@
       const opt = e.target.closest('[data-pref]');
       if (opt) {
         const { pref, value } = opt.dataset;
+        const prev = pref === 'theme' ? themePref() : prefs[pref];
         if (pref === 'theme') { store.set(THEME_KEY, value); applyTheme(); }
         else { prefs[pref] = value; savePrefs(); }
         if (pref === 'motion') toast('Settings saved');
+        if (pref === 'accent' && value !== prev) queueVoyagerNudge();
         $$(`[data-pref="${pref}"]`, root).forEach((b) => b.setAttribute('aria-checked', String(b === opt)));
         return;
       }
@@ -4148,47 +4159,160 @@
     if (el) el.classList.add('k-hide');
   }
 
-  /* ------------------------------------------- cabin shake cockpit
-   * The media page's spaceship + crew cutouts, rebuilt for the radio:
-   * when CABIN SHAKE is on and music is playing, the cockpit rides the
-   * waveform level (the 140 BPM synth for Spotify, the real signal for
-   * MP3s); it settles the moment the music pauses. Off by default,
-   * remembered per device, and always off for reduced motion.
+  /* ------------------------------------------- space glow drift
+   * Tiny scroll parallax on .k-space so the site feels afloat. Transform
+   * only, paused when depth is off, reduced motion, or the tab is hidden.
    * ------------------------------------------------------------------ */
-  function mountCabinShake() {
-    const root = $('[data-cockpit]');
-    if (!root || root.dataset.cabinDone) return;
-    root.dataset.cabinDone = '1';
-    const btn = $('[data-cabin-toggle]', root);
-    const label = $('[data-cabin-label]', root);
-    const ship = $('.k-cockpit__ship', root);
-    const crew = $('.k-cockpit__crew', root);
-    let on = false;
-    try { on = localStorage.getItem('kiosk:cabin-shake') === '1'; } catch { on = false; }
-    if (REDUCED) on = false;
-    let raf = 0;
-    const apply = () => {
-      if (btn) { btn.setAttribute('aria-checked', String(on)); btn.classList.toggle('is-on', on); }
-      if (label) label.textContent = on ? 'On · riding the music' : 'Off · cabin steady';
-      root.classList.toggle('cabin-on', on);
-      try { localStorage.setItem('kiosk:cabin-shake', on ? '1' : '0'); } catch { /* private mode */ }
-      if (on && !raf) raf = requestAnimationFrame(tick);
-      if (!on) { if (ship) ship.style.transform = ''; if (crew) crew.style.transform = ''; }
-    };
-    const tick = (now) => {
+  function bindSpaceDrift(el) {
+    if (!el || el.dataset.driftDone) return;
+    el.dataset.driftDone = '1';
+    let raf = 0; let y = 0;
+    const tick = () => {
       raf = 0;
-      if (!on || !root.isConnected) return;
+      if (document.hidden || REDUCED || document.documentElement.dataset.depth === 'off' || !document.documentElement.dataset.accent) {
+        el.style.transform = '';
+        return;
+      }
+      const drift = Math.max(-24, Math.min(24, y * 0.04));
+      el.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0)`;
+    };
+    const onScroll = () => { y = window.scrollY || 0; if (!raf) raf = requestAnimationFrame(tick); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) onScroll(); });
+    document.addEventListener('kiosk:prefs', onScroll);
+  }
+
+  /* ------------------------------------------- Voyager accent nudge
+   * Guests who pick an accent see a one-time popup inviting them to sign
+   * up; the discount code rides the welcome email (WELCOME_DISCOUNT_CODE).
+   * ------------------------------------------------------------------ */
+  const VOYAGER_NUDGE_KEY = 'kiosk:voyager-nudge';
+  let kioskSignedIn = false;
+  document.addEventListener('kiosk:account', (e) => {
+    kioskSignedIn = !!(e.detail && e.detail.signedIn);
+    if (kioskSignedIn) {
+      try { localStorage.setItem(VOYAGER_NUDGE_KEY, String(Date.now())); } catch { /* private mode */ }
+    }
+  });
+  function nudgeSeen() {
+    try {
+      const v = localStorage.getItem(VOYAGER_NUDGE_KEY);
+      if (!v) return false;
+      const t = Number(v);
+      if (!Number.isFinite(t)) return true;
+      return (Date.now() - t) < 30 * 24 * 60 * 60 * 1000;
+    } catch { return true; }
+  }
+  function markNudgeSeen() {
+    try { localStorage.setItem(VOYAGER_NUDGE_KEY, String(Date.now())); } catch { /* private mode */ }
+  }
+  let nudgeTimer = 0;
+  function queueVoyagerNudge() {
+    if (kioskSignedIn || nudgeSeen()) return;
+    clearTimeout(nudgeTimer);
+    nudgeTimer = setTimeout(() => {
+      if (settingsEl && settingsEl.classList.contains('is-open')) {
+        const once = () => { document.removeEventListener('kiosk:settings-close', once); setTimeout(showVoyagerNudge, 600); };
+        document.addEventListener('kiosk:settings-close', once, { once: true });
+        return;
+      }
+      showVoyagerNudge();
+    }, 600);
+  }
+  function showVoyagerNudge() {
+    if (kioskSignedIn || nudgeSeen()) return;
+    if ($('.k-voyager-nudge')) return;
+    const el = document.createElement('div');
+    el.className = 'k-voyager-nudge';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'k-voyager-nudge-title');
+    el.innerHTML = `
+      <div class="k-voyager-nudge__card">
+        <span aria-hidden="true">${KIOSK_SYMBOL}</span>
+        <h2 id="k-voyager-nudge-title">Make it yours. Become a <em class="k-serif">Voyager.</em></h2>
+        <p>Your accent, your saves and your bag on every device — plus a first-purchase code emailed to you the moment you join.</p>
+        <div class="k-voyager-nudge__actions">
+          <button type="button" class="k-btn k-btn--solid" data-voyager-join>Become a Voyager</button>
+          <button type="button" class="k-btn" data-voyager-dismiss>Keep browsing</button>
+        </div>
+      </div>`;
+    document.body.append(el);
+    requestAnimationFrame(() => el.classList.add('is-open'));
+    const close = () => {
+      markNudgeSeen();
+      el.classList.remove('is-open');
+      setTimeout(() => el.remove(), 360);
+    };
+    el.addEventListener('click', (e) => {
+      if (e.target === el || e.target.closest('[data-voyager-dismiss]')) { close(); return; }
+      if (e.target.closest('[data-voyager-join]')) {
+        close();
+        closeSettings();
+        const btn = $('[data-account-open]');
+        if (btn) btn.click();
+        else if (window.KIOSK_ACCOUNT && window.KIOSK_ACCOUNT.openAccount) window.KIOSK_ACCOUNT.openAccount();
+      }
+    });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key !== 'Escape') return;
+      document.removeEventListener('keydown', esc);
+      close();
+    });
+  }
+
+  /* ------------------------------------------- plane window radio scene
+   * Landscape + fog + clouds behind the song wheel, framed by a cutout
+   * window. Entry zooms through the glass once per session (skipped for
+   * reduced motion, intro:off, or Save-Data). --win-glow breathes with
+   * the waveform while music plays.
+   * ------------------------------------------------------------------ */
+  function mountWindowScene() {
+    const root = $('[data-window]');
+    if (!root || root.dataset.windowDone) return;
+    root.dataset.windowDone = '1';
+    let raf = 0;
+    const saveData = !!(navigator.connection && navigator.connection.saveData);
+    const skipZoom = REDUCED || prefs.intro === 'off' || saveData;
+    const tick = () => {
+      raf = 0;
+      if (!root.isConnected) return;
       const level = player.playing ? Math.min(1, wave.level || 0) : 0;
-      const beat = Math.sin(now / (60000 / 140 / 2)) * level;
-      const y = (-14 * level - 6 * Math.max(0, beat)).toFixed(1);
-      const x = (Math.sin(now / 900) * 3 * level).toFixed(1);
-      if (ship) ship.style.transform = `translate(${x}px, ${y}px)`;
-      if (crew) crew.style.transform = `translate(${(-x * 0.6).toFixed(1)}px, ${(y * 0.55).toFixed(1)}px)`;
-      root.style.setProperty('--cabin-glow', (0.25 + level * 0.55).toFixed(2));
+      root.style.setProperty('--win-glow', (0.28 + level * 0.5).toFixed(2));
       raf = requestAnimationFrame(tick);
     };
-    if (btn) btn.addEventListener('click', () => { on = !on; if (REDUCED && on) { toast('Cabin shake is off while reduced motion is on.'); on = false; } apply(); });
-    apply();
+    raf = requestAnimationFrame(tick);
+    if (skipZoom) {
+      root.classList.add('is-settled', 'is-through');
+      return;
+    }
+    try {
+      if (sessionStorage.getItem('kiosk:radio-zoom') === '1') {
+        root.classList.add('is-settled', 'is-through');
+        return;
+      }
+    } catch { /* private mode */ }
+    root.classList.add('is-entering');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove('is-entering');
+        root.classList.add('is-through');
+        let settled = false;
+        const done = () => {
+          if (settled) return;
+          settled = true;
+          root.classList.add('is-settled');
+          root.querySelectorAll('.k-window__frame, .k-window__world').forEach((n) => { n.style.willChange = 'auto'; });
+          try { sessionStorage.setItem('kiosk:radio-zoom', '1'); } catch { /* private mode */ }
+        };
+        const frame = $('.k-window__frame', root);
+        if (frame) {
+          const onEnd = (e) => { if (e.propertyName !== 'transform') return; frame.removeEventListener('transitionend', onEnd); done(); };
+          frame.addEventListener('transitionend', onEnd);
+        }
+        setTimeout(done, 2400);
+      });
+    });
   }
 
   /* ------------------------------------------- Spotify connect panel
@@ -4211,7 +4335,7 @@
       body = `<p class="k-body">Full-track Spotify in the cabin is being fitted. Until then, every playlist below plays previews here — or in full in your Spotify app.</p>`;
     } else if (!st.voyager) {
       body = `<p class="k-body">Become a Voyager (free, one email code) and connect Spotify once. Your playlists then play in full without signing in for every song.</p>
-        <div class="k-row-flex"><a class="k-btn k-btn--solid" href="account.html">Become a Voyager</a><a class="k-btn" href="tv.html">Watch KIOSK TV</a></div>`;
+        <div class="k-row-flex"><a class="k-btn k-btn--solid" href="account.html">Become a Voyager</a><a class="k-btn" href="members.html">Voyager perks</a></div>`;
     } else if (!st.connected) {
       body = `<p class="k-body">One connect, then press play. Spotify Premium plays full tracks right here; Free still browses your library and hears previews.</p>
         <div class="k-row-flex"><a class="k-btn k-btn--solid" href="/api/spotify/login?returnTo=${encodeURIComponent('/radio.html')}">Connect Spotify</a></div>`;
@@ -4260,123 +4384,11 @@
     } catch { el.innerHTML = '<p class="k-small">Your channels couldn’t load right now.</p>'; }
   }
 
-  /* ------------------------------------------------------------ KIOSK TV
-   * Curated official videos (C.tvVideos) for everyone; a Voyager's own
-   * Spotify library resolved to videos by /api/tv/feed. A card shows its
-   * YouTube thumbnail until tapped, then swaps in the player with sound.
-   * Scrolling a playing card mostly out of view stops it.
-   * -------------------------------------------------------------------- */
-  function tvCard(v, personal) {
-    const thumb = v.youtube ? `https://i.ytimg.com/vi/${esc(v.youtube)}/hqdefault.jpg` : (v.cover || '');
-    return `<article class="k-tv-card" data-tv-card data-youtube="${esc(v.youtube || '')}" data-track="${esc(v.id || v.spotify || '')}">
-      <div class="k-tv-card__frame">
-        ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}
-        ${v.youtube ? `<button class="k-btn k-btn--solid" type="button" data-tv-play style="position:absolute;inset:auto 12px 12px auto;z-index:2">Play video</button>` : `<span class="k-btn" style="position:absolute;inset:auto 12px 12px auto">Audio only</span>`}
-      </div>
-      <div class="k-tv-card__body">
-        <b data-no-i18n>${esc(v.title || '')}</b>
-        <span data-no-i18n>${esc(v.artist || '')}${v.note ? ` · ${esc(v.note)}` : ''}${personal && v.youtube && !v.verified ? ' · matched video — check it’s the right one' : ''}</span>
-        <div class="k-row-flex">
-          ${v.id || v.spotify ? `<a class="k-btn" href="https://open.spotify.com/track/${esc(v.id || v.spotify)}" target="_blank" rel="noopener">Open in Spotify</a>` : ''}
-          ${personal && v.youtube ? `<button class="k-btn" type="button" data-tv-reject>Not this video</button>` : ''}
-        </div>
-      </div>
-    </article>`;
-  }
-
-  function bindTvFeed(root) {
-    if (!root || root.dataset.tvDone) return;
-    root.dataset.tvDone = '1';
-    root.addEventListener('click', async (e) => {
-      const reject = e.target.closest('[data-tv-reject]');
-      if (reject) {
-        const card = reject.closest('[data-tv-card]');
-        await fetch('/api/tv/not-this-video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ spotifyTrackId: card.dataset.track }) }).catch(() => {});
-        card.remove();
-        toast('Got it — that match won’t come back.');
-        return;
-      }
-      const btn = e.target.closest('[data-tv-play]');
-      if (!btn) return;
-      const card = btn.closest('[data-tv-card]');
-      const frame = $('.k-tv-card__frame', card);
-      const id = card.dataset.youtube;
-      if (!id || !frame) return;
-      $$('[data-tv-card] iframe', root).forEach((f) => { const c = f.closest('[data-tv-card]'); if (c && c !== card) { f.remove(); const b = $('[data-tv-play]', c); if (b) b.hidden = false; } });
-      btn.hidden = true;
-      const img = $('img', frame);
-      if (img) img.hidden = true;
-      const f = document.createElement('iframe');
-      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
-      f.title = 'Music video';
-      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-      f.allowFullscreen = true;
-      frame.append(f);
-    });
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((en) => {
-          if (en.intersectionRatio >= 0.25) return;
-          const f = $('iframe', en.target);
-          if (f) { f.remove(); const b = $('[data-tv-play]', en.target); if (b) b.hidden = false; const img = $('.k-tv-card__frame img', en.target); if (img) img.hidden = false; }
-        });
-      }, { threshold: [0, 0.25] });
-      $$('[data-tv-card]', root).forEach((c) => io.observe(c));
-    }
-  }
-
-  function pageTv() {
-    const curated = fill('tv-curated', (C.tvVideos || []).filter((v) => v.youtube).length
-      ? `<div class="k-tv-feed k-tv-scroll">${(C.tvVideos || []).filter((v) => v.youtube).map((v) => tvCard(v, false)).join('')}</div>`
-      : `<div class="k-glass" style="padding:22px"><p class="k-eyebrow">First broadcast soon</p><p class="k-body" style="margin-top:8px">The first official videos are being matched to the radio playlists. Add them in <b>js/kiosk-content.js</b> (<i>tvVideos</i>) — see the Content Guide. Meanwhile the songs play on <a href="radio.html" style="text-decoration:underline;text-underline-offset:3px">KIOSK Radio</a>.</p></div>`);
-    bindTvFeed(curated);
-    mountTvPersonal();
-  }
-
-  /** A Voyager's own library as videos; everyone else gets the invite. */
-  async function mountTvPersonal() {
-    const el = mount('tv-personal');
-    if (!el || el.dataset.done) return;
-    el.dataset.done = '1';
-    const curatedMap = {};
-    (C.tvVideos || []).forEach((v) => { if (v.spotify && v.youtube) curatedMap[v.spotify] = v.youtube; });
-    let d = null;
-    try {
-      const r = await fetch('/api/tv/feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ curated: curatedMap }) });
-      d = r.ok ? await r.json() : null;
-    } catch { d = null; }
-    if (!el.isConnected) return;
-    if (!d || !d.enabled) {
-      const reason = d && d.reason;
-      el.innerHTML = `<div class="k-glass" style="padding:22px"><p class="k-body">${reason === 'unconfigured'
-        ? 'Personal TV switches on once Spotify is connected to the site. The curated channel above is on air for everyone.'
-        : 'Become a Voyager and connect Spotify once — your top songs, likes and recent plays become a video channel of your own.'}</p>
-        <div class="k-row-flex" style="margin-top:12px"><a class="k-btn k-btn--solid" href="${reason === 'not-connected' ? '/api/spotify/login?returnTo=%2Ftv.html' : 'account.html'}">${reason === 'not-connected' ? 'Connect Spotify' : 'Become a Voyager'}</a><a class="k-btn" href="radio.html">KIOSK Radio</a></div></div>`;
-      return;
-    }
-    const withVideo = d.videos.filter((v) => v.youtube);
-    el.innerHTML = (withVideo.length
-      ? `<div class="k-row-flex" role="group" aria-label="Your Spotify source">${[['top', 'Top tracks'], ['recent', 'Recently played'], ['liked', 'Liked songs']].map(([k, l]) => `<button class="k-btn${(d.source || 'top') === k ? ' k-btn--solid' : ''}" type="button" data-tv-source="${k}">${l}</button>`).join('')}</div>
-         <div class="k-tv-feed k-tv-scroll" style="margin-top:14px">${withVideo.map((v) => tvCard(v, true)).join('')}</div>
-         <p class="k-small" style="margin-top:10px">Matched from YouTube — a live or cover version can slip in. “Not this video” removes that match for you for good.</p>`
-      : '<p class="k-body">No videos matched your Spotify songs yet. The curated channel above is on air.</p>');
-    bindTvFeed(el);
-    $$('[data-tv-source]', el).forEach((b) => b.addEventListener('click', async () => {
-      const r = await fetch(`/api/tv/feed?source=${encodeURIComponent(b.dataset.tvSource)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ curated: curatedMap }) }).catch(() => null);
-      const dd = r && r.ok ? await r.json() : null;
-      if (!dd || !dd.enabled) return;
-      const list = dd.videos.filter((v) => v.youtube);
-      const feed = $('.k-tv-feed', el);
-      if (feed) { feed.innerHTML = list.map((v) => tvCard(v, true)).join(''); delete feed.dataset.tvDone; }
-      $$('[data-tv-source]', el).forEach((x) => x.classList.toggle('k-btn--solid', x === b));
-    }));
-  }
-
   /* ------------------------------------------------------------ radio */
 
   function pageRadio() {
     mountSpotifyPanel();
-    mountCabinShake();
+    mountWindowScene();
     const deck = mount('radio');
     mountWheel(deck, (player.mix && player.mix.slug) || ((C.mixes || [])[0] && C.mixes[0].slug), true);
     if (deck) {
@@ -4756,417 +4768,6 @@
       </div>
     </article>`;
   }
-  /* ---------------------------------------------------------- flights
-   * Live flight status on a satellite globe (flights.html). Look a flight
-   * up by number or callsign, or let the KIOSK pick one somewhere on Earth.
-   * Data comes through /api/flights (functions/api/flights.js); if that
-   * can't be reached the page says so and shows sample traffic instead.
-   * -------------------------------------------------------------------- */
-  // IATA code → [ICAO callsign prefix, airline]
-  const AIRLINES = {
-    AA: ['AAL', 'American Airlines'], DL: ['DAL', 'Delta Air Lines'], UA: ['UAL', 'United Airlines'], WN: ['SWA', 'Southwest'], B6: ['JBU', 'JetBlue'],
-    AS: ['ASA', 'Alaska Airlines'], NK: ['NKS', 'Spirit'], F9: ['FFT', 'Frontier'], AC: ['ACA', 'Air Canada'], WS: ['WJA', 'WestJet'],
-    AM: ['AMX', 'Aeroméxico'], AV: ['AVA', 'Avianca'], LA: ['LAN', 'LATAM'], JJ: ['TAM', 'LATAM Brasil'], G3: ['GLO', 'GOL'],
-    BA: ['BAW', 'British Airways'], VS: ['VIR', 'Virgin Atlantic'], AF: ['AFR', 'Air France'], KL: ['KLM', 'KLM'], LH: ['DLH', 'Lufthansa'],
-    LX: ['SWR', 'SWISS'], OS: ['AUA', 'Austrian'], IB: ['IBE', 'Iberia'], TP: ['TAP', 'TAP Air Portugal'], AZ: ['ITY', 'ITA Airways'],
-    SK: ['SAS', 'SAS'], AY: ['FIN', 'Finnair'], FI: ['ICE', 'Icelandair'], EI: ['EIN', 'Aer Lingus'], FR: ['RYR', 'Ryanair'], U2: ['EZY', 'easyJet'],
-    TK: ['THY', 'Turkish Airlines'], EK: ['UAE', 'Emirates'], QR: ['QTR', 'Qatar Airways'], EY: ['ETD', 'Etihad'], ET: ['ETH', 'Ethiopian'],
-    KQ: ['KQA', 'Kenya Airways'], SA: ['SAA', 'South African'], AI: ['AIC', 'Air India'], '6E': ['IGO', 'IndiGo'], SQ: ['SIA', 'Singapore Airlines'],
-    CX: ['CPA', 'Cathay Pacific'], NH: ['ANA', 'ANA'], JL: ['JAL', 'Japan Airlines'], KE: ['KAL', 'Korean Air'], OZ: ['AAR', 'Asiana'],
-    CA: ['CCA', 'Air China'], MU: ['CES', 'China Eastern'], CZ: ['CSN', 'China Southern'], QF: ['QFA', 'Qantas'], NZ: ['ANZ', 'Air New Zealand'],
-    FX: ['FDX', 'FedEx'], '5X': ['UPS', 'UPS'],
-  };
-  const BY_ICAO = Object.fromEntries(Object.entries(AIRLINES).map(([iata, [icao, name]]) => [icao, { iata, name }]));
-  const FL_HUBS = [
-    ['New York', 40.64, -73.78], ['Los Angeles', 33.94, -118.41], ['Chicago', 41.98, -87.9], ['Atlanta', 33.64, -84.43], ['Toronto', 43.68, -79.63],
-    ['Mexico City', 19.44, -99.07], ['São Paulo', -23.43, -46.47], ['Bogotá', 4.7, -74.15], ['London', 51.47, -0.45], ['Paris', 49.01, 2.55],
-    ['Amsterdam', 52.31, 4.76], ['Frankfurt', 50.04, 8.56], ['Madrid', 40.47, -3.56], ['Istanbul', 41.26, 28.74], ['Reykjavík', 63.98, -22.6],
-    ['Lagos', 6.58, 3.32], ['Nairobi', -1.32, 36.93], ['Johannesburg', -26.14, 28.24], ['Cairo', 30.12, 31.41], ['Dubai', 25.25, 55.36],
-    ['Doha', 25.27, 51.61], ['Delhi', 28.56, 77.1], ['Mumbai', 19.09, 72.87], ['Singapore', 1.36, 103.99], ['Bangkok', 13.69, 100.75],
-    ['Hong Kong', 22.31, 113.91], ['Shanghai', 31.14, 121.81], ['Seoul', 37.46, 126.44], ['Tokyo', 35.55, 139.78], ['Sydney', -33.95, 151.18],
-    ['Auckland', -37.01, 174.79], ['Honolulu', 21.32, -157.92], ['Anchorage', 61.17, -149.99], ['Vancouver', 49.19, -123.18], ['Miami', 25.79, -80.29],
-    ['Lisbon', 38.77, -9.13],
-  ].map(([n, lat, lon]) => ({ n, lat, lon }));
-  const toCallsign = (raw) => {
-    const q = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const m = q.match(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/);
-    if (m && AIRLINES[m[1]] && !/^[A-Z]{3}/.test(q)) return AIRLINES[m[1]][0] + m[2].replace(/^0+(?=\d)/, '');
-    return q;
-  };
-  const airlineOf = (cs) => (BY_ICAO[String(cs || '').slice(0, 3)] || {}).name || '';
-  const prettyCs = (cs) => String(cs || '').replace(/^([A-Z]{3})(\d)/, '$1 $2');
-  const iataNo = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata} ${cs.slice(3)}` : ''; };
-  // Aviationstack times are airport-local wall clock; show them as written
-  const asTime = (t) => (t && t.length >= 16 ? t.slice(11, 16) : '');
-  const STATUS_LABEL = { scheduled: 'Scheduled', active: 'En route', landed: 'Landed', cancelled: 'Cancelled', incident: 'Incident', diverted: 'Diverted', unknown: 'Status unknown' };
-  const iataFor = (cs) => { const a = BY_ICAO[String(cs || '').slice(0, 3)]; return a ? `${a.iata}${cs.slice(3)}` : ''; };
-  const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round((((deg || 0) % 360) + 360) % 360 / 22.5) % 16];
-  const kmBetween = (a, b) => {
-    const r = Math.PI / 180; const dLa = (b.lat - a.lat) * r; const dLo = (b.lon - a.lon) * r;
-    const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2;
-    return 12742 * Math.asin(Math.min(1, Math.sqrt(h)));
-  };
-  // Sample traffic for when the live feed can't be reached: the fictional KIOSK fleet
-  function sampleTraffic(c) {
-    let seed = Math.round((c.lat + 90) * 1000 + (c.lon + 180)); const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-    return Array.from({ length: 42 }, (_, i) => {
-      const alt = rnd() < 0.2 ? 4000 + rnd() * 16000 : 30000 + Math.round(rnd() * 10) * 1000;
-      return {
-        hex: `k${String(100000 + i).slice(1)}`, callsign: `KSK${100 + Math.floor(rnd() * 899)}`, reg: '', type: ['A20N', 'B38M', 'B789', 'A359', 'A21N', 'E75L'][i % 6], sample: true,
-        lat: c.lat + (rnd() - 0.5) * 7, lon: c.lon + (rnd() - 0.5) * 9, alt, gs: alt > 20000 ? 420 + rnd() * 90 : 220 + rnd() * 120,
-        track: rnd() * 360, vs: alt > 20000 ? 0 : (rnd() < 0.5 ? -1 : 1) * (800 + rnd() * 1400), squawk: '', seen: rnd() * 8, ground: false,
-      };
-    });
-  }
-
-  function pageFlights() {
-    const root = $('[data-flights]');
-    if (!root) return;
-    const signal = pageAbort.signal;
-    const air = $('[data-fl-air]', root);
-    const status = $('[data-fl-status]', root);
-    const resEl = $('[data-fl-result]', root);
-    const listEl = $('[data-fl-list]', root);
-    const phone = () => window.innerWidth < 760;
-    const S = { field: [], fieldAt: 0, hub: null, sel: null, selAt: 0, route: null, follow: true, live: true, earth: null, status: null, statusOn: true, statusBusy: false };
-    const say = (t) => { status.textContent = t; };
-
-    const api = (qs) => fetch(`/api/flights?${qs}`, { signal, headers: { Accept: 'application/json' } }).then(async (r) => {
-      const body = await r.json().catch(() => ({}));
-      if (!r.ok) throw Object.assign(new Error(body.error || `HTTP ${r.status}`), { status: r.status });
-      return body;
-    });
-
-    // Where a plane is now: dead-reckon from its last fix along its track
-    const posOf = (a, now) => {
-      if (!a || a.ground || !a.gs || a.track == null) return { lat: a.lat, lon: a.lon };
-      const hours = Math.min(120, (now - a._at) / 1000 + (a.seen || 0)) / 3600;
-      const km = a.gs * 1.852 * hours; const r = Math.PI / 180;
-      const lat = a.lat + (km / 111.2) * Math.cos(a.track * r);
-      return { lat, lon: a.lon + (km / (111.2 * Math.max(0.2, Math.cos(a.lat * r)))) * Math.sin(a.track * r) };
-    };
-    const stamp = (list) => { const t = performance.now(); list.forEach((a) => { a._at = t; }); return list; };
-
-    // --- the globe and the air above it
-    let ctx = null; let dpr = 1;
-    const sizeAir = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); air.width = Math.round(air.clientWidth * dpr); air.height = Math.round(air.clientHeight * dpr); ctx = air.getContext('2d'); };
-    const frameView = (lat, lon, close) => (phone()
-      ? { lat: lat - (close ? 1.2 : 4), lon, alt: close ? 0.32 : 0.9, tilt: close ? 0.95 : 0.7, px: 0.5, py: close ? 0.3 : 0.32, fov: 0.62 }
-      : { lat: lat - (close ? 1 : 3), lon, alt: close ? 0.3 : 0.8, tilt: close ? 0.95 : 0.75, px: 0.64, py: 0.52, fov: 0.55 });
-    function plane(x, y, ang, size, color, glow) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(size / 24, size / 24);
-      if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 16; }
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(12, 0); ctx.lineTo(9, -1.4); ctx.lineTo(3, -1.6); ctx.lineTo(-3, -9.5); ctx.lineTo(-5.4, -9.5); ctx.lineTo(-2.2, -1.7); ctx.lineTo(-7.8, -1.6);
-      ctx.lineTo(-9.8, -4.6); ctx.lineTo(-11.4, -4.6); ctx.lineTo(-10.2, 0); ctx.lineTo(-11.4, 4.6); ctx.lineTo(-9.8, 4.6); ctx.lineTo(-7.8, 1.6);
-      ctx.lineTo(-2.2, 1.7); ctx.lineTo(-5.4, 9.5); ctx.lineTo(-3, 9.5); ctx.lineTo(3, 1.6); ctx.lineTo(9, 1.4); ctx.closePath(); ctx.fill();
-      ctx.restore();
-    }
-    const screenAngle = (p, trk) => {
-      const r = Math.PI / 180; const e = S.earth;
-      const a = e.project(p.lat, p.lon); const b = e.project(p.lat + Math.cos(trk * r) * 0.3, p.lon + Math.sin(trk * r) * 0.3 / Math.max(0.2, Math.cos(p.lat * r)));
-      return Math.atan2(b.y - a.y, b.x - a.x);
-    };
-    function drawAir() {
-      if (!ctx || !S.earth) return;
-      const e = S.earth; const now = performance.now();
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, air.clientWidth, air.clientHeight);
-      // route of the selected flight
-      if (S.route && S.route.stops && (S.sel || S.status)) {
-        const [o, d] = [S.route.stops[0], S.route.stops[S.route.stops.length - 1]];
-        if (o.lat != null && d.lat != null) {
-          const pts = window.KioskEarth.arc(o, d, 64, 0);
-          const here = S.sel ? posOf(S.sel, now) : null;
-          const done = here ? kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d)) : (S.status && S.status.status === 'landed' ? 1 : 0);
-          ctx.lineWidth = 2; ctx.lineCap = 'round';
-          [[0, done, 'rgba(255,255,255,.95)', []], [done, 1, 'rgba(255,255,255,.55)', [5, 6]]].forEach(([t0, t1, col, dash]) => {
-            ctx.strokeStyle = col; ctx.setLineDash(dash); ctx.beginPath(); let pen = false;
-            pts.forEach((q) => { if (q.t < t0 || q.t > t1) return; const s = e.project(q.lat, q.lon); if (!s.front) { pen = false; return; } if (pen) ctx.lineTo(s.x, s.y); else ctx.moveTo(s.x, s.y); pen = true; });
-            ctx.stroke();
-          });
-          ctx.setLineDash([]);
-          [o, d].forEach((ap) => {
-            const s = e.project(ap.lat, ap.lon); if (!s.front) return;
-            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, 4.5, 0, 6.283); ctx.fill();
-            ctx.fillStyle = '#0b0b0c'; ctx.beginPath(); ctx.arc(s.x, s.y, 2, 0, 6.283); ctx.fill();
-            ctx.font = '700 12px ui-monospace, "SF Mono", Menlo, monospace'; ctx.fillStyle = '#fff';
-            ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 4; ctx.fillText(ap.iata || ap.icao, s.x + 9, s.y + 4); ctx.shadowBlur = 0;
-          });
-        }
-      }
-      // everything else in the air
-      S.field.forEach((a) => {
-        if (S.sel && a.hex === S.sel.hex) return;
-        const p = posOf(a, now); const s = e.project(p.lat, p.lon);
-        if (!s.front || s.x < -20 || s.y < -20 || s.x > air.clientWidth + 20 || s.y > air.clientHeight + 20) return;
-        plane(s.x, s.y, screenAngle(p, a.track || 0), 13, a.ground ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.88)');
-      });
-      // the one we're watching
-      if (S.sel) {
-        const p = posOf(S.sel, now); const s = e.project(p.lat, p.lon);
-        if (s.front) {
-          const ang = screenAngle(p, S.sel.track || 0);
-          ctx.strokeStyle = 'rgba(255,122,61,.55)'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.arc(s.x, s.y, 22 + 4 * Math.sin(now / 300), 0, 6.283); ctx.stroke();
-          plane(s.x, s.y, ang, 30, '#ff7a3d', 'rgba(255,122,61,.9)');
-        }
-      }
-    }
-    let raf = 0; let lastCam = 0;
-    const loop = (now) => {
-      raf = requestAnimationFrame(loop);
-      if (document.hidden || !S.earth) return;
-      if (S.follow && S.sel && now - lastCam > 50) {
-        lastCam = now; const p = posOf(S.sel, now); const v = frameView(p.lat, p.lon, true);
-        if (!S.flying) { S.earth.view.lat = v.lat; S.earth.view.lon = v.lon; S.earth.invalidate(); }
-      }
-      drawAir();
-    };
-
-    // --- panels
-    const fmt = (n, d = 0) => (n == null ? '—' : Number(n).toLocaleString(undefined, { maximumFractionDigits: d }));
-    const phase = (a) => (a.ground ? ['ground', 'On the ground'] : a.vs > 400 ? ['climb', 'Climbing'] : a.vs < -400 ? ['descend', 'Descending'] : a.alt > 18000 ? ['cruise', 'Cruising'] : ['level', 'In the air']);
-    // Gates, times and delays from Aviationstack
-    function statusHtml(st) {
-      const end = (e, label) => {
-        const late = (e.estimated || e.actual) && e.scheduled && (e.actual || e.estimated) > e.scheduled;
-        const now = e.actual ? ['Actual', asTime(e.actual)] : e.estimated ? ['Expected', asTime(e.estimated)] : null;
-        return `<div class="k-fstat__end">
-          <small>${label}</small><b>${esc(e.iata || e.icao || '—')}</b><span>${esc(e.airport || '')}</span>
-          <dl>
-            <div><dt>Scheduled</dt><dd>${esc(asTime(e.scheduled) || '—')}</dd></div>
-            ${now ? `<div><dt>${now[0]}</dt><dd class="${late ? 'is-late' : 'is-ok'}">${esc(now[1])}</dd></div>` : ''}
-            ${e.terminal ? `<div><dt>Terminal</dt><dd>${esc(e.terminal)}</dd></div>` : ''}
-            ${e.gate ? `<div><dt>Gate</dt><dd>${esc(e.gate)}</dd></div>` : ''}
-            ${e.baggage ? `<div><dt>Baggage</dt><dd>${esc(e.baggage)}</dd></div>` : ''}
-          </dl></div>`;
-      };
-      const delay = Math.max(st.dep.delay || 0, st.arr.delay || 0);
-      const day = st.date ? new Date(`${st.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : '';
-      return `<div class="k-fstat">
-        <p class="k-fstat__head"><span class="k-fstat__pill k-fstat__pill--${esc(st.status)}">${esc(STATUS_LABEL[st.status] || st.status)}</span>${delay ? `<span class="k-fstat__delay">Delayed ${delay} min</span>` : ''}<span class="k-fstat__day">${esc(day)}</span></p>
-        <div class="k-fstat__ends">${end(st.dep, 'Departs')}${end(st.arr, 'Arrives')}</div>
-        <p class="k-fstat__note">Local airport times · Aviationstack</p>
-      </div>`;
-    }
-    function card() {
-      const a = S.sel;
-      if (!a && S.status) {
-        const st = S.status;
-        resEl.innerHTML = `<article class="k-fcard" aria-live="polite">
-          <div class="k-fcard__top"><div><p class="k-fcard__airline">${esc(st.airline.name || 'Flight')}${st.flight.icao ? ` · ${esc(prettyCs(st.flight.icao))}` : ''}</p>
-          <h2 class="k-fcard__cs">${esc(st.flight.iata || st.flight.icao)}</h2></div></div>
-          ${statusHtml(st)}
-          ${st.aircraft && (st.aircraft.type || st.aircraft.reg) ? `<p class="k-fcard__seen">Aircraft ${esc([st.aircraft.type, st.aircraft.reg].filter(Boolean).join(' · '))}</p>` : ''}
-          <div class="k-fcard__cta"><button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button><button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button></div>
-        </article>`;
-        return;
-      }
-      if (!a) { resEl.innerHTML = ''; return; }
-      const [pk, pl] = phase(a);
-      const stops = S.route && S.route.stops; const o = stops && stops[0]; const d = stops && stops[stops.length - 1];
-      let prog = '';
-      if (o && d && o.lat != null) {
-        const here = posOf(a, performance.now()); const k = kmBetween(o, here) / Math.max(1, kmBetween(o, here) + kmBetween(here, d));
-        prog = `<div class="k-fcard__route"><div><b>${esc(o.iata || o.icao)}</b><small>${esc(o.city || o.name)}</small></div>
-          <div class="k-fcard__track" style="--p:${k.toFixed(3)}"><i></i><span aria-hidden="true">✈</span></div>
-          <div><b>${esc(d.iata || d.icao)}</b><small>${esc(d.city || d.name)}</small></div></div>
-          <p class="k-fcard__left">${fmt(kmBetween(here, d))} km to go${a.gs ? ` · about ${Math.max(1, Math.round(kmBetween(here, d) / (a.gs * 1.852) * 60))} min at this speed` : ''}${S.route.plausible ? '' : ' · route unconfirmed'}</p>`;
-      }
-      const ago = Math.max(0, Math.round((performance.now() - a._at) / 1000 + (a.seen || 0)));
-      resEl.innerHTML = `<article class="k-fcard" aria-live="polite">
-        <div class="k-fcard__top">
-          <div><p class="k-fcard__airline">${esc(airlineOf(a.callsign) || (a.sample ? 'KIOSK Air · sample' : a.desc || 'Flight'))}${iataNo(a.callsign) ? ` · ${esc(iataNo(a.callsign))}` : ''}</p>
-          <h2 class="k-fcard__cs">${esc(prettyCs(a.callsign) || a.hex.toUpperCase())}</h2></div>
-          <span class="k-fcard__state k-fcard__state--${pk}">${pl}</span>
-        </div>
-        ${prog}
-        ${S.status ? statusHtml(S.status) : ''}
-        <dl class="k-fcard__grid">
-          <div><dt>Altitude</dt><dd>${a.ground ? 'Ground' : `${fmt(a.alt)} ft`}</dd></div>
-          <div><dt>Ground speed</dt><dd>${fmt(a.gs)} kt<small>${fmt(a.gs * 1.852)} km/h</small></dd></div>
-          <div><dt>Heading</dt><dd>${fmt(a.track)}° ${compass(a.track)}</dd></div>
-          <div><dt>Vertical</dt><dd>${a.vs ? `${a.vs > 0 ? '+' : ''}${fmt(a.vs)} ft/min` : 'Level'}</dd></div>
-          <div><dt>Aircraft</dt><dd>${esc(a.type || '—')}${a.reg ? `<small>${esc(a.reg)}</small>` : ''}</dd></div>
-          <div><dt>Position</dt><dd class="k-mono">${esc(fmtGeo({ lat: a.lat, lon: a.lon }))}</dd></div>
-        </dl>
-        <p class="k-fcard__seen">${a.sample ? 'Sample traffic · live feed unavailable' : `Last fix ${ago} s ago · ${esc(S.source || 'ADS-B')}${a.squawk ? ` · squawk ${esc(a.squawk)}` : ''}`}</p>
-        <div class="k-fcard__cta">
-          <button class="k-btn k-btn--sm" type="button" data-fl-follow aria-pressed="${S.follow}">${S.follow ? 'Following' : 'Follow'}</button>
-          ${!a.sample && !S.status && S.statusOn && a.callsign ? `<button class="k-btn k-btn--sm" type="button" data-fl-times${S.statusBusy ? ' disabled' : ''}>${S.statusBusy ? 'Checking…' : 'Gate & times'}</button>` : ''}
-          <button class="k-btn k-btn--sm" type="button" data-fl-random>Another flight</button>
-          ${a.sample ? '' : '<button class="k-btn k-btn--sm" type="button" data-fl-share>Copy link</button>'}
-        </div>
-      </article>`;
-    }
-    function list() {
-      const items = S.field.filter((a) => a.callsign && !a.ground && (!S.sel || a.hex !== S.sel.hex)).sort((x, y) => (y.alt || 0) - (x.alt || 0)).slice(0, 10);
-      listEl.innerHTML = items.length ? `<h3 class="k-flights__list-title">Also in the air${S.hub ? ` near ${esc(S.hub.n)}` : ''}</h3>
-        <ul>${items.map((a) => `<li><button type="button" data-fl-pick="${esc(a.hex)}"><span class="k-flights__cs">${esc(prettyCs(a.callsign))}</span><span class="k-flights__al">${esc(airlineOf(a.callsign) || a.type || '')}</span><span class="k-flights__alt">${fmt(a.alt)} ft</span></button></li>`).join('')}</ul>` : '';
-    }
-
-    // --- actions
-    async function loadField(hub) {
-      S.hub = hub;
-      try {
-        const d = await api(`near=${hub.lat.toFixed(2)},${hub.lon.toFixed(2)}`);
-        S.live = true; S.source = d.source; S.field = stamp(d.aircraft || []);
-      } catch (e) {
-        if (signal.aborted) throw e;
-        S.live = false; S.source = 'sample'; S.field = stamp(sampleTraffic(hub));
-      }
-      S.fieldAt = performance.now();
-      return S.field;
-    }
-    async function routeFor(a) {
-      S.route = null;
-      if (!a || a.sample || !a.callsign || !S.live) return;
-      try { const r = await api(`route=${encodeURIComponent(a.callsign)}&lat=${a.lat.toFixed(3)}&lon=${a.lon.toFixed(3)}`); if (S.sel === a) { S.route = r.route; card(); } } catch (e) { /* routes are a bonus */ }
-    }
-    // One Aviationstack lookup (cached on the server); only on request, the plan is small
-    async function statusLookup(code) {
-      if (!S.statusOn || !code) return null;
-      try { const d = await api(`status=${encodeURIComponent(code)}`); return d.flight || null; } catch (e) {
-        if (e.status === 503) S.statusOn = false;          // no key on this deploy
-        else if (e.status === 429) toast(e.message || 'Flight status is busy. Try again later.');
-        return null;
-      }
-    }
-    async function select(a, why, status = null) {
-      S.sel = a; S.route = null; S.follow = true; S.status = status;
-      if (!a) { card(); return; }
-      card(); list();
-      const p = posOf(a, performance.now());
-      S.flying = true; await S.earth.flyTo(frameView(p.lat, p.lon, true), 1800); S.flying = false;
-      say(why || (S.live ? `${prettyCs(a.callsign) || 'This aircraft'} is ${phase(a)[1].toLowerCase()}${S.hub ? ` near ${S.hub.n}` : ''}.` : 'The live feed isn’t reachable right now, so this is sample traffic from the KIOSK fleet.'));
-      const qs = new URLSearchParams(location.search);
-      if (a.callsign && !a.sample) qs.set('f', a.callsign); else qs.delete('f');
-      history.replaceState(history.state, '', `${location.pathname}${qs.toString() ? `?${qs}` : ''}`);
-      routeFor(a);
-    }
-    async function random() {
-      say('Scanning the skies…');
-      const hub = FL_HUBS[Math.floor(Math.random() * FL_HUBS.length)];
-      S.flying = true; S.sel = null; card();
-      const flight = S.earth.flyTo(frameView(hub.lat, hub.lon, false), 1600);
-      const field = await loadField(hub).catch(() => []);
-      await flight; S.flying = false;
-      const pool = field.filter((a) => a.callsign && !a.ground && a.alt > 8000);
-      list();
-      if (!pool.length) { say(`Quiet skies over ${hub.n} right now. Try again.`); return; }
-      await select(pool[Math.floor(Math.random() * pool.length)]);
-    }
-    async function search(raw) {
-      const cs = toCallsign(raw);
-      if (cs.length < 3) { say('Type a flight number like BA117 or a callsign like DAL1.'); return; }
-      say(`Looking for ${prettyCs(cs)}…`);
-      const typed = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-      const flightNo = /^[A-Z0-9]{2}\d/.test(typed) && !/^[A-Z]{3}\d/.test(typed) ? typed : (iataFor(cs) || cs);
-      const [live, st] = await Promise.all([
-        api(`callsign=${encodeURIComponent(cs)}`).then((d) => { S.live = true; S.source = d.source; return stamp(d.aircraft || []).sort((x, y) => (x.seen || 0) - (y.seen || 0))[0] || null; }).catch((e) => (e.status === 429 ? 'busy' : null)),
-        statusLookup(flightNo),
-      ]);
-      if (signal.aborted) return;
-      let hit = live && live !== 'busy' ? live : null;
-      // In the air per Aviationstack but not on ADS-B: plot its reported position
-      if (!hit && st && st.live && st.live.lat != null && !st.live.ground) {
-        hit = stamp([{ hex: (st.aircraft && st.aircraft.icao24) || `as${cs}`.toLowerCase().slice(0, 6), callsign: st.flight.icao || cs, reg: (st.aircraft || {}).reg || '', type: (st.aircraft || {}).type || '', lat: st.live.lat, lon: st.live.lon, alt: st.live.alt, gs: st.live.gs, track: st.live.track, vs: 0, seen: 0, ground: false }])[0];
-      }
-      if (hit) {
-        const near = FL_HUBS.slice().sort((x, y) => kmBetween(x, hit) - kmBetween(y, hit))[0];
-        S.hub = null;
-        loadField({ n: near.n, lat: hit.lat, lon: hit.lon }).then(() => { if (!S.field.some((a) => a.hex === hit.hex)) S.field.push(hit); list(); }).catch(() => {});
-        await select(hit, `${prettyCs(hit.callsign)} found${airlineOf(hit.callsign) ? `, ${airlineOf(hit.callsign)}` : ''}.`, st);
-        return;
-      }
-      if (st) {
-        // Not in the air: show its status and its route on the globe
-        S.sel = null; S.status = st; S.route = null; card();
-        const label = `${st.flight.iata || cs} · ${STATUS_LABEL[st.status] || st.status}`;
-        say(st.status === 'scheduled' ? `${label}. Departs ${st.dep.iata || ''} at ${asTime(st.dep.estimated || st.dep.scheduled) || '—'} local.` : st.status === 'landed' ? `${label} at ${st.arr.iata || ''}${st.arr.actual ? ` (${asTime(st.arr.actual)} local)` : ''}.` : `${label}.`);
-        const qs = new URLSearchParams(location.search); qs.set('f', st.flight.iata || cs);
-        history.replaceState(history.state, '', `${location.pathname}?${qs}`);
-        try {
-          const r = await api(`route=${encodeURIComponent(st.flight.icao || cs)}&lat=0&lon=0`);
-          const stops = r.route && r.route.stops;
-          if (stops && stops[0].lat != null && S.status === st) {
-            S.route = r.route;
-            const o = stops[0]; const d = stops[stops.length - 1];
-            const mid = window.KioskEarth.arc(o, d, 2, 0)[1];
-            S.earth.flyTo(frameView(mid.lat, mid.lon, false), 1600);
-          }
-        } catch (e) { /* the status card stands on its own */ }
-        return;
-      }
-      if (live === 'busy') { say('Too many lookups at once. Give it a few seconds.'); return; }
-      say(`${prettyCs(cs)} isn’t in the air right now${S.statusOn ? ' and has no status today' : ', or it isn’t broadcasting'}. Check the number, or try another.`);
-    }
-    function above() {
-      if (!navigator.geolocation) { say('Your browser can’t share a location.'); return; }
-      say('Finding you…');
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const hub = { n: 'you', lat: pos.coords.latitude, lon: pos.coords.longitude };
-        S.flying = true; S.sel = null; card();
-        await Promise.all([S.earth.flyTo(frameView(hub.lat, hub.lon, false), 1600), loadField(hub)]);
-        S.flying = false; list();
-        const pool = S.field.filter((a) => a.callsign && !a.ground);
-        if (!pool.length) { say('Nothing broadcasting overhead right now.'); return; }
-        const nearest = pool.sort((x, y) => kmBetween(x, hub) - kmBetween(y, hub))[0];
-        await select(nearest, `${prettyCs(nearest.callsign)} is the closest flight to you, ${fmt(kmBetween(nearest, hub))} km away.`);
-      }, () => say('Location is off, so we can’t look overhead. Try Surprise me instead.'), { timeout: 10000, maximumAge: 300000 });
-    }
-
-    // --- refresh the watched flight and its neighbours
-    const tick = setInterval(async () => {
-      if (document.hidden || !S.live) return;
-      if (S.sel && !S.sel.sample) {
-        try { const d = await api(`hex=${S.sel.hex}`); const n = stamp(d.aircraft || [])[0]; if (n) { Object.assign(S.sel, n); card(); } } catch (e) { /* keep dead-reckoning */ }
-      }
-      if (S.hub && performance.now() - S.fieldAt > 30000) { await loadField(S.hub).catch(() => {}); if (S.sel) { const n = S.field.find((a) => a.hex === S.sel.hex); if (n) Object.assign(S.sel, n); } list(); }
-    }, 15000);
-
-    $('[data-fl-form]', root).addEventListener('submit', (e) => { e.preventDefault(); search($('[data-fl-q]', root).value); }, { signal });
-    root.addEventListener('click', (e) => {
-      if (e.target.closest('[data-fl-random]')) { random(); return; }
-      if (e.target.closest('[data-fl-near]')) { above(); return; }
-      if (e.target.closest('[data-fl-times]') && S.sel && !S.statusBusy) {
-        const a = S.sel; S.statusBusy = true; card();
-        statusLookup(iataFor(a.callsign) || a.callsign).then((st) => {
-          S.statusBusy = false;
-          if (S.sel !== a) return;
-          S.status = st; card();
-          if (!st) say(S.statusOn ? `No gate or schedule found for ${prettyCs(a.callsign)}. Private and cargo flights often aren’t listed.` : 'Flight status isn’t set up on this site yet.');
-        });
-        return;
-      }
-      const f = e.target.closest('[data-fl-follow]');
-      if (f) { S.follow = !S.follow; card(); if (S.follow && S.sel) { const p = posOf(S.sel, performance.now()); S.earth.flyTo(frameView(p.lat, p.lon, true), 900); } return; }
-      if (e.target.closest('[data-fl-share]')) { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('Link copied')); return; }
-      const pk = e.target.closest('[data-fl-pick]');
-      if (pk) { const a = S.field.find((x) => x.hex === pk.dataset.flPick); if (a) select(a); }
-    }, { signal });
-
-    loadScript('js/kiosk-earth.js').then(() => {
-      if (signal.aborted || !window.KioskEarth) return;
-      const start = FL_HUBS[0];
-      let earth = null;
-      try { earth = window.KioskEarth.create($('[data-fl-earth]', root), { view: frameView(start.lat + 8, start.lon - 20, false), drag: true, relief: 0.9, onDrag: (on) => { if (on) S.follow = false; } }); } catch (e) { earth = null; }
-      if (!earth || !earth.gl) { root.classList.add('is-nogl'); return; }
-      S.earth = earth;
-      const lbl = window.KioskEarth.labels($('[data-fl-labels]', root), earth);
-      earth.onFrame = () => lbl.update();
-      earth.ready.then(() => root.classList.add('is-ready'), () => root.classList.add('is-nogl'));
-      sizeAir(); window.addEventListener('resize', sizeAir, { signal });
-      raf = requestAnimationFrame(loop);
-      const want = new URLSearchParams(location.search).get('f');
-      if (want) { $('[data-fl-q]', root).value = want; search(want); } else random();
-    }).catch(() => root.classList.add('is-nogl'));
-
-    signal.addEventListener('abort', () => { clearInterval(tick); cancelAnimationFrame(raf); if (S.earth) S.earth.destroy(); });
-  }
-
   /* Check-in answers (js/kiosk-onboard.js) and how they pick posts */
   const taste = () => { const t = store.get('kiosk:taste', null); return t && t.completedAt ? t : null; };
 
@@ -7543,12 +7144,10 @@
     { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
     { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
     { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
-    { id: 'tv', t: 'T4V', name: 'KIOSK TV', href: 'tv.html', note: 'Music videos, curated and yours' },
     { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
-    { id: 'flights', t: 'T6', name: 'Flight deck', href: 'flights.html', note: 'Live flight status from anywhere on Earth' },
-    { id: 'garage', t: 'T7', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
+    { id: 'garage', t: 'T6', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
   ];
-  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault', tv: 'radio' };
+  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault' };
   const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
   const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
   const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
@@ -7627,7 +7226,7 @@
 
   /* ------------------------------------------------------------- boot */
 
-  const PAGES = { garage: pageGarage, home: pageHome, flights: pageFlights, films: pageFilms, story: pageStory, radio: pageRadio, tv: pageTv, vault: pageVault, journal: pageJournal, archive: pageArchive, gallery: pageGallery, store: pageStore, hunt: pageHunt, account: () => {}, partner: () => {} };
+  const PAGES = { garage: pageGarage, home: pageHome, films: pageFilms, story: pageStory, radio: pageRadio, vault: pageVault, journal: pageJournal, archive: pageArchive, gallery: pageGallery, store: pageStore, hunt: pageHunt, account: () => {}, partner: () => {} };
   function runPage() {
     try {
       (PAGES[PAGE] || (() => {}))();

@@ -1,0 +1,20 @@
+# Perf after 2026-10-22T22:59:21Z
+## HTML
+23680 index.html
+ 7053 atlas.html
+13464 vault.html
+ 4977 radio.html
+49174 total
+## Core JS/CSS
+440885 js/kiosk-glass.js
+132787 js/kiosk-content.js
+ 21150 js/kiosk-earth.js
+318199 css/kiosk-glass.css
+913021 total
+## Radio window assets
+56K	total
+## images/ total
+67M	images
+
+Baseline was: glass.js 472647, css 323824, cockpit cutouts 3.1M
+After: see above. TV/Flights pages and APIs removed; radio window <80KB total.

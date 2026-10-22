@@ -1,0 +1,19 @@
+# Perf baseline 2026-10-22T22:36:06Z
+## HTML
+23680 index.html
+ 7053 atlas.html
+13464 vault.html
+ 5189 radio.html
+ 4418 tv.html
+ 5292 flights.html
+59096 total
+## Core JS/CSS
+472647 js/kiosk-glass.js
+133546 js/kiosk-content.js
+ 19838 js/kiosk-earth.js
+323824 css/kiosk-glass.css
+949855 total
+## Cockpit assets (to be replaced)
+3.1M	total
+## images/ total
+67M	images

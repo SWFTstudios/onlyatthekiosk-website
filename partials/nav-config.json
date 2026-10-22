@@ -31,20 +31,6 @@
       ]
     },
     {
-      "label": "KIOSK TV",
-      "path": "tv.html",
-      "match": [
-        "tv.html"
-      ]
-    },
-    {
-      "label": "Flights",
-      "path": "flights.html",
-      "match": [
-        "flights.html"
-      ]
-    },
-    {
       "label": "Shop",
       "path": "vault.html",
       "match": [
