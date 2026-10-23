@@ -148,6 +148,10 @@
     const U = {};
     ['res', 'cam', 'fw', 'rt', 'upv', 'fov', 'px', 'py', 'sun', 'relief', 'nightK', 'lowQ', 'accent', 'accentMix', 'dayT', 'nightT', 'reliefT', 'waterT'].forEach((k) => { U[k] = gl.getUniformLocation(prog, k); });
 
+    // Declared before syncAccent: create-time tint must not hit the TDZ on alive
+    let raf = 0; let alive = true;
+    function invalidate() { if (alive && !raf) raf = requestAnimationFrame(draw); }
+
     /** Read --signal from CSS when html[data-accent] is set; guests keep the blue globe. */
     function syncAccent() {
       const on = !!document.documentElement.dataset.accent;
@@ -241,7 +245,6 @@
       return { x: (view.px + sx / 2) * w, y: (view.py - sy / 2) * h, front };
     }
 
-    let raf = 0; let alive = true;
     function draw() {
       raf = 0;
       if (!alive) return;
@@ -257,7 +260,6 @@
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       if (api.onFrame) api.onFrame(api);
     }
-    function invalidate() { if (alive && !raf) raf = requestAnimationFrame(draw); }
 
     // The sun keeps moving
     const tick = setInterval(() => { state.sun = subsolar(); invalidate(); }, 60000);
