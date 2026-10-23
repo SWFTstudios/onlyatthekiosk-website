@@ -6437,8 +6437,10 @@
     const hl = h && h.lat != null && h.lat !== '' ? Number(h.lat) : NaN; const hn = h && h.lon != null && h.lon !== '' ? Number(h.lon) : NaN;
     if (Number.isFinite(hl) && Number.isFinite(hn) && !(hl === 0 && hn === 0)) return Promise.resolve({ lat: hl, lon: hn, city: h.city });
     const fallback = homeFromZone() || { lat: 40.71, lon: -74.0, city: 'New York', approx: true };
-    const ask = fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : null))
+    // the home page's load intro (inline in index.html) already asked on the way in
+    const early = window.KioskIntro && window.KioskIntro.where;
+    const ask = (early || fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null)))
       .then((d) => (d && d.lat != null ? { lat: d.lat, lon: d.lon, city: d.city || fallback.city } : fallback))
       .catch(() => fallback);
     return Promise.race([ask, new Promise((r) => setTimeout(() => r(fallback), 1500))]);
@@ -6478,8 +6480,11 @@
       .then(() => {
         if (signal.aborted) return;
         hero = window.KioskGlobeHero.mount(sec, {
-          Earth: window.KioskEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen,
+          // the opening flight waits for the load intro to hand over
+          Earth: window.KioskEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen, gate: window.KioskIntro && window.KioskIntro.done,
         });
+        // the load intro bows out as soon as the planet is ready behind it
+        hero.ready.then(() => document.dispatchEvent(new CustomEvent('kiosk:globe-ready'))).catch(() => {});
         showLive();
         signal.addEventListener('abort', () => hero.stop());
       })
@@ -6506,8 +6511,11 @@
     const beat = () => {
       clearTimeout(timer);
       if (off || document.hidden) return;
-      fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
-        .then((r) => (r.ok ? r.json() : null))
+      // the first check-in may already be on its way from the home page's load intro
+      const early = window.KioskIntro && window.KioskIntro.live;
+      if (early) window.KioskIntro.live = null;
+      (early || fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
+        .then((r) => (r.ok ? r.json() : null)))
         .then((d) => {
           if (d && d.enabled === false) { off = true; live.enabled = false; publish(); return; }
           if (!d || !d.enabled) { miss(); return; }
