@@ -19,7 +19,7 @@
  * right now, so the day/night line is the actual one. Return visits skip the
  * opening flight; reduced motion gets one still frame.
  *
- *   KioskGlobeHero.mount(section, { Earth, home, journey, reduced }) → { setLive(viewers, count), stop() }
+ *   KioskGlobeHero.mount(section, { Earth, home, journey, reduced, onSeen }) → { setLive(viewers, count), stop() }
  */
 (function () {
   'use strict';
@@ -392,6 +392,14 @@
     fx.addEventListener('pointerup', onUp);
     fx.addEventListener('pointercancel', onUp);
 
+    const onSeen = typeof opts.onSeen === 'function' ? opts.onSeen : null;
+    let seenMarked = false;
+    const markSeen = () => {
+      if (seenMarked) return;
+      seenMarked = true;
+      try { onSeen && onSeen(); } catch (e) { /* prefs / storage */ }
+    };
+
     async function settle(ms) {
       frame = heroFrame();
       if (route) route.classList.remove('is-on');
@@ -399,13 +407,15 @@
       await tween(V, { lat: frame.lat, lon: home.lon, alt: frame.alt, py: frame.py, hero: 1 }, ms, ease, isAlive);
       if (!alive) return;
       section.classList.add('is-settled');
+      markSeen();
     }
 
     async function opening() {
       const ROUTE = routeTo(home);
       const legs = ROUTE.slice(0, -1).map((a, i) => Earth.arc(a, ROUTE[i + 1], 48, 0.12));
       const J = { leg: 0 };
-      Object.assign(V, { lat: ROUTE[0].lat * 0.6, lon: ROUTE[0].lon, alt: farAlt(), py: 0.5, hero: 0 });
+      const startAlt = farAlt();
+      Object.assign(V, { lat: ROUTE[0].lat * 0.6, lon: ROUTE[0].lon, alt: startAlt, py: 0.5, hero: 0 });
       journeyDraw = (now) => {
         const fade = 1 - V.hero;
         if (fade <= 0.01) return;
@@ -443,12 +453,22 @@
       section.classList.add('is-flying');
       if (route) route.classList.add('is-on');
       const LEG = 1050;
+      const hops = Math.max(1, ROUTE.length - 1);
+      const end = heroFrame();
       for (let i = 0; i < ROUTE.length - 1 && alive; i += 1) {
         const a = ROUTE[i]; const b = ROUTE[i + 1];
         if (route) route.textContent = `KSK 00${i + 1} · ${a.c} → ${b.c} · ${b.n}`;
-        // the camera glides toward each next stop while the flight draws itself in
+        // Glide toward each stop while easing alt/py toward the floating hero
+        const k = (i + 1) / hops;
+        const midAlt = lerp(startAlt, end.alt, ease(k * 0.72));
+        const midPy = lerp(0.5, end.py, ease(k * 0.55));
         let dl = (b.lon - V.lon) % 360; if (dl > 180) dl -= 360; if (dl < -180) dl += 360;
-        tween(V, { lat: clamp(b.lat * 0.75, -60, 60), lon: V.lon + dl }, LEG * 1.15, ease, isAlive);
+        tween(V, {
+          lat: clamp(b.lat * 0.75, -60, 60),
+          lon: V.lon + dl,
+          alt: midAlt,
+          py: midPy,
+        }, LEG * 1.15, ease, isAlive);
         // eslint-disable-next-line no-await-in-loop
         await tween(J, { leg: i + 1 }, LEG, (x) => x, isAlive);
       }
@@ -456,7 +476,7 @@
       if (route) route.textContent = `KSK 00${ROUTE.length} · Arrived · ${home.city || 'Home'}`;
       tween(HK, { v: 1 }, 600, easeOut, isAlive);
       await wait(350);
-      await settle(2600);
+      await settle(3000);
       journeyDraw = null;
     }
 
@@ -466,11 +486,19 @@
       Object.assign(V, { lat: frame.lat, lon: home.lon, alt: frame.alt, py: frame.py, hero: reduced ? 1 : 0 });
       HK.v = 1;
       section.classList.add('is-hero');
-      if (reduced) section.classList.add('is-settled');
-      else {
+      if (reduced) {
+        section.classList.add('is-settled');
+        markSeen();
+      } else {
         // return visits: no flight, the planet just rises into place
         V.py = frame.py + 0.25;
-        Promise.race([earth.ready.catch(() => {}), wait(1500)]).then(() => alive && tween(V, { py: frame.py, hero: 1 }, 1600, easeOut, isAlive)).then(() => alive && section.classList.add('is-settled'));
+        Promise.race([earth.ready.catch(() => {}), wait(1500)])
+          .then(() => alive && tween(V, { py: frame.py, hero: 1 }, 1600, easeOut, isAlive))
+          .then(() => {
+            if (!alive) return;
+            section.classList.add('is-settled');
+            markSeen();
+          });
       }
     }
     apply();

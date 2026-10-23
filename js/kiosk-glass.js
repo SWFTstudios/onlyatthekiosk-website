@@ -6450,7 +6450,8 @@
     sec.dataset.on = '1';
     const signal = pageAbort.signal;
     let seen = false;
-    try { seen = sessionStorage.getItem('kiosk:sky') === '1'; sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { seen = true; }
+    try { seen = sessionStorage.getItem('kiosk:sky') === '1'; } catch (e) { seen = true; }
+    const markSkySeen = () => { try { sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { /* private mode */ } };
     const journey = !seen && prefs.intro !== 'off' && !REDUCED;
     const count = $('[data-gh-count]', sec);
     let home = null;
@@ -6476,7 +6477,9 @@
     ])
       .then(() => {
         if (signal.aborted) return;
-        hero = window.KioskGlobeHero.mount(sec, { Earth: window.KioskEarth, home, journey, reduced: REDUCED });
+        hero = window.KioskGlobeHero.mount(sec, {
+          Earth: window.KioskEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen,
+        });
         showLive();
         signal.addEventListener('abort', () => hero.stop());
       })

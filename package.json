@@ -18,6 +18,7 @@
     "test:spotify": "node scripts/test-spotify-unit.mjs",
     "sync:airtable-catalog": "node scripts/sync-airtable-catalog.js",
     "audit:mobile-controls": "node scripts/audit-mobile-controls.mjs",
+    "test:browse": "node scripts/test-site-browse.mjs",
     "build:worker": "bash scripts/build-worker.sh",
     "deploy:worker": "bash scripts/build-worker.sh && npx --yes wrangler@4 deploy"
   },
