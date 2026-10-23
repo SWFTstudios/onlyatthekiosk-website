@@ -4700,10 +4700,10 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
 .k-hunt-fallback .k-finds-static { display: grid; gap: 12px; padding: 20px var(--gutter); }
 
 /* ------------------------------------------------------------ globe hero
- * Home, top of the page (js/kiosk-globe-hero.js): the real Earth across the
- * bottom of the screen under the headline, the visitor pinned with a sonar
- * pulse, everyone else here right now pinned too, flights streaking between
- * them. Always night sky, whatever the theme.
+ * Home, top of the page (js/kiosk-globe-hero.js): a full sphere floating in
+ * night sky under the headline (not a flat horizon strip), the visitor
+ * pinned with a sonar pulse, everyone else here right now pinned too,
+ * flights streaking between them. Always night sky, whatever the theme.
  * Once the planet is up (.is-scene) the section is a few screens tall and
  * its stage stays pinned while you scroll through it: the headline lifts
  * away, the whole planet rises into view and turns with the page. */
@@ -4723,19 +4723,28 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
   radial-gradient(1px 1px at 71% 11%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 86% 31%, #fff 50%, transparent 51%),
   radial-gradient(1px 1px at 94% 6%, rgba(255,255,255,.6) 50%, transparent 51%), radial-gradient(1px 1px at 4% 46%, rgba(255,255,255,.5) 50%, transparent 51%),
   radial-gradient(1px 1px at 64% 44%, rgba(255,255,255,.45) 50%, transparent 51%), radial-gradient(1px 1px at 31% 52%, rgba(255,255,255,.4) 50%, transparent 51%),
-  radial-gradient(80% 55% at 50% 100%, rgba(40,110,255,.32) 0%, rgba(40,110,255,0) 70%),
-  linear-gradient(180deg, #02040b 0%, #050a1c 60%, #071230 100%); }
+  /* Soft far glow behind the floating sphere (blue by default; accent when chosen) */
+  radial-gradient(52% 42% at 50% 62%, rgba(40, 110, 255, .22) 0%, rgba(40, 110, 255, 0) 70%),
+  linear-gradient(180deg, #010206 0%, #03050c 55%, #05080f 100%); }
+html[data-accent] .k-gh__space { background:
+  radial-gradient(1px 1px at 8% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 22% 36%, rgba(255,255,255,.6) 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 38% 9%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 57% 28%, rgba(255,255,255,.7) 50%, transparent 51%),
+  radial-gradient(1px 1px at 71% 11%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 86% 31%, #fff 50%, transparent 51%),
+  radial-gradient(1px 1px at 94% 6%, rgba(255,255,255,.6) 50%, transparent 51%), radial-gradient(1px 1px at 4% 46%, rgba(255,255,255,.5) 50%, transparent 51%),
+  radial-gradient(1px 1px at 64% 44%, rgba(255,255,255,.45) 50%, transparent 51%), radial-gradient(1px 1px at 31% 52%, rgba(255,255,255,.4) 50%, transparent 51%),
+  radial-gradient(52% 42% at 50% 62%, color-mix(in srgb, var(--signal) 28%, transparent) 0%, transparent 70%),
+  linear-gradient(180deg, #010206 0%, #03050c 55%, #05080f 100%); }
 .k-gh__earth, .k-gh__fx { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .k-gh__earth { opacity: 0; transition: opacity 1.4s var(--ease); }
 .k-gh__earth.is-ready { opacity: 1; }
-/* the bottom edge melts into the night sky of the cover below */
-.k-gh__fade { position: absolute; left: 0; right: 0; bottom: 0; height: 14%; background: linear-gradient(180deg, rgba(2,4,11,0) 0%, #02040b 100%); }
+/* Soft vignette under the floating sphere into the next section */
+.k-gh__fade { position: absolute; left: 0; right: 0; bottom: 0; height: 18%; background: linear-gradient(180deg, rgba(2,4,11,0) 0%, #02040b 100%); }
 .k-gh__route { position: absolute; left: var(--gutter); right: var(--gutter); top: calc(var(--nav-h) + 14px); margin: 0; font-family: var(--f-mono); font-size: calc(11px * var(--type, 1)); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .6s var(--ease); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .k-gh__route.is-on { opacity: 1; }
 
-.k-gh__copy { position: relative; z-index: 2; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: clamp(14px, 2vh, 22px); padding-top: calc(var(--nav-h) + clamp(36px, 9vh, 110px)); text-align: center;
-  /* room for the planet under the buttons: on short screens the hero grows rather than overlapping */
-  padding-bottom: clamp(220px, 34svh, 360px);
+.k-gh__copy { position: relative; z-index: 2; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: clamp(14px, 2vh, 22px); padding-top: calc(var(--nav-h) + clamp(28px, 7vh, 88px)); text-align: center;
+  /* room for the floating sphere under the buttons */
+  padding-bottom: clamp(260px, 42svh, 420px);
   /* scrolling on, it lifts and fades out of the planet's way; it lets drags
    * through to the planet except on its buttons and links */
   opacity: calc(1 - var(--gh-out, 0)); translate: 0 calc(var(--gh-out, 0) * -56px); pointer-events: none; }
@@ -4770,10 +4779,15 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
 .k-gh.is-hero .k-gh__copy > :nth-child(3) { animation-delay: .24s; }
 .k-gh.is-hero .k-gh__copy > :nth-child(4) { animation-delay: .36s; }
 @keyframes k-gh-in { from { opacity: 0; transform: translateY(18px); } }
-/* without WebGL: a still planet from the day imagery */
-.k-gh.is-flat .k-gh__space::after { content: ''; position: absolute; left: 50%; top: 58%; width: max(130vw, 900px); aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0) 40%, rgba(2,4,11,.85) 72%), url('../images/earth/day-2k.jpg') center 30% / 200% auto;
-  box-shadow: 0 0 80px 20px rgba(60,130,255,.35), inset 0 30px 60px rgba(120,180,255,.35); }
+/* without WebGL: a floating still sphere from the day imagery (not a horizon strip) */
+.k-gh.is-flat .k-gh__space::after { content: ''; position: absolute; left: 50%; top: 58%; width: min(68vw, 420px); aspect-ratio: 1; translate: -50% -42%; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, rgba(255,255,255,.08) 0%, transparent 42%),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(2,4,11,.92) 72%),
+    url('../images/earth/day-2k.jpg') center 40% / 210% auto;
+  box-shadow: 0 0 90px 28px rgba(40, 110, 255, .28), inset -18px -12px 40px rgba(0,0,0,.45); }
+html[data-accent] .k-gh.is-flat .k-gh__space::after {
+  box-shadow: 0 0 90px 28px color-mix(in srgb, var(--signal) 32%, transparent), inset -18px -12px 40px rgba(0,0,0,.45);
+}
 @media (max-width: 759px) {
   .k-gh__copy { padding-top: calc(var(--nav-h) + 22px); gap: 14px; }
   .k-gh__title { font-size: calc(clamp(38px, 11vw, 52px) * var(--type, 1)); }
@@ -4782,6 +4796,7 @@ html:not([data-theme='dark']) .k-mockup--sketch { --sk-ink: #111111; }
   .k-gh .k-gh__btn { flex: 1 1 140px; }
   .k-gh__route { top: calc(var(--nav-h) + 6px); font-size: 10px; letter-spacing: .12em; }
   .k-gh.is-scene { height: 260vh; height: 260svh; }
+  .k-gh.is-flat .k-gh__space::after { width: min(78vw, 320px); top: 62%; }
   /* above the floating tab bar */
   .k-gh__hint { bottom: calc(var(--tabbar-h, 72px) + 22px); }
   .k-gh__hint-how { font-size: 10px; letter-spacing: .12em; }

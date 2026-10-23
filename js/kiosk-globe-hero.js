@@ -4,10 +4,10 @@
  *   1. Opening flight (first visit of the session): the satellite Earth
  *      (js/kiosk-earth.js) turns while a flight hops round the world toward
  *      the visitor's town, each stop closer to home.
- *   2. The camera settles into the hero: a big planet across the bottom of
- *      the screen under the headline, the visitor's town pinned with a sonar
- *      pulse, everyone else on the site right now pinned where they are
- *      (/api/live, city level), and flights streaking between them.
+ *   2. The camera settles into the hero: a full sphere floating in night sky
+ *      under the headline (not a flat horizon strip), the visitor's town
+ *      pinned with a sonar pulse, everyone else on the site right now pinned
+ *      where they are (/api/live, city level), and flights streaking between them.
  *   3. Idle: the planet turns slowly back and forth under the pins, new
  *      flights keep taking off; everything stops while the hero is off screen.
  *   4. Scroll: the stage stays pinned while the page scrolls through the
@@ -103,32 +103,34 @@
     };
     resize();
 
-    /* Hero framing: a planet of radius R px whose top sits `top` of the way
-     * down the screen, the camera over a point south of home so home rides
-     * high on the visible cap. */
+    /* Hero framing: a full sphere floating in space under the headline —
+     * small enough that the limb reads all the way around (not a flat
+     * horizon strip across the bottom of the screen). */
     const V = { lat: home.lat, lon: home.lon, alt: 3, py: 0.5, sway: 0, hero: 0 };
     function heroFrame() {
       const mobile = w < 760;
-      const R = mobile ? Math.max(w * 0.96, h * 0.36) : Math.max(w * 0.6, h * 0.86);
-      // the planet's edge sits just under the headline and buttons, however tall they wrap
-      // (offsets, not boxes: the copy may be mid-lift when this runs)
+      // Whole ball in view: leave night sky around the limb
+      const R = mobile
+        ? Math.min(w * 0.48, h * 0.30)
+        : Math.min(w * 0.34, h * 0.38);
       const last = copy && copy.lastElementChild;
-      const below = last ? copy.offsetTop + last.offsetTop + last.offsetHeight + 22 : 0;
-      const top = clamp(Math.max(mobile ? 0.6 : 0.52, below / Math.max(1, h)), 0.3, 0.8);
+      const below = last ? copy.offsetTop + last.offsetTop + last.offsetHeight + 28 : 0;
+      // Top of the sphere sits just under the CTAs; keep the bottom limb on screen
+      const topPx = Math.max(below, mobile ? h * 0.40 : h * 0.36);
+      const maxTop = h - 2 * R - (mobile ? 88 : 48);
+      const top = clamp(Math.min(topPx, maxTop) / Math.max(1, h), 0.28, 0.58);
       const rh = R / Math.max(1, h);
       const tanT = 2 * 0.55 * rh;
       const D = 1 / Math.sin(Math.atan(tanT));
       const cap = Math.acos(1 / D) / D2R;
       const py = top + rh;
-      // Put home a third of the way down the visible planet, clear of the
-      // phone tab bar: find how far north of the camera's ground point it
-      // must sit (a point a° north shows tan φ = sin a / (D − cos a) above centre)
-      const clearBottom = mobile ? 130 : 70;
-      const targetY = Math.min(top * h + (h - top * h) * 0.34, h - clearBottom);
+      // Home near the visual centre of the sphere (slightly above mid)
+      const clearBottom = mobile ? 100 : 56;
+      const targetY = clamp(top * h + R * 0.28, top * h + R * 0.12, h - clearBottom - R * 0.35);
       const want = 2 * 0.55 * (py - targetY / h);
       let lo = 0; let hi = Math.acos(1 / D) * 0.96;
       for (let i = 0; i < 30; i += 1) { const a = (lo + hi) / 2; if (Math.sin(a) / (D - Math.cos(a)) < want) lo = a; else hi = a; }
-      return { alt: D - 1, py, lat: clamp(home.lat - lo / D2R, -75, 75), cap, sway: mobile ? 0.1 : 0.3, top: top * h };
+      return { alt: D - 1, py, lat: clamp(home.lat - lo / D2R, -75, 75), cap, sway: mobile ? 0.12 : 0.28, top: top * h };
     }
     // the whole planet in frame for the opening flight, whatever the screen shape
     const farAlt = () => { const tanR = 0.55 * 0.62 * Math.min(w, h) / Math.max(1, h); return Math.sqrt(1 + 1 / (tanR * tanR)) - 1; };
