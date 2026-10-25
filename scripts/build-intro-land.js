@@ -3,13 +3,14 @@
  * Land mask for the home page's load intro (the dotted globe inline in
  * index.html). The intro scatters N points evenly over the sphere (a
  * Fibonacci lattice, which the page rebuilds from the index alone) and draws
- * the ones on land. This marks which ones those are, from the Natural Earth
- * coastlines in data/land-110m.geojson, as a base64 bitset (1 bit per point,
- * ~1 KB) and writes it into index.html between the LAND markers.
+ * the ones on land, and so does the dotted Earth under the globe hero
+ * (js/kiosk-dotearth.js). This marks which ones those are, from the Natural
+ * Earth coastlines in data/land-110m.geojson, as a base64 bitset (1 bit per
+ * point, ~1.5 KB) and writes it into both files between the LAND markers.
  *
  *   node scripts/build-intro-land.js
  *
- * Re-run only if N changes (keep it in step with N in the intro script).
+ * Re-run only if N changes (keep it in step with N in both files).
  */
 
 const fs = require('fs');
@@ -54,9 +55,11 @@ for (let i = 0; i < N; i += 1) {
 }
 const b64 = bits.toString('base64');
 
-const file = path.join(ROOT, 'index.html');
-const html = fs.readFileSync(file, 'utf8');
 const re = /(\/\*LAND\*\/')[A-Za-z0-9+/=]*('\/\*LAND\*\/)/;
-if (!re.test(html)) { console.error('LAND markers not found in index.html'); process.exit(1); }
-fs.writeFileSync(file, html.replace(re, `$1${b64}$2`));
+['index.html', 'js/kiosk-dotearth.js'].forEach((rel) => {
+  const file = path.join(ROOT, rel);
+  const src = fs.readFileSync(file, 'utf8');
+  if (!re.test(src)) { console.error(`LAND markers not found in ${rel}`); process.exit(1); }
+  fs.writeFileSync(file, src.replace(re, `$1${b64}$2`));
+});
 console.log(`intro land mask: ${land}/${N} points on land, ${b64.length} chars`);

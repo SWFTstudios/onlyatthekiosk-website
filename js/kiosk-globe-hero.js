@@ -1,8 +1,8 @@
 /**
  * KIOSK — the globe hero at the top of the home page
  *
- *   1. Opening flight (first visit of the session): the satellite Earth
- *      (js/kiosk-earth.js) turns while a flight hops round the world toward
+ *   1. Opening flight (first visit of the session): the dotted Earth
+ *      (js/kiosk-dotearth.js) turns while a flight hops round the world toward
  *      the visitor's town, each stop closer to home.
  *   2. The camera settles into the hero: a full sphere floating in night sky
  *      under the headline (not a flat horizon strip), the visitor's town
@@ -15,9 +15,9 @@
  *      turns with the page: clockwise (seen from the north pole) going down,
  *      back again going up. Drag it (or swipe sideways) to spin it by hand.
  *
- * The Earth is real: NASA day and night imagery with the sun where it is
- * right now, so the day/night line is the actual one. Return visits skip the
- * opening flight; reduced motion gets one still frame.
+ * The Earth is a ball of dots, the same style as the load intro; any Earth
+ * with the same camera and project() works (js/kiosk-earth.js does too).
+ * Return visits skip the opening flight; reduced motion gets one still frame.
  *
  * The opening flight (and the return-visit rise) waits for opts.gate, a
  * promise, when there is one: the home page's load intro resolves it as it
@@ -95,7 +95,7 @@
     const isAlive = () => alive;
 
     const earth = Earth && earthEl ? Earth.create(earthEl, { view: { lat: home.lat, lon: home.lon, alt: 3, tilt: 0, fov: 0.55, px: 0.5, py: 0.5 }, maxDpr: 1.5, relief: 1 }) : null;
-    if (!earth || !earth.gl) { section.classList.add('is-flat'); if (earth) earth.destroy(); return { ready: Promise.reject(new Error('no webgl')), setLive() {}, stop() {} }; }
+    if (!earth || !earth.gl) { section.classList.add('is-flat'); if (earth) earth.destroy(); return { ready: Promise.reject(new Error('no globe')), setLive() {}, stop() {} }; }
     const gate = Promise.resolve(opts.gate).catch(() => {});
     // the tall scroll scene only once there's a planet to turn
     if (!reduced) section.classList.add('is-scene');

@@ -4772,22 +4772,18 @@ html[data-accent] .k-gh__space { background:
 .k-gh .k-btn--solid.k-gh__btn { background: #fff; color: #0b1020; border-color: #fff; }
 .k-gh .k-gh__btn--ghost { background: rgba(32,72,170,.45); color: #fff; border: 1px solid rgba(140,180,255,.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .k-gh .k-gh__btn--ghost:hover { background: rgba(48,96,210,.6); }
-/* during the opening flight the copy waits; it rises in as the planet settles */
-.k-gh.is-flying:not(.is-hero) .k-gh__copy > * { opacity: 0; }
-.k-gh.is-hero .k-gh__copy > * { animation: k-gh-in 1.1s var(--ease) both; }
+/* during the opening flight the copy waits; it rises in as the planet settles.
+ * html.gh-pending (set before first paint when the flight is still to come)
+ * keeps it hidden from the start, so it never flashes up before the flight */
+.k-gh.is-flying:not(.is-hero) .k-gh__copy > *,
+html.gh-pending .k-gh:not(.is-hero):not(.is-flat) .k-gh__copy > * { opacity: 0; }
+/* (only after the flight: on return visits the copy is up from first paint,
+ * and starting it over again would flicker) */
+html.gh-pending .k-gh.is-hero .k-gh__copy > * { animation: k-gh-in 1.1s var(--ease) both; }
 .k-gh.is-hero .k-gh__copy > :nth-child(2) { animation-delay: .12s; }
 .k-gh.is-hero .k-gh__copy > :nth-child(3) { animation-delay: .24s; }
 .k-gh.is-hero .k-gh__copy > :nth-child(4) { animation-delay: .36s; }
 @keyframes k-gh-in { from { opacity: 0; transform: translateY(18px); } }
-/* without WebGL: a floating still sphere from the day imagery (not a horizon strip) */
-.k-gh.is-flat .k-gh__space::after { content: ''; position: absolute; left: 50%; top: 58%; width: min(68vw, 420px); aspect-ratio: 1; translate: -50% -42%; border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, rgba(255,255,255,.08) 0%, transparent 42%),
-    radial-gradient(circle at 50% 50%, transparent 58%, rgba(2,4,11,.92) 72%),
-    url('../images/earth/day-2k.jpg') center 40% / 210% auto;
-  box-shadow: 0 0 90px 28px rgba(40, 110, 255, .28), inset -18px -12px 40px rgba(0,0,0,.45); }
-html[data-accent] .k-gh.is-flat .k-gh__space::after {
-  box-shadow: 0 0 90px 28px color-mix(in srgb, var(--signal) 32%, transparent), inset -18px -12px 40px rgba(0,0,0,.45);
-}
 @media (max-width: 759px) {
   .k-gh__copy { padding-top: calc(var(--nav-h) + 22px); gap: 14px; }
   .k-gh__title { font-size: calc(clamp(38px, 11vw, 52px) * var(--type, 1)); }
@@ -4796,7 +4792,6 @@ html[data-accent] .k-gh.is-flat .k-gh__space::after {
   .k-gh .k-gh__btn { flex: 1 1 140px; }
   .k-gh__route { top: calc(var(--nav-h) + 6px); font-size: 10px; letter-spacing: .12em; }
   .k-gh.is-scene { height: 260vh; height: 260svh; }
-  .k-gh.is-flat .k-gh__space::after { width: min(78vw, 320px); top: 62%; }
   /* above the floating tab bar */
   .k-gh__hint { bottom: calc(var(--tabbar-h, 72px) + 22px); }
   .k-gh__hint-how { font-size: 10px; letter-spacing: .12em; }

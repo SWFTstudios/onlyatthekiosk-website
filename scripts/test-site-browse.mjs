@@ -88,6 +88,11 @@ console.log('Site browse smoke');
   p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   await p.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
+  // the headline must not flash up before the opening flight
+  const early = await p.evaluate(() => getComputedStyle(document.querySelector('.k-gh__title')).opacity);
+  if (early === '0') ok('home intro: headline hidden until the flight');
+  else bad('home intro: headline hidden until the flight', `opacity ${early} at first paint`);
+
   const webgl = await p.evaluate(() => {
     try {
       const c = document.createElement('canvas');
@@ -118,6 +123,9 @@ console.log('Site browse smoke');
     } catch (e) {
       bad('home intro: is-settled', e.message || e);
     }
+    await p.waitForFunction(() => getComputedStyle(document.querySelector('.k-gh__title')).opacity === '1', null, { timeout: 4000 })
+      .then(() => ok('home intro: headline shown once settled'))
+      .catch((e) => bad('home intro: headline shown once settled', e.message || e));
     const earth = await p.locator('[data-gh-earth]').count();
     if (earth) ok('home intro: earth present');
     else bad('home intro: earth present', 'missing');

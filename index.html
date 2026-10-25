@@ -13,11 +13,15 @@
   <meta name="apple-mobile-web-app-title" content="KIOSK">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','auto')||'auto',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
-  <!-- Load intro (markup and script at the top of <body>): decided before first
-       paint so it never flashes. Once per session; skipped for reduced motion,
-       Save-Data, automated browsers and Settings › Intro animation: Off.
-       ?intro=1 forces it, ?intro=0 skips it. -->
-  <script>(function(){var d=document.documentElement,q=location.search;if(/[?&]intro=0/.test(q))return;try{var s=JSON.parse(localStorage.getItem('kiosk:prefs')||'{}')||{},c=navigator.connection,rm=s.motion==='reduced'||(s.motion!=='full'&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(/[?&]intro=1/.test(q)||!(s.intro==='off'||rm||(c&&c.saveData)||navigator.webdriver||sessionStorage.getItem('kiosk:intro')==='1'))d.classList.add('has-intro')}catch(e){}})();</script>
+  <!-- Decided before first paint so nothing flashes:
+       · gh-pending: the hero's opening flight is still to come this session, so
+         its headline stays hidden until the planet settles (js/kiosk-glass.js
+         takes over; a 20 s safety net shows it whatever happens).
+       · has-intro: the load intro (markup and script at the top of <body>).
+         Once per session; skipped for reduced motion, Save-Data, automated
+         browsers and Settings › Intro animation: Off. ?intro=1 forces it,
+         ?intro=0 skips it. -->
+  <script>(function(){var d=document.documentElement,q=location.search;try{var s=JSON.parse(localStorage.getItem('kiosk:prefs')||'{}')||{},c=navigator.connection,ss=sessionStorage,rm=s.motion==='reduced'||(s.motion!=='full'&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(s.intro!=='off'&&!rm&&ss.getItem('kiosk:sky')!=='1'){d.classList.add('gh-pending');setTimeout(function(){d.classList.remove('gh-pending')},20000)}if(/[?&]intro=0/.test(q))return;if(/[?&]intro=1/.test(q)||!(s.intro==='off'||rm||(c&&c.saveData)||navigator.webdriver||ss.getItem('kiosk:intro')==='1'))d.classList.add('has-intro')}catch(e){}})();</script>
   <style>
     .k-intro{display:none}
     html.has-intro:not(.intro-out){overflow:hidden}
@@ -66,7 +70,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Homemade+Apple&family=IM+Fell+English:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet"></noscript>
-  <link href="css/kiosk-glass.css" rel="stylesheet">
+  <link href="css/kiosk-glass.css?v=20261025" rel="stylesheet">
   <link href="css/kiosk-editorial.css" rel="stylesheet">
   <link rel="preload" href="fonts/GeneralSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="icon" href="images/favicon.svg?v=kstar" type="image/svg+xml">
@@ -704,7 +708,7 @@
 
   <script defer src="js/kiosk-content.js"></script>
   <script defer src="js/kiosk-mockups.js"></script>
-  <script defer src="js/kiosk-glass.js"></script>
+  <script defer src="js/kiosk-glass.js?v=20261025"></script>
   <script defer src="js/vendor/lenis/lenis.min.js"></script>
   <script defer src="js/kiosk-editorial.js"></script>
   <script defer src="js/kiosk-account.js"></script>

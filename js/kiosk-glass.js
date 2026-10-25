@@ -6395,11 +6395,15 @@
   }
 
   /* ---------------------------------------------------------- globe hero
-   * Top of the home page: the opening flight round the satellite Earth lands
+   * Top of the home page: the opening flight round the dotted Earth lands
    * on the visitor's town, then the planet settles under the headline with
    * them pinned and everyone else here now pinned too (js/kiosk-globe-hero.js
-   * and js/kiosk-earth.js, loaded only here). The flight plays once per
-   * session (Settings › Intro animation: Off skips it).
+   * and js/kiosk-dotearth.js, loaded only here: plain 2D canvas, nothing to
+   * download, the same dots as the load intro). The flight plays once per
+   * session (Settings › Intro animation: Off skips it). While it's still to
+   * come the headline stays hidden (html.gh-pending, set before first paint
+   * in index.html), so it doesn't flash up and vanish again as the flight
+   * starts.
    * -------------------------------------------------------------------- */
   /* Where the visitor roughly is, so the opening flight lands over their town:
    * the city Cloudflare attaches to the request (/api/where, no permission
@@ -6455,6 +6459,8 @@
     try { seen = sessionStorage.getItem('kiosk:sky') === '1'; } catch (e) { seen = true; }
     const markSkySeen = () => { try { sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { /* private mode */ } };
     const journey = !seen && prefs.intro !== 'off' && !REDUCED;
+    const docEl = document.documentElement;
+    docEl.classList.toggle('gh-pending', journey);
     const count = $('[data-gh-count]', sec);
     let home = null;
     let hero = null;
@@ -6471,24 +6477,24 @@
       if (hero) hero.setLive(live.viewers, live.count);
     };
     document.addEventListener('kiosk:live', showLive, { signal });
-    if (!hasWebGL()) { sec.classList.add('is-flat'); visitorHome(signal).then((h) => { home = h; showLive(); }); return; }
+    // (?v: /js/* is cached for a year under a fixed name; bump it when these change)
     Promise.all([
-      window.KioskEarth ? null : loadScript('js/kiosk-earth.js'),
-      window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js'),
+      window.KioskDotEarth ? null : loadScript('js/kiosk-dotearth.js?v=20261025'),
+      window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js?v=20261025'),
       visitorHome(signal).then((h) => { home = h; }),
     ])
       .then(() => {
         if (signal.aborted) return;
         hero = window.KioskGlobeHero.mount(sec, {
           // the opening flight waits for the load intro to hand over
-          Earth: window.KioskEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen, gate: window.KioskIntro && window.KioskIntro.done,
+          Earth: window.KioskDotEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen, gate: window.KioskIntro && window.KioskIntro.done,
         });
         // the load intro bows out as soon as the planet is ready behind it
         hero.ready.then(() => document.dispatchEvent(new CustomEvent('kiosk:globe-ready'))).catch(() => {});
         showLive();
         signal.addEventListener('abort', () => hero.stop());
       })
-      .catch((err) => { sec.classList.add('is-flat'); console.warn('[KIOSK] globe hero unavailable', err); });
+      .catch((err) => { sec.classList.add('is-flat'); docEl.classList.remove('gh-pending'); console.warn('[KIOSK] globe hero unavailable', err); });
   }
 
   /* ------------------------------------------------------- live presence
