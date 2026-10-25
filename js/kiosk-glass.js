@@ -6477,10 +6477,9 @@
       if (hero) hero.setLive(live.viewers, live.count);
     };
     document.addEventListener('kiosk:live', showLive, { signal });
-    // (?v: /js/* is cached for a year under a fixed name; bump it when these change)
     Promise.all([
-      window.KioskDotEarth ? null : loadScript('js/kiosk-dotearth.js?v=20261025'),
-      window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js?v=20261025'),
+      window.KioskDotEarth ? null : loadScript('js/kiosk-dotearth.js'),
+      window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js'),
       visitorHome(signal).then((h) => { home = h; }),
     ])
       .then(() => {

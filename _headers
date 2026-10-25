@@ -1,7 +1,7 @@
 # Long-cache hashed/static assets. HTML stays short-cache so content edits land fast.
-# These names aren't hashed: when a script or stylesheet changes, bump the ?v=
-# on its links (and on loadScript() calls), or returning visitors keep the old
-# copy for a year.
+# The build (scripts/stamp-assets.js) stamps every script and stylesheet URL
+# with ?v=<content hash>, so a changed file gets a new URL; images and fonts
+# aren't stamped, so give a changed one a new file name.
 /images/*
   Cache-Control: public, max-age=31536000, immutable
 

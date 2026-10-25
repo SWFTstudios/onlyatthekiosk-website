@@ -19,6 +19,10 @@ for dir in css js images videos fonts; do
   cp -R "$dir" dist/
 done
 
+# /js/* and /css/* are cached for a year under fixed names (_headers): give
+# every reference a ?v= that changes with the file's content
+node scripts/stamp-assets.js dist
+
 echo "Compiling functions/ into the Worker..."
 npx --yes wrangler@4 pages functions build --outdir=dist/_worker.js
 
