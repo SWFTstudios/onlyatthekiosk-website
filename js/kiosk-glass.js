@@ -6488,9 +6488,13 @@
     ])
       .then(() => {
         if (signal.aborted) return;
+        const club = sec.getAttribute('data-gh-mode') === 'club';
         hero = window.KioskGlobeHero.mount(sec, {
           // the opening flight waits for the load intro to hand over
           Earth: window.KioskDotEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen, gate: window.KioskIntro && window.KioskIntro.done,
+          // club home: large bottom-pinned globe + scroll dive into black
+          frame: club ? 'horizon' : undefined,
+          dive: club,
         });
         // the load intro bows out as soon as the planet is ready behind it
         hero.ready.then(() => document.dispatchEvent(new CustomEvent('kiosk:globe-ready'))).catch(() => {});
@@ -6542,12 +6546,14 @@
     });
     // back from the back/forward cache: it checked out on the way away, so check in again
     window.addEventListener('pageshow', (e) => { if (e.persisted) beat(); });
-    // the nav's dot takes you to the globe; on the home page, down to where the whole planet's in view
+    // the nav's dot takes you to the globe; on the home page, down to the
+    // centred spinning planet (~0.45 of the scroll run — spin phase in dive mode)
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('[data-live-nav]');
       const hero = a && $('[data-globe-hero]');
       if (!hero) return;
       e.preventDefault();
+      // 0.45 lands in the spin phase for both the classic hero and the club dive
       const top = hero.offsetTop + Math.max(0, hero.offsetHeight - window.innerHeight) * 0.45;
       const lenis = window.KioskEditorial && window.KioskEditorial.lenis;
       if (lenis) lenis.scrollTo(top, { duration: 1.6 }); else window.scrollTo({ top, behavior: REDUCED ? 'auto' : 'smooth' });

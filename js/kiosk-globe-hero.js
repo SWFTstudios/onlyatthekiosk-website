@@ -15,6 +15,11 @@
  *      turns with the page: clockwise (seen from the north pole) going down,
  *      back again going up. Drag it (or swipe sideways) to spin it by hand.
  *
+ * Club mode (`frame: 'horizon'`, `dive: true`): big globe pinned to the bottom
+ * of the viewport under the headline with a continuous slow orbit; on scroll
+ * it pulls out to a centred spinning planet, then the camera dives in until a
+ * black mask fills the screen and hands off to the bento magazine below.
+ *
  * The Earth is a ball of dots, the same style as the load intro; any Earth
  * with the same camera and project() works (js/kiosk-earth.js does too).
  * Return visits skip the opening flight; reduced motion gets one still frame.
@@ -23,7 +28,7 @@
  * promise, when there is one: the home page's load intro resolves it as it
  * hands over, so the flight isn't spent behind it.
  *
- *   KioskGlobeHero.mount(section, { Earth, home, journey, reduced, onSeen, gate }) → { ready, setLive(viewers, count), stop() }
+ *   KioskGlobeHero.mount(section, { Earth, home, journey, reduced, onSeen, gate, frame, dive }) → { ready, setLive(viewers, count), stop() }
  */
 (function () {
   'use strict';
@@ -91,14 +96,23 @@
     const copy = section.querySelector('.k-gh__copy');
     const reduced = !!opts.reduced;
     const journey = !!opts.journey && !reduced;
+    const horizon = opts.frame === 'horizon';
+    const dive = !!opts.dive && !reduced;
+    const FOV = 0.55;
+    // continuous slow orbit (deg/s) when horizon-framed; sway otherwise
+    const ORBIT_DPS = 2.4;
     let alive = true;
     const isAlive = () => alive;
 
-    const earth = Earth && earthEl ? Earth.create(earthEl, { view: { lat: home.lat, lon: home.lon, alt: 3, tilt: 0, fov: 0.55, px: 0.5, py: 0.5 }, maxDpr: 1.5, relief: 1 }) : null;
+    const earth = Earth && earthEl ? Earth.create(earthEl, { view: { lat: home.lat, lon: home.lon, alt: 3, tilt: 0, fov: FOV, px: 0.5, py: 0.5 }, maxDpr: 1.5, relief: 1 }) : null;
     if (!earth || !earth.gl) { section.classList.add('is-flat'); if (earth) earth.destroy(); return { ready: Promise.reject(new Error('no globe')), setLive() {}, stop() {} }; }
     const gate = Promise.resolve(opts.gate).catch(() => {});
     // the tall scroll scene only once there's a planet to turn
-    if (!reduced) section.classList.add('is-scene');
+    if (!reduced) {
+      section.classList.add('is-scene');
+      if (dive) section.classList.add('is-dive');
+      if (horizon) section.classList.add('is-horizon');
+    }
     const ctx = fx.getContext('2d');
     let w = 0; let h = 0; let dpr = 1;
     const resize = () => {
@@ -110,9 +124,11 @@
 
     /* Hero framing: a full sphere floating in space under the headline —
      * small enough that the limb reads all the way around (not a flat
-     * horizon strip across the bottom of the screen). */
+     * horizon strip across the bottom of the screen).
+     * Horizon mode: a large sphere pinned low so the headline and CTAs sit
+     * above it and the lower half of the planet falls off-screen. */
     const V = { lat: home.lat, lon: home.lon, alt: 3, py: 0.5, sway: 0, hero: 0 };
-    function heroFrame() {
+    function floatingFrame() {
       const mobile = w < 760;
       // Whole ball in view: leave night sky around the limb
       const R = mobile
@@ -125,20 +141,40 @@
       const maxTop = h - 2 * R - (mobile ? 88 : 48);
       const top = clamp(Math.min(topPx, maxTop) / Math.max(1, h), 0.28, 0.58);
       const rh = R / Math.max(1, h);
-      const tanT = 2 * 0.55 * rh;
+      const tanT = 2 * FOV * rh;
       const D = 1 / Math.sin(Math.atan(tanT));
       const cap = Math.acos(1 / D) / D2R;
       const py = top + rh;
       // Home near the visual centre of the sphere (slightly above mid)
       const clearBottom = mobile ? 100 : 56;
       const targetY = clamp(top * h + R * 0.28, top * h + R * 0.12, h - clearBottom - R * 0.35);
-      const want = 2 * 0.55 * (py - targetY / h);
+      const want = 2 * FOV * (py - targetY / h);
       let lo = 0; let hi = Math.acos(1 / D) * 0.96;
       for (let i = 0; i < 30; i += 1) { const a = (lo + hi) / 2; if (Math.sin(a) / (D - Math.cos(a)) < want) lo = a; else hi = a; }
-      return { alt: D - 1, py, lat: clamp(home.lat - lo / D2R, -75, 75), cap, sway: mobile ? 0.12 : 0.28, top: top * h };
+      return { alt: D - 1, py, lat: clamp(home.lat - lo / D2R, -75, 75), cap, sway: mobile ? 0.12 : 0.28, top: top * h, R };
     }
+    function horizonFrame() {
+      const mobile = w < 760;
+      const last = copy && copy.lastElementChild;
+      const below = last ? copy.offsetTop + last.offsetTop + last.offsetHeight + 20 : h * 0.42;
+      // Large sphere: top under the CTAs, lower half off the bottom edge
+      const R = Math.max(w * (mobile ? 0.72 : 0.62), h * (mobile ? 0.48 : 0.55));
+      const topPx = Math.max(below, mobile ? h * 0.38 : h * 0.34);
+      const top = clamp(topPx / Math.max(1, h), 0.30, 0.55);
+      const rh = R / Math.max(1, h);
+      const tanT = 2 * FOV * rh;
+      const Dist = 1 / Math.sin(Math.atan(tanT));
+      const cap = Math.acos(clamp(1 / Dist, -1, 1)) / D2R;
+      const py = top + rh;
+      const targetY = top * h + R * 0.22;
+      const want = 2 * FOV * (py - targetY / h);
+      let lo = 0; let hi = Math.acos(clamp(1 / Dist, -1, 1)) * 0.96;
+      for (let i = 0; i < 30; i += 1) { const a = (lo + hi) / 2; if (Math.sin(a) / (Dist - Math.cos(a)) < want) lo = a; else hi = a; }
+      return { alt: Dist - 1, py, lat: clamp(home.lat - lo / D2R, -75, 75), cap, sway: 0, top: top * h, R };
+    }
+    const heroFrame = horizon ? horizonFrame : floatingFrame;
     // the whole planet in frame for the opening flight, whatever the screen shape
-    const farAlt = () => { const tanR = 0.55 * 0.62 * Math.min(w, h) / Math.max(1, h); return Math.sqrt(1 + 1 / (tanR * tanR)) - 1; };
+    const farAlt = () => { const tanR = FOV * 0.62 * Math.min(w, h) / Math.max(1, h); return Math.sqrt(1 + 1 / (tanR * tanR)) - 1; };
     let frame = heroFrame();
 
     /* Scrolled down: the whole planet, centred in what's left of the screen
@@ -149,18 +185,20 @@
       const top = (h - vh) + 84; const bottom = mobile ? 168 : 104;
       const avail = Math.max(120, vh - 84 - bottom);
       const R = Math.min(w * 0.46, avail * 0.48);
-      const D = 1 / Math.sin(Math.atan(2 * 0.55 * R / Math.max(1, h)));
-      return { alt: D - 1, py: (top + avail / 2) / Math.max(1, h), lat: clamp(home.lat * 0.7, -35, 45) };
+      const Dist = 1 / Math.sin(Math.atan(2 * FOV * R / Math.max(1, h)));
+      return { alt: Dist - 1, py: (top + avail / 2) / Math.max(1, h), lat: clamp(home.lat * 0.7, -35, 45), R };
     }
     let full = fullFrame();
 
     /* Scroll and drag. P eases after the page's scroll position p; the
      * framing (hero → whole planet) happens over the first stretch, the spin
-     * over the whole section. Drag adds its own turn, with a little coast. */
-    const SPIN = 320;            // degrees of turn across the section
-    const scene = { p: 0, P: 0, s: 0 };
+     * over the whole section. With dive:true the phases continue into a
+     * camera dive that fills the screen with a black disc. Drag adds its
+     * own turn, with a little coast. */
+    const SPIN = dive ? 420 : 320;            // degrees of turn across the section
+    const scene = { p: 0, P: 0, s: 0, d: 0 };
     const D = { lat: 0, lon: 0, vel: 0 };
-    let drag = null; let swayOff = false;
+    let drag = null; let swayOff = false; let blacked = false;
     // the section's place in the page, measured on resize: reading it per frame
     // would force a layout in the middle of every scroll
     let secTop = 0; let secH = 0;
@@ -172,10 +210,47 @@
     };
     let outShown = -1; let inShown = -1;
     function syncCopy() {
-      const out = clamp(scene.P / 0.2, 0, 1);
-      const inn = clamp((scene.P - 0.3) / 0.14, 0, 1) * V.hero;
+      // dive timeline: hold → pull-out → spin → dive → black
+      const out = dive
+        ? clamp((scene.P - 0.08) / 0.22, 0, 1)
+        : clamp(scene.P / 0.2, 0, 1);
+      let inn = dive
+        ? clamp((scene.P - 0.32) / 0.14, 0, 1) * V.hero
+        : clamp((scene.P - 0.3) / 0.14, 0, 1) * V.hero;
+      // fade the "you're on the map" hint as the dive begins
+      if (dive) inn *= (1 - clamp((scene.P - 0.58) / 0.12, 0, 1));
       if (Math.abs(out - outShown) > 0.002) { outShown = out; section.style.setProperty('--gh-out', out.toFixed(3)); section.classList.toggle('is-away', out > 0.5); }
       if (Math.abs(inn - inShown) > 0.002) { inShown = inn; section.style.setProperty('--gh-in', inn.toFixed(3)); }
+    }
+
+    /** Projected sphere radius in CSS pixels for the current alt / py. */
+    function sphereRadius(alt) {
+      const Dist = alt + 1;
+      const ang = Math.asin(clamp(1 / Dist, 0, 1));
+      return (h * Math.tan(ang)) / (2 * FOV);
+    }
+
+    /** Drive the black dive mask: circle grows from the globe until it fills. */
+    function syncMask() {
+      if (!dive) return;
+      const d = scene.d;
+      const mo = clamp((d - 0.05) / 0.2, 0, 1);
+      const baseR = sphereRadius(lerp(full.alt, 0.03, d));
+      const diag = Math.hypot(w, h) * 0.55;
+      const mr = lerp(baseR, diag, ease(clamp((d - 0.15) / 0.85, 0, 1)));
+      const my = (lerp(full.py, 0.5, d) * 100).toFixed(2) + '%';
+      section.style.setProperty('--gh-mr', `${Math.round(mr)}px`);
+      section.style.setProperty('--gh-my', my);
+      section.style.setProperty('--gh-mo', mo.toFixed(3));
+      const fill = d > 0.92 || mr >= diag * 0.98;
+      if (fill !== blacked) {
+        blacked = fill;
+        section.classList.toggle('is-black', fill);
+        if (fill && ctx) {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, w, h);
+        }
+      }
     }
     // short screens: the pinned stage is taller than the window, so it pins
     // by its bottom edge and the headline scrolls up out of the way first
@@ -223,11 +298,12 @@
       ctx.fillText(text, lx + 9, ly + bh / 2 + 4);
     };
 
+    let overlayFade = 1; // fade flights/pins during the dive without touching V.hero
     function overlay(now) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       ctx.lineCap = 'round';
-      const heroK = V.hero;
+      const heroK = V.hero * overlayFade;
       if (heroK > 0.01) {
         // flights: a bright head with a fading trail that runs out behind it,
         // kept below the planet's edge so they never cross the headline
@@ -286,7 +362,7 @@
       // the visitor: sonar rings off a bright pin
       const me = earth.project(home.lat, home.lon);
       if (me.front) {
-        const k = journey ? Math.max(heroK, HK.v) : 1;
+        const k = (journey ? Math.max(V.hero, HK.v) : 1) * overlayFade;
         if (k > 0.01) {
           for (let i = 0; i < 3; i += 1) {
             const ph = reduced ? 0.35 + i * 0.22 : ((now / SONAR) + i / 3) % 1;
@@ -308,22 +384,38 @@
     /* The loop: move the camera, let the Earth repaint, draw on top */
     let raf = 0; let on = true; let lastT = 0; let prevT = 0; const t0 = performance.now();
     // The camera: the flight/hero framing in V, eased toward the whole planet
-    // as the page scrolls, turned by the scroll and by hand. Scroll and drag
-    // only count once the planet has settled (V.hero), so nothing jumps.
+    // as the page scrolls, turned by the scroll and by hand. With dive:true
+    // a second phase eases alt down until a black disc fills the screen.
+    // Scroll and drag only count once the planet has settled (V.hero).
     const apply = () => {
-      scene.s = ease(clamp((scene.P - 0.02) / 0.36, 0, 1)) * V.hero;
+      if (dive) {
+        // 0–0.08 hold · 0.08–0.35 pull-out · 0.35–0.6 spin · 0.6–0.92 dive · 0.92–1 black
+        scene.s = ease(clamp((scene.P - 0.08) / 0.27, 0, 1)) * V.hero;
+        scene.d = ease(clamp((scene.P - 0.6) / 0.32, 0, 1)) * V.hero;
+      } else {
+        scene.s = ease(clamp((scene.P - 0.02) / 0.36, 0, 1)) * V.hero;
+        scene.d = 0;
+      }
       const s = scene.s;
+      const d = scene.d;
+      const diveAlt = lerp(full.alt, 0.03, d);
+      const divePy = lerp(full.py, 0.5, d);
       Object.assign(earth.view, {
         lat: clamp(lerp(V.lat, full.lat, s) + D.lat * V.hero, -72, 72),
         lon: V.lon + V.sway * (1 - s) + (scene.P * SPIN + D.lon) * V.hero,
-        alt: lerp(V.alt, full.alt, s),
-        py: lerp(V.py, full.py, s),
+        alt: d > 0.001 ? diveAlt : lerp(V.alt, full.alt, s),
+        py: d > 0.001 ? divePy : lerp(V.py, full.py, s),
         px: 0.5,
         tilt: 0,
       });
-      earth.invalidate();
+      syncMask();
+      // once the black disc fills, skip the Earth repaint — nothing to see
+      if (!blacked) earth.invalidate();
     };
-    earth.onFrame = () => overlay(performance.now());
+    earth.onFrame = () => {
+      overlayFade = dive ? (1 - clamp(scene.d / 0.35, 0, 1)) : 1;
+      overlay(performance.now());
+    };
     const loop = (now) => {
       raf = 0;
       if (!alive || !on) return;
@@ -332,7 +424,7 @@
       scene.p = progress();
       // following the scroll or a hand: every frame; idling: half rate is
       // plenty for a slow planet, and kind to phones
-      const busy = drag || Math.abs(scene.p - scene.P) > 0.0004 || Math.abs(D.vel) > 0.0004;
+      const busy = drag || Math.abs(scene.p - scene.P) > 0.0004 || Math.abs(D.vel) > 0.0004 || (horizon && V.hero > 0.99 && !blacked);
       if (busy || now - lastT > (w < 760 ? 50 : 30)) {
         lastT = now;
         // Lenis already eases the page; easing again on top would leave the planet trailing it
@@ -341,8 +433,15 @@
         if (Math.abs(scene.p - scene.P) < 0.0004) scene.P = scene.p;
         if (!drag && D.vel) { D.lon += D.vel * dt; D.vel *= Math.pow(0.94, dt / 16); if (Math.abs(D.vel) < 0.0004) D.vel = 0; }
         if (V.hero > 0.99) {
-          if (!swayOff) V.sway = Math.sin((now - t0) / 9000) * frame.cap * frame.sway;
-          if (now - lastSpawn > 900) { lastSpawn = now; spawn(now); }
+          if (!swayOff) {
+            if (horizon) {
+              // continuous slow orbit under the headline (and during pull-out)
+              V.lon += ORBIT_DPS * (dt / 1000) * (1 - scene.s * 0.35);
+            } else {
+              V.sway = Math.sin((now - t0) / 9000) * frame.cap * frame.sway;
+            }
+          }
+          if (now - lastSpawn > 900 && scene.d < 0.2) { lastSpawn = now; spawn(now); }
         }
         syncCopy();
         apply();
@@ -521,7 +620,10 @@
       },
       stop() {
         alive = false; io.disconnect(); window.removeEventListener('resize', onResize); window.removeEventListener('scroll', wake);
-        section.classList.remove('is-scene', 'is-away', 'is-dragging');
+        section.classList.remove('is-scene', 'is-away', 'is-dragging', 'is-dive', 'is-horizon', 'is-black', 'is-hero', 'is-settled', 'is-flying');
+        section.style.removeProperty('--gh-mr');
+        section.style.removeProperty('--gh-my');
+        section.style.removeProperty('--gh-mo');
         if (raf) cancelAnimationFrame(raf);
         earth.destroy();
       },

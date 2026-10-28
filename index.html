@@ -13,6 +13,8 @@
   <meta name="apple-mobile-web-app-title" content="KIOSK">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>/* Day/night + reader settings before first paint (Settings view in js/kiosk-glass.js) */(function(){var d=document.documentElement,g=function(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},p=g('kiosk:theme','dark')||'dark',s=g('kiosk:prefs',{})||{},h=new Date().getHours();d.setAttribute('data-theme',p==='auto'?(h>=6&&h<19?'light':'dark'):p);['accent','type','density','depth','corners','motion'].forEach(function(k){if(s[k])d.setAttribute('data-'+k,s[k])});if(s.lang&&s.lang!=='en'){d.lang=s.lang;d.classList.add('is-i18n')}})();</script>
+  <!-- Hide the globe-hero headline until the opening flight lands (first visit of the session). -->
+  <script>(function(){var d=document.documentElement;try{var s=JSON.parse(localStorage.getItem('kiosk:prefs')||'{}')||{},rm=s.motion==='reduced'||(s.motion!=='full'&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(s.intro!=='off'&&!rm&&sessionStorage.getItem('kiosk:sky')!=='1'){d.classList.add('gh-pending');setTimeout(function(){d.classList.remove('gh-pending')},20000)}}catch(e){}})();</script>
   <link rel="canonical" href="https://onlyatthekiosk.com/">
 
   <meta property="og:type" content="website">
@@ -60,159 +62,119 @@
   <main id="main">
     <div class="k-club" data-club-scroll>
       <div class="k-club__progress" data-club-progress aria-hidden="true"><i></i></div>
-      <a class="k-club__pip" data-club-pip href="#club" aria-label="Next chapter">
-        <img src="images/garage/andy-q50/01.webp" alt="">
-        <span data-club-pip-label>Next</span>
-      </a>
 
-      <!-- 01 HERO -->
-      <section class="k-club__chapter" id="hero" data-club-chapter data-club-label="The Club" aria-labelledby="club-hero-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/andy-q50/01.webp" alt="Night drive — cinematic still from the KIOSK garage" width="2400" height="1600" fetchpriority="high">
+      <!-- GLOBE HERO: opening flight → bottom-pinned orbiting globe under
+           headline → scroll pulls out, spins, dives to black → bento magazine.
+           (js/kiosk-globe-hero.js + js/kiosk-dotearth.js) -->
+      <section class="k-gh" id="hero" data-globe-hero data-gh-mode="club" aria-labelledby="gh-title">
+        <div class="k-gh__pin" data-gh-pin>
+          <div class="k-gh__stage" data-gh-stage aria-hidden="true">
+            <div class="k-gh__space"></div>
+            <canvas class="k-gh__earth" data-gh-earth></canvas>
+            <canvas class="k-gh__fx" data-gh-fx></canvas>
+            <div class="k-gh__fade"></div>
           </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
+          <p class="k-gh__route" data-gh-route aria-hidden="true">KSK 001</p>
+          <div class="k-wrap k-gh__copy">
             <svg class="k-club__brand" viewBox="0 0 1152 726" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M0 725.1C0 724.3 48.2 677.3 103.5 624C112.8 615 141.2 587.6 166.5 563.1C191.8 538.6 230 501.6 251.5 481C272.9 460.4 298.4 435.9 308 426.5C329.9 405.4 347.1 388.8 362.4 374.1L374.3 362.7L365.4 354.1C337.4 327 240.5 232.7 204.5 197.5C156.4 150.5 53.4 50.4 10.7 9C6.5 4.9 3 1.2 3 0.8C3 0.4 62.6 0 135.4 0L267.8 -0L271 3.7C273.9 7 282.8 16.4 323.6 59C335.1 71 383.5 122 431.9 173C452.5 194.7 475.3 218.5 482.5 225.8C495 238.4 495.8 239 499.6 239C504.1 239 507.1 236.7 508.9 231.7C509.7 229.8 509.8 194.1 509.3 114.4L508.7 -0.1L540.8 0.2C558.4 0.4 573.1 0.8 573.5 1.2C574.8 2.5 570.2 84.3 563.9 171.5C556.7 271.3 551.8 294.3 532.6 318.6C525.2 328 514.5 335.5 502 340.1C497.7 341.6 477.9 347.2 457.9 352.5C437.9 357.8 420.8 362.3 420 362.6C419.1 363 421.3 364 425 365C433.3 367.3 466.5 376.1 483.6 380.5C508.1 386.9 517.3 391.3 527.5 401.5C549.4 423.4 555.8 447.9 563 537.5C564.1 551.2 565.2 563.9 565.5 565.5C566.5 571.5 570.7 630.7 572 656C572.6 667.3 573.3 679 573.6 682.1L574.2 687.7L560.9 688.3C553.5 688.7 538.5 689 527.5 689.1L507.5 689.2L507 581.2C506.7 521.8 506.2 472.9 505.9 472.6C505.3 472 492.5 483.7 472 503.4C465.6 509.5 437.3 536.8 409 564C380.7 591.2 350.1 620.7 341 629.5C331.9 638.3 305.8 663.6 283 685.6L241.5 725.6L120.7 725.8C54.3 725.9 0 725.6 0 725.1ZM787.5 611.4C724.8 548.4 669.7 493.1 665 488.6C660.4 484.2 654.6 478.6 652.1 476.2C649.7 473.9 647.6 472 647.4 472C647.2 472 647 520.8 647 580.5L647 689L614.5 689C586.3 689 581.9 688.8 581.4 687.5C580.4 684.9 585.3 604.6 589 564C597.6 469.1 600.4 450.3 609.4 429.1C616 413.6 626.8 400.4 639.5 392.5C648.5 386.8 659 383.5 702.2 372.4C721.4 367.5 737 363.2 737 362.9C737 362.6 729.7 360.5 720.8 358.2C677 346.9 658.5 341.9 652.3 339.4C627.2 329.3 612.5 311.3 604.6 280.6C599.5 261.3 596.6 233.7 592 161C590.8 143.1 589.5 122 589 114C586.5 75.9 583.1 1.5 583.8 0.8C584.3 0.3 598.8 0.1 616.1 0.2L647.5 0.5L647.5 21.5C647.5 33.1 647.1 85 646.7 137C645.9 230.5 645.9 231.5 647.9 234.7C650.1 238.1 653.5 239.6 657.3 238.6C659.7 238 665.6 232 759.5 134C824.2 66.7 886.8 1.9 888.4 0.8C890 -0.3 1152 -0.2 1152 0.9C1152 1.4 1149.6 4 1146.6 6.7C1140.2 12.4 1066.7 83.1 1059.5 90.5C1054.4 95.7 979.9 167.4 912.5 232C892.1 251.5 869 273.8 861 281.5C831.2 310.4 783.4 355.9 780.8 357.9L778.1 360.1L794.8 376.3C826.9 407.5 847.1 427.1 921 499.5C1040.5 616.6 1089.5 664.6 1121.3 695.4C1137.6 711.3 1151 724.6 1151 724.9C1151 725.2 1094.8 725.6 1026.2 725.8L901.4 726.1L787.5 611.4Z"/></svg>
+            <p class="k-gh__live" data-gh-live><span class="k-gh__dot" aria-hidden="true"></span><span data-gh-count>Travelers from everywhere</span></p>
             <p class="k-club__eyebrow">Only at the KIOSK</p>
-            <h1 class="k-club__title" id="club-hero-title">For those who refuse <em>ordinary.</em></h1>
-            <p class="k-club__dek">A lifestyle club for action sports, motorsports, street culture, film and sound.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="members.html">Enter the club</a>
-              <a class="k-btn k-btn--ghost" href="#scene">Scroll the story</a>
+            <h1 class="k-gh__title" id="gh-title">For those who refuse <em class="k-serif">ordinary.</em></h1>
+            <p class="k-gh__dek">A lifestyle club for action sports, motorsports, street culture, film and sound.</p>
+            <div class="k-gh__cta">
+              <a class="k-btn k-btn--solid k-gh__btn" href="members.html">Enter the club</a>
+              <a class="k-btn k-gh__btn k-gh__btn--ghost" href="#scene">Scroll the story</a>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- 02 THE CLUB -->
-      <section class="k-club__chapter" id="club" data-club-chapter data-club-label="The Scene" aria-labelledby="club-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/andy-q50/08.webp" alt="" width="2400" height="1600" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">02 / The Club</p>
-            <h2 class="k-club__title" id="club-title">We don’t post culture. <span class="k-club__muted">We live it.</span></h2>
-            <p class="k-club__dek">Voyagers get early drops, Lost &amp; Found alerts, and the sessions behind the shoots. Membership is free.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="members.html">Become a Voyager</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 03 SCENE -->
-      <section class="k-club__chapter" id="scene" data-club-chapter data-club-label="Machines" aria-labelledby="scene-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/andy-q50/12.webp" alt="" width="2400" height="1600" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">03 / The Scene</p>
-            <h2 class="k-club__title" id="scene-title">Street. Strip. <em>Story.</em></h2>
-            <p class="k-club__dek">Films, interviews and photo diaries from the people who build, ride and compete.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="atlas.html">Enter the Scene</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 04 MACHINES -->
-      <section class="k-club__chapter" id="machines" data-club-chapter data-club-label="Cuts" aria-labelledby="machines-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/moses-r1m/01.webp" alt="" width="2400" height="1600" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">04 / Machines</p>
-            <h2 class="k-club__title" id="machines-title">Built to be <em>felt.</em></h2>
-            <p class="k-club__dek">Cars, bikes and the Street File — schematics, strip numbers and the owners behind them.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="the-garage.html">Open the Garage</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 05 CUTS -->
-      <section class="k-club__chapter" id="cuts" data-club-chapter data-club-label="Frequency" aria-labelledby="cuts-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/moses-r1m/06.webp" alt="" width="2400" height="1600" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">05 / Cuts</p>
-            <h2 class="k-club__title" id="cuts-title">Scored in <em>phonk.</em></h2>
-            <p class="k-club__dek">Cinematic edits from the road and the ramp. Watch free. Own the director’s cuts at the Counter.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="films.html">Watch Cuts</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 06 FREQUENCY -->
-      <section class="k-club__chapter" id="frequency" data-club-chapter data-club-label="Counter" aria-labelledby="freq-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/radio/clouds.webp" alt="" width="1600" height="900" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">06 / Frequency</p>
-            <h2 class="k-club__title" id="freq-title">Sound for the <em>session.</em></h2>
-            <p class="k-club__dek">KIOSK Radio follows you around the site. Press play once — it stays with you.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="radio.html">Tune in</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 07 COUNTER -->
-      <section class="k-club__chapter" id="counter" data-club-chapter data-club-label="Join" aria-labelledby="counter-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/product-lifestyle/tees/001-black-street-01.webp" alt="" width="1600" height="2000" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">07 / The Counter</p>
-            <h2 class="k-club__title" id="counter-title">Drops. Rares. <em>Only here.</em></h2>
-            <p class="k-club__dek">Streetwear and skate cut from the shoots, plus Lost &amp; Found pieces you travel to collect.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="vault.html">Shop the Counter</a>
-              <a class="k-btn k-btn--ghost" href="lost-and-found.html">Lost &amp; Found</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 08 JOIN -->
-      <section class="k-club__chapter" id="join" data-club-chapter data-club-label="Home" aria-labelledby="join-title">
-        <div class="k-club__pin">
-          <div class="k-club__media" data-club-media>
-            <img src="images/garage/andy-q50/19.webp" alt="" width="2400" height="1600" loading="lazy">
-          </div>
-          <div class="k-club__shade" aria-hidden="true"></div>
-          <div class="k-club__copy" data-club-copy>
-            <p class="k-club__eyebrow">08 / Join</p>
-            <h2 class="k-club__title" id="join-title">Ordinary <span class="k-club__muted">ends here.</span></h2>
-            <p class="k-club__dek">Become a Voyager, or get The Dispatch — one email per release.</p>
-            <div class="k-club__cta">
-              <a class="k-btn k-btn--solid" href="members.html">Become a Voyager</a>
-              <button class="k-btn k-btn--ghost" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
-            </div>
-          </div>
+          <p class="k-gh__hint" aria-hidden="true"><span class="k-gh__hint-now" data-gh-now>Travelers on the map right now</span><span class="k-gh__hint-how">Drag or scroll to spin the globe</span></p>
+          <!-- Dive mask sits above copy/hint so the black disc can cover the whole pin -->
+          <div class="k-gh__mask" aria-hidden="true"></div>
         </div>
       </section>
     </div>
+
+    <!-- Bento magazine: doors from the club chapters, revealed after the dive -->
+    <section class="k-bento" id="scene" aria-labelledby="bento-mast">
+      <div class="k-bento__grid">
+        <header class="k-bento__tile k-bento__tile--mast" data-bento-tile>
+          <p class="k-bento__kicker">KIOSK / Issue 01</p>
+          <h2 class="k-bento__title" id="bento-mast">Hudson Line</h2>
+          <p class="k-bento__dek">Action, motorsports, street — scored in phonk.</p>
+          <span class="k-bento__page" aria-hidden="true">p. 01</span>
+        </header>
+
+        <a class="k-bento__tile k-bento__tile--lead" href="atlas.html" data-bento-tile>
+          <img class="k-bento__media" src="images/garage/andy-q50/12.webp" alt="" width="2400" height="1600" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">The Scene</p>
+            <h3 class="k-bento__title">Street. Strip. <em>Story.</em></h3>
+            <p class="k-bento__dek">Films, interviews and photo diaries from the people who build, ride and compete.</p>
+            <span class="k-bento__page" aria-hidden="true">p. 02</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--cuts" href="films.html" data-bento-tile>
+          <img class="k-bento__media" src="images/garage/moses-r1m/06.webp" alt="" width="2400" height="1600" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <span class="k-bento__play" aria-hidden="true"></span>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">Cuts</p>
+            <h3 class="k-bento__title">Scored in <em>phonk.</em></h3>
+            <span class="k-bento__page" aria-hidden="true">p. 03</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--machines" href="the-garage.html" data-bento-tile>
+          <img class="k-bento__media" src="images/garage/moses-r1m/01.webp" alt="" width="2400" height="1600" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">Machines</p>
+            <h3 class="k-bento__title">Built to be <em>felt.</em></h3>
+            <span class="k-bento__page" aria-hidden="true">p. 04</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--freq" href="radio.html" data-bento-tile>
+          <img class="k-bento__media" src="images/radio/clouds.webp" alt="" width="1600" height="900" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker"><span class="k-bento__signal" aria-hidden="true"></span> Frequency</p>
+            <h3 class="k-bento__title">Sound for the <em>session.</em></h3>
+            <span class="k-bento__page" aria-hidden="true">p. 05</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--counter" href="vault.html" data-bento-tile>
+          <img class="k-bento__media" src="images/product-lifestyle/tees/001-black-street-01.webp" alt="" width="1600" height="2000" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">The Counter</p>
+            <h3 class="k-bento__title">Drops. Rares. <em>Only here.</em></h3>
+            <span class="k-bento__page" aria-hidden="true">p. 06</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--club" href="members.html" data-bento-tile>
+          <img class="k-bento__media" src="images/garage/andy-q50/08.webp" alt="" width="2400" height="1600" loading="lazy">
+          <div class="k-bento__shade" aria-hidden="true"></div>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">The Club</p>
+            <h3 class="k-bento__title">We don’t post culture. <span class="k-bento__muted">We live it.</span></h3>
+            <span class="k-bento__page" aria-hidden="true">p. 07</span>
+          </div>
+        </a>
+
+        <a class="k-bento__tile k-bento__tile--join" href="members.html" data-bento-tile>
+          <div class="k-bento__copy">
+            <p class="k-bento__kicker">Join</p>
+            <h3 class="k-bento__title">Ordinary <span class="k-bento__muted">ends here.</span></h3>
+            <p class="k-bento__dek">Become a Voyager — membership is free.</p>
+            <span class="k-bento__page" aria-hidden="true">p. 08</span>
+          </div>
+        </a>
+      </div>
+    </section>
 
     <!-- Lean after-theater: films + supply + dispatch (glass mounts) -->
     <div class="k-club-after">
