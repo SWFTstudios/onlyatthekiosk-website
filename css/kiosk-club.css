@@ -221,3 +221,367 @@
 
 html[data-motion='reduced'] .k-club__chapter { min-height: auto; }
 html[data-motion='reduced'] .k-club__pin { position: relative; height: auto; min-height: 100svh; }
+
+/* ==========================================================================
+   Club globe hero (data-gh-mode="club") — bottom-pinned orbiting globe,
+   dive-to-black mask, then the bento magazine.
+   ========================================================================== */
+
+.k-gh[data-gh-mode='club'] {
+  background: #0c0c0c;
+  color: #f2f0eb;
+}
+.k-gh[data-gh-mode='club'].is-dive.is-scene {
+  height: 400vh;
+  height: 400svh;
+}
+.k-gh[data-gh-mode='club'] .k-gh__space {
+  background:
+    radial-gradient(1px 1px at 8% 14%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 36%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 38% 9%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 57% 28%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
+    radial-gradient(1px 1px at 71% 11%, #fff 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 86% 31%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 94% 6%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 4% 46%, rgba(255, 255, 255, 0.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 64% 44%, rgba(255, 255, 255, 0.35) 50%, transparent 51%),
+    radial-gradient(42% 36% at 50% 72%, rgba(255, 255, 255, 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, #050505 0%, #0c0c0c 55%, #0c0c0c 100%);
+}
+.k-gh[data-gh-mode='club'] .k-gh__fade {
+  background: linear-gradient(180deg, rgba(12, 12, 12, 0) 0%, #0c0c0c 100%);
+}
+.k-gh[data-gh-mode='club'] .k-gh__title {
+  font-family: var(--f-serif, 'Instrument Serif', Georgia, serif);
+  font-size: clamp(2.4rem, 7.2vw, 5.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  max-width: 14ch;
+}
+.k-gh[data-gh-mode='club'] .k-gh__dek {
+  color: rgba(242, 240, 235, 0.72);
+  max-width: 34em;
+}
+.k-gh[data-gh-mode='club'] .k-gh__btn {
+  min-height: 44px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  padding: 0 20px;
+}
+.k-gh[data-gh-mode='club'] .k-btn--solid.k-gh__btn {
+  background: #fff;
+  color: #0c0c0c;
+  border-color: #fff;
+}
+.k-gh[data-gh-mode='club'] .k-gh__btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.k-gh[data-gh-mode='club'] .k-gh__btn--ghost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.k-gh[data-gh-mode='club'] .k-gh__live {
+  border-radius: 2px;
+  background: rgba(12, 12, 12, 0.55);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.k-gh[data-gh-mode='club'] .k-club__brand {
+  margin-bottom: 18px;
+}
+.k-gh[data-gh-mode='club'] .k-club__eyebrow {
+  margin: 0 0 12px;
+}
+
+/* Brand + eyebrow stay visible while the flight is still to come */
+html.gh-pending .k-gh[data-gh-mode='club']:not(.is-hero):not(.is-flat) .k-gh__copy > .k-club__brand,
+html.gh-pending .k-gh[data-gh-mode='club']:not(.is-hero):not(.is-flat) .k-gh__copy > .k-club__eyebrow {
+  opacity: 1;
+  animation: none;
+}
+
+/* Dive mask: black disc that grows from the globe until the screen is black.
+   Sits above copy/hint (z-index 5) so the wipe covers the whole pin. */
+.k-gh__mask {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: #000;
+  opacity: var(--gh-mo, 0);
+  clip-path: circle(var(--gh-mr, 0px) at 50% var(--gh-my, 50%));
+  will-change: clip-path, opacity;
+}
+.k-gh.is-black .k-gh__mask {
+  opacity: 1;
+  clip-path: none;
+}
+.k-gh.is-black .k-gh__earth,
+.k-gh.is-black .k-gh__fx,
+.k-gh.is-black .k-gh__space,
+.k-gh.is-black .k-gh__fade,
+.k-gh.is-black .k-gh__hint,
+.k-gh.is-black .k-gh__copy,
+.k-gh.is-black .k-gh__route {
+  visibility: hidden;
+}
+
+/* ==========================================================================
+   Bento magazine — digital issue spread revealed after the dive
+   ========================================================================== */
+
+.k-bento {
+  position: relative;
+  z-index: 2;
+  background: #000;
+  color: #f2f0eb;
+  padding: clamp(32px, 6vw, 72px) var(--gutter, 20px) clamp(48px, 8vw, 96px);
+}
+.k-bento__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.k-bento__tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #111;
+  color: inherit;
+  text-decoration: none;
+  min-height: 220px;
+  isolation: isolate;
+}
+.k-bento__tile--mast {
+  background: #0c0c0c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(28px, 5vw, 48px);
+  min-height: auto;
+  display: grid;
+  gap: 12px;
+  align-content: end;
+}
+.k-bento__tile--join {
+  background: #0c0c0c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(28px, 5vw, 40px);
+  display: grid;
+  align-content: end;
+}
+.k-bento__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 0;
+  transform: scale(1.04);
+  transition: transform 0.8s var(--ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.k-bento__tile:hover .k-bento__media {
+  transform: scale(1);
+}
+.k-bento__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 55%, rgba(0, 0, 0, 0.88) 100%);
+}
+.k-bento__copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  align-content: end;
+  height: 100%;
+  min-height: inherit;
+}
+.k-bento__tile--mast .k-bento__copy,
+.k-bento__tile--join .k-bento__copy {
+  padding: 0;
+  height: auto;
+}
+.k-bento__kicker {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 235, 0.55);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.k-bento__title {
+  margin: 0;
+  font-family: var(--f-serif, 'Instrument Serif', Georgia, serif);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: balance;
+}
+.k-bento__title em {
+  font-style: italic;
+}
+.k-bento__muted {
+  color: rgba(242, 240, 235, 0.42);
+  font-family: var(--f-sans, 'General Sans', system-ui, sans-serif);
+  font-style: normal;
+  font-weight: 300;
+}
+.k-bento__dek {
+  margin: 0;
+  max-width: 32em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(242, 240, 235, 0.7);
+}
+.k-bento__page {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  z-index: 3;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 235, 0.4);
+}
+.k-bento__tile--mast .k-bento__page,
+.k-bento__tile--join .k-bento__page {
+  position: static;
+  justify-self: start;
+  margin-top: 8px;
+}
+.k-bento__signal {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--signal, #ff5a1f);
+  box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.55);
+  animation: k-bento-pulse 2s infinite;
+}
+.k-bento__play {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+.k-bento__play::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 15px;
+  border-style: solid;
+  border-width: 9px 0 9px 14px;
+  border-color: transparent transparent transparent #fff;
+}
+.k-bento__tile--lead {
+  min-height: 320px;
+}
+
+@keyframes k-bento-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 90, 31, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 90, 31, 0); }
+}
+
+/* Initial state for scroll reveal (js/kiosk-club-scroll.js) */
+.k-bento__tile[data-bento-tile] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.k-bento__tile.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (min-width: 640px) {
+  .k-bento__grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  .k-bento__tile--mast { grid-column: 1 / -1; }
+  .k-bento__tile--lead { grid-column: 1 / 5; grid-row: span 2; min-height: 420px; }
+  .k-bento__tile--cuts { grid-column: 5 / 7; min-height: 200px; }
+  .k-bento__tile--machines { grid-column: 5 / 7; min-height: 200px; }
+  .k-bento__tile--freq { grid-column: 1 / 3; min-height: 240px; }
+  .k-bento__tile--counter { grid-column: 3 / 5; min-height: 240px; }
+  .k-bento__tile--club { grid-column: 5 / 7; min-height: 240px; }
+  .k-bento__tile--join { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1024px) {
+  .k-bento__grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 14px;
+  }
+  .k-bento__tile--mast { grid-column: 1 / 5; grid-row: span 2; min-height: 100%; }
+  .k-bento__tile--lead { grid-column: 5 / 13; grid-row: span 2; min-height: 480px; }
+  .k-bento__tile--cuts { grid-column: 1 / 5; min-height: 260px; }
+  .k-bento__tile--machines { grid-column: 5 / 9; min-height: 260px; }
+  .k-bento__tile--freq { grid-column: 9 / 13; min-height: 260px; }
+  .k-bento__tile--counter { grid-column: 1 / 5; min-height: 280px; }
+  .k-bento__tile--club { grid-column: 5 / 9; min-height: 280px; }
+  .k-bento__tile--join { grid-column: 9 / 13; min-height: 280px; }
+  .k-bento__title { font-size: clamp(1.8rem, 2.4vw, 2.8rem); }
+  .k-bento__tile--lead .k-bento__title { font-size: clamp(2.4rem, 3.6vw, 4rem); }
+}
+
+@media (max-width: 640px) {
+  .k-gh[data-gh-mode='club'] .k-gh__title {
+    font-size: clamp(2.1rem, 11vw, 3.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-gh[data-gh-mode='club'].is-dive.is-scene,
+  .k-gh[data-gh-mode='club'].is-scene {
+    height: auto;
+  }
+  .k-gh[data-gh-mode='club'] .k-gh__pin {
+    position: relative;
+    top: auto;
+  }
+  .k-gh__mask { display: none; }
+  .k-bento__tile[data-bento-tile] {
+    opacity: 1;
+    transform: none;
+  }
+  .k-bento__media { transform: none; transition: none; }
+  .k-bento__signal { animation: none; }
+}
+
+html[data-motion='reduced'] .k-gh[data-gh-mode='club'].is-dive.is-scene,
+html[data-motion='reduced'] .k-gh[data-gh-mode='club'].is-scene {
+  height: auto;
+}
+html[data-motion='reduced'] .k-gh[data-gh-mode='club'] .k-gh__pin {
+  position: relative;
+  top: auto;
+}
+html[data-motion='reduced'] .k-gh__mask { display: none; }
+html[data-motion='reduced'] .k-bento__tile[data-bento-tile] {
+  opacity: 1;
+  transform: none;
+}
