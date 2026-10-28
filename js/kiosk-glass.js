@@ -237,10 +237,10 @@
   /* ----------------------------------------------------------- chrome */
 
   const NAV = [
-    { id: 'journal', label: 'Atlas', href: 'atlas.html' },
-    { id: 'films', label: 'Films', href: 'films.html' },
+    { id: 'journal', label: 'Scene', href: 'atlas.html' },
+    { id: 'films', label: 'Cuts', href: 'films.html' },
     { id: 'radio', label: 'Radio', href: 'radio.html' },
-    { id: 'garage', label: 'Garage', href: 'the-garage.html' },
+    { id: 'garage', label: 'Machines', href: 'the-garage.html' },
     { id: 'vault', label: 'Shop', href: 'vault.html' },
   ];
 
@@ -258,39 +258,38 @@
     close: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
     more: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="17.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
   };
-  // The menu is six doors by intent, not a flat page list: each door is a
-  // verb with a tagline, and every page lives under exactly one door.
-  const MENU_HOME = { id: 'home', label: 'Home', href: 'index.html', note: 'Front page', icon: 'home' };
+  // Six club doors by intent — lifestyle club IA (not a travel terminal).
+  const MENU_HOME = { id: 'home', label: 'Home', href: 'index.html', note: 'The club', icon: 'home' };
   const MENU_GROUPS = [
-    { door: 'READ', tag: 'Stories from the road', links: [
-      { id: 'journal', label: 'Atlas', href: 'atlas.html', note: 'All visual & written media', icon: 'journal' },
+    { door: 'SCENE', tag: 'Culture from the street and the strip', links: [
+      { id: 'journal', label: 'The Scene', href: 'atlas.html', note: 'Stories, edits & field notes', icon: 'journal' },
       { id: 'archive', label: 'The Journal', href: 'archive.html', note: 'Monthly magazine archive', icon: 'journal' },
     ] },
-    { door: 'WATCH', tag: 'Films & moving pictures', links: [
+    { door: 'CUTS', tag: 'Films, edits, every frame', links: [
       { id: 'films', label: 'Films', href: 'films.html', note: 'Screening room', icon: 'films' },
       { id: 'gallery', label: 'Gallery', href: 'gallery.html', note: 'Every frame', icon: 'films' },
     ] },
-    { door: 'LISTEN', tag: 'Phonk for the drive', links: [
+    { door: 'FREQUENCY', tag: 'Sound for the session', links: [
       { id: 'radio', label: 'Radio', href: 'radio.html', note: 'Radio, song wheel & Your Spotify', icon: 'radio' },
     ] },
-    { door: 'SHOP', tag: 'Only at the counter', links: [
+    { door: 'MACHINES', tag: 'Builds, meets, Street File', links: [
+      { id: 'garage', label: 'The Garage', href: 'the-garage.html', note: 'The Street File', icon: 'garage' },
+    ] },
+    { door: 'COUNTER', tag: 'Drops, rares, partners', links: [
       { id: 'vault', label: 'Shop', href: 'vault.html', note: 'Supply', icon: 'shop' },
       { id: 'hunt', label: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds', icon: 'pin' },
       { id: 'store', label: 'Stores', href: 'store.html', note: 'Partner stores', icon: 'store' },
     ] },
-    { door: 'JOIN', tag: 'Become a Voyager', links: [
-      { id: 'members', label: 'Voyagers', href: 'members.html', note: 'Members & check-in', icon: 'pin' },
+    { door: 'CLUB', tag: 'Members only energy', links: [
+      { id: 'members', label: 'Voyagers', href: 'members.html', note: 'The club · check-in', icon: 'pin' },
       { id: 'partner', label: 'Partner Hub', href: 'partner.html', note: 'Sell & stock at the KIOSK', icon: 'store' },
-    ] },
-    { door: 'EXPLORE', tag: 'Maps, machines & live sky', links: [
-      { id: 'garage', label: 'The Garage', href: 'the-garage.html', note: 'The Street File', icon: 'garage' },
     ] },
   ];
   const MENU_TOTAL = 1 + MENU_GROUPS.reduce((n, g) => n + g.links.length, 0);
   const TABS = [
     { id: 'home', label: 'Home', href: 'index.html', icon: TAB_ICONS.home },
-    { id: 'journal', label: 'Atlas', href: 'atlas.html', icon: TAB_ICONS.journal },
-    { id: 'films', label: 'Films', href: 'films.html', icon: TAB_ICONS.films },
+    { id: 'journal', label: 'Scene', href: 'atlas.html', icon: TAB_ICONS.journal },
+    { id: 'films', label: 'Cuts', href: 'films.html', icon: TAB_ICONS.films },
     { id: 'radio', label: 'Radio', href: 'radio.html', icon: TAB_ICONS.radio },
     { id: 'vault', label: 'Shop', href: 'vault.html', icon: TAB_ICONS.shop },
   ];
@@ -303,9 +302,8 @@
   }
 
   /* ------------------------------------------------- day / night + clock
-   * Theme follows the visitor's local time (light 06:00–18:59) unless they
-   * pick one. The <head> of each page sets data-theme before paint; this
-   * keeps it in sync, cycles the toggle and ticks the clocks.
+   * Club default is dark (Forge cinematic). Visitors can pick Light or Auto
+   * (local time) in Settings. Head scripts set data-theme before paint.
    * -------------------------------------------------------------------- */
   const THEME_KEY = 'kiosk:theme';
   const THEME_ICONS = {
@@ -313,15 +311,15 @@
     light: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3.6" stroke="currentColor" stroke-width="1.4"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     dark: '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M15.6 12.6A6.8 6.8 0 0 1 7.4 4.4a6.8 6.8 0 1 0 8.2 8.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
   };
-  const themeIcon = (mode) => THEME_ICONS[mode] || THEME_ICONS.auto;
-  const themePref = () => store.get(THEME_KEY, 'auto');
+  const themeIcon = (mode) => THEME_ICONS[mode] || THEME_ICONS.dark;
+  const themePref = () => store.get(THEME_KEY, 'dark');
   const autoTheme = () => { const h = new Date().getHours(); return h >= 6 && h < 19 ? 'light' : 'dark'; };
   function applyTheme() {
     const pref = themePref();
     const mode = pref === 'auto' ? autoTheme() : pref;
     document.documentElement.dataset.theme = mode;
     const meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', mode === 'dark' ? '#0b0b0c' : '#ffffff');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#0c0c0c' : '#ffffff');
     $$('[data-theme-toggle]').forEach((b) => {
       (b.querySelector('[data-theme-ico]') || b).innerHTML = themeIcon(pref);
       b.setAttribute('aria-label', `Theme: ${pref === 'auto' ? `auto (${mode === 'dark' ? 'night' : 'day'})` : pref === 'dark' ? 'night' : 'day'}`);
@@ -334,7 +332,7 @@
     document.addEventListener('click', (e) => {
       if (!e.target.closest('[data-theme-toggle]')) return;
       const inMenu = !!e.target.closest('.k-sheet__q');   // read before applyTheme swaps the icon out
-      const order = ['auto', 'light', 'dark'];
+      const order = ['dark', 'light', 'auto'];
       const next = order[(order.indexOf(themePref()) + 1) % order.length];
       store.set(THEME_KEY, next);
       applyTheme();
@@ -374,7 +372,7 @@
 
     const nav = document.createElement('header');
     nav.className = 'k-nav';
-    // Glass header: local clock and who's here now · the K star (centre) · day/night · radio · menu. Everything else lives in the menu.
+    // Club chrome: sparse header · K star centre · Navigate opens the sheet.
     nav.innerHTML = `
       <div class="k-nav__inner">
         <div class="k-nav__left">
@@ -384,12 +382,15 @@
         <a class="k-logo" href="index.html" aria-label="KIOSK home"><span class="k-logo__mark">${KIOSK_SYMBOL}</span></a>
         <nav class="k-nav__links" aria-label="Primary">${links}</nav>
         <div class="k-nav__actions">
-          <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: auto">${themeIcon('auto')}</button>
+          <button class="k-nav__theme" type="button" data-theme-toggle aria-label="Theme: dark">${themeIcon('dark')}</button>
           <button class="k-nav__theme k-nav__settings" type="button" data-settings-open aria-label="Open settings">${icon.gear}</button>
           <button class="k-nav__theme k-nav__account is-hidden" type="button" data-account-open aria-label="Account" hidden>${icon.user}</button>
           <button class="k-nav__theme k-nav__cart is-hidden" type="button" data-cart-open aria-label="Cart" hidden><span class="k-nav__cart-icon">${icon.bag}</span><span class="k-nav__cart-count" data-cart-count hidden>0</span></button>
           <a class="k-nav__radio" href="radio.html"><span class="k-live" aria-hidden="true"></span><canvas class="k-nav__wave" data-wave data-wave-bar="2" data-wave-gap="2" aria-hidden="true"></canvas><span class="k-nav__radio-label">Radio</span></a>
-          <button class="k-nav__menu-btn" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Open menu"><span></span></button>
+          <button class="k-nav__navigate" type="button" aria-expanded="false" aria-controls="k-sheet" aria-label="Navigate">
+            <span class="k-nav__navigate-label">Navigate</span>
+            <span class="k-nav__menu-btn" aria-hidden="true"><span></span></span>
+          </button>
         </div>
       </div>`;
 
@@ -399,22 +400,22 @@
     sheet.setAttribute('aria-hidden', 'true');
     sheet.innerHTML = `
       <div class="k-sheet__top">
-        <p class="k-eyebrow">Only at the KIOSK · Issue ${esc((C.issue || {}).number || '01')}</p>
-        <p class="k-sheet__clock" aria-hidden="true"><span data-clock>--:--:--</span> <small data-clock-zone></small></p>
+        <p class="k-eyebrow">KIOSK · The Club · Issue ${esc((C.issue || {}).number || '01')}</p>
+        <button class="k-sheet__close" type="button" data-sheet-close aria-label="Close menu">Close <span aria-hidden="true">×</span></button>
       </div>
       <ul class="k-sheet__links k-sheet__links--home">${menuHome}</ul>
       <div class="k-sheet__groups">${menuGroups}</div>
       <div class="k-sheet__foot" style="--i:${MENU_TOTAL}">
         <div class="k-sheet__quick">
           <button class="k-sheet__q" type="button" data-settings-open><i>${icon.gear}</i><span>Settings<small>Look &amp; feel</small></span></button>
-          <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: auto"><i data-theme-ico>${themeIcon('auto')}</i><span>Theme<small data-theme-sub>Auto</small></span></button>
+          <button class="k-sheet__q k-sheet__theme" type="button" data-theme-toggle aria-label="Theme: dark"><i data-theme-ico>${themeIcon('dark')}</i><span>Theme<small data-theme-sub>Night</small></span></button>
           <button class="k-sheet__q" type="button" data-onboard-open><i>${PLANE_ICON}</i><span>Check in<small data-checkin-sub>1 minute</small></span></button>
           <button class="k-sheet__q is-hidden" type="button" data-account-open hidden><i>${icon.user}</i><span>Account<small data-account-sub>Sign in</small></span></button>
           <button class="k-sheet__q is-hidden" type="button" data-cart-open hidden><i>${icon.bag}<span class="k-nav__cart-count" data-cart-count hidden>0</span></i><span>Cart<small>Your bag</small></span></button>
         </div>
         <div class="k-sheet__pills">
-          <button class="k-btn k-btn--sm k-btn--solid" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
-          <button class="k-btn k-btn--sm" type="button" data-notify="stockist" data-notify-title="Sell at the KIOSK">Sell at the KIOSK</button>
+          <a class="k-btn k-btn--sm k-btn--solid" href="members.html">Become a Voyager</a>
+          <button class="k-btn k-btn--sm" type="button" data-notify="dispatch" data-notify-title="The Dispatch">Join the Dispatch</button>
           <a class="k-btn k-btn--sm" href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a>
           <a class="k-btn k-btn--sm" href="about.html">About</a>
           <a class="k-btn k-btn--sm" href="contact.html">Contact</a>
@@ -455,11 +456,11 @@
     document.addEventListener('kiosk:taste', syncQuickSubs);
     document.addEventListener('kiosk:account', syncQuickSubs);
 
-    const btn = $('.k-nav__menu-btn', nav);
+    const btn = $('.k-nav__navigate', nav);
     const more = $('[data-tab-more]', tabbar);
     const setOpen = (open) => {
       btn.setAttribute('aria-expanded', String(open));
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      btn.setAttribute('aria-label', open ? 'Close navigate' : 'Navigate');
       more.setAttribute('aria-expanded', String(open));
       more.setAttribute('aria-label', open ? 'Close menu' : 'More');
       more.innerHTML = open ? TAB_ICONS.close : TAB_ICONS.more;
@@ -479,7 +480,9 @@
       pill.style.setProperty('--i', String($$('.k-tabbar__item', pill).indexOf(a)));
       pill.removeAttribute('data-idle');
     });
-    sheet.addEventListener('click', (e) => { if (e.target.closest('a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open], [data-onboard-open]')) setOpen(false); });
+    sheet.addEventListener('click', (e) => {
+      if (e.target.closest('[data-sheet-close], a, [data-notify], [data-settings-open], [data-account-open], [data-cart-open], [data-onboard-open]')) setOpen(false);
+    });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 
     const footer = document.createElement('footer');
@@ -489,10 +492,10 @@
         <div class="k-footer__grid">
           <div>
             <p class="k-eyebrow">Only at the KIOSK</p>
-            <p class="k-lede k-mt-s">A global travel magazine for the curious. Cars, motorcycles, sports, culture and fashion, plus pieces and rare finds you can only get at the kiosk.</p>
+            <p class="k-lede k-mt-s">A lifestyle club for action sports, motorsports, street culture, film and sound. Members, drops and rare finds — only at the kiosk.</p>
           </div>
-          <div><h4>Watch + Listen</h4><ul><li><a href="atlas.html">The Atlas</a></li><li><a href="archive.html">The Journal</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="films.html">Films</a></li><li><a href="atlas.html?type=photo">Photo stories</a></li><li><a href="atlas.html?type=article">Articles &amp; interviews</a></li><li><a href="radio.html">KIOSK Radio</a></li></ul></div>
-          <div><h4>Shop</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li><li><a href="partner.html">Partner Hub</a></li></ul></div>
+          <div><h4>The Club</h4><ul><li><a href="atlas.html">The Scene</a></li><li><a href="archive.html">The Journal</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="films.html">Films</a></li><li><a href="radio.html">Radio</a></li><li><a href="the-garage.html">The Garage</a></li><li><a href="members.html">Voyagers</a></li></ul></div>
+          <div><h4>Counter</h4><ul><li><a href="vault.html?c=quotes">Words to wear</a></li><li><a href="vault.html?c=travel">Travel goods</a></li><li><a href="lost-and-found.html">Lost &amp; Found</a></li><li><a href="vault.html?c=apparel">Apparel</a></li><li><a href="vault.html?c=skate">Skate</a></li><li><a href="vault.html?c=accessories">Accessories</a></li><li><a href="vault.html?c=luts">LUT packs</a></li><li><a href="store.html">Partner stores</a></li><li><a href="partner.html">Partner Hub</a></li></ul></div>
           <div><h4>KIOSK</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="faq.html">FAQ</a></li><li><a href="shipping-returns.html">Shipping + Returns</a></li><li><a href="https://www.instagram.com/onlyatthekiosk" target="_blank" rel="noopener noreferrer">Instagram</a></li></ul></div>
         </div>
         <div class="k-footer__mark" aria-hidden="true"><span class="k-rk">K</span>IOSK</div>
@@ -2461,8 +2464,7 @@
    * Opened from the gear in the header, "Settings" in the menu or #settings.
    * -------------------------------------------------------------------- */
   const HOME_SECTIONS = [
-    ['garage', 'Latest stories'], ['globe', 'The Atlas'], ['departments', 'The Departments'], ['about', 'Why the kiosk'],
-    ['make', 'What we make'], ['films', 'Films'], ['mosaic', 'The Mosaic'], ['radio', 'Radio'], ['shop', 'Supply & co.'], ['dispatch', 'The Dispatch'],
+    ['films', 'Cuts'], ['shop', 'The Counter'], ['dispatch', 'The Dispatch'],
   ];
   const ACCENTS = [['signal', 'Signal', '#ff5b23'], ['cobalt', 'Cobalt', '#2f5bff'], ['acid', 'Acid', '#b6f500'], ['rose', 'Rose', '#ff3d8b'], ['gold', 'Gold', '#e2a72e'], ['mono', 'Mono', 'currentColor']];
 
@@ -2516,7 +2518,7 @@
 
           <section class="k-set__group" aria-labelledby="k-set-look">
             <h3 id="k-set-look">Appearance</h3>
-            <div class="k-set__row"><span>Theme</span>${seg('theme', [['auto', 'Auto'], ['light', 'Day'], ['dark', 'Night']], themePref(), 'Theme')}</div>
+            <div class="k-set__row"><span>Theme</span>${seg('theme', [['dark', 'Night'], ['light', 'Day'], ['auto', 'Auto']], themePref(), 'Theme')}</div>
             <div class="k-set__row"><span>Accent</span>
               <div class="k-set__swatches" role="radiogroup" aria-label="Accent">${ACCENTS.map(([v, l, c]) => `<button type="button" role="radio" data-pref="accent" data-value="${v}" aria-checked="${String(prefs.accent === v)}" aria-label="${l}" title="${l}" style="--sw:${c}"></button>`).join('')}</div>
             </div>
@@ -2610,7 +2612,7 @@
       if (e.target.closest('[data-settings-reset]')) {
         const lang = prefs.lang;
         Object.assign(prefs, JSON.parse(JSON.stringify(PREF_DEFAULTS)));
-        store.set(THEME_KEY, 'auto'); applyTheme();
+        store.set(THEME_KEY, 'dark'); applyTheme();
         savePrefs(); applyHome();
         if (lang !== 'en') setLanguage('en');
         refreshSettings();
@@ -3657,7 +3659,7 @@
         <p class="k-feature-card__sub">${[formatLabel(lead), place(lead), lead.runtime].filter(Boolean).map(esc).join(' · ')}</p>
         ${featureMedia(lead, { meta: '' })}
       </a>
-      <a class="k-bar" href="atlas.html">Open the Atlas<span class="k-arrow">${icon.arrow}</span></a>`);
+      <a class="k-bar" href="atlas.html">Enter the Scene<span class="k-arrow">${icon.arrow}</span></a>`);
     // Latest stories: the same rail (and card size) as the departments, with a type filter
     const railEl = mount('garage-rail');
     const renderRail = (type) => {
@@ -4435,7 +4437,7 @@
    *                each labelled with its department (desk).
    * -------------------------------------------------------------------- */
 
-  const DESKS = { travel: 'Travel', automotive: 'Automotive', music: 'Music', fashion: 'Fashion' };
+  const DESKS = { travel: 'Travel', automotive: 'Automotive', action: 'Action', music: 'Music', fashion: 'Fashion' };
   const ARROW_L = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const ARROW_R = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -4511,7 +4513,7 @@
 
   /** Everything the mosaic can show, sorted into departments. */
   function mosaicPool(only) {
-    const out = { automotive: [], travel: [], fashion: [], music: [] };
+    const out = { automotive: [], travel: [], action: [], fashion: [], music: [] };
     const push = (desk, item) => (out[DESKS[desk] ? desk : 'automotive']).push({ ...item, desk: DESKS[desk] ? desk : 'automotive' });
     features.filter((f) => !only || f.slug === only).forEach((f) => {
       (f.gallery || []).forEach((g) => {
@@ -4533,8 +4535,9 @@
         if (i < 2) push('fashion', { kind: 'quote', text: p.quote, link: `vault.html?c=quotes#${p.id}`, cta: `${p.title} · ${price(p)}` });
         if ((p.lifestyle || [])[0]) push('fashion', { kind: 'photo', src: p.lifestyle[0], thumb: p.lifestyle[0], caption: `${p.title}: “${p.quote}”`, meta: 'Words to wear · on location', place: 'Only at the KIOSK', story: '' });
       });
-      push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'KIOSK Radio' });
-      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'atlas.html', cta: 'The Journal' });
+      push('music', { kind: 'quote', text: 'The phonk behind every film, free on every page.', link: 'radio.html', cta: 'Frequency' });
+      push('travel', { kind: 'quote', text: 'Machines, people & the long way home.', link: 'atlas.html', cta: 'The Scene' });
+      push('action', { kind: 'quote', text: 'Skate, ramp, strip — culture from the session.', link: 'vault.html?c=skate', cta: 'Skate at the Counter' });
     }
     return out;
   }
@@ -4692,9 +4695,10 @@
     const mix = (C.mixes || [])[0];
     const desks = [
       { id: 'automotive', n: '01', title: 'Automotive', dek: 'Cars, bikes and the people who keep them running.', href: 'atlas.html?desk=automotive', img: (autoPhoto || {}).thumb, count: features.filter((f) => f.desk === 'automotive').length, unit: 'stories' },
-      { id: 'travel', n: '02', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'atlas.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
-      { id: 'music', n: '03', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
-      { id: 'fashion', n: '04', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
+      { id: 'action', n: '02', title: 'Action', dek: 'Skate, ramp and session culture from the club.', href: 'atlas.html?desk=action', img: (firstPhoto('action') || firstPhoto('travel') || {}).thumb, count: features.filter((f) => f.desk === 'action').length || (C.products || []).filter((p) => p.category === 'skate').length, unit: 'stories' },
+      { id: 'travel', n: '03', title: 'Travel', dek: 'Bridges, rivers and cities after dark.', href: 'atlas.html', img: (firstPhoto('travel', autoPhoto && autoPhoto.story) || {}).thumb, count: pool.travel.length, unit: 'frames' },
+      { id: 'music', n: '04', title: 'Music', dek: 'Phonk playlists that follow you around the site.', href: 'radio.html', img: mix && mix.cover, tone: mix && mix.tone, count: (C.mixes || []).length, unit: 'playlists' },
+      { id: 'fashion', n: '05', title: 'Fashion', dek: 'Streetwear in colourways pulled from the shoots.', href: 'vault.html', product: hoodie, count: (C.products || []).filter((p) => ['apparel', 'headwear'].includes(p.category)).length, unit: 'pieces' },
     ];
     return desks.map((d) => `
       <a class="k-dept k-dept--${d.id}" href="${d.href}" data-reveal>
@@ -4815,10 +4819,10 @@
   const INTEREST_MATCH = {
     cars: { desks: ['automotive'], words: /\b(car|cars|meet|stance|drift|jdm|rollers|build|garage|infiniti|bmw|honda civic|night drive)\b/i },
     motorcycles: { words: /\b(motorcycle|moto|bike|superbike|rider|riders|r1m?|r3|cbr|yamaha|ducati|powersports)\b/i },
-    sports: { words: /\b(sport|race|racing|track|skate|ball|game)\b/i },
+    sports: { desks: ['action'], words: /\b(sport|race|racing|track|skate|ball|game|session)\b/i },
     travel: { desks: ['travel'], words: /\b(travel|trip|road|city|night drive|vhs)\b/i },
     fashion: { desks: ['fashion'], words: /\b(fashion|streetwear|fit|style|sourcing|thrift)\b/i },
-    skate: { words: /\b(skate|board|park)\b/i },
+    skate: { desks: ['action'], words: /\b(skate|board|park|bmx|ramp|deck)\b/i },
     music: { desks: ['music'], words: /\b(music|mix|phonk|record|tape|vhs|sound)\b/i },
     culture: { words: /\b(culture|people|community|meet|lunar)\b/i },
     food: { words: /\b(food|eat|kitchen|market)\b/i },
@@ -7142,16 +7146,16 @@
    * the home page is the main concourse with a directory to the rest.
    * -------------------------------------------------------------------- */
   const TERMINALS = [
-    { id: 'home', t: 'T0', name: 'Main concourse', href: 'index.html', note: 'Departures from every desk' },
-    { id: 'vault', t: 'T1', name: 'Supply terminal', href: 'vault.html', note: 'Clothing, travel goods and rare finds' },
-    { id: 'films', t: 'T2', name: 'Screening room', href: 'films.html', note: 'Films, cinematic edits and home movies' },
-    { id: 'journal', t: 'T3', name: 'The Atlas', href: 'atlas.html', note: 'Every story, interview, vlog and gallery' },
-    { id: 'radio', t: 'T4', name: 'In-flight radio', href: 'radio.html', note: 'Phonk, mixes and audio notes' },
-    { id: 'hunt', t: 'T5', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
-    { id: 'garage', t: 'T6', name: 'The Garage', href: 'the-garage.html', note: 'The Street File: schematics, strip numbers and secrets' },
+    { id: 'home', t: '01', name: 'The Club', href: 'index.html', note: 'Lifestyle club home' },
+    { id: 'vault', t: '02', name: 'The Counter', href: 'vault.html', note: 'Drops, apparel and rare finds' },
+    { id: 'films', t: '03', name: 'Cuts', href: 'films.html', note: 'Films, cinematic edits and clips' },
+    { id: 'journal', t: '04', name: 'The Scene', href: 'atlas.html', note: 'Stories, interviews, vlogs and galleries' },
+    { id: 'radio', t: '05', name: 'Frequency', href: 'radio.html', note: 'Phonk, mixes and session sound' },
+    { id: 'hunt', t: '06', name: 'Lost & Found', href: 'lost-and-found.html', note: 'Rare finds you travel to collect' },
+    { id: 'garage', t: '07', name: 'Machines', href: 'the-garage.html', note: 'The Street File: builds, meets and secrets' },
   ];
-  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault' };
-  const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D' };
+  const TERMINAL_OF = { story: 'journal', archive: 'journal', gallery: 'journal', store: 'vault', account: 'home', partner: 'vault', members: 'home' };
+  const DESK_GATE = { automotive: 'A', travel: 'B', music: 'C', fashion: 'D', action: 'E' };
   const shortDate = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase() : '—');
   const termFor = (page) => TERMINALS.find((x) => x.id === (TERMINAL_OF[page] || page));
   const INFO_PAGES = ['about', 'contact', 'faq', 'shipping-returns', 'members', 'terms-conditions', 'privacy-cookies', 'do-not-sell'];

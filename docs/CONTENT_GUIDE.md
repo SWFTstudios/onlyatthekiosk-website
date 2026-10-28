@@ -2,16 +2,36 @@
 
 How to publish films, photo stories, interviews, radio playlists and products on the KIOSK Glass site.
 
+**Positioning:** KIOSK is a **lifestyle club** for action sports, motorsports, street culture, film and sound — dark-by-default, Forge-style scroll theater on the home page. Membership is **Voyagers** (`members.html`).
+
 Everything lives in **one file: `js/kiosk-content.js`**. There's no CMS and no build step. Edit the file, add your media, commit, and Cloudflare Pages deploys it.
+
+## Club information architecture
+
+Six doors in the Navigate sheet (labels change; URLs stay):
+
+| Door | Destinations |
+| --- | --- |
+| **SCENE** | `atlas.html` (The Scene), `archive.html` (Journal), `story.html` |
+| **CUTS** | `films.html`, `gallery.html` |
+| **FREQUENCY** | `radio.html` |
+| **MACHINES** | `the-garage.html` |
+| **COUNTER** | `vault.html`, `lost-and-found.html`, `store.html` |
+| **CLUB** | `members.html` (Voyagers), `partner.html` |
+
+Mobile tabs: **Home · Scene · Cuts · Radio · Shop**.
+
+**Desks** on stories: `travel` | `automotive` | `action` | `music` | `fashion`. Use `action` for skate / BMX / session culture.
 
 | Page | URL | Renders |
 | --- | --- | --- |
-| Home | `index.html` | Lead story, Garage rail, films, radio, Vault preview, Dispatch signup |
-| Atlas | `atlas.html` | Every story as a blog post: date, read time, chapters (`?draft=1` shows unwritten chapters) |
-| Garage | `atlas.html` | Every story, with filters (machine, format, era, season, city, search, saved) |
-| Story | `story.html?s=<slug>` | One shoot as a magazine feature: full-bleed cover, standfirst, the story in text-and-photo spreads, swipe gallery, spec sheet, subjects, colour guide, behind the scenes, interview, shop the look, next story |
-| Radio | `radio.html` | Phonk playlists. Plays in the site-wide radio dock with a live waveform |
-| Shop | `vault.html?c=<category>&sort=new` | KIOSK Supply: apparel, headwear, skate, accessories, films, LUT packs |
+| Home | `index.html` | Forge-style club scroll chapters + films / Counter / Dispatch |
+| The Scene | `atlas.html` | Every story: date, read time, chapters (`?draft=1` shows unwritten chapters) |
+| Story | `story.html?s=<slug>` | Magazine feature: full-bleed cover, spreads, gallery, specs, shop the look |
+| Frequency | `radio.html` | Phonk playlists. Site-wide radio dock + waveform |
+| Machines | `the-garage.html` | Street File |
+| Counter | `vault.html?c=<category>&sort=new` | Shop: apparel, headwear, skate, accessories, films, LUT packs |
+| Club | `members.html` | Voyagers membership |
 
 The older Shopify apparel pages (classic store, `collections/*`) have been removed; the shop now lives in `vault.html`.
 

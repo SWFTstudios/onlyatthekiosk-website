@@ -42,7 +42,7 @@ window.KIOSK_CONTENT = {
   issue: {
     number: '01',
     title: 'Hudson Line',
-    dek: 'Our first projects: Andy’s Q50, Moses’s R1M and a Honda F4i in the shop. Shot on location, scored in phonk.',
+    dek: 'Issue 01 from the club: Andy’s Q50, Moses’s R1M and a Honda F4i in the shop. Action, motorsports, street — scored in phonk.',
     // Optional looping hero reel (muted, autoplay). Empty → lead story's cover image.
     reel: 'videos/kiosk-reel.mp4',              // full-screen cover video (muted loop)
     reelWebm: 'videos/kiosk-reel.webm',
@@ -80,7 +80,7 @@ window.KIOSK_CONTENT = {
   features: [
     {
       slug: 'andy-q50',
-      desk: 'automotive',   // magazine department: travel | automotive | music | fashion
+      desk: 'automotive',   // desk: travel | automotive | action | music | fashion
       type: 'car',
       format: 'film',
       year: '',
