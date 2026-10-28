@@ -1,0 +1,223 @@
+/* ==========================================================================
+   KIOSK Club — Forge-style scroll theater (home)
+   Dark cinematic chapters. Sticky media + advancing copy.
+   ========================================================================== */
+
+.k-club {
+  position: relative;
+  background: #0c0c0c;
+  color: #f2f0eb;
+}
+
+.k-club__progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+.k-club__progress > i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: #f2f0eb;
+  transform-origin: left center;
+}
+
+.k-club__pip {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(72px, calc(env(safe-area-inset-bottom) + 64px));
+  z-index: 88;
+  width: min(148px, 28vw);
+  aspect-ratio: 16 / 10;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 2px;
+  overflow: hidden;
+  background: #111;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)), transform 0.4s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)), visibility 0s linear 0.4s;
+  text-decoration: none;
+  color: inherit;
+}
+.k-club__pip.is-on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+.k-club__pip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.k-club__pip span {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 6px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.k-club__chapter {
+  position: relative;
+  min-height: 220vh;
+}
+.k-club__chapter:last-of-type { min-height: 160vh; }
+
+.k-club__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.k-club__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.k-club__media img,
+.k-club__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.06);
+  will-change: transform, opacity;
+}
+.k-club__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.55) 70%, rgba(12, 12, 12, 0.95) 100%),
+    radial-gradient(50% 40% at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.k-club__copy {
+  position: relative;
+  z-index: 2;
+  width: min(920px, calc(100% - 2 * var(--gutter, 20px)));
+  margin: 0 auto;
+  text-align: center;
+  padding: calc(var(--nav-h, 76px) + 24px) 0 48px;
+}
+.k-club__eyebrow {
+  margin: 0 0 18px;
+  font-size: calc(11px * var(--type, 1));
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 235, 0.55);
+  font-weight: 500;
+}
+.k-club__title {
+  margin: 0;
+  font-family: var(--f-serif, 'Instrument Serif', Georgia, serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 7.2vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: balance;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.45), 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+.k-club__title em {
+  font-style: italic;
+}
+.k-club__title .k-club__muted {
+  color: rgba(242, 240, 235, 0.42);
+  font-family: var(--f-sans, 'General Sans', system-ui, sans-serif);
+  font-style: normal;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+.k-club__dek {
+  margin: 18px auto 0;
+  max-width: 34em;
+  font-size: calc(15px * var(--type, 1));
+  line-height: 1.55;
+  color: rgba(242, 240, 235, 0.72);
+  text-wrap: pretty;
+}
+.k-club__cta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
+}
+.k-club__cta .k-btn {
+  min-height: 44px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.k-club__cta .k-btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.k-club__cta .k-btn--ghost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.k-club__brand {
+  display: block;
+  margin: 0 auto 28px;
+  width: min(72px, 18vw);
+  height: auto;
+  color: #fff;
+  opacity: 0.95;
+}
+
+/* After the theater: lean club rails (reuse glass mounts) */
+.k-club-after {
+  position: relative;
+  z-index: 2;
+  background: var(--bg, #0c0c0c);
+  padding-top: clamp(48px, 8vw, 96px);
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.k-club-hero-extra {
+  padding: clamp(64px, 10vw, 120px) 0;
+}
+.k-club-hero-extra .k-display {
+  font-family: var(--f-serif);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  line-height: 1.08;
+  max-width: 14ch;
+}
+
+@media (max-width: 640px) {
+  .k-club__pip { display: none; }
+  .k-club__chapter { min-height: 180vh; }
+  .k-club__title { font-size: clamp(2.1rem, 11vw, 3.2rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-club__chapter { min-height: auto; }
+  .k-club__pin { position: relative; height: auto; min-height: 100svh; padding: 24px 0; }
+  .k-club__media img,
+  .k-club__media video { transform: none; }
+}
+
+html[data-motion='reduced'] .k-club__chapter { min-height: auto; }
+html[data-motion='reduced'] .k-club__pin { position: relative; height: auto; min-height: 100svh; }
