@@ -3638,12 +3638,290 @@
     signal.addEventListener('abort', () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); });
   }
 
+  /* ---------------------------------------------------------- club stream
+   * Home after the globe dive: fullscreen featured slideshow (issue.heroSlides
+   * + featured stories) and Netflix-style category rails. Mounted only when
+   * [data-club-feature] is on the page (club rebuild home).
+   * -------------------------------------------------------------------- */
+  function mountClubStream() {
+    const feature = $('[data-club-feature]');
+    const rails = $('[data-club-rails]');
+    if (!feature && !rails) return;
+    const signal = pageAbort.signal;
+    const issue = C.issue || {};
+
+    /* ---------- featured fullscreen slideshow ---------- */
+    if (feature) {
+      const stage = $('[data-feature-stage]', feature);
+      const kickerEl = $('[data-feature-kicker]', feature);
+      const titleEl = $('[data-feature-title]', feature);
+      const dekEl = $('[data-feature-dek]', feature);
+      const ctaEl = $('[data-feature-cta]', feature);
+      const navEl = $('[data-feature-nav]', feature);
+      const slides = [];
+
+      // Magazine hero reels first
+      (issue.heroSlides || []).forEach((s) => {
+        const story = s.story ? featureBySlug(s.story) : null;
+        slides.push({
+          kind: 'video',
+          src: s.src,
+          webm: s.webm,
+          poster: s.poster || (story && (story.poster || story.image)) || '',
+          kicker: s.kicker || 'Featured',
+          title: s.title || (story && story.title) || 'Featured',
+          dek: s.caption || (story && (story.excerpt || story.tagline)) || issue.dek || '',
+          href: story ? storyHref(story) : 'atlas.html',
+          cta: story ? 'Read the story' : 'Enter the Scene',
+        });
+      });
+      // Door / featured story pages to round out the show
+      const doors = [
+        { slug: issue.featured && issue.featured[0], kicker: 'The Scene', title: 'Street. Strip. Story.', dek: 'Films, interviews and photo diaries from the people who build, ride and compete.', href: 'atlas.html', cta: 'Enter the Scene', img: 'images/garage/andy-q50/12.webp' },
+        { slug: null, kicker: 'Cuts', title: 'Scored in phonk.', dek: 'Cinematic edits from the road and the ramp.', href: 'films.html', cta: 'Watch Cuts', img: 'images/garage/moses-r1m/06.webp' },
+        { slug: null, kicker: 'Machines', title: 'Built to be felt.', dek: 'Cars, bikes and the Street File.', href: 'the-garage.html', cta: 'Open the Garage', img: 'images/garage/moses-r1m/01.webp' },
+        { slug: null, kicker: 'Frequency', title: 'Sound for the session.', dek: 'KIOSK Radio follows you around the site.', href: 'radio.html', cta: 'Tune in', img: 'images/radio/clouds.webp' },
+        { slug: null, kicker: 'The Counter', title: 'Drops. Rares. Only here.', dek: 'Streetwear and skate cut from the shoots.', href: 'vault.html', cta: 'Shop the Counter', img: 'images/product-lifestyle/tees/001-black-street-01.webp' },
+      ];
+      doors.forEach((d) => {
+        const story = d.slug ? featureBySlug(d.slug) : null;
+        // Skip if we already have a hero slide for this story
+        if (story && slides.some((s) => s.href === storyHref(story))) return;
+        slides.push({
+          kind: 'image',
+          poster: (story && (story.poster || story.image)) || d.img,
+          kicker: d.kicker,
+          title: (story && (story.title || featureName(story))) || d.title,
+          dek: (story && (story.excerpt || story.tagline)) || d.dek,
+          href: story ? storyHref(story) : d.href,
+          cta: d.cta,
+        });
+      });
+      if (!slides.length) {
+        slides.push({
+          kind: 'image',
+          poster: 'images/garage/andy-q50/01.webp',
+          kicker: `Issue ${issue.number || '01'}`,
+          title: issue.title || 'Hudson Line',
+          dek: issue.dek || '',
+          href: 'atlas.html',
+          cta: 'Enter the Scene',
+        });
+      }
+
+      stage.innerHTML = slides.map((s, i) => {
+        if (s.kind === 'video' && s.src) {
+          return `<div class="k-feature__slide${i ? '' : ' is-on'}" data-feature-slide="${i}"${i ? ' aria-hidden="true"' : ''}>
+            <video muted loop playsinline preload="${i ? 'none' : 'metadata'}" poster="${esc(s.poster || '')}"${i ? '' : ' autoplay'}>
+              ${s.webm ? `<source src="${esc(s.webm)}" type="video/webm">` : ''}
+              <source src="${esc(s.src)}" type="video/mp4">
+            </video>
+          </div>`;
+        }
+        return `<div class="k-feature__slide${i ? '' : ' is-on'}" data-feature-slide="${i}"${i ? ' aria-hidden="true"' : ''}>
+          <img src="${esc(s.poster || '')}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async" width="2400" height="1600">
+        </div>`;
+      }).join('');
+      navEl.innerHTML = slides.map((s, i) =>
+        `<button type="button" class="k-feature__dot${i ? '' : ' is-on'}" role="tab" aria-selected="${i ? 'false' : 'true'}" aria-label="Slide ${i + 1}: ${esc(s.title)}" data-feature-dot="${i}"></button>`
+      ).join('');
+
+      let cur = 0;
+      let timer = 0;
+      const REDUCED_LOCAL = REDUCED;
+      const apply = (i, { user } = {}) => {
+        cur = (i + slides.length) % slides.length;
+        const s = slides[cur];
+        $$('[data-feature-slide]', stage).forEach((el, k) => {
+          const on = k === cur;
+          el.classList.toggle('is-on', on);
+          el.setAttribute('aria-hidden', on ? 'false' : 'true');
+          const v = $('video', el);
+          if (v) {
+            if (on) { try { v.play().catch(() => {}); } catch (e) { /* autoplay blocked */ } }
+            else { v.pause(); }
+          }
+        });
+        $$('[data-feature-dot]', navEl).forEach((el, k) => {
+          el.classList.toggle('is-on', k === cur);
+          el.setAttribute('aria-selected', k === cur ? 'true' : 'false');
+        });
+        if (kickerEl) kickerEl.textContent = s.kicker;
+        if (titleEl) titleEl.textContent = s.title;
+        if (dekEl) dekEl.textContent = s.dek || '';
+        if (ctaEl) { ctaEl.href = s.href; ctaEl.textContent = s.cta || 'Open'; }
+        if (user) arm();
+      };
+      const arm = () => {
+        clearTimeout(timer);
+        if (REDUCED_LOCAL || slides.length < 2) return;
+        timer = setTimeout(() => apply(cur + 1), 7000);
+      };
+      const prev = $('[data-feature-prev]', feature);
+      const next = $('[data-feature-next]', feature);
+      if (prev) prev.addEventListener('click', () => apply(cur - 1, { user: true }), { signal });
+      if (next) next.addEventListener('click', () => apply(cur + 1, { user: true }), { signal });
+      navEl.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-feature-dot]');
+        if (!b) return;
+        apply(Number(b.dataset.featureDot), { user: true });
+      }, { signal });
+      feature.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { apply(cur - 1, { user: true }); e.preventDefault(); }
+        if (e.key === 'ArrowRight') { apply(cur + 1, { user: true }); e.preventDefault(); }
+      }, { signal });
+      // Pause autoplay while off-screen
+      const io = new IntersectionObserver(([en]) => {
+        if (en.isIntersecting) arm();
+        else clearTimeout(timer);
+      }, { threshold: 0.35 });
+      io.observe(feature);
+      signal.addEventListener('abort', () => { clearTimeout(timer); io.disconnect(); });
+      apply(0);
+      arm();
+    }
+
+    /* ---------- streaming category rails ---------- */
+    if (rails) {
+      const plateInitials = (title) => {
+        const parts = String(title || '').trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return 'K';
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      };
+      const streamMedia = (img, title) => {
+        if (img) {
+          return `<img src="${esc(img)}" alt="" loading="lazy" decoding="async" width="800" height="500">`;
+        }
+        return `<span class="k-stream__card-plate" aria-hidden="true">${esc(plateInitials(title))}</span>`;
+      };
+      const streamCard = ({ href, img, title, sub, tall, wide }) => `
+        <a class="k-stream__card${tall ? ' k-stream__card--tall' : ''}${wide ? ' k-stream__card--wide' : ''}" href="${esc(href)}">
+          <span class="k-stream__card-media">${streamMedia(img, title)}</span>
+          <span class="k-stream__card-meta"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span>
+        </a>`;
+
+      const rows = [];
+
+      // The Scene — featured stories
+      const coverOf = (f) => {
+        if (!f) return '';
+        if (f.poster) return f.poster;
+        if (f.image) return f.image;
+        const g = f.gallery && f.gallery[0];
+        return (g && (g.src || g)) || '';
+      };
+      const sceneList = (issue.featured || []).map(featureBySlug).filter(Boolean);
+      const sceneCards = (sceneList.length ? sceneList : features.slice(0, 8)).map((f) =>
+        streamCard({
+          href: storyHref(f),
+          img: coverOf(f),
+          title: f.title || featureName(f),
+          sub: [formatLabel(f), place(f)].filter(Boolean).join(' · '),
+          wide: true,
+        })
+      );
+      if (sceneCards.length) {
+        rows.push({
+          label: 'The Scene',
+          more: 'atlas.html',
+          moreLabel: 'All stories',
+          cards: sceneCards,
+          wrap: 'k-hscroll-wrap--stream k-hscroll-wrap--stream-scene',
+        });
+      }
+
+      // Cuts — films
+      const filmCards = (C.films || []).slice(0, 12).map((fm) => {
+        const f = fm.story ? featureBySlug(fm.story) : null;
+        return streamCard({
+          href: f ? storyHref(f) : 'films.html',
+          img: fm.poster || coverOf(f) || '',
+          title: fm.title,
+          sub: [fm.runtime, fm.blurb].filter(Boolean).join(' · ').slice(0, 64),
+        });
+      });
+      if (filmCards.length) {
+        rows.push({ label: 'Cuts', more: 'films.html', moreLabel: 'All films', cards: filmCards });
+      }
+
+      // Machines — garage / automotive features
+      const machines = features.filter((f) => f.type === 'automotive' || f.desk === 'automotive' || (f.make && f.model)).slice(0, 10);
+      const machineCards = (machines.length ? machines : features.slice(0, 8)).map((f) =>
+        streamCard({
+          href: storyHref(f),
+          img: coverOf(f),
+          title: [f.make, f.model].filter(Boolean).join(' ') || f.title || featureName(f),
+          sub: f.title || place(f) || '',
+        })
+      );
+      if (machineCards.length) {
+        rows.push({ label: 'Machines', more: 'the-garage.html', moreLabel: 'The Garage', cards: machineCards });
+      }
+
+      // Frequency — radio mixes
+      const mixCards = (C.mixes || []).slice(0, 8).map((m) =>
+        streamCard({
+          href: `radio.html#${esc(m.slug || '')}`,
+          img: m.cover || 'images/radio/clouds.webp',
+          title: m.title,
+          sub: m.volume || m.mood || 'KIOSK Radio',
+        })
+      );
+      if (mixCards.length) {
+        rows.push({ label: 'Frequency', more: 'radio.html', moreLabel: 'Tune in', cards: mixCards });
+      }
+
+      // The Counter — products
+      const picks = (C.products || [])
+        .filter((p) => !['mixes', 'films', 'luts'].includes(p.category))
+        .slice(0, 10);
+      const productCards = picks.map((p) => {
+        const life = (typeof lifeOf === 'function' ? lifeOf(p, 0) : []) || [];
+        const img = life[0] || (p.images && p.images[0]) || '';
+        return streamCard({
+          href: `vault.html#${esc(p.id || p.handle || '')}`,
+          img,
+          title: p.title,
+          sub: p.category || 'Drop',
+          tall: true,
+        });
+      });
+      if (productCards.length) {
+        rows.push({ label: 'The Counter', more: 'vault.html', moreLabel: 'Shop', cards: productCards });
+      }
+
+      // The Club
+      rows.push({
+        label: 'The Club',
+        more: 'members.html',
+        moreLabel: 'Join',
+        cards: [
+          streamCard({ href: 'members.html', img: 'images/garage/andy-q50/08.webp', title: 'Become a Voyager', sub: 'Free membership · early drops', wide: true }),
+          streamCard({ href: 'lost-and-found.html', img: 'images/garage/andy-q50/19.webp', title: 'Lost & Found', sub: 'Pieces you travel to collect' }),
+          streamCard({ href: 'about.html', img: 'images/garage/andy-q50/01.webp', title: 'About the Kiosk', sub: 'Why we built the club' }),
+        ],
+      });
+
+      rails.innerHTML = rows.map((r) => `
+        <div class="k-stream__row" data-reveal>
+          <div class="k-stream__head">
+            <h3 class="k-stream__label">${esc(r.label)}</h3>
+            <a class="k-stream__more" href="${esc(r.more)}">${esc(r.moreLabel || 'See all')}</a>
+          </div>
+          ${railShell(r.cards.join(''), r.label, r.wrap || 'k-hscroll-wrap--stream')}
+        </div>`).join('');
+      bindRails(rails);
+    }
+  }
+
   function pageHome() {
     const issue = C.issue || {};
     const lead = featureBySlug(issue.lead) || features[0];
     if (!lead) return;
 
     mountGlobeHero();
+    mountClubStream();
     mountWorldLibrary();
     mountWhy();
     bindZone();
