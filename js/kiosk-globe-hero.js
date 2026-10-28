@@ -208,7 +208,7 @@
       const run = secH - (window.innerHeight || h);
       return run > 1 ? clamp((window.scrollY - secTop) / run, 0, 1) : 0;
     };
-    let outShown = -1; let inShown = -1;
+    let outShown = -1; let inShown = -1; let flyShown = -1;
     function syncCopy() {
       // dive timeline: hold → pull-out → spin → dive → black
       const out = dive
@@ -219,8 +219,27 @@
         : clamp((scene.P - 0.3) / 0.14, 0, 1) * V.hero;
       // fade the "you're on the map" hint as the dive begins
       if (dive) inn *= (1 - clamp((scene.P - 0.58) / 0.12, 0, 1));
+      // Forge-style Z fly-in: rises from deep space during the dive, then eases out
+      // before the featured show. --gh-fly 0→1 = arrive; past ~0.85 starts exit.
+      let fly = 0;
+      if (dive) {
+        const arrive = ease(clamp((scene.P - 0.62) / 0.22, 0, 1));
+        const leave = ease(clamp((scene.P - 0.88) / 0.1, 0, 1));
+        fly = arrive * (1 - leave);
+      }
       if (Math.abs(out - outShown) > 0.002) { outShown = out; section.style.setProperty('--gh-out', out.toFixed(3)); section.classList.toggle('is-away', out > 0.5); }
       if (Math.abs(inn - inShown) > 0.002) { inShown = inn; section.style.setProperty('--gh-in', inn.toFixed(3)); }
+      if (Math.abs(fly - flyShown) > 0.002) {
+        flyShown = fly;
+        section.style.setProperty('--gh-fly', fly.toFixed(3));
+        section.classList.toggle('is-flying-copy', fly > 0.02);
+        // Stagger each line's arrival from deep Z (Forge-style)
+        section.querySelectorAll('[data-fly]').forEach((el) => {
+          const delay = (Number(el.getAttribute('data-fly')) - 1) * 0.14;
+          const t = clamp((fly - delay) / Math.max(0.001, 1 - delay), 0, 1);
+          el.style.setProperty('--fly-t', ease(t).toFixed(3));
+        });
+      }
     }
 
     /** Projected sphere radius in CSS pixels for the current alt / py. */
@@ -620,10 +639,11 @@
       },
       stop() {
         alive = false; io.disconnect(); window.removeEventListener('resize', onResize); window.removeEventListener('scroll', wake);
-        section.classList.remove('is-scene', 'is-away', 'is-dragging', 'is-dive', 'is-horizon', 'is-black', 'is-hero', 'is-settled', 'is-flying');
+        section.classList.remove('is-scene', 'is-away', 'is-dragging', 'is-dive', 'is-horizon', 'is-black', 'is-hero', 'is-settled', 'is-flying', 'is-flying-copy');
         section.style.removeProperty('--gh-mr');
         section.style.removeProperty('--gh-my');
         section.style.removeProperty('--gh-mo');
+        section.style.removeProperty('--gh-fly');
         if (raf) cancelAnimationFrame(raf);
         earth.destroy();
       },

@@ -2346,7 +2346,7 @@ html.no-js [data-reveal] { opacity: 1; transform: none; }
   cursor: grab;
 }
 .k-hscroll::-webkit-scrollbar { display: none; }
-.k-hscroll > * { scroll-snap-align: start; }
+.k-hscroll > * { scroll-snap-align: start; min-width: 0; }
 .k-hscroll.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
 .k-hscroll.is-dragging * { pointer-events: none; }
 .k-hscroll__ui { display: flex; align-items: center; gap: 8px; margin-top: 16px; }

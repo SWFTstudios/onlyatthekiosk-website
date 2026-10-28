@@ -64,7 +64,8 @@
       <div class="k-club__progress" data-club-progress aria-hidden="true"><i></i></div>
 
       <!-- GLOBE HERO: opening flight → bottom-pinned orbiting globe under
-           headline → scroll pulls out, spins, dives to black → bento magazine.
+           headline → scroll pulls out, spins, dives to black with Forge-style
+           Z fly-in copy → featured fullscreen show + streaming rails.
            (js/kiosk-globe-hero.js + js/kiosk-dotearth.js) -->
       <section class="k-gh" id="hero" data-globe-hero data-gh-mode="club" aria-labelledby="gh-title">
         <div class="k-gh__pin" data-gh-pin>
@@ -89,134 +90,39 @@
           <p class="k-gh__hint" aria-hidden="true"><span class="k-gh__hint-now" data-gh-now>Travelers on the map right now</span><span class="k-gh__hint-how">Drag or scroll to spin the globe</span></p>
           <!-- Dive mask sits above copy/hint so the black disc can cover the whole pin -->
           <div class="k-gh__mask" aria-hidden="true"></div>
+          <!-- Forge-style Z fly-in copy during the dive (above the mask) -->
+          <div class="k-gh__fly" data-gh-fly aria-hidden="true">
+            <p class="k-gh__fly-line" data-fly="1">For those who refuse</p>
+            <p class="k-gh__fly-line k-gh__fly-line--em" data-fly="2"><em>ordinary.</em></p>
+            <p class="k-gh__fly-line k-gh__fly-line--sub" data-fly="3">Only at the KIOSK</p>
+          </div>
         </div>
       </section>
     </div>
 
-    <!-- Bento magazine: doors from the club chapters, revealed after the dive -->
-    <section class="k-bento" id="scene" aria-labelledby="bento-mast">
-      <div class="k-bento__grid">
-        <header class="k-bento__tile k-bento__tile--mast" data-bento-tile>
-          <p class="k-bento__kicker">KIOSK / Issue 01</p>
-          <h2 class="k-bento__title" id="bento-mast">Hudson Line</h2>
-          <p class="k-bento__dek">Action, motorsports, street — scored in phonk.</p>
-          <span class="k-bento__page" aria-hidden="true">p. 01</span>
-        </header>
-
-        <a class="k-bento__tile k-bento__tile--lead" href="atlas.html" data-bento-tile>
-          <img class="k-bento__media" src="images/garage/andy-q50/12.webp" alt="" width="2400" height="1600" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">The Scene</p>
-            <h3 class="k-bento__title">Street. Strip. <em>Story.</em></h3>
-            <p class="k-bento__dek">Films, interviews and photo diaries from the people who build, ride and compete.</p>
-            <span class="k-bento__page" aria-hidden="true">p. 02</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--cuts" href="films.html" data-bento-tile>
-          <img class="k-bento__media" src="images/garage/moses-r1m/06.webp" alt="" width="2400" height="1600" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <span class="k-bento__play" aria-hidden="true"></span>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">Cuts</p>
-            <h3 class="k-bento__title">Scored in <em>phonk.</em></h3>
-            <span class="k-bento__page" aria-hidden="true">p. 03</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--machines" href="the-garage.html" data-bento-tile>
-          <img class="k-bento__media" src="images/garage/moses-r1m/01.webp" alt="" width="2400" height="1600" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">Machines</p>
-            <h3 class="k-bento__title">Built to be <em>felt.</em></h3>
-            <span class="k-bento__page" aria-hidden="true">p. 04</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--freq" href="radio.html" data-bento-tile>
-          <img class="k-bento__media" src="images/radio/clouds.webp" alt="" width="1600" height="900" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker"><span class="k-bento__signal" aria-hidden="true"></span> Frequency</p>
-            <h3 class="k-bento__title">Sound for the <em>session.</em></h3>
-            <span class="k-bento__page" aria-hidden="true">p. 05</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--counter" href="vault.html" data-bento-tile>
-          <img class="k-bento__media" src="images/product-lifestyle/tees/001-black-street-01.webp" alt="" width="1600" height="2000" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">The Counter</p>
-            <h3 class="k-bento__title">Drops. Rares. <em>Only here.</em></h3>
-            <span class="k-bento__page" aria-hidden="true">p. 06</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--club" href="members.html" data-bento-tile>
-          <img class="k-bento__media" src="images/garage/andy-q50/08.webp" alt="" width="2400" height="1600" loading="lazy">
-          <div class="k-bento__shade" aria-hidden="true"></div>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">The Club</p>
-            <h3 class="k-bento__title">We don’t post culture. <span class="k-bento__muted">We live it.</span></h3>
-            <span class="k-bento__page" aria-hidden="true">p. 07</span>
-          </div>
-        </a>
-
-        <a class="k-bento__tile k-bento__tile--join" href="members.html" data-bento-tile>
-          <div class="k-bento__copy">
-            <p class="k-bento__kicker">Join</p>
-            <h3 class="k-bento__title">Ordinary <span class="k-bento__muted">ends here.</span></h3>
-            <p class="k-bento__dek">Become a Voyager — membership is free.</p>
-            <span class="k-bento__page" aria-hidden="true">p. 08</span>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Lean after-theater: films + supply + dispatch (glass mounts) -->
-    <div class="k-club-after">
-      <section class="k-section" id="films" aria-labelledby="films-title" data-home="films">
-        <div class="k-wrap">
-          <div class="k-section-head">
-            <div>
-              <p class="k-eyebrow">Now showing</p>
-              <h2 class="k-h2 k-stagger" id="films-title" data-reveal>
-                <span>Cuts scored in</span>
-                <span><em class="k-serif">phonk.</em></span>
-              </h2>
-            </div>
-            <a class="k-btn" href="films.html">All films</a>
-          </div>
-          <div class="k-films">
-            <div class="k-films__lead" data-mount="films-lead" data-reveal></div>
-            <div class="k-rows" data-mount="films-rows"></div>
-          </div>
+    <!-- After the dive: featured fullscreen show + streaming category rails -->
+    <div class="k-stream" id="scene">
+      <section class="k-feature" data-club-feature aria-roledescription="carousel" aria-labelledby="feature-title">
+        <div class="k-feature__stage" data-feature-stage></div>
+        <div class="k-feature__shade" aria-hidden="true"></div>
+        <div class="k-feature__copy">
+          <p class="k-feature__kicker" data-feature-kicker>Issue 01</p>
+          <h2 class="k-feature__title" id="feature-title" data-feature-title>Hudson Line</h2>
+          <p class="k-feature__dek" data-feature-dek>Action, motorsports, street — scored in phonk.</p>
+          <a class="k-btn k-btn--solid k-feature__cta" data-feature-cta href="atlas.html">Enter the Scene</a>
         </div>
+        <button class="k-feature__arrow k-feature__arrow--prev" type="button" data-feature-prev aria-label="Previous feature">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5L8 12l7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="k-feature__arrow k-feature__arrow--next" type="button" data-feature-next aria-label="Next feature">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="k-feature__nav" data-feature-nav role="tablist" aria-label="Featured stories"></div>
       </section>
 
-      <section class="k-section" id="vault" aria-labelledby="vault-title" data-home="shop">
-        <div class="k-wrap">
-          <div class="k-shop-hero" style="margin-bottom:clamp(32px,5vw,64px)">
-            <div>
-              <p class="k-eyebrow">The Counter</p>
-              <h2 class="k-shop-hero__title k-mt-m" id="vault-title">Supply<br><em>&amp; co.</em></h2>
-              <p class="k-lede k-mt-m">Streetwear and skate cut from the shoots, in colourways pulled from the machines.</p>
-              <div class="k-row-flex k-mt-m">
-                <a class="k-btn k-btn--solid" href="vault.html">Shop everything</a>
-                <a class="k-btn" href="vault.html?c=skate">Skate</a>
-                <a class="k-btn" href="members.html">Voyagers</a>
-              </div>
-            </div>
-            <div class="k-wall" data-mount="home-wall" aria-label="Featured products"></div>
-          </div>
-          <div class="k-term-grid" data-mount="vault"></div>
-        </div>
-      </section>
+      <div class="k-stream__rails" data-club-rails aria-label="Browse by category"></div>
 
-      <section class="k-section" id="dispatch" aria-labelledby="dispatch-title" data-home="dispatch">
+      <section class="k-section k-stream__dispatch" id="dispatch" aria-labelledby="dispatch-title" data-home="dispatch">
         <div class="k-wrap">
           <div class="k-dispatch k-glass">
             <div>
