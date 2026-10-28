@@ -6399,11 +6399,15 @@
   }
 
   /* ---------------------------------------------------------- globe hero
-   * Top of the home page: the opening flight round the satellite Earth lands
+   * Top of the home page: the opening flight round the dotted Earth lands
    * on the visitor's town, then the planet settles under the headline with
    * them pinned and everyone else here now pinned too (js/kiosk-globe-hero.js
-   * and js/kiosk-earth.js, loaded only here). The flight plays once per
-   * session (Settings › Intro animation: Off skips it).
+   * and js/kiosk-dotearth.js, loaded only here: plain 2D canvas, nothing to
+   * download, the same dots as the load intro). The flight plays once per
+   * session (Settings › Intro animation: Off skips it). While it's still to
+   * come the headline stays hidden (html.gh-pending, set before first paint
+   * in index.html), so it doesn't flash up and vanish again as the flight
+   * starts.
    * -------------------------------------------------------------------- */
   /* Where the visitor roughly is, so the opening flight lands over their town:
    * the city Cloudflare attaches to the request (/api/where, no permission
@@ -6441,8 +6445,10 @@
     const hl = h && h.lat != null && h.lat !== '' ? Number(h.lat) : NaN; const hn = h && h.lon != null && h.lon !== '' ? Number(h.lon) : NaN;
     if (Number.isFinite(hl) && Number.isFinite(hn) && !(hl === 0 && hn === 0)) return Promise.resolve({ lat: hl, lon: hn, city: h.city });
     const fallback = homeFromZone() || { lat: 40.71, lon: -74.0, city: 'New York', approx: true };
-    const ask = fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : null))
+    // the home page's load intro (inline in index.html) already asked on the way in
+    const early = window.KioskIntro && window.KioskIntro.where;
+    const ask = (early || fetch('/api/where', { signal, headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null)))
       .then((d) => (d && d.lat != null ? { lat: d.lat, lon: d.lon, city: d.city || fallback.city } : fallback))
       .catch(() => fallback);
     return Promise.race([ask, new Promise((r) => setTimeout(() => r(fallback), 1500))]);
@@ -6457,6 +6463,8 @@
     try { seen = sessionStorage.getItem('kiosk:sky') === '1'; } catch (e) { seen = true; }
     const markSkySeen = () => { try { sessionStorage.setItem('kiosk:sky', '1'); } catch (e) { /* private mode */ } };
     const journey = !seen && prefs.intro !== 'off' && !REDUCED;
+    const docEl = document.documentElement;
+    docEl.classList.toggle('gh-pending', journey);
     const count = $('[data-gh-count]', sec);
     let home = null;
     let hero = null;
@@ -6473,21 +6481,23 @@
       if (hero) hero.setLive(live.viewers, live.count);
     };
     document.addEventListener('kiosk:live', showLive, { signal });
-    if (!hasWebGL()) { sec.classList.add('is-flat'); visitorHome(signal).then((h) => { home = h; showLive(); }); return; }
     Promise.all([
-      window.KioskEarth ? null : loadScript('js/kiosk-earth.js'),
+      window.KioskDotEarth ? null : loadScript('js/kiosk-dotearth.js'),
       window.KioskGlobeHero ? null : loadScript('js/kiosk-globe-hero.js'),
       visitorHome(signal).then((h) => { home = h; }),
     ])
       .then(() => {
         if (signal.aborted) return;
         hero = window.KioskGlobeHero.mount(sec, {
-          Earth: window.KioskEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen,
+          // the opening flight waits for the load intro to hand over
+          Earth: window.KioskDotEarth, home, journey, reduced: REDUCED, onSeen: markSkySeen, gate: window.KioskIntro && window.KioskIntro.done,
         });
+        // the load intro bows out as soon as the planet is ready behind it
+        hero.ready.then(() => document.dispatchEvent(new CustomEvent('kiosk:globe-ready'))).catch(() => {});
         showLive();
         signal.addEventListener('abort', () => hero.stop());
       })
-      .catch((err) => { sec.classList.add('is-flat'); console.warn('[KIOSK] globe hero unavailable', err); });
+      .catch((err) => { sec.classList.add('is-flat'); docEl.classList.remove('gh-pending'); console.warn('[KIOSK] globe hero unavailable', err); });
   }
 
   /* ------------------------------------------------------- live presence
@@ -6510,8 +6520,11 @@
     const beat = () => {
       clearTimeout(timer);
       if (off || document.hidden) return;
-      fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
-        .then((r) => (r.ok ? r.json() : null))
+      // the first check-in may already be on its way from the home page's load intro
+      const early = window.KioskIntro && window.KioskIntro.live;
+      if (early) window.KioskIntro.live = null;
+      (early || fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true })
+        .then((r) => (r.ok ? r.json() : null)))
         .then((d) => {
           if (d && d.enabled === false) { off = true; live.enabled = false; publish(); return; }
           if (!d || !d.enabled) { miss(); return; }
